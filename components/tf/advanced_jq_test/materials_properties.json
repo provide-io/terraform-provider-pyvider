@@ -1,0 +1,1 @@
+{ "materials": [{"material_id": "NIOBIUM-99.99", "element": "Niobium", "properties": {"type": "superconductor", "quantity_grams": 0.5}}, {"material_id": "SILICON-DIOXIDE", "element": "Silicon Dioxide", "properties": {"type": "insulator"}}] }
