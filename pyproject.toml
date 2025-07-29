@@ -1,0 +1,55 @@
+[project]
+name = "terraform-provider-pyvider"
+version = "0.0.1"
+description = "The official Pyvider provider, built with Pyvider."
+readme = "README.md"
+requires-python = ">=3.13"
+# These are the RUNTIME dependencies. They must be valid PEP 508 package names.
+# The local development environment setup is handled by the multi-path install command.
+dependencies = [
+    "pyvider",
+    "pyvider-builder",
+    "pyvider-cty",
+    "pyvider-rpcplugin",
+    "pyvider-telemetry",
+    "attrs>=23.1.0"
+]
+scripts = { "terraform-provider-pyvider" = "pyvider.provider_core:setup_provider" }
+
+[build-system]
+# This correctly states that 'pyvider-builder' must be present in the environment
+# before this project can be built.
+requires = ["pyvider-builder>=0.0.11"]
+build-backend = "pyvider.builder.build_backend"
+
+[tool.pyvider]
+name = "pyvider"
+version = "0.0.1"
+output_path = "dist/terraform-provider-pyvider"
+entry_point = "pyvider.provider_core:setup_provider"
+
+[tool.pyvider.build]
+# This section lists the local paths for the build tool to bundle.
+# THE FIX: 'pyvider-builder' is the tool, not a runtime dependency of the
+# provider, so it should not be included here.
+dependencies = [
+    "../pyvider",
+    "../pyvider-cty",
+    "../pyvider-rpcplugin",
+    "pyvider-telemetry",
+]
+include_dirs = [
+    "./components",
+]
+exclude = [
+    "**/.terraform/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/.DS_Store",
+]
+
+[tool.pyvider.signing]
+private_key_path = "keys/provider-private.key"
+public_key_path = "keys/provider-public.key"
