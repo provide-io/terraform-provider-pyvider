@@ -5,41 +5,35 @@ description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "pyvider",
-    "pyvider-builder",
-    "pyvider-cty",
-    "pyvider-rpcplugin",
-    "pyvider-telemetry",
     "pyvider-components",
-    "attrs>=23.1.0"
 ]
-# This script name is used by the build backend to name the final executable.
-# The entry point itself is now defined in the [tool.pyvider-builder] section.
-scripts = { "terraform-provider-pyvider" = "pyvider.cli.__main__:main" }
 
 [build-system]
-requires = ["pyvider-builder>=0.0.11"]
+requires = ["pyvider-builder"]
 build-backend = "pyvider.builder.build_backend"
+
+[tool.pyvbuild]
+provider_name = "pyvider"
+version_source = "0.0.2-1"
 
 [tool.pyvider-builder]
 name = "pyvider"
 version = "0.1.0"
 output_path = "dist/terraform-provider-pyvider"
-# This is the crucial change: the packaged binary now starts from the CLI main.
+# Use the pyvider CLI entry point for the provider binary
 entry_point = "pyvider.cli.__main__:main"
 
 [tool.pyvider-builder.build]
-# This section lists the local paths for the build tool to bundle.
+# This meta package just brings together components
 dependencies = [
     "../pyvider",
-    "../pyvider-components",
-    "pyvider-cty",
-    "pyvider-rpcplugin",
-    "pyvider-telemetry",
+    "../pyvider-components", 
+    "../pyvider-cty",
+    "../pyvider-rpcplugin",
 ]
 exclude = [
     "**/.terraform/**",
-    "**/.venv/**",
+    "**/.venv/**", 
     "**/__pycache__/**",
     "**/*.pyc",
     "**/*.pyo",
