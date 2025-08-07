@@ -6,15 +6,15 @@ This provider is built entirely in Python using the `pyvider` framework and pack
 
 ## Features
 
-*   **Utility Resources:** Manage local files and directories (`pyvider_file_content`, `pyvider_local_directory`).
-*   **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
-*   **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_jq`, `pyvider_jq_cty`).
-*   **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
+* **Utility Resources:** Manage local files and directories (`pyvider_file_content`, `pyvider_local_directory`).
+* **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
+* **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_jq`, `pyvider_jq_cty`).
+* **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
 
 ## Installation
 
-1.  **Download:** Download the appropriate `terraform-provider-pyvider` binary for your system from the [releases page](https://example.com/releases).
-2.  **Install:** Run the downloaded binary with the `install` command. It will automatically copy itself to the correct Terraform plugin directory.
+1. **Download:** Download the appropriate `terraform-provider-pyvider` binary for your system from the releases page.
+2. **Install:** Run the downloaded binary with the `install` command. It will automatically copy itself to the correct Terraform plugin directory.
 
     ```sh
     ./terraform-provider-pyvider install

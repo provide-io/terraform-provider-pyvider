@@ -1,33 +1,34 @@
 ---
-page_title: "pyvider_local_directory"
+page_title: "Resource: pyvider_local_directory"
 description: |-
   Manages a directory on the local filesystem.
 ---
 
-# pyvider_local_directory
+# pyvider_local_directory (Resource)
 
-Manages a directory on the local filesystem. This resource can create directories with specific permissions.
+The `pyvider_local_directory` resource ensures that a directory exists at a given path with specified permissions. It can create nested parent directories as needed.
+
+**Note:** This resource only manages the directory itself. On deletion (`terraform destroy`), it will only remove the directory if it is empty. It will not recursively delete contents.
 
 ## Example Usage
 
-```hcl
-resource "pyvider_local_directory" "app_data" {
-  path        = "/var/data/my_app"
-  permissions = "0o750"
+```terraform
+resource "pyvider_local_directory" "example" {
+  # Configuration options here
 }
+
+output "example_id" {
+  description = "The ID of the pyvider_local_directory resource"
+  value       = pyvider_local_directory.example.id
+}
+
 ```
 
-## Schema
+## Argument Reference
 
-### Required
+## Arguments
 
-- `path` (String) The path of the directory to manage.
-
-### Optional
-
-- `permissions` (String) The permissions for the directory in octal format. Must start with '0o' (e.g., '0o755'). Defaults to `0o755`.
-
-### Read-Only
-
-- `id` (String) The absolute path of the directory.
-- `file_count` (Number) The number of files in the directory.
+- `path` (String, Required) The path of the directory to manage.
+- `permissions` (String, Optional) The permissions for the directory in octal format. Must start with '0o' (e.g., '0o755').
+- `id` (String, Computed) The absolute path of the directory.
+- `file_count` (String, Computed) The number of files in the directory.
