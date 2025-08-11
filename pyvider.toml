@@ -1,0 +1,2 @@
+[pyvider]
+components = ["pyvider.components"]

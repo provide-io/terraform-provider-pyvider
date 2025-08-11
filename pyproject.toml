@@ -3,33 +3,43 @@ name = "terraform-provider-pyvider"
 version = "0.0.1"
 description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
-    "pyvider-components",
+    "flavorpack>=0.0.3.post2",
+    "pyvider>=0.0.0.post0",
+    "pyvider-components>=0.0.0.post1",
+    "pyvider-cty>=0.0.112",
 ]
 
+[project.scripts]
+terraform-provider-pyvider = "pyvider.cli:main"
+
 [build-system]
-requires = ["pyvider-builder"]
-build-backend = "pyvider.builder.build_backend"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
-[tool.pyvbuild]
-provider_name = "pyvider"
-version_source = "0.0.2-1"
+[tool.setuptools]
+py-modules = []
+packages = []
 
-[tool.pyvider-builder]
-name = "pyvider"
-version = "0.1.0"
+[tool.flavor]
+entry_point = "pyvider.cli:main"
 output_path = "dist/terraform-provider-pyvider"
-# Use the pyvider CLI entry point for the provider binary
-entry_point = "pyvider.cli.__main__:main"
+# Ensure the binary is named terraform-provider-pyvider so detection works
+command = "{workenv}/bin/terraform-provider-pyvider"
 
-[tool.pyvider-builder.build]
+[tool.flavor.metadata]
+package_name = "terraform-provider-pyvider"
+version = "0.1.0"
+
+[tool.flavor.build]
 # This meta package just brings together components
 dependencies = [
-    "../pyvider",
-    "../pyvider-components", 
-    "../pyvider-cty",
-    "../pyvider-rpcplugin",
+#    "../pyvider-telemetry",
+#    "../pyvider-rpcplugin",
+#    "../pyvider-cty",
+#    "../pyvider-components", 
+#    "../pyvider",
 ]
 exclude = [
     "**/.terraform/**",
@@ -40,6 +50,13 @@ exclude = [
     "**/.DS_Store",
 ]
 
-[tool.pyvider-builder.signing]
+[tool.flavor.signing]
 private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
+
+[tool.flavor.execution]
+# Runtime environment configuration for Terraform provider protocol
+[tool.flavor.execution.runtime]
+[tool.flavor.execution.runtime.env]
+# Pass through all Terraform environment variables as-is
+pass = ["TF_*", "PLUGIN_*"]
