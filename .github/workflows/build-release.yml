@@ -1,0 +1,189 @@
+name: 🚀 Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: '3.11'
+  UV_VERSION: '0.5.13'
+
+jobs:
+  build:
+    name: 📦 Build PSP Package
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: amd64
+            target: linux_amd64
+            runs_on_arch: x64
+          - os: ubuntu-latest  
+            platform: linux
+            arch: arm64
+            target: linux_arm64
+            runs_on_arch: x64  # Cross-compile
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            target: darwin_arm64
+            runs_on_arch: arm64
+          - os: macos-13  # Intel Mac for darwin_amd64
+            platform: darwin
+            arch: amd64
+            target: darwin_amd64
+            runs_on_arch: x64
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 📦 Install UV
+        run: |
+          curl -LsSf https://astral.sh/uv/${{ env.UV_VERSION }}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: 🔧 Install flavorpack
+        run: |
+          uv tool install flavorpack
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: 🔍 Verify flavorpack installation
+        run: |
+          which flavor || echo "flavor not in PATH"
+          flavor --version || echo "Failed to get flavor version"
+          uv tool list
+      
+      - name: 📥 Download launcher binary
+        run: |
+          # Use the download script to get the appropriate launcher
+          bash .github/scripts/download-launcher.sh "${{ matrix.target }}"
+      
+      - name: 🏗️ Build PSP package
+        run: |
+          # Update version in pyproject.toml
+          sed -i.bak 's/version = "[^"]*"/version = "${{ inputs.version }}"/' pyproject.toml
+          
+          # Build the PSP package
+          flavor pack \
+            --manifest pyproject.toml \
+            --output "terraform-provider-pyvider-${{ inputs.version }}-${{ matrix.target }}.psp" \
+            --launcher-bin "launchers/flavor-rs-launcher-${{ matrix.target }}"
+          
+          echo "✅ Built package:"
+          ls -la *.psp
+      
+      - name: 📤 Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: psp-${{ matrix.target }}
+          path: "*.psp"
+          retention-days: 7
+
+  release:
+    name: 🎉 Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: 📁 Organize release files
+        run: |
+          mkdir -p release
+          find artifacts -name "*.psp" -type f -exec mv {} release/ \;
+          
+          echo "📦 Release files:"
+          ls -la release/
+      
+      - name: 🔧 Generate checksums
+        run: |
+          cd release
+          sha256sum *.psp > checksums.txt
+          
+          echo "📝 Checksums:"
+          cat checksums.txt
+      
+      - name: 📝 Generate release notes
+        run: |
+          cat > release-notes.md << EOF
+          # Terraform Provider Pyvider v${{ inputs.version }}
+          
+          ## 📦 Installation
+          
+          Download the appropriate PSP package for your platform and run:
+          
+          \`\`\`bash
+          # Linux AMD64
+          ./terraform-provider-pyvider-${{ inputs.version }}-linux_amd64.psp
+          
+          # Linux ARM64
+          ./terraform-provider-pyvider-${{ inputs.version }}-linux_arm64.psp
+          
+          # macOS ARM64 (Apple Silicon)
+          ./terraform-provider-pyvider-${{ inputs.version }}-darwin_arm64.psp
+          
+          # macOS AMD64 (Intel)
+          ./terraform-provider-pyvider-${{ inputs.version }}-darwin_amd64.psp
+          \`\`\`
+          
+          ## 🔒 Checksums
+          
+          Verify your download with the checksums provided in \`checksums.txt\`.
+          
+          ## 🚀 What's New
+          
+          - Built with Pyvider and Flavor Pack
+          - Self-contained PSP packages with embedded Python runtime
+          - Cross-platform support
+          
+          ## 📋 Supported Platforms
+          
+          - Linux AMD64
+          - Linux ARM64
+          - macOS ARM64 (Apple Silicon)
+          - macOS AMD64 (Intel)
+          EOF
+      
+      - name: 🏷️ Create Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}" || echo "Tag already exists"
+      
+      - name: 🚀 Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ inputs.version }}"
+          name: "v${{ inputs.version }}"
+          bodyFile: "release-notes.md"
+          artifacts: "release/*"
+          prerelease: ${{ inputs.prerelease }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
