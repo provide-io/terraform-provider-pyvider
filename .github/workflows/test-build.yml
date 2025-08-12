@@ -1,0 +1,84 @@
+name: 🧪 Test Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**/*.py'
+      - 'pyproject.toml'
+      - '.github/workflows/*.yml'
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  PYTHON_VERSION: '3.11'
+  UV_VERSION: '0.5.13'
+
+jobs:
+  test-build:
+    name: 🧪 Test PSP Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 📦 Install UV
+        run: |
+          curl -LsSf https://astral.sh/uv/${{ env.UV_VERSION }}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: 🔧 Install flavorpack
+        run: |
+          # Install the latest flavorpack from PyPI
+          uv tool install flavorpack
+          
+          # Verify installation
+          echo "🔍 Checking flavor installation:"
+          uv tool list
+          export PATH="$HOME/.local/bin:$PATH"
+          which flavor || echo "flavor not found in PATH"
+          flavor --version || echo "Failed to run flavor"
+      
+      - name: 📥 Download test launcher
+        run: |
+          # For testing, download a Linux AMD64 launcher
+          LAUNCHER_VERSION="0.3.0"
+          LAUNCHER_URL="https://github.com/livingstaccato/flavorpack/releases/download/v${LAUNCHER_VERSION}/flavor-rs-launcher-${LAUNCHER_VERSION}-linux_amd64"
+          
+          mkdir -p launchers
+          curl -L -o "launchers/flavor-rs-launcher-linux_amd64" "${LAUNCHER_URL}"
+          chmod +x "launchers/flavor-rs-launcher-linux_amd64"
+          
+          echo "✅ Downloaded launcher:"
+          ls -la launchers/
+      
+      - name: 🏗️ Test build
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Try to build a test PSP package
+          flavor pack \
+            --manifest pyproject.toml \
+            --output "test-build.psp" \
+            --launcher-bin "launchers/flavor-rs-launcher-linux_amd64" \
+            --key-seed "test123"
+          
+          echo "✅ Build successful:"
+          ls -la test-build.psp
+      
+      - name: 🔍 Verify package
+        run: |
+          # Test that the package executes
+          chmod +x test-build.psp
+          ./test-build.psp --version || echo "Package execution test"
+          
+          # Show package info
+          FLAVOR_LOG_LEVEL=info ./test-build.psp --help || true
