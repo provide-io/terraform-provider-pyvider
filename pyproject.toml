@@ -48,3 +48,14 @@ exclude = [
 [tool.flavor.signing]
 private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
+
+[tool.flavor.execution]
+# Runtime environment configuration for Terraform provider protocol
+[tool.flavor.execution.runtime]
+[tool.flavor.execution.runtime.env]
+# Tell pyvider to look for TF_PLUGIN_MAGIC_COOKIE environment variable
+set = { PLUGIN_MAGIC_COOKIE_KEY = "TF_PLUGIN_MAGIC_COOKIE" }
+# Map the TF_PLUGIN_MAGIC_COOKIE value to PLUGIN_MAGIC_COOKIE_VALUE for pyvider
+map = { TF_PLUGIN_MAGIC_COOKIE = "PLUGIN_MAGIC_COOKIE_VALUE" }
+# Ensure required Terraform variables are passed through
+pass = ["TF_LOG", "TF_LOG_PATH", "TF_ACC"]
