@@ -24,16 +24,17 @@ entry_point = "pyvider.cli.__main__:main"
 output_path = "dist/terraform-provider-pyvider"
 
 [tool.flavor.metadata]
-package_name = "pyvider"
+package_name = "terraform-provider-pyvider"
 version = "0.1.0"
 
 [tool.flavor.build]
 # This meta package just brings together components
 dependencies = [
-    "../pyvider",
-    "../pyvider-components", 
-    "../pyvider-cty",
+    "../pyvider-telemetry",
     "../pyvider-rpcplugin",
+    "../pyvider-cty",
+    "../pyvider-components", 
+    "../pyvider",
 ]
 exclude = [
     "**/.terraform/**",
