@@ -18,14 +18,16 @@ packages = []
 provider_name = "pyvider"
 version_source = "0.0.2-1"
 
-[tool.pyvider-builder]
-name = "pyvider"
-version = "0.1.0"
-output_path = "dist/terraform-provider-pyvider"
+[tool.flavor]
 # Use the pyvider CLI entry point for the provider binary
 entry_point = "pyvider.cli.__main__:main"
+output_path = "dist/terraform-provider-pyvider"
 
-[tool.pyvider-builder.build]
+[tool.flavor.metadata]
+package_name = "pyvider"
+version = "0.1.0"
+
+[tool.flavor.build]
 # This meta package just brings together components
 dependencies = [
     "../pyvider",
@@ -42,6 +44,6 @@ exclude = [
     "**/.DS_Store",
 ]
 
-[tool.pyvider-builder.signing]
+[tool.flavor.signing]
 private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
