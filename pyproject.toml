@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.scripts]
+terraform-provider-pyvider = "pyvider.cli:main"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
@@ -50,6 +53,5 @@ public_key_path = "keys/provider-public.key"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
-#set = { PLUGIN_MAGIC_COOKIE_KEY = "TF_PLUGIN_MAGIC_COOKIE" }
-map = { TF_PLUGIN_MAGIC_COOKIE = "PLUGIN_MAGIC_COOKIE_VALUE" }
-pass = ["TF_*"]
+# Pass through all Terraform environment variables as-is
+pass = ["TF_*", "PLUGIN_*"]
