@@ -14,14 +14,11 @@ build-backend = "setuptools.build_meta"
 py-modules = []
 packages = []
 
-[tool.pyvbuild]
-provider_name = "pyvider"
-version_source = "0.0.2-1"
-
 [tool.flavor]
-# Use the pyvider CLI entry point for the provider binary
-entry_point = "pyvider.cli.__main__:main"
+entry_point = "pyvider.cli:main"
 output_path = "dist/terraform-provider-pyvider"
+# Ensure the binary is named terraform-provider-pyvider so detection works
+command = "{workenv}/bin/terraform-provider-pyvider"
 
 [tool.flavor.metadata]
 package_name = "terraform-provider-pyvider"
@@ -53,9 +50,6 @@ public_key_path = "keys/provider-public.key"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
-# Tell pyvider to look for TF_PLUGIN_MAGIC_COOKIE environment variable
-set = { PLUGIN_MAGIC_COOKIE_KEY = "TF_PLUGIN_MAGIC_COOKIE" }
-# Map the TF_PLUGIN_MAGIC_COOKIE value to PLUGIN_MAGIC_COOKIE_VALUE for pyvider
+#set = { PLUGIN_MAGIC_COOKIE_KEY = "TF_PLUGIN_MAGIC_COOKIE" }
 map = { TF_PLUGIN_MAGIC_COOKIE = "PLUGIN_MAGIC_COOKIE_VALUE" }
-# Ensure required Terraform variables are passed through
-pass = ["TF_LOG", "TF_LOG_PATH", "TF_ACC"]
+pass = ["TF_*"]
