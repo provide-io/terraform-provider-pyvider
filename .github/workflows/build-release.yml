@@ -71,21 +71,21 @@ jobs:
           flavor --version || echo "Failed to get flavor version"
           uv tool list
       
-      - name: 📥 Download launcher binary
+      - name: 📥 Setup launcher
         run: |
-          # Use the download script to get the appropriate launcher
-          bash .github/scripts/download-launcher.sh "${{ matrix.target }}"
+          # Flavorpack auto-discovers launchers from the installed package
+          # The launchers are embedded in the platform-specific wheels
+          echo "🔍 Using flavorpack's auto-discovery for launcher"
       
       - name: 🏗️ Build PSP package
         run: |
           # Update version in pyproject.toml
           sed -i.bak 's/version = "[^"]*"/version = "${{ inputs.version }}"/' pyproject.toml
           
-          # Build the PSP package
+          # Build the PSP package (launcher will be auto-discovered)
           flavor pack \
             --manifest pyproject.toml \
-            --output "terraform-provider-pyvider-${{ inputs.version }}-${{ matrix.target }}.psp" \
-            --launcher-bin "launchers/flavor-rs-launcher-${{ matrix.target }}"
+            --output "terraform-provider-pyvider-${{ inputs.version }}-${{ matrix.target }}.psp"
           
           echo "✅ Built package:"
           ls -la *.psp

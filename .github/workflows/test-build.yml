@@ -47,28 +47,22 @@ jobs:
           which flavor || echo "flavor not found in PATH"
           flavor --version || echo "Failed to run flavor"
       
-      - name: 📥 Download test launcher
+      - name: 🔍 Verify auto-discovery
         run: |
-          # For testing, download a Linux AMD64 launcher
-          LAUNCHER_VERSION="0.3.0"
-          LAUNCHER_URL="https://github.com/livingstaccato/flavorpack/releases/download/v${LAUNCHER_VERSION}/flavor-rs-launcher-${LAUNCHER_VERSION}-linux_amd64"
+          # Flavorpack auto-discovers launchers from the installed package
+          echo "🔍 Using flavorpack's auto-discovery for launcher"
           
-          mkdir -p launchers
-          curl -L -o "launchers/flavor-rs-launcher-linux_amd64" "${LAUNCHER_URL}"
-          chmod +x "launchers/flavor-rs-launcher-linux_amd64"
-          
-          echo "✅ Downloaded launcher:"
-          ls -la launchers/
+          # Show flavorpack installation details
+          uv tool list --verbose || true
       
       - name: 🏗️ Test build
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Try to build a test PSP package
+          # Try to build a test PSP package (launcher will be auto-discovered)
           flavor pack \
             --manifest pyproject.toml \
             --output "test-build.psp" \
-            --launcher-bin "launchers/flavor-rs-launcher-linux_amd64" \
             --key-seed "test123"
           
           echo "✅ Build successful:"

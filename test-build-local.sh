@@ -61,19 +61,16 @@ else
     fi
 fi
 
-# Check for launcher
+# Check for launcher (optional - flavorpack can auto-discover)
 LAUNCHER_DIR="../flavorpack/ingredients/bin"
 LAUNCHER="$LAUNCHER_DIR/flavor-rs-launcher-${TARGET}"
 
 if [ -f "$LAUNCHER" ]; then
-    echo "✅ Found launcher: $LAUNCHER"
+    echo "✅ Found local launcher: $LAUNCHER"
+    LAUNCHER_ARGS="--launcher-bin $LAUNCHER"
 else
-    echo "⚠️ Launcher not found at $LAUNCHER"
-    echo "📥 Attempting to download launcher..."
-    
-    mkdir -p launchers
-    bash .github/scripts/download-launcher.sh "$TARGET"
-    LAUNCHER="launchers/flavor-rs-launcher-${TARGET}"
+    echo "🔍 Using flavorpack's auto-discovery for launcher"
+    LAUNCHER_ARGS=""
 fi
 
 # Build the PSP package
@@ -84,8 +81,8 @@ echo "🏗️ Building PSP package..."
 flavor pack \
     --manifest pyproject.toml \
     --output "$OUTPUT" \
-    --launcher-bin "$LAUNCHER" \
-    --key-seed "test123"
+    --key-seed "test123" \
+    $LAUNCHER_ARGS
 
 if [ -f "$OUTPUT" ]; then
     echo "✅ Build successful!"
