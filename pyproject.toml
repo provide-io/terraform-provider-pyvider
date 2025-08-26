@@ -1,6 +1,6 @@
 [project]
 name = "terraform-provider-pyvider"
-version = "0.0.1"
+version = "0.0.2-3"
 description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -30,7 +30,7 @@ command = "{workenv}/bin/terraform-provider-pyvider"
 
 [tool.flavor.metadata]
 package_name = "terraform-provider-pyvider"
-version = "0.1.0"
+#version = "0.1.0"
 
 [tool.flavor.build]
 # This meta package just brings together components
@@ -38,7 +38,7 @@ dependencies = [
 #    "../pyvider-telemetry",
 #    "../pyvider-rpcplugin",
 #    "../pyvider-cty",
-#    "../pyvider-components", 
+#    "../pyvider-components",
 #    "../pyvider",
 ]
 exclude = [
