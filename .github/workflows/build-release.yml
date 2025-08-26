@@ -79,22 +79,36 @@ jobs:
       
       - name: 🏗️ Build PSP package
         run: |
+          # Convert version to PEP 440 format (0.0.2-2 -> 0.0.2.post2)
+          PEP_VERSION="${{ inputs.version }}"
+          if [[ "$PEP_VERSION" == *"-"* ]]; then
+            BASE_VERSION=$(echo "$PEP_VERSION" | cut -d'-' -f1)
+            POST_VERSION=$(echo "$PEP_VERSION" | cut -d'-' -f2)
+            PEP_VERSION="${BASE_VERSION}.post${POST_VERSION}"
+          fi
+          
           # Update version in pyproject.toml
-          sed -i.bak 's/version = "[^"]*"/version = "${{ inputs.version }}"/' pyproject.toml
+          sed -i.bak "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
           
           # Build the PSP package (launcher will be auto-discovered)
           flavor pack \
             --manifest pyproject.toml \
-            --output "terraform-provider-pyvider-${{ inputs.version }}-${{ matrix.target }}.psp"
+            --output "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.psp"
           
-          echo "✅ Built package:"
-          ls -la *.psp
+          # Create zip file for release (matching existing release format)
+          zip "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip" \
+              "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.psp"
+          
+          echo "✅ Built packages:"
+          ls -la *.psp *.zip
       
       - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: psp-${{ matrix.target }}
-          path: "*.psp"
+          path: |
+            *.psp
+            *.zip
           retention-days: 7
 
   release:
@@ -117,6 +131,7 @@ jobs:
         run: |
           mkdir -p release
           find artifacts -name "*.psp" -type f -exec mv {} release/ \;
+          find artifacts -name "*.zip" -type f -exec mv {} release/ \;
           
           echo "📦 Release files:"
           ls -la release/
@@ -124,10 +139,14 @@ jobs:
       - name: 🔧 Generate checksums
         run: |
           cd release
-          sha256sum *.psp > checksums.txt
+          # Generate checksums matching existing format
+          sha256sum *.zip > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
+          
+          # Create a dummy signature file (for now)
+          echo "signature placeholder" > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig"
           
           echo "📝 Checksums:"
-          cat checksums.txt
+          cat "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
       
       - name: 📝 Generate release notes
         run: |
@@ -136,25 +155,29 @@ jobs:
           
           ## 📦 Installation
           
-          Download the appropriate PSP package for your platform and run:
+          Download the appropriate ZIP package for your platform, extract, and run:
           
           \`\`\`bash
           # Linux AMD64
-          ./terraform-provider-pyvider-${{ inputs.version }}-linux_amd64.psp
+          unzip terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.zip
+          ./terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.psp
           
-          # Linux ARM64
-          ./terraform-provider-pyvider-${{ inputs.version }}-linux_arm64.psp
+          # Linux ARM64  
+          unzip terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.zip
+          ./terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.psp
           
           # macOS ARM64 (Apple Silicon)
-          ./terraform-provider-pyvider-${{ inputs.version }}-darwin_arm64.psp
+          unzip terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.zip
+          ./terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.psp
           
           # macOS AMD64 (Intel)
-          ./terraform-provider-pyvider-${{ inputs.version }}-darwin_amd64.psp
+          unzip terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.zip
+          ./terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.psp
           \`\`\`
           
           ## 🔒 Checksums
           
-          Verify your download with the checksums provided in \`checksums.txt\`.
+          Verify your download with the checksums provided in \`terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS\`.
           
           ## 🚀 What's New
           
