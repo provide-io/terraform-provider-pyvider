@@ -36,7 +36,8 @@
       "Bash(garnish:*)",
       "Bash(./scripts/build-docs.sh:*)",
       "Bash(make:*)",
-      "Bash(soup:*)"
+      "Bash(soup:*)",
+      "Bash(pytest:*)"
     ],
     "deny": [],
     "ask": [],
