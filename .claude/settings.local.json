@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(python3 -m pip:*)",
+      "Bash(command -v:*)",
+      "Bash(uv:*)",
+      "Bash(source env.sh)",
+      "Bash(openssl genpkey:*)",
+      "Bash(openssl rsa:*)",
+      "Bash(flavor pack)",
+      "Bash(./dist/terraform-provider-pyvider.psp --version)",
+      "Bash(./dist/terraform-provider-pyvider.psp version)",
+      "Bash(./dist/terraform-provider-pyvider.psp:*)",
+      "Bash(grep:*)",
+      "Read(//Users/tim/code/gh/provide-io/**)",
+      "Bash(gpg:*)",
+      "Read(//Users/tim/code/gh/provide-io/**)",
+      "WebSearch",
+      "Read(//private/tmp/**)",
+      "Bash(curl:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:registry.terraform.io)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh release view:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/check-registry.sh:*)",
+      "Bash(./scripts/sync-registry.sh:*)",
+      "Read(//private/tmp/**)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/tim/Library/Caches/flavor/workenv/terraform-provider-pyvider"
+    ]
+  }
+}
