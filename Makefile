@@ -93,12 +93,23 @@ clean: ## Clean build artifacts and cache
 	@rm -rf ~/Library/Caches/flavor/workenv/$(PROVIDER_NAME)
 	@echo "$(GREEN)✅ Cleaned$(NC)"
 
+.PHONY: clean-docs
+clean-docs: ## Clean documentation directory
+	@echo "$(BLUE)🧹 Cleaning documentation...$(NC)"
+	@rm -rf docs/data-sources
+	@rm -rf docs/data_sources
+	@rm -rf docs/resources
+	@rm -rf docs/functions
+	@rm -rf docs/generated*
+	@rm -rf docs/garnish-improvements.md
+	@rm -f docs/index.md
+	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
+
 .PHONY: clean-all
-clean-all: clean ## Deep clean including workenv and all caches
+clean-all: clean clean-docs ## Deep clean including workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
 	@rm -rf workenv/
 	@rm -rf keys/
-	@rm -rf docs/generated*
 	@rm -rf examples/
 	@rm -rf tests/conformance/
 	@echo "$(GREEN)✅ Everything cleaned$(NC)"
@@ -108,7 +119,7 @@ clean-all: clean ## Deep clean including workenv and all caches
 # ==============================================================================
 
 .PHONY: docs
-docs: ## Build documentation with garnish
+docs: clean-docs ## Build documentation with garnish (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
 	@./scripts/build-docs.sh
 	@echo "$(GREEN)✅ Documentation built in docs/$(NC)"

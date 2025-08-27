@@ -84,27 +84,33 @@ print_header "🍽️ Running Garnish"
 # Create output directory if it doesn't exist
 mkdir -p "$DOCS_OUTPUT_DIR"
 
+# Note: Using consistent directory naming for Terraform Registry compatibility
+# Terraform Registry expects: resources, data-sources (with hyphen), functions
+
 # Generate documentation for resources
 if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/resources" ]; then
     echo "📦 Generating resource documentation..."
+    mkdir -p "$DOCS_OUTPUT_DIR/resources"
     $GARNISH_CMD generate \
         --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/resources" \
         --output "$DOCS_OUTPUT_DIR/resources" \
         --type resource || print_warning "Resource docs generation had issues"
 fi
 
-# Generate documentation for data sources
+# Generate documentation for data sources (using hyphenated directory name)
 if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/data_sources" ]; then
     echo "📊 Generating data source documentation..."
+    mkdir -p "$DOCS_OUTPUT_DIR/data-sources"
     $GARNISH_CMD generate \
         --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/data_sources" \
-        --output "$DOCS_OUTPUT_DIR/data_sources" \
+        --output "$DOCS_OUTPUT_DIR/data-sources" \
         --type data-source || print_warning "Data source docs generation had issues"
 fi
 
 # Generate documentation for functions
 if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/functions" ]; then
     echo "🔧 Generating function documentation..."
+    mkdir -p "$DOCS_OUTPUT_DIR/functions"
     $GARNISH_CMD generate \
         --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/functions" \
         --output "$DOCS_OUTPUT_DIR/functions" \
@@ -135,13 +141,13 @@ if command -v garnish &> /dev/null; then
     fi
     
     # Extract and build examples from data source docs  
-    if [ -d "$DOCS_OUTPUT_DIR/data_sources" ]; then
-        for doc in "$DOCS_OUTPUT_DIR/data_sources"/*.md; do
+    if [ -d "$DOCS_OUTPUT_DIR/data-sources" ]; then
+        for doc in "$DOCS_OUTPUT_DIR/data-sources"/*.md; do
             if [ -f "$doc" ]; then
                 data_source_name=$(basename "$doc" .md)
                 garnish extract-examples \
                     --input "$doc" \
-                    --output "$EXAMPLES_OUTPUT_DIR/data_sources/${data_source_name}.tf" \
+                    --output "$EXAMPLES_OUTPUT_DIR/data-sources/${data_source_name}.tf" \
                     --format terraform 2>/dev/null || true
             fi
         done
@@ -166,11 +172,8 @@ if command -v tofusoup &> /dev/null; then
     print_success "Generated conformance test configurations in $TOFUSOUP_TEST_DIR"
 fi
 
-# Copy any existing handwritten docs
-if [ -d "$PYVIDER_COMPONENTS_DIR/docs" ]; then
-    echo "📄 Copying existing documentation..."
-    cp -r "$PYVIDER_COMPONENTS_DIR/docs/"* "$DOCS_OUTPUT_DIR/" 2>/dev/null || true
-fi
+# Note: Not copying docs from pyvider-components as they may be outdated or incorrect
+# Documentation should be generated fresh from the code
 
 # Create index if it doesn't exist
 if [ ! -f "$DOCS_OUTPUT_DIR/index.md" ]; then
@@ -213,9 +216,9 @@ print_success "Documentation generated in $DOCS_OUTPUT_DIR"
 # Show summary
 echo -e "\n📊 Documentation Summary:"
 if [ -d "$DOCS_OUTPUT_DIR" ]; then
-    echo "  Resources: $(find "$DOCS_OUTPUT_DIR/resources" -name "*.md" 2>/dev/null | wc -l)"
-    echo "  Data Sources: $(find "$DOCS_OUTPUT_DIR/data_sources" -name "*.md" 2>/dev/null | wc -l)"
-    echo "  Functions: $(find "$DOCS_OUTPUT_DIR/functions" -name "*.md" 2>/dev/null | wc -l)"
+    echo "  Resources: $(find "$DOCS_OUTPUT_DIR/resources" -name "*.md" 2>/dev/null | wc -l | xargs)"
+    echo "  Data Sources: $(find "$DOCS_OUTPUT_DIR/data-sources" -name "*.md" 2>/dev/null | wc -l | xargs)"
+    echo "  Functions: $(find "$DOCS_OUTPUT_DIR/functions" -name "*.md" 2>/dev/null | wc -l | xargs)"
 fi
 
 print_header "✅ Documentation Build Complete"
