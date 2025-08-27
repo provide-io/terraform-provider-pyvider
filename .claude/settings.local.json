@@ -44,7 +44,8 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(git rm:*)",
-      "Bash(export TEST_VAR1=hello TEST_VAR2=world TEST_SENSITIVE_TOKEN=secret)"
+      "Bash(export TEST_VAR1=hello TEST_VAR2=world TEST_SENSITIVE_TOKEN=secret)",
+      "Bash(/Users/tim/code/gh/provide-io/pyvider-components/test-examples.sh)"
     ],
     "deny": [],
     "ask": [],
