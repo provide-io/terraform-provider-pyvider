@@ -52,7 +52,8 @@
       "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret soup stir)",
       "Bash(python:*)",
       "Read(//private/tmp/garnish-tests/resource_file_content_test/**)",
-      "Read(//tmp/garnish-tests/resource_file_content_test/**)"
+      "Read(//tmp/garnish-tests/resource_file_content_test/**)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": [],
