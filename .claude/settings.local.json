@@ -31,7 +31,9 @@
       "Bash(chmod:*)",
       "Bash(./scripts/check-registry.sh:*)",
       "Bash(./scripts/sync-registry.sh:*)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(tofusoup:*)",
+      "Bash(garnish:*)"
     ],
     "deny": [],
     "ask": [],
