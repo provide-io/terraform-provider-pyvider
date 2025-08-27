@@ -15,11 +15,10 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
-  UV_VERSION: '0.5.13'
 
 jobs:
   build:
-    name: 📦 Build PSP Package
+    name: 📦 Build Provider Binary
     strategy:
       matrix:
         include:
@@ -27,22 +26,18 @@ jobs:
             platform: linux
             arch: amd64
             target: linux_amd64
-            runs_on_arch: x64
           - os: ubuntu-latest  
             platform: linux
             arch: arm64
             target: linux_arm64
-            runs_on_arch: x64  # Cross-compile
           - os: macos-latest
             platform: darwin
             arch: arm64
             target: darwin_arm64
-            runs_on_arch: arm64
-          - os: macos-13  # Intel Mac for darwin_amd64
+          - os: macos-13  # Intel Mac
             platform: darwin
             arch: amd64
             target: darwin_amd64
-            runs_on_arch: x64
     
     runs-on: ${{ matrix.os }}
     
@@ -56,30 +51,24 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       
       - name: 📦 Install UV
-        run: |
-          curl -LsSf https://astral.sh/uv/${{ env.UV_VERSION }}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
       
       - name: 🔧 Install flavorpack
         run: |
           uv tool install flavorpack
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
       
-      - name: 🔍 Verify flavorpack installation
+      - name: 🔑 Generate temporary signing keys
         run: |
-          which flavor || echo "flavor not in PATH"
-          flavor --version || echo "Failed to get flavor version"
-          uv tool list
-      
-      - name: 📥 Setup launcher
-        run: |
-          # Flavorpack auto-discovers launchers from the installed package
-          # The launchers are embedded in the platform-specific wheels
-          echo "🔍 Using flavorpack's auto-discovery for launcher"
+          # Generate Ed25519 keys using flavor keygen
+          flavor keygen --out-dir keys
+          echo "✅ Generated temporary signing keys"
+          ls -la keys/
       
       - name: 🏗️ Build PSP package
         run: |
-          # Convert version to PEP 440 format (0.0.2-2 -> 0.0.2.post2)
+          # Convert version to PEP 440 format for Python packaging
           PEP_VERSION="${{ inputs.version }}"
           if [[ "$PEP_VERSION" == *"-"* ]]; then
             BASE_VERSION=$(echo "$PEP_VERSION" | cut -d'-' -f1)
@@ -88,27 +77,51 @@ jobs:
           fi
           
           # Update version in pyproject.toml
-          sed -i.bak "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
+          else
+            sed -i "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
+          fi
           
-          # Build the PSP package (launcher will be auto-discovered)
+          # Build the PSP package
           flavor pack \
             --manifest pyproject.toml \
-            --output "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.psp"
+            --output "terraform-provider-pyvider.psp"
           
-          # Create zip file for release (matching existing release format)
-          zip "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip" \
-              "terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.psp"
+          echo "✅ Built PSP package:"
+          ls -la terraform-provider-pyvider.psp
+      
+      - name: 📦 Package for Terraform
+        run: |
+          # Rename PSP to Terraform provider binary format
+          BINARY_NAME="terraform-provider-pyvider_v${{ inputs.version }}"
+          cp terraform-provider-pyvider.psp "$BINARY_NAME"
+          chmod +x "$BINARY_NAME"
           
-          echo "✅ Built packages:"
-          ls -la *.psp *.zip
+          # Test execution with timing and launch-context
+          echo "🧪 Testing provider binary execution..."
+          echo "First run (cold start):"
+          time ./"$BINARY_NAME" --launch-context || true
+          
+          echo -e "\nSecond run (warm start):"
+          time ./"$BINARY_NAME" --launch-context || true
+          
+          # Create zip archive with proper naming
+          ZIP_NAME="terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip"
+          zip "$ZIP_NAME" "$BINARY_NAME"
+          
+          echo "📦 Created Terraform provider package:"
+          ls -la "$ZIP_NAME"
+          
+          # Test unzip to verify
+          unzip -l "$ZIP_NAME"
       
       - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: psp-${{ matrix.target }}
+          name: provider-${{ matrix.target }}
           path: |
-            *.psp
-            *.zip
+            terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip
           retention-days: 7
 
   release:
@@ -130,8 +143,12 @@ jobs:
       - name: 📁 Organize release files
         run: |
           mkdir -p release
-          find artifacts -name "*.psp" -type f -exec mv {} release/ \;
+          
+          # Move all zip files to release directory
           find artifacts -name "*.zip" -type f -exec mv {} release/ \;
+          
+          # Copy and rename manifest file
+          cp terraform-registry-manifest.json "release/terraform-provider-pyvider_${{ inputs.version }}_manifest.json"
           
           echo "📦 Release files:"
           ls -la release/
@@ -139,14 +156,24 @@ jobs:
       - name: 🔧 Generate checksums
         run: |
           cd release
-          # Generate checksums matching existing format
-          sha256sum *.zip > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
           
-          # Create a dummy signature file (for now)
-          echo "signature placeholder" > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig"
+          # Generate SHA256 checksums for all files
+          sha256sum * > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
           
           echo "📝 Checksums:"
           cat "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
+      
+      - name: 🔐 Sign checksums with GPG
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+        run: |
+          chmod +x .github/scripts/sign-release.sh
+          .github/scripts/sign-release.sh release/
+          
+          echo "✅ Signatures created:"
+          ls -la release/*.sig
       
       - name: 📝 Generate release notes
         run: |
@@ -155,35 +182,37 @@ jobs:
           
           ## 📦 Installation
           
-          Download the appropriate ZIP package for your platform, extract, and run:
-          
-          \`\`\`bash
-          # Linux AMD64
-          unzip terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.zip
-          ./terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.psp
-          
-          # Linux ARM64  
-          unzip terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.zip
-          ./terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.psp
-          
-          # macOS ARM64 (Apple Silicon)
-          unzip terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.zip
-          ./terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.psp
-          
-          # macOS AMD64 (Intel)
-          unzip terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.zip
-          ./terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.psp
+          ### Terraform Registry (Coming Soon)
+          \`\`\`hcl
+          terraform {
+            required_providers {
+              pyvider = {
+                source  = "provide-io/pyvider"
+                version = "${{ inputs.version }}"
+              }
+            }
+          }
           \`\`\`
           
-          ## 🔒 Checksums
+          ### Manual Installation
+          1. Download the appropriate package for your platform from the assets below
+          2. Extract the archive to get the provider binary
+          3. Place it in your Terraform plugins directory
           
-          Verify your download with the checksums provided in \`terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS\`.
+          ## 🔒 Verification
           
-          ## 🚀 What's New
+          Verify your download with:
+          \`\`\`bash
+          # Download the SHA256SUMS and signature files
+          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ inputs.version }}/terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS
+          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ inputs.version }}/terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig
           
-          - Built with Pyvider and Flavor Pack
-          - Self-contained PSP packages with embedded Python runtime
-          - Cross-platform support
+          # Verify the signature
+          gpg --verify terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS
+          
+          # Verify the checksum
+          sha256sum -c terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS 2>&1 | grep OK
+          \`\`\`
           
           ## 📋 Supported Platforms
           
@@ -191,14 +220,20 @@ jobs:
           - Linux ARM64
           - macOS ARM64 (Apple Silicon)
           - macOS AMD64 (Intel)
+          
+          ## 🚀 What's New
+          
+          Built with Pyvider framework - Python-based Terraform provider development.
           EOF
       
       - name: 🏷️ Create Git tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}" || echo "Tag already exists"
+          
+          # Create and push tag
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}" || echo "Tag might already exist"
+          git push origin "v${{ inputs.version }}" || echo "Tag already exists on remote"
       
       - name: 🚀 Create GitHub Release
         uses: ncipollo/release-action@v1
