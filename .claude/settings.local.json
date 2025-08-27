@@ -39,7 +39,10 @@
       "Bash(soup:*)",
       "Bash(pytest:*)",
       "Bash(terraform:*)",
-      "Bash(TF_LOG=DEBUG terraform plan)"
+      "Bash(TF_LOG=DEBUG terraform plan)",
+      "Bash(export TF_LOG=DEBUG)",
+      "Bash(cat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": [],

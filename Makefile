@@ -118,6 +118,20 @@ clean-examples: ## Clean example test outputs
 	@rm -rf examples/*/outputs 2>/dev/null || true
 	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
 
+.PHONY: clean-tfstate
+clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
+	@echo "$(BLUE)🧹 Cleaning Terraform state files...$(NC)"
+	@find . -name "*.tfstate" -o -name "*.tfstate.*" -o -name ".terraform.lock.hcl" | xargs rm -f 2>/dev/null || true
+	@find . -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
+	@echo "$(GREEN)✅ Terraform state files cleaned$(NC)"
+
+.PHONY: clean-tfcache
+clean-tfcache: ## Clean Terraform plugin cache (~/.terraform.d)
+	@echo "$(BLUE)🧹 Cleaning Terraform plugin cache...$(NC)"
+	@rm -rf ~/.terraform.d/plugin-cache 2>/dev/null || true
+	@rm -rf ~/.terraform.d/providers 2>/dev/null || true
+	@echo "$(GREEN)✅ Terraform plugin cache cleaned$(NC)"
+
 .PHONY: clean-workenv
 clean-workenv: ## Clean all flavor work environments for this provider
 	@echo "$(BLUE)🧹 Cleaning flavor work environments...$(NC)"

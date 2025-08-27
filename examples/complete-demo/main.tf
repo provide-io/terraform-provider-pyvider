@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.0"
   required_providers {
     pyvider = {
-      source  = "provide-io/pyvider"
+      source  = "registry.terraform.io/provide-io/pyvider"
       version = "~> 0.0.3"
     }
   }
@@ -19,7 +19,7 @@ resource "pyvider_file_content" "config" {
     name        = "pyvider-demo"
     version     = "1.0.0"
     environment = "test"
-    timestamp   = timestamp()
+    demo        = true
   })
 }
 
