@@ -36,7 +36,9 @@
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "/Users/tim/Library/Caches/flavor/workenv/terraform-provider-pyvider"
+      "/Users/tim/Library/Caches/flavor/workenv/terraform-provider-pyvider",
+      "/Users/tim/code/gh/provide-io/tofusoup",
+      "/Users/tim/code/gh/provide-io"
     ]
   }
 }
