@@ -43,7 +43,8 @@
       "Bash(export TF_LOG=DEBUG)",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(export TEST_VAR1=hello TEST_VAR2=world TEST_SENSITIVE_TOKEN=secret)"
     ],
     "deny": [],
     "ask": [],
