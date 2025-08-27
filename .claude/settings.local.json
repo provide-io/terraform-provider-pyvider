@@ -35,7 +35,8 @@
       "Bash(tofusoup:*)",
       "Bash(garnish:*)",
       "Bash(./scripts/build-docs.sh:*)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(soup:*)"
     ],
     "deny": [],
     "ask": [],
