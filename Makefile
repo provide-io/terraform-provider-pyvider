@@ -118,8 +118,21 @@ clean-examples: ## Clean example test outputs
 	@rm -rf examples/*/outputs 2>/dev/null || true
 	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
 
+.PHONY: clean-workenv
+clean-workenv: ## Clean all flavor work environments for this provider
+	@echo "$(BLUE)🧹 Cleaning flavor work environments...$(NC)"
+	@rm -rf ~/Library/Caches/flavor/workenv/$(PROVIDER_NAME)*
+	@rm -rf ~/Library/Caches/flavor/workenv/.$(PROVIDER_NAME)*
+	@if [ -n "$$XDG_CACHE_HOME" ]; then \
+		rm -rf $$XDG_CACHE_HOME/flavor/workenv/$(PROVIDER_NAME)*; \
+		rm -rf $$XDG_CACHE_HOME/flavor/workenv/.$(PROVIDER_NAME)*; \
+	fi
+	@rm -rf ~/.cache/flavor/workenv/$(PROVIDER_NAME)* 2>/dev/null || true
+	@rm -rf ~/.cache/flavor/workenv/.$(PROVIDER_NAME)* 2>/dev/null || true
+	@echo "$(GREEN)✅ Flavor work environments cleaned$(NC)"
+
 .PHONY: clean-all
-clean-all: clean clean-docs clean-garnish clean-examples ## Deep clean including workenv and all caches
+clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep clean including workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
 	@rm -rf workenv/
 	@rm -rf keys/

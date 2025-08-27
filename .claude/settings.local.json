@@ -37,7 +37,8 @@
       "Bash(./scripts/build-docs.sh:*)",
       "Bash(make:*)",
       "Bash(soup:*)",
-      "Bash(pytest:*)"
+      "Bash(pytest:*)",
+      "Bash(terraform:*)"
     ],
     "deny": [],
     "ask": [],
