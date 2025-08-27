@@ -48,7 +48,8 @@
       "Bash(/Users/tim/code/gh/provide-io/pyvider-components/test-examples.sh)",
       "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret-key terraform plan)",
       "Bash(/dev/null)",
-      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret terraform plan)"
+      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret terraform plan)",
+      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret soup stir)"
     ],
     "deny": [],
     "ask": [],
