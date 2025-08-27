@@ -42,7 +42,8 @@
       "Bash(TF_LOG=DEBUG terraform plan)",
       "Bash(export TF_LOG=DEBUG)",
       "Bash(cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": [],
