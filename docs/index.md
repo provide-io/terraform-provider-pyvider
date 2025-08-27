@@ -1,17 +1,17 @@
 ---
-page_title: "pyvider Provider"
+page_title: "pyvider-components Provider"
 description: |-
-  Terraform provider for pyvider
+  Terraform provider for pyvider-components
 ---
 
-# pyvider Provider
+# pyvider-components Provider
 
-Terraform provider for pyvider.
+Terraform provider for pyvider-components.
 
 ## Example Usage
 
 ```terraform
-provider "pyvider" {
+provider "pyvider-components" {
   # Configuration options
 }
 ```

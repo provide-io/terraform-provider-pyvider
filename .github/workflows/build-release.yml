@@ -17,6 +17,57 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
+  docs:
+    name: 📚 Build Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Provider
+        uses: actions/checkout@v4
+        with:
+          path: terraform-provider-pyvider
+      
+      - name: 📥 Checkout pyvider-components
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/pyvider-components
+          path: pyvider-components
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 📥 Checkout garnish
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/garnish
+          path: garnish
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: 📦 Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      
+      - name: 📚 Install garnish
+        run: |
+          cd garnish
+          uv pip install -e .
+      
+      - name: 📝 Generate Documentation
+        run: |
+          cd terraform-provider-pyvider
+          ./scripts/build-docs.sh
+      
+      - name: 📤 Upload Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: terraform-provider-pyvider/docs
+          retention-days: 7
+  
   build:
     name: 📦 Build Provider Binary
     strategy:
@@ -44,6 +95,8 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
       
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
@@ -134,6 +187,8 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
       
       - name: 📥 Download all artifacts
         uses: actions/download-artifact@v4

@@ -9,22 +9,13 @@ description: |-
 Provides a pyvider_env_variables DataSource.
 
 ```terraform
-# Read specific environment variables
-data "pyvider_env_variables" "by_keys" {
-  keys = ["HOME", "PATH"]
+data "pyvider_env_variables" "example" {
+  # Configuration options here
 }
 
-# Read all environment variables with a specific prefix
-data "pyvider_env_variables" "by_prefix" {
-  prefix = "PYVIDER_"
-}
-
-output "home_directory" {
-  value = data.pyvider_env_variables.by_keys.values["HOME"]
-}
-
-output "pyvider_vars" {
-  value = data.pyvider_env_variables.by_prefix.values
+output "example_data" {
+  description = "Data from pyvider_env_variables"
+  value       = data.pyvider_env_variables.example
 }
 
 ```

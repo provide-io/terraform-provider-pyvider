@@ -9,26 +9,13 @@ description: |-
 Provides a pyvider_file_info DataSource.
 
 ```terraform
-# Get information about an existing file
-data "pyvider_file_info" "bash_profile" {
-  path = "~/.bash_profile"
+data "pyvider_file_info" "example" {
+  # Configuration options here
 }
 
-# Check for a non-existent file
-data "pyvider_file_info" "nonexistent" {
-  path = "/tmp/this_file_does_not_exist.txt"
-}
-
-output "bash_profile_exists" {
-  value = data.pyvider_file_info.bash_profile.exists
-}
-
-output "bash_profile_size" {
-  value = data.pyvider_file_info.bash_profile.size
-}
-
-output "nonexistent_exists" {
-  value = data.pyvider_file_info.nonexistent.exists
+output "example_data" {
+  description = "Data from pyvider_file_info"
+  value       = data.pyvider_file_info.example
 }
 
 ```

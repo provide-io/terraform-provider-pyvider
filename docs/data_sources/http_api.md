@@ -9,19 +9,13 @@ description: |-
 Provides a pyvider_http_api DataSource.
 
 ```terraform
-data "pyvider_http_api" "httpbin" {
-  url = "https://httpbin.org/get"
-  headers = {
-    "User-Agent" = "Terraform Pyvider Test"
-  }
+data "pyvider_http_api" "example" {
+  # Configuration options here
 }
 
-output "httpbin_status_code" {
-  value = data.pyvider_http_api.httpbin.status_code
-}
-
-output "httpbin_response_body" {
-  value = jsondecode(data.pyvider_http_api.httpbin.response_body)
+output "example_data" {
+  description = "Data from pyvider_http_api"
+  value       = data.pyvider_http_api.example
 }
 
 ```

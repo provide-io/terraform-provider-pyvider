@@ -9,19 +9,13 @@ description: |-
 Provides a pyvider_provider_config_reader DataSource.
 
 ```terraform
-# This data source reads the configuration from the provider block.
-# It is useful for diagnostics and for passing provider-level
-# settings to other resources.
-
-provider "pyvider" {
-  api_endpoint = "https://api.example.com"
-  api_token    = "my-secret-token"
+data "pyvider_provider_config_reader" "example" {
+  # Configuration options here
 }
 
-data "pyvider_provider_config_reader" "config" {}
-
-output "provider_api_endpoint" {
-  value = data.pyvider_provider_config_reader.config.api_endpoint
+output "example_data" {
+  description = "Data from pyvider_provider_config_reader"
+  value       = data.pyvider_provider_config_reader.example
 }
 
 ```

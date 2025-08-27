@@ -33,7 +33,8 @@
       "Bash(./scripts/sync-registry.sh:*)",
       "Read(//private/tmp/**)",
       "Bash(tofusoup:*)",
-      "Bash(garnish:*)"
+      "Bash(garnish:*)",
+      "Bash(./scripts/build-docs.sh:*)"
     ],
     "deny": [],
     "ask": [],

@@ -35,6 +35,24 @@ flavor pack
 # - Outputs to dist/terraform-provider-pyvider.psp (~84MB)
 ```
 
+### Building Documentation
+```bash
+# Build documentation for pyvider-components
+./scripts/build-docs.sh
+
+# This script:
+# - Uses garnish to generate docs from pyvider-components code
+# - Extracts examples from documentation to create .tf files
+# - Generates conformance test configurations with tofusoup
+# - Outputs documentation to docs/ directory
+# - Creates examples in examples/ directory
+# - Generates conformance tests in tests/conformance/
+
+# Install documentation tools if needed
+uv tool install garnish
+uv tool install tofusoup
+```
+
 ### Testing the Provider
 ```bash
 # Test the provider executable
