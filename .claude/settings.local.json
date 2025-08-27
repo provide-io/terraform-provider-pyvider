@@ -34,7 +34,8 @@
       "Read(//private/tmp/**)",
       "Bash(tofusoup:*)",
       "Bash(garnish:*)",
-      "Bash(./scripts/build-docs.sh:*)"
+      "Bash(./scripts/build-docs.sh:*)",
+      "Bash(make:*)"
     ],
     "deny": [],
     "ask": [],

@@ -10,9 +10,31 @@ The provider is packaged using the `flavorpack` toolchain which creates self-con
 
 ## Essential Commands
 
-### Environment Setup
+### Quick Start with Makefile
 ```bash
-# Always source the environment first - this sets up Python, UV, and installs dependencies
+# Show all available commands
+make help
+
+# Common development workflow
+make setup          # Set up environment
+make build          # Build the provider
+make test           # Test the provider
+make docs           # Build documentation
+make release        # Create a new release
+
+# Version management
+make bump-patch     # Bump patch version (0.0.3 -> 0.0.4)
+make bump-minor     # Bump minor version (0.0.3 -> 0.1.0) 
+make bump-major     # Bump major version (0.0.3 -> 1.0.0)
+
+# Registry operations
+make registry-check # Check Terraform Registry status
+make registry-sync  # Sync with registry
+```
+
+### Manual Environment Setup
+```bash
+# Source the environment (if not using Makefile)
 source env.sh
 
 # The env.sh script automatically:
