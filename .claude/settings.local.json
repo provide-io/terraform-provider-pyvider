@@ -49,7 +49,8 @@
       "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret-key terraform plan)",
       "Bash(/dev/null)",
       "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret terraform plan)",
-      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret soup stir)"
+      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret soup stir)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": [],
