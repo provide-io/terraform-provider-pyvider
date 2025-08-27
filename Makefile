@@ -143,6 +143,22 @@ test-local: build ## Test provider with local Terraform
 	@cd examples/test && terraform init && terraform validate
 	@echo "$(GREEN)✅ Provider works with Terraform$(NC)"
 
+.PHONY: test-garnish
+test-garnish: ## Run garnish tests for all components
+	@echo "$(BLUE)🧪 Running garnish tests...$(NC)"
+	@./scripts/test-garnish.sh
+
+.PHONY: test-examples
+test-examples: build ## Test example configurations
+	@echo "$(BLUE)🧪 Testing example configurations...$(NC)"
+	@for dir in examples/*/; do \
+		if [ -f "$$dir/main.tf" ]; then \
+			echo "Testing $$dir..."; \
+			cd "$$dir" && terraform init -upgrade && terraform validate && cd ../..; \
+		fi; \
+	done
+	@echo "$(GREEN)✅ All examples validated$(NC)"
+
 .PHONY: lint
 lint: ## Run code linting
 	@echo "$(BLUE)🔍 Running linters...$(NC)"
