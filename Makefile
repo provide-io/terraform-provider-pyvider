@@ -99,8 +99,27 @@ clean-docs: ## Clean entire documentation directory
 	@rm -rf docs/*
 	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
 
+.PHONY: clean-garnish
+clean-garnish: ## Clean garnish test outputs
+	@echo "$(BLUE)🧹 Cleaning garnish test outputs...$(NC)"
+	@rm -rf tests/garnish-tests
+	@find ../pyvider-components -name "*.garnish" -type d -exec rm -rf {}/test-output \; 2>/dev/null || true
+	@echo "$(GREEN)✅ Garnish test outputs cleaned$(NC)"
+
+.PHONY: clean-examples
+clean-examples: ## Clean example test outputs
+	@echo "$(BLUE)🧹 Cleaning example outputs...$(NC)"
+	@find examples -name "*.tfstate*" -delete 2>/dev/null || true
+	@find examples -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
+	@find examples -name "*.tfplan" -delete 2>/dev/null || true
+	@find examples -name "terraform.lock.hcl" -delete 2>/dev/null || true
+	@rm -rf examples/*/generated 2>/dev/null || true
+	@rm -rf examples/*/test_output 2>/dev/null || true
+	@rm -rf examples/*/outputs 2>/dev/null || true
+	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
+
 .PHONY: clean-all
-clean-all: clean clean-docs ## Deep clean including workenv and all caches
+clean-all: clean clean-docs clean-garnish clean-examples ## Deep clean including workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
 	@rm -rf workenv/
 	@rm -rf keys/
