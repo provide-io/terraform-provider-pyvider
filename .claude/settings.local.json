@@ -53,7 +53,8 @@
       "Bash(python:*)",
       "Read(//private/tmp/garnish-tests/resource_file_content_test/**)",
       "Read(//tmp/garnish-tests/resource_file_content_test/**)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Read(//Users/tim/Library/Caches/flavor/workenv/**)"
     ],
     "deny": [],
     "ask": [],
