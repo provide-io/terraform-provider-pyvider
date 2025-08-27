@@ -38,7 +38,8 @@
       "Bash(make:*)",
       "Bash(soup:*)",
       "Bash(pytest:*)",
-      "Bash(terraform:*)"
+      "Bash(terraform:*)",
+      "Bash(TF_LOG=DEBUG terraform plan)"
     ],
     "deny": [],
     "ask": [],
