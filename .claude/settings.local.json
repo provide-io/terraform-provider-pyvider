@@ -56,7 +56,8 @@
       "Bash(git tag:*)",
       "Read(//Users/tim/Library/Caches/flavor/workenv/**)",
       "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret soup stir examples)",
-      "Bash(/tmp/test_garnish_fix.sh:*)"
+      "Bash(/tmp/test_garnish_fix.sh:*)",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "ask": [],
