@@ -87,34 +87,46 @@ mkdir -p "$DOCS_OUTPUT_DIR"
 # Note: Using consistent directory naming for Terraform Registry compatibility
 # Terraform Registry expects: resources, data-sources (with hyphen), functions
 
-# Generate documentation for resources
-if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/resources" ]; then
-    echo "📦 Generating resource documentation..."
-    mkdir -p "$DOCS_OUTPUT_DIR/resources"
-    $GARNISH_CMD generate \
-        --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/resources" \
-        --output "$DOCS_OUTPUT_DIR/resources" \
-        --type resource || print_warning "Resource docs generation had issues"
+# Check for correct source path (could be src/pyvider or src/pyvider_components)
+COMPONENTS_SRC=""
+if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider/components" ]; then
+    COMPONENTS_SRC="$PYVIDER_COMPONENTS_DIR/src/pyvider/components"
+elif [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components" ]; then
+    COMPONENTS_SRC="$PYVIDER_COMPONENTS_DIR/src/pyvider_components"
+else
+    print_warning "Cannot find pyvider components source directory"
 fi
 
-# Generate documentation for data sources (using hyphenated directory name)
-if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/data_sources" ]; then
-    echo "📊 Generating data source documentation..."
-    mkdir -p "$DOCS_OUTPUT_DIR/data-sources"
-    $GARNISH_CMD generate \
-        --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/data_sources" \
-        --output "$DOCS_OUTPUT_DIR/data-sources" \
-        --type data-source || print_warning "Data source docs generation had issues"
-fi
+if [ -n "$COMPONENTS_SRC" ]; then
+    # Generate documentation for resources
+    if [ -d "$COMPONENTS_SRC/resources" ]; then
+        echo "📦 Generating resource documentation..."
+        mkdir -p "$DOCS_OUTPUT_DIR/resources"
+        $GARNISH_CMD generate \
+            --source "$COMPONENTS_SRC/resources" \
+            --output "$DOCS_OUTPUT_DIR/resources" \
+            --type resource || print_warning "Resource docs generation had issues"
+    fi
 
-# Generate documentation for functions
-if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/functions" ]; then
-    echo "🔧 Generating function documentation..."
-    mkdir -p "$DOCS_OUTPUT_DIR/functions"
-    $GARNISH_CMD generate \
-        --source "$PYVIDER_COMPONENTS_DIR/src/pyvider_components/functions" \
-        --output "$DOCS_OUTPUT_DIR/functions" \
-        --type function || print_warning "Function docs generation had issues"
+    # Generate documentation for data sources (using hyphenated directory name)
+    if [ -d "$COMPONENTS_SRC/data_sources" ]; then
+        echo "📊 Generating data source documentation..."
+        mkdir -p "$DOCS_OUTPUT_DIR/data-sources"
+        $GARNISH_CMD generate \
+            --source "$COMPONENTS_SRC/data_sources" \
+            --output "$DOCS_OUTPUT_DIR/data-sources" \
+            --type data-source || print_warning "Data source docs generation had issues"
+    fi
+
+    # Generate documentation for functions
+    if [ -d "$COMPONENTS_SRC/functions" ]; then
+        echo "🔧 Generating function documentation..."
+        mkdir -p "$DOCS_OUTPUT_DIR/functions"
+        $GARNISH_CMD generate \
+            --source "$COMPONENTS_SRC/functions" \
+            --output "$DOCS_OUTPUT_DIR/functions" \
+            --type function || print_warning "Function docs generation had issues"
+    fi
 fi
 
 # Generate example Terraform configurations from garnish examples
