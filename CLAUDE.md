@@ -71,8 +71,9 @@ flavor pack
 # - Generates conformance tests in tests/conformance/
 
 # Install documentation tools if needed
-uv tool install garnish
-uv tool install tofusoup
+# Note: garnish integration is still being worked on - may need updates
+cd ../garnish && uv pip install -e .
+cd ../tofusoup && uv pip install -e .
 ```
 
 ### Testing the Provider

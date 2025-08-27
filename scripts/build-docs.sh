@@ -98,34 +98,21 @@ else
 fi
 
 if [ -n "$COMPONENTS_SRC" ]; then
-    # Generate documentation for resources
-    if [ -d "$COMPONENTS_SRC/resources" ]; then
-        echo "📦 Generating resource documentation..."
-        mkdir -p "$DOCS_OUTPUT_DIR/resources"
-        $GARNISH_CMD generate \
-            --source "$COMPONENTS_SRC/resources" \
-            --output "$DOCS_OUTPUT_DIR/resources" \
-            --type resource || print_warning "Resource docs generation had issues"
-    fi
-
-    # Generate documentation for data sources (using hyphenated directory name)
-    if [ -d "$COMPONENTS_SRC/data_sources" ]; then
-        echo "📊 Generating data source documentation..."
-        mkdir -p "$DOCS_OUTPUT_DIR/data-sources"
-        $GARNISH_CMD generate \
-            --source "$COMPONENTS_SRC/data_sources" \
-            --output "$DOCS_OUTPUT_DIR/data-sources" \
-            --type data-source || print_warning "Data source docs generation had issues"
-    fi
-
-    # Generate documentation for functions
-    if [ -d "$COMPONENTS_SRC/functions" ]; then
-        echo "🔧 Generating function documentation..."
-        mkdir -p "$DOCS_OUTPUT_DIR/functions"
-        $GARNISH_CMD generate \
-            --source "$COMPONENTS_SRC/functions" \
-            --output "$DOCS_OUTPUT_DIR/functions" \
-            --type function || print_warning "Function docs generation had issues"
+    # First, dress the components (adds .garnish directories with metadata)
+    echo "👗 Dressing components with garnish metadata..."
+    cd "$PYVIDER_COMPONENTS_DIR"
+    $GARNISH_CMD dress || print_warning "Garnish dress had issues"
+    
+    # Then plate the documentation (generates final docs)
+    echo "🍽️ Plating documentation..."
+    $GARNISH_CMD plate \
+        --output-dir "$DOCS_OUTPUT_DIR" || print_warning "Garnish plate had issues"
+    
+    cd "$PROJECT_ROOT"
+    
+    # Ensure proper directory structure for Terraform Registry
+    if [ -d "$DOCS_OUTPUT_DIR/data_sources" ] && [ ! -d "$DOCS_OUTPUT_DIR/data-sources" ]; then
+        mv "$DOCS_OUTPUT_DIR/data_sources" "$DOCS_OUTPUT_DIR/data-sources"
     fi
 fi
 
