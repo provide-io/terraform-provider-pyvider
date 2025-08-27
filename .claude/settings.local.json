@@ -45,7 +45,10 @@
       "Bash(find:*)",
       "Bash(git rm:*)",
       "Bash(export TEST_VAR1=hello TEST_VAR2=world TEST_SENSITIVE_TOKEN=secret)",
-      "Bash(/Users/tim/code/gh/provide-io/pyvider-components/test-examples.sh)"
+      "Bash(/Users/tim/code/gh/provide-io/pyvider-components/test-examples.sh)",
+      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret-key terraform plan)",
+      "Bash(/dev/null)",
+      "Bash(PYVIDER_PRIVATE_STATE_SHARED_SECRET=test-secret terraform plan)"
     ],
     "deny": [],
     "ask": [],
