@@ -1,21 +1,30 @@
 ---
-page_title: "pyvider-components Provider"
+page_title: "pyvider Provider"
 description: |-
-  Terraform provider for pyvider-components
+  The official Pyvider provider for Terraform/OpenTofu
 ---
 
-# pyvider-components Provider
+# pyvider Provider
 
-Terraform provider for pyvider-components.
+The `pyvider` provider is the official provider for the Pyvider framework, demonstrating its capabilities and providing utility resources, data sources, and functions for testing and infrastructure tasks.
 
 ## Example Usage
 
-```terraform
-provider "pyvider-components" {
+```hcl
+terraform {
+  required_providers {
+    pyvider = {
+      source  = "provide-io/pyvider"
+      version = "~> 0.0"
+    }
+  }
+}
+
+provider "pyvider" {
   # Configuration options
 }
 ```
 
-## Schema
+## Available Resources
 
-Provider configuration documentation
+See the navigation menu for available resources, data sources, and functions.

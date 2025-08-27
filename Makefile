@@ -94,15 +94,9 @@ clean: ## Clean build artifacts and cache
 	@echo "$(GREEN)✅ Cleaned$(NC)"
 
 .PHONY: clean-docs
-clean-docs: ## Clean documentation directory
+clean-docs: ## Clean entire documentation directory
 	@echo "$(BLUE)🧹 Cleaning documentation...$(NC)"
-	@rm -rf docs/data-sources
-	@rm -rf docs/data_sources
-	@rm -rf docs/resources
-	@rm -rf docs/functions
-	@rm -rf docs/generated*
-	@rm -rf docs/garnish-improvements.md
-	@rm -f docs/index.md
+	@rm -rf docs/*
 	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
 
 .PHONY: clean-all
