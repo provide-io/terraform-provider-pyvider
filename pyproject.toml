@@ -5,7 +5,6 @@ description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "flavorpack>=0.0.3.post2",
     "pyvider>=0.0.0.post0",
     "pyvider-components>=0.0.0.post1",
     "pyvider-cty>=0.0.112",
