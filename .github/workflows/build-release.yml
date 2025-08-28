@@ -101,10 +101,10 @@ jobs:
           # Test execution with timing and launch-context
           echo "🧪 Testing provider binary execution..."
           echo "First run (cold start):"
-          time ./"$BINARY_NAME" --launch-context || true
+          time ./"$BINARY_NAME" launch-context || true
           
           echo -e "\nSecond run (warm start):"
-          time ./"$BINARY_NAME" --launch-context || true
+          time ./"$BINARY_NAME" launch-context || true
           
           # Create zip archive with proper naming
           ZIP_NAME="terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip"
@@ -175,6 +175,52 @@ jobs:
           echo "✅ Signatures created:"
           ls -la release/*.sig
       
+      - name: 🔍 Verify release artifacts
+        run: |
+          cd release
+          echo "📋 Verifying release artifacts for Terraform Registry..."
+          
+          # Check all required files exist
+          REQUIRED_FILES=(
+            "terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.zip"
+            "terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.zip"
+            "terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.zip"
+            "terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.zip"
+            "terraform-provider-pyvider_${{ inputs.version }}_manifest.json"
+            "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
+            "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig"
+          )
+          
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              exit 1
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          
+          # Verify SHA256SUMS contains all required entries
+          echo -e "\n📝 Checking SHA256SUMS entries..."
+          for platform in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64; do
+            if grep -q "${platform}.zip" "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"; then
+              echo "✅ SHA256SUMS contains ${platform}"
+            else
+              echo "❌ SHA256SUMS missing ${platform}"
+              exit 1
+            fi
+          done
+          
+          # Verify manifest.json
+          if grep -q "manifest.json" "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"; then
+            echo "✅ SHA256SUMS contains manifest.json"
+          else
+            echo "❌ SHA256SUMS missing manifest.json"
+            exit 1
+          fi
+          
+          echo -e "\n✅ All release artifacts verified!"
+      
       - name: 📝 Generate release notes
         run: |
           cat > release-notes.md << EOF
@@ -231,7 +277,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Create and push tag
+          # Create and push tag (ensure it exists before release)
           git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}" || echo "Tag might already exist"
           git push origin "v${{ inputs.version }}" || echo "Tag already exists on remote"
       
