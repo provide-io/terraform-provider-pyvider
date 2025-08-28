@@ -99,8 +99,54 @@ clean-docs: ## Clean entire documentation directory
 	@rm -rf docs/*
 	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
 
+.PHONY: clean-garnish
+clean-garnish: ## Clean garnish test outputs
+	@echo "$(BLUE)🧹 Cleaning garnish test outputs...$(NC)"
+	@rm -rf tests/garnish-tests
+	@find ../pyvider-components -name "*.garnish" -type d -exec rm -rf {}/test-output \; 2>/dev/null || true
+	@echo "$(GREEN)✅ Garnish test outputs cleaned$(NC)"
+
+.PHONY: clean-examples
+clean-examples: ## Clean example test outputs
+	@echo "$(BLUE)🧹 Cleaning example outputs...$(NC)"
+	@find examples -name "*.tfstate*" -delete 2>/dev/null || true
+	@find examples -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
+	@find examples -name "*.tfplan" -delete 2>/dev/null || true
+	@find examples -name "terraform.lock.hcl" -delete 2>/dev/null || true
+	@rm -rf examples/*/generated 2>/dev/null || true
+	@rm -rf examples/*/test_output 2>/dev/null || true
+	@rm -rf examples/*/outputs 2>/dev/null || true
+	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
+
+.PHONY: clean-tfstate
+clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
+	@echo "$(BLUE)🧹 Cleaning Terraform state files...$(NC)"
+	@find . -name "*.tfstate" -o -name "*.tfstate.*" -o -name ".terraform.lock.hcl" | xargs rm -f 2>/dev/null || true
+	@find . -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
+	@echo "$(GREEN)✅ Terraform state files cleaned$(NC)"
+
+.PHONY: clean-tfcache
+clean-tfcache: ## Clean Terraform plugin cache (~/.terraform.d)
+	@echo "$(BLUE)🧹 Cleaning Terraform plugin cache...$(NC)"
+	@rm -rf ~/.terraform.d/plugin-cache 2>/dev/null || true
+	@rm -rf ~/.terraform.d/providers 2>/dev/null || true
+	@echo "$(GREEN)✅ Terraform plugin cache cleaned$(NC)"
+
+.PHONY: clean-workenv
+clean-workenv: ## Clean all flavor work environments for this provider
+	@echo "$(BLUE)🧹 Cleaning flavor work environments...$(NC)"
+	@rm -rf ~/Library/Caches/flavor/workenv/$(PROVIDER_NAME)*
+	@rm -rf ~/Library/Caches/flavor/workenv/.$(PROVIDER_NAME)*
+	@if [ -n "$$XDG_CACHE_HOME" ]; then \
+		rm -rf $$XDG_CACHE_HOME/flavor/workenv/$(PROVIDER_NAME)*; \
+		rm -rf $$XDG_CACHE_HOME/flavor/workenv/.$(PROVIDER_NAME)*; \
+	fi
+	@rm -rf ~/.cache/flavor/workenv/$(PROVIDER_NAME)* 2>/dev/null || true
+	@rm -rf ~/.cache/flavor/workenv/.$(PROVIDER_NAME)* 2>/dev/null || true
+	@echo "$(GREEN)✅ Flavor work environments cleaned$(NC)"
+
 .PHONY: clean-all
-clean-all: clean clean-docs ## Deep clean including workenv and all caches
+clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep clean including workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
 	@rm -rf workenv/
 	@rm -rf keys/
@@ -142,6 +188,22 @@ test-local: build ## Test provider with local Terraform
 	@echo 'terraform {\n  required_providers {\n    pyvider = {\n      source = "local/providers/pyvider"\n      version = "$(VERSION)"\n    }\n  }\n}\n\nprovider "pyvider" {}' > examples/test/main.tf
 	@cd examples/test && terraform init && terraform validate
 	@echo "$(GREEN)✅ Provider works with Terraform$(NC)"
+
+.PHONY: test-garnish
+test-garnish: ## Run garnish tests for all components
+	@echo "$(BLUE)🧪 Running garnish tests...$(NC)"
+	@./scripts/test-garnish.sh
+
+.PHONY: test-examples
+test-examples: build ## Test example configurations
+	@echo "$(BLUE)🧪 Testing example configurations...$(NC)"
+	@for dir in examples/*/; do \
+		if [ -f "$$dir/main.tf" ]; then \
+			echo "Testing $$dir..."; \
+			cd "$$dir" && terraform init -upgrade && terraform validate && cd ../..; \
+		fi; \
+	done
+	@echo "$(GREEN)✅ All examples validated$(NC)"
 
 .PHONY: lint
 lint: ## Run code linting
