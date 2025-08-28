@@ -16,8 +16,3 @@ Provides a pyvider_mixed_map_test DataSource.
 
 ## Argument Reference
 
-## Arguments
-
-- `input_data` (String, Optional) Mixed type map input
-- `processed_data` (String, Computed) Processed mixed map
-- `data_hash` (String, Computed) Hash of processed data

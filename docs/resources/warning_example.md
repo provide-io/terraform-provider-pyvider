@@ -18,36 +18,13 @@ It showcases two key features:
 
 This example correctly uses the modern `name` attribute and will not produce any warnings.
 
-```terraform
-# This resource uses the modern 'name' attribute and should
-# produce no warnings.
-resource "pyvider_warning_example" "good" {
-  name = "modern-resource"
-}
 
-output "good_resource_name" {
-  value = pyvider_warning_example.good.name
-}
-
-```
 
 ### Deprecated Usage
 
 This example uses the deprecated `old_name` attribute. Running `terraform plan` will succeed but will display a warning in the CLI output.
 
-```terraform
-# This resource uses the deprecated 'old_name' attribute.
-# Running `terraform plan` on this configuration should display
-# a warning message in the output.
-resource "pyvider_warning_example" "deprecated" {
-  old_name = "legacy-resource"
-}
 
-output "deprecated_resource_name" {
-  value = pyvider_warning_example.deprecated.name
-}
-
-```
 
 ### Invalid Usage (Error)
 
@@ -63,8 +40,3 @@ resource "pyvider_warning_example" "bad_config" {
 
 ## Argument Reference
 
-## Arguments
-
-- `name` (String, Optional)
-- `old_name` (String, Optional)
-- `source_file` (String, Optional)

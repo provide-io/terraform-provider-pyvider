@@ -16,9 +16,3 @@ Provides a pyvider_structured_object_test DataSource.
 
 ## Argument Reference
 
-## Arguments
-
-- `config_name` (String, Required)
-- `metadata` (String, Optional)
-- `generated_config` (String, Computed)
-- `summary` (String, Computed)

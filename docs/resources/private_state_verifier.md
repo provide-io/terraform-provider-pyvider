@@ -28,7 +28,3 @@ output "example_id" {
 
 ## Argument Reference
 
-## Arguments
-
-- `input_value` (String, Required)
-- `decrypted_token` (String, Computed)

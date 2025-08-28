@@ -10,9 +10,31 @@ The provider is packaged using the `flavorpack` toolchain which creates self-con
 
 ## Essential Commands
 
-### Environment Setup
+### Quick Start with Makefile
 ```bash
-# Always source the environment first - this sets up Python, UV, and installs dependencies
+# Show all available commands
+make help
+
+# Common development workflow
+make setup          # Set up environment
+make build          # Build the provider
+make test           # Test the provider
+make docs           # Build documentation
+make release        # Create a new release
+
+# Version management
+make bump-patch     # Bump patch version (0.0.3 -> 0.0.4)
+make bump-minor     # Bump minor version (0.0.3 -> 0.1.0) 
+make bump-major     # Bump major version (0.0.3 -> 1.0.0)
+
+# Registry operations
+make registry-check # Check Terraform Registry status
+make registry-sync  # Sync with registry
+```
+
+### Manual Environment Setup
+```bash
+# Source the environment (if not using Makefile)
 source env.sh
 
 # The env.sh script automatically:
@@ -33,6 +55,25 @@ flavor pack
 # - Bundles Python runtime (3.11)
 # - Signs the package with keys from keys/provider-private.key
 # - Outputs to dist/terraform-provider-pyvider.psp (~84MB)
+```
+
+### Building Documentation
+```bash
+# Build documentation for pyvider-components
+./scripts/build-docs.sh
+
+# This script:
+# - Uses garnish to generate docs from pyvider-components code
+# - Extracts examples from documentation to create .tf files
+# - Generates conformance test configurations with tofusoup
+# - Outputs documentation to docs/ directory
+# - Creates examples in examples/ directory
+# - Generates conformance tests in tests/conformance/
+
+# Install documentation tools if needed
+# Note: garnish integration is still being worked on - may need updates
+cd ../garnish && uv pip install -e .
+cd ../tofusoup && uv pip install -e .
 ```
 
 ### Testing the Provider
