@@ -48,10 +48,3 @@ output "nested_resource_result" {
 
 ## Argument Reference
 
-## Arguments
-
-- `resource_name` (String, Required)
-- `configuration` (String, Optional) Dynamic configuration map
-- `processed_data` (String, Computed) Processed configuration data
-- `resource_id` (String, Computed)
-- `exists` (String, Computed)

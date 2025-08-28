@@ -28,9 +28,3 @@ output "example_id" {
 
 ## Argument Reference
 
-## Arguments
-
-- `name` (String, Required)
-- `id` (String, Computed)
-- `token` (String, Computed)
-- `expires_at` (String, Computed)

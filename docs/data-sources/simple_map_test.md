@@ -16,8 +16,3 @@ Provides a pyvider_simple_map_test DataSource.
 
 ## Argument Reference
 
-## Arguments
-
-- `input_data` (String, Optional) Simple string map input
-- `processed_data` (String, Computed) Processed string map
-- `data_hash` (String, Computed) Hash of processed data

@@ -26,9 +26,3 @@ output "example_id" {
 
 ## Argument Reference
 
-## Arguments
-
-- `filename` (String, Required)
-- `content` (String, Required)
-- `exists` (String, Computed)
-- `content_hash` (String, Computed)

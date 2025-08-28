@@ -26,9 +26,3 @@ output "example_id" {
 
 ## Argument Reference
 
-## Arguments
-
-- `path` (String, Required) The path of the directory to manage.
-- `permissions` (String, Optional) The permissions for the directory in octal format. Must start with '0o' (e.g., '0o755').
-- `id` (String, Computed) The absolute path of the directory.
-- `file_count` (String, Computed) The number of files in the directory.

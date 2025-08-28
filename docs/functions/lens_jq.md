@@ -6,7 +6,7 @@ description: |-
 
 # lens_jq (Function)
 
-`pyvider_lens_jq(...)`
+`lens_jq(...)`
 
 Provides the lens_jq function.
 
@@ -28,8 +28,3 @@ output "item_names" {
 
 ## Arguments
 
-## Arguments
-
-- `json_input` (String, Required)
-- `query` (String, Required)
-- `result` (String, Computed)
