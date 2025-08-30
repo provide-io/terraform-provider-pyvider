@@ -1,0 +1,20 @@
+{
+  "project_id": "PROJ-APOLLO",
+  "system": {
+    "subsystems": [
+      {
+        "id": "QPU-01",
+        "assemblies": [
+          {"id": "QPU-A-CHIP", "parts": [{"id": "P-QBC-100", "name": "Qubit Capacitor Array", "supplier_id": "SUP-QFAB-01", "owner_ids": ["ereed_789"], "material_ids": ["NIOBIUM-99.99", "SILICON-DIOXIDE"]}]},
+          {"id": "QPU-B-COUPLER", "parts": [{"id": "P-QBC-200", "name": "Inter-Qubit Coupler", "supplier_id": "SUP-QFAB-01", "owner_ids": ["ereed_789", "mrosa_101"], "material_ids": ["NIOBIUM-99.99"]}]}
+        ]
+      },
+      {
+        "id": "CRYO-01",
+        "assemblies": [
+          {"id": "CRYO-A-SHIELD", "parts": [{"id": "P-CRYO-SHIELD", "name": "Primary Niobium Shield", "supplier_id": "SUP-QFAB-01", "owner_ids": ["ereed_789", "jchen_456"], "material_ids": ["NIOBIUM-99.99"]}]}
+        ]
+      }
+    ]
+  }
+}
