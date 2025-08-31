@@ -136,6 +136,17 @@ jobs:
             sed -i "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
           fi
           
+          # Set UV platform for broader compatibility on Linux
+          # Use manylinux2014 (glibc 2.17+) for maximum compatibility
+          if [[ "${{ matrix.platform }}" == "linux" ]]; then
+            if [[ "${{ matrix.arch }}" == "amd64" ]]; then
+              export UV_PYTHON_PLATFORM="x86_64-manylinux2014"
+            elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
+              export UV_PYTHON_PLATFORM="aarch64-manylinux2014"
+            fi
+            echo "Using UV_PYTHON_PLATFORM=$UV_PYTHON_PLATFORM for compatibility"
+          fi
+          
           # Build the PSP package
           flavor pack \
             --manifest pyproject.toml \
