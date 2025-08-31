@@ -1,0 +1,25 @@
+# wrknv configuration for terraform-provider-pyvider
+
+[project]
+name = "terraform-provider-pyvider"
+description = "Official Terraform Provider built with Pyvider framework"
+
+[tools]
+uv = "latest"
+go = "1.22.1"    # For testing with Terraform
+rust = "1.75"    # For flavorpack packaging
+
+[siblings]
+patterns = [
+    "pyvider",            # Core framework
+    "pyvider-components", # Component library
+    "pyvider-cty",        # CTY type system
+    "pyvider-hcl",        # HCL parsing
+    "pyvider-rpcplugin",  # RPC plugin
+    "pyvider-telemetry",  # Telemetry
+    "flavorpack",         # Packaging system
+    "wrknv",              # Environment manager
+]
+
+[settings]
+python_version = ">=3.11"
