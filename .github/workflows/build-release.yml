@@ -110,9 +110,7 @@ jobs:
       
       - name: 🔧 Install flavorpack
         run: |
-          # Install flavorpack from git to get manylinux2014 fix
-          # TODO: Switch back to PyPI once flavorpack > 0.0.4 is released
-          uv tool install git+https://github.com/provide-io/flavorpack.git@develop
+          uv tool install flavorpack
       
       - name: 🔑 Generate temporary signing keys
         run: |
@@ -138,18 +136,8 @@ jobs:
             sed -i "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
           fi
           
-          # Set UV platform for broader compatibility on Linux
-          # Use manylinux2014 (glibc 2.17+) for maximum compatibility
-          if [[ "${{ matrix.platform }}" == "linux" ]]; then
-            if [[ "${{ matrix.arch }}" == "amd64" ]]; then
-              export UV_PYTHON_PLATFORM="x86_64-manylinux2014"
-            elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
-              export UV_PYTHON_PLATFORM="aarch64-manylinux2014"
-            fi
-            echo "Using UV_PYTHON_PLATFORM=$UV_PYTHON_PLATFORM for compatibility"
-          fi
-          
           # Build the PSP package
+          # Note: flavorpack >= 0.0.5 automatically uses manylinux2014 wheels on Linux
           flavor pack \
             --manifest pyproject.toml \
             --output "terraform-provider-pyvider.psp"
