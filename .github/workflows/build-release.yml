@@ -110,7 +110,9 @@ jobs:
       
       - name: 🔧 Install flavorpack
         run: |
-          uv tool install flavorpack
+          # Install flavorpack from git to get manylinux2014 fix
+          # TODO: Switch back to PyPI once flavorpack > 0.0.4 is released
+          uv tool install git+https://github.com/provide-io/flavorpack.git@develop
       
       - name: 🔑 Generate temporary signing keys
         run: |
