@@ -405,3 +405,4 @@ bin/
 public*key*
 config.json
 .psp.*
+.soup
