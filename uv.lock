@@ -538,7 +538,7 @@ wheels = [
 
 [[package]]
 name = "terraform-provider-pyvider"
-version = "0.0.3"
+version = "0.0.5"
 source = { editable = "." }
 dependencies = [
     { name = "pyvider" },
