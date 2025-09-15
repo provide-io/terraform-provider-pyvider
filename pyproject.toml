@@ -33,13 +33,7 @@ package_name = "terraform-provider-pyvider"
 
 [tool.flavor.build]
 # This meta package just brings together components
-dependencies = [
-#    "../pyvider-telemetry",
-#    "../pyvider-rpcplugin",
-#    "../pyvider-cty",
-#    "../pyvider-components",
-#    "../pyvider",
-]
+dependencies = []
 exclude = [
     "**/.terraform/**",
     "**/.venv/**", 
