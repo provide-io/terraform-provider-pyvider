@@ -62,7 +62,8 @@
       "Read(//Users/tim/.terraform.d/plugins/**)",
       "Read(//Users/tim/.terraform.d/plugins/**)",
       "Bash(/tmp/verify_fix.sh:*)",
-      "Bash(. .venv/bin/activate)"
+      "Bash(. .venv/bin/activate)",
+      "Bash(FLAVOR_LAUNCHER_BIN=../flavorpack/ingredients/bin/flavor-rs-launcher-darwin_arm64 python -m flavor.cli pack)"
     ],
     "deny": [],
     "ask": [],
