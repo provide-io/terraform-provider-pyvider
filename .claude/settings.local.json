@@ -67,7 +67,8 @@
       "Bash(FLAVOR_LAUNCHER_BIN=/Users/tim/code/gh/provide-io/flavorpack/ingredients/bin/flavor-rs-launcher-darwin_arm64 python -m flavor.cli pack)",
       "Read(//Users/tim/.cache/flavor/workenv/terraform-provider-pyvider/bin/**)",
       "Bash(shellcheck:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "Bash(gh run cancel:*)"
     ],
     "deny": [],
     "ask": [],
