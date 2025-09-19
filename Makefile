@@ -195,17 +195,9 @@ from pathlib import Path; \
 api = PlatingAPI(); \
 Path('docs').mkdir(exist_ok=True); \
 Path('docs/functions').mkdir(exist_ok=True); \
-Path('docs/resources').mkdir(exist_ok=True); \
-Path('docs/data-sources').mkdir(exist_ok=True); \
 files = api.generate_function_documentation('docs/functions'); \
 written = api.write_generated_files(files); \
-print(f'Generated {len(written)} function documentation files'); \
-files = api.generate_resource_documentation('docs/resources'); \
-written = api.write_generated_files(files); \
-print(f'Generated {len(written)} resource documentation files'); \
-files = api.generate_resource_documentation('docs/data-sources'); \
-written = api.write_generated_files(files); \
-print(f'Generated {len(written)} data source documentation files')" && \
+print(f'Generated {len(written)} function documentation files')" && \
 		echo "$(GREEN)✅ Documentation built in docs/$(NC)"
 
 .PHONY: docs-serve
