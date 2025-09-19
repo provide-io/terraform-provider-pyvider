@@ -68,7 +68,8 @@
       "Read(//Users/tim/.cache/flavor/workenv/terraform-provider-pyvider/bin/**)",
       "Bash(shellcheck:*)",
       "Bash(gh run watch:*)",
-      "Bash(gh run cancel:*)"
+      "Bash(gh run cancel:*)",
+      "Bash(gh repo list:*)"
     ],
     "deny": [],
     "ask": [],
