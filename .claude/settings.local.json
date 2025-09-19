@@ -69,7 +69,8 @@
       "Bash(shellcheck:*)",
       "Bash(gh run watch:*)",
       "Bash(gh run cancel:*)",
-      "Bash(gh repo list:*)"
+      "Bash(gh repo list:*)",
+      "Bash(/tmp/workflow-test/create-clean-branch.sh:*)"
     ],
     "deny": [],
     "ask": [],
