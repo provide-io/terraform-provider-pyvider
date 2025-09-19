@@ -173,7 +173,7 @@ provider "pyvider" {}
 
 # Test file content resource
 resource "pyvider_file_content" "test_file" {
-  filename = "${path.module}/test_output/example.json"
+  filename = "\${path.module}/test_output/example.json"
   content = jsonencode({
     test_id   = "plating-comprehensive-test"
     timestamp = timestamp()
@@ -183,7 +183,7 @@ resource "pyvider_file_content" "test_file" {
 
 # Test directory resource
 resource "pyvider_local_directory" "test_dir" {
-  path        = "${path.module}/test_output"
+  path        = "\${path.module}/test_output"
   create_mode = "0755"
 }
 
