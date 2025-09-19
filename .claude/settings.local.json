@@ -61,7 +61,8 @@
       "Bash(./fix_and_test_garnish.sh:*)",
       "Read(//Users/tim/.terraform.d/plugins/**)",
       "Read(//Users/tim/.terraform.d/plugins/**)",
-      "Bash(/tmp/verify_fix.sh:*)"
+      "Bash(/tmp/verify_fix.sh:*)",
+      "Bash(. .venv/bin/activate)"
     ],
     "deny": [],
     "ask": [],
