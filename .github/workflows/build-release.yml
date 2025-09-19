@@ -33,24 +33,24 @@ jobs:
           repository: provide-io/pyvider-components
           path: pyvider-components
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 📥 Checkout plating
         uses: actions/checkout@v4
         with:
           repository: provide-io/plating
           path: plating
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: 📦 Install UV
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-      
+
       - name: 📚 Install plating
         run: |
           cd plating
@@ -97,7 +97,28 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      
+
+      - name: 📥 Checkout provide-foundation
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/provide-foundation
+          path: ../provide-foundation
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📥 Checkout pyvider-components
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/pyvider-components
+          path: ../pyvider-components
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📥 Checkout plating
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/plating
+          path: ../plating
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
@@ -108,8 +129,14 @@ jobs:
         with:
           enable-cache: true
       
-      - name: 🔧 Install flavorpack
+      - name: 🔧 Install dependencies
         run: |
+          # Install local workspace packages first
+          cd ..
+          uv pip install -e 'provide-foundation[all]'
+          uv pip install -e pyvider-components
+          uv pip install -e plating
+          cd terraform-provider-pyvider
           uv tool install flavorpack
       
       - name: 🔑 Generate temporary signing keys
