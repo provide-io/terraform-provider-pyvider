@@ -34,11 +34,11 @@ jobs:
           path: pyvider-components
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: 📥 Checkout garnish
+      - name: 📥 Checkout plating
         uses: actions/checkout@v4
         with:
-          repository: provide-io/garnish
-          path: garnish
+          repository: provide-io/plating
+          path: plating
           token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: 🐍 Setup Python
@@ -51,9 +51,9 @@ jobs:
         with:
           enable-cache: true
       
-      - name: 📚 Install garnish
+      - name: 📚 Install plating
         run: |
-          cd garnish
+          cd plating
           uv pip install -e .
       
       - name: 📝 Generate Documentation
