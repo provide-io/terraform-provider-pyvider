@@ -33,6 +33,21 @@ PYVIDER_COMPONENTS_DIR="${PROJECT_ROOT}/../pyvider-components"
 TEST_OUTPUT_DIR="${PROJECT_ROOT}/tests/plating-tests"
 TEST_RESULTS_FILE="${TEST_OUTPUT_DIR}/results.json"
 
+# Platform detection for provider binary
+UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
+UNAME_M=$(uname -m)
+# Convert uname -m output to Go arch naming
+case "$UNAME_M" in
+    x86_64) ARCH="amd64" ;;
+    arm64|aarch64) ARCH="arm64" ;;
+    *) ARCH="$UNAME_M" ;;
+esac
+CURRENT_PLATFORM="${UNAME_S}_${ARCH}"
+
+# Get version from pyproject.toml
+VERSION=$(grep 'version = ' "${PROJECT_ROOT}/pyproject.toml" | head -1 | cut -d'"' -f2)
+PROVIDER_BINARY="${PROJECT_ROOT}/dist/${CURRENT_PLATFORM}/terraform-provider-pyvider_v${VERSION}"
+
 print_header "🧪 Plating Test Runner for Pyvider Provider"
 
 # Check if Python and plating are available
@@ -112,20 +127,44 @@ except Exception as e:
 
 print_success "Documentation generated with plating"
 
-# Step 2: Create test configurations
+# Step 2: Ensure provider is built and installed
+print_header "🔧 Building and Installing Provider"
+
+# Check if provider binary exists, if not build it
+if [ ! -f "$PROVIDER_BINARY" ]; then
+    print_warning "Provider binary not found at $PROVIDER_BINARY"
+    echo "Building provider..."
+    cd "$PROJECT_ROOT"
+    make build || {
+        print_error "Failed to build provider"
+        exit 1
+    }
+fi
+
+# Install the provider locally for Terraform
+echo "Installing provider locally..."
+cd "$PROJECT_ROOT"
+make install || {
+    print_error "Failed to install provider"
+    exit 1
+}
+
+print_success "Provider built and installed"
+
+# Step 3: Create test configurations
 print_header "🔧 Creating Test Configurations"
 
 # Create a comprehensive test configuration
 COMPREHENSIVE_TEST_DIR="${TEST_OUTPUT_DIR}/comprehensive"
 mkdir -p "$COMPREHENSIVE_TEST_DIR"
 
-cat > "$COMPREHENSIVE_TEST_DIR/main.tf" << 'EOF'
+cat > "$COMPREHENSIVE_TEST_DIR/main.tf" << EOF
 terraform {
   required_version = ">= 1.0"
   required_providers {
     pyvider = {
       source  = "local/providers/pyvider"
-      version = "0.0.5"
+      version = "$VERSION"
     }
   }
 }
@@ -212,7 +251,7 @@ EOF
 
 print_success "Comprehensive test configuration created"
 
-# Step 3: Run the comprehensive test with Terraform
+# Step 4: Run the comprehensive test with Terraform
 print_header "🚀 Running Comprehensive Test with Terraform"
 
 cd "$COMPREHENSIVE_TEST_DIR"
@@ -248,7 +287,7 @@ echo "$OUTPUTS" > "$TEST_OUTPUT_DIR/comprehensive_outputs.json"
 echo "Cleaning up..."
 terraform destroy -auto-approve &>/dev/null || print_warning "Cleanup may have partially failed"
 
-# Step 4: Generate test report
+# Step 5: Generate test report
 print_header "📊 Test Report"
 
 # Read results from plating documentation generation
@@ -264,7 +303,7 @@ fi
 
 echo "  Comprehensive test: ✅ Passed"
 
-# Generate markdown report
+# Step 6: Generate markdown report
 print_header "📝 Generating Markdown Report"
 
 cat > "$TEST_OUTPUT_DIR/report.md" << EOF

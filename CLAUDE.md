@@ -46,8 +46,21 @@ source env.sh
 
 ### Building the Provider
 ```bash
-# Build the provider package (.psp file)
-flavor pack
+# Build the provider package with architecture-specific naming
+make build
+
+# This creates both:
+# - dist/terraform-provider-pyvider.psp (base PSP file)
+# - dist/{platform}/terraform-provider-pyvider_v{version} (versioned binary)
+
+# Platform detection:
+# - darwin_arm64 (Apple Silicon Mac)
+# - darwin_amd64 (Intel Mac)
+# - linux_arm64 (ARM Linux)
+# - linux_amd64 (x86_64 Linux)
+
+# Build for all platforms (CI/CD reference):
+make build-all
 
 # The build process:
 # - Creates a wheel from the current code
@@ -55,15 +68,19 @@ flavor pack
 # - Bundles Python runtime (3.11)
 # - Signs the package with keys from keys/provider-private.key
 # - Outputs to dist/terraform-provider-pyvider.psp (~84MB)
+# - Copies to architecture-specific directory with versioned name
 ```
 
 ### Building Documentation
 ```bash
-# Build documentation for pyvider-components
+# Build documentation using plating (successor to garnish)
+make docs
+
+# Or run the build script directly:
 ./scripts/build-docs.sh
 
 # This script:
-# - Uses garnish to generate docs from pyvider-components code
+# - Uses PlatingAPI to generate docs from pyvider-components code
 # - Extracts examples from documentation to create .tf files
 # - Generates conformance test configurations with tofusoup
 # - Outputs documentation to docs/ directory
@@ -71,18 +88,44 @@ flavor pack
 # - Generates conformance tests in tests/conformance/
 
 # Install documentation tools if needed
-# Note: garnish integration is still being worked on - may need updates
-cd ../garnish && uv pip install -e .
+cd ../plating && uv pip install -e .
 cd ../tofusoup && uv pip install -e .
 ```
 
+### Migration from Garnish to Plating
+
+**IMPORTANT**: This project has migrated from `garnish` to `plating` for documentation generation.
+
+- **Garnish**: Deprecated documentation system (no longer used)
+- **Plating**: New documentation generation system using PlatingAPI
+- All scripts, Makefile targets, and CI/CD workflows now use plating
+- PlatingAPI provides programmatic access to documentation generation
+
 ### Testing the Provider
 ```bash
-# Test the provider executable
-./dist/terraform-provider-pyvider.psp provide --help
+# Test the provider executable (tests both PSP and versioned binary)
+make test
 
-# Run local build test script (includes platform detection)
-./test-build-local.sh
+# Test with Terraform locally
+make test-local
+
+# Run comprehensive plating tests
+make test-plating
+
+# Test example configurations
+make test-examples
+
+# The make test command runs:
+# - Cold/warm start tests on the PSP file
+# - Cold/warm start tests on the versioned binary
+# - Performance timing for both variants
+
+# The test-plating script:
+# - Generates documentation using PlatingAPI
+# - Builds and installs the provider automatically
+# - Creates comprehensive Terraform test configurations
+# - Runs full terraform init/plan/apply cycle
+# - Generates detailed test reports
 ```
 
 ### Key Generation
@@ -96,6 +139,68 @@ openssl rsa -pubout -in keys/provider-private.key -out keys/provider-public.key
 ```
 
 **Note**: The provider signing keys in `keys/` are temporary and throwaway. They're regenerated for each build in CI/CD.
+
+### Cleanup Procedures
+
+The Makefile provides comprehensive cleanup targets:
+
+```bash
+# Clean build artifacts and cache
+make clean
+
+# Clean documentation
+make clean-docs
+
+# Clean plating test outputs
+make clean-plating
+
+# Clean example test outputs
+make clean-examples
+
+# Clean all Terraform state files
+make clean-tfstate
+
+# Clean Terraform plugin cache
+make clean-tfcache
+
+# Clean flavor work environments
+make clean-workenv
+
+# Nuclear option - clean everything including venv
+make clean-all
+```
+
+### Provider Binary Naming Conventions
+
+Following HashiCorp's official Terraform Provider naming standards:
+
+**Archive naming**: `terraform-provider-{NAME}_{VERSION}_{OS}_{ARCH}.zip`
+- Example: `terraform-provider-pyvider_0.1.0_darwin_arm64.zip`
+
+**Binary naming inside archive**: `terraform-provider-{NAME}_v{VERSION}`
+- Example: `terraform-provider-pyvider_v0.1.0`
+- Note: Binary has 'v' prefix, archive does not
+
+**Local development structure**:
+```
+dist/
+├── terraform-provider-pyvider.psp          # Base PSP file
+├── darwin_arm64/
+│   └── terraform-provider-pyvider_v0.0.5   # Versioned binary
+├── darwin_amd64/
+│   └── terraform-provider-pyvider_v0.0.5
+├── linux_arm64/
+│   └── terraform-provider-pyvider_v0.0.5
+└── linux_amd64/
+    └── terraform-provider-pyvider_v0.0.5
+```
+
+**Terraform plugin directory**:
+```
+~/.terraform.d/plugins/local/providers/pyvider/{VERSION}/{PLATFORM}/terraform-provider-pyvider
+```
+
+This architecture-specific structure prevents binary collisions when multiple architectures share a directory.
 
 ## Architecture and Structure
 
@@ -139,11 +244,23 @@ When executed, the provider:
 
 ### Development Workflow
 
-1. **Always start with**: `source env.sh` to set up the development environment
+1. **Always start with**: `make setup` or `source env.sh` to set up the development environment
 2. **Make code changes** in sibling pyvider packages if needed
-3. **Build**: Run `flavor pack` to create the provider package
-4. **Test**: Execute the built package or use with Terraform
-5. **Clean cache**: If needed, remove `~/Library/Caches/flavor/workenv/terraform-provider-pyvider/`
+3. **Build**: Run `make build` to create both PSP and versioned binary
+4. **Install**: Run `make install` to install provider locally for Terraform
+5. **Test**: Run `make test` to test both PSP and versioned binary performance
+6. **Validate**: Run `make test-local` to test with actual Terraform configurations
+7. **Documentation**: Run `make docs` to regenerate documentation with plating
+8. **Clean**: Use appropriate `make clean-*` targets as needed
+
+### Important Development Notes
+
+- The project now uses **plating** instead of garnish for documentation generation
+- Provider binaries are created in architecture-specific directories to prevent collisions
+- Both PSP and versioned binaries are tested for performance comparisons
+- Local installation follows Terraform's plugin directory structure
+- Cleanup targets are comprehensive and prevent workspace pollution
+- Platform detection is automatic based on `uname -s` and `uname -m`
 
 ## GitHub Actions Release Process
 
@@ -199,3 +316,50 @@ Each release includes:
 - The built .psp file is completely self-contained and portable
 - GitHub Actions workflows handle multi-platform builds and releases
 - GPG signatures use binary format (not ASCII armored) for Terraform Registry compatibility
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+**Import errors during build**:
+```bash
+# Fix with local workspace package installation
+uv pip install -e '../provide-foundation[all]'
+uv pip install -e '../pyvider-components'
+uv pip install -e '../plating'
+```
+
+**Provider not found by Terraform**:
+```bash
+# Ensure provider is built and installed
+make build
+make install
+# Check installation location
+ls -la ~/.terraform.d/plugins/local/providers/pyvider/
+```
+
+**Stale cache issues**:
+```bash
+# Clean flavor work environments
+make clean-workenv
+# Or manually remove cache
+rm -rf ~/Library/Caches/flavor/workenv/terraform-provider-pyvider*
+```
+
+**Performance testing**:
+```bash
+# Compare cold vs warm start times
+make test
+# First run extracts and sets up environment (~3.3s)
+# Second run uses cached environment (~0.14s)
+```
+
+### Migration from Garnish
+
+If you encounter references to `garnish`:
+1. Replace all `garnish` commands with `plating` equivalents
+2. Use `PlatingAPI` instead of garnish CLI commands
+3. Update import statements to use plating modules
+4. Check CI/CD workflows for garnish references
+
+The migration ensures consistent documentation generation and removes dependency on deprecated tools.
