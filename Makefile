@@ -18,7 +18,26 @@ help: ## Show this help message
 PROVIDER_NAME := terraform-provider-pyvider
 VERSION ?= $(shell grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2)
 PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
+
+# Platform detection
+UNAME_S := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+UNAME_M := $(shell uname -m)
+# Convert uname -m output to Go arch naming
+ifeq ($(UNAME_M),x86_64)
+    ARCH := amd64
+else ifeq ($(UNAME_M),arm64)
+    ARCH := arm64
+else ifeq ($(UNAME_M),aarch64)
+    ARCH := arm64
+else
+    ARCH := $(UNAME_M)
+endif
+CURRENT_PLATFORM := $(UNAME_S)_$(ARCH)
+
+# File paths
 PSP_FILE := dist/$(PROVIDER_NAME).psp
+ARCH_DIR := dist/$(CURRENT_PLATFORM)
+VERSIONED_BINARY := $(ARCH_DIR)/$(PROVIDER_NAME)_v$(VERSION)
 
 # Colors for output
 BLUE := \033[0;34m
@@ -91,11 +110,30 @@ deps: venv ## Install Python dependencies
 
 .PHONY: build
 build: venv deps install-flavor keys ## Build the provider PSP package
-	@echo "$(BLUE)🏗️ Building provider version $(VERSION)...$(NC)"
+	@echo "$(BLUE)🏗️ Building provider version $(VERSION) for $(CURRENT_PLATFORM)...$(NC)"
 	@. .venv/bin/activate && \
 		flavor pack && \
 		echo "$(GREEN)✅ Provider built: $(PSP_FILE)$(NC)" && \
-		ls -lh $(PSP_FILE)
+		mkdir -p $(ARCH_DIR) && \
+		cp $(PSP_FILE) $(VERSIONED_BINARY) && \
+		chmod +x $(VERSIONED_BINARY) && \
+		echo "$(GREEN)✅ Versioned binary created: $(VERSIONED_BINARY)$(NC)" && \
+		ls -lh $(PSP_FILE) $(VERSIONED_BINARY)
+
+.PHONY: build-all
+build-all: venv deps install-flavor keys ## Build provider for all platforms (CI/CD reference)
+	@echo "$(BLUE)🏗️ Building provider version $(VERSION) for all platforms...$(NC)"
+	@echo "$(YELLOW)⚠️  Note: This target shows structure for CI/CD. Local builds only support current platform.$(NC)"
+	@. .venv/bin/activate && \
+		flavor pack && \
+		echo "$(GREEN)✅ Base PSP built: $(PSP_FILE)$(NC)"
+	@for platform in $(PLATFORMS); do \
+		echo "$(BLUE)Creating structure for $$platform...$(NC)"; \
+		mkdir -p dist/$$platform; \
+		cp $(PSP_FILE) dist/$$platform/$(PROVIDER_NAME)_v$(VERSION); \
+		chmod +x dist/$$platform/$(PROVIDER_NAME)_v$(VERSION); \
+		echo "$(GREEN)✅ Created: dist/$$platform/$(PROVIDER_NAME)_v$(VERSION)$(NC)"; \
+	done
 
 .PHONY: keys
 keys: ## Generate signing keys if missing
@@ -110,7 +148,7 @@ keys: ## Generate signing keys if missing
 .PHONY: clean
 clean: ## Clean build artifacts and cache
 	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
-	@rm -rf dist/*.psp
+	@rm -rf dist/
 	@rm -rf build/
 	@rm -rf *.egg-info
 	@rm -rf __pycache__
@@ -212,10 +250,16 @@ docs-serve: docs ## Build and serve documentation locally
 .PHONY: test
 test: venv build ## Test the provider binary
 	@echo "$(BLUE)🧪 Testing provider...$(NC)"
+	@echo "Testing PSP file:"
 	@echo "First run (cold start):"
 	@time ./$(PSP_FILE) launch-context || true
 	@echo "\nSecond run (warm start):"
 	@time ./$(PSP_FILE) launch-context || true
+	@echo "\nTesting versioned binary:"
+	@echo "First run (cold start):"
+	@time ./$(VERSIONED_BINARY) launch-context || true
+	@echo "\nSecond run (warm start):"
+	@time ./$(VERSIONED_BINARY) launch-context || true
 
 .PHONY: test-local
 test-local: build ## Test provider with local Terraform
@@ -336,11 +380,11 @@ shell: setup ## Enter development shell
 
 .PHONY: install
 install: build ## Install provider locally for testing
-	@echo "$(BLUE)📦 Installing provider locally...$(NC)"
-	@mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/darwin_arm64/
-	@cp $(PSP_FILE) ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/darwin_arm64/terraform-provider-pyvider
-	@chmod +x ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/darwin_arm64/terraform-provider-pyvider
-	@echo "$(GREEN)✅ Provider installed to ~/.terraform.d/plugins$(NC)"
+	@echo "$(BLUE)📦 Installing provider locally for $(CURRENT_PLATFORM)...$(NC)"
+	@mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/
+	@cp $(VERSIONED_BINARY) ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
+	@chmod +x ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
+	@echo "$(GREEN)✅ Provider installed to ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/$(NC)"
 
 .PHONY: watch
 watch: ## Watch for changes and rebuild automatically
@@ -358,16 +402,30 @@ watch: ## Watch for changes and rebuild automatically
 info: ## Show project information
 	@echo "$(BLUE)📊 Terraform Provider Pyvider$(NC)"
 	@echo "================================"
-	@echo "Version:    $(VERSION)"
-	@echo "Python:     $$(python --version 2>&1)"
-	@echo "UV:         $$(uv --version 2>&1)"
-	@echo "Flavor:     $$(flavor --version 2>&1 | head -1 || echo 'not installed')"
+	@echo "Version:         $(VERSION)"
+	@echo "Platform:        $(CURRENT_PLATFORM)"
+	@echo "Python:          $$(python --version 2>&1)"
+	@echo "UV:              $$(uv --version 2>&1)"
+	@echo "Flavor:          $$(flavor --version 2>&1 | head -1 || echo 'not installed')"
 	@echo ""
 	@echo "Project Structure:"
-	@echo "  Provider:  $(PROVIDER_NAME)"
-	@echo "  PSP File:  $(PSP_FILE)"
-	@echo "  Docs:      docs/"
-	@echo "  Examples:  examples/"
+	@echo "  Provider:        $(PROVIDER_NAME)"
+	@echo "  PSP File:        $(PSP_FILE)"
+	@echo "  Versioned Binary: $(VERSIONED_BINARY)"
+	@echo "  Docs:            docs/"
+	@echo "  Examples:        examples/"
+	@echo ""
+	@echo "Build Artifacts:"
+	@if [ -f "$(PSP_FILE)" ]; then \
+		echo "  PSP:             ✅ $(PSP_FILE)"; \
+	else \
+		echo "  PSP:             ❌ Not built"; \
+	fi
+	@if [ -f "$(VERSIONED_BINARY)" ]; then \
+		echo "  Versioned:       ✅ $(VERSIONED_BINARY)"; \
+	else \
+		echo "  Versioned:       ❌ Not built"; \
+	fi
 	@echo ""
 	@echo "Recent Commits:"
 	@git log --oneline -5
