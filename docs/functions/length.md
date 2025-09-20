@@ -1,20 +1,22 @@
 ---
 page_title: "Function: length"
 description: |-
-  Provides the length function.
+  Terraform function for length
 ---
 
 # length (Function)
 
-`length(...)`
+Terraform function for length
 
-Provides the length function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+length("input") # Returns: processed output
 
-```
+## Signature
+
+``length(input)``
 
 ## Arguments
+
+- `input`: The input value to process
 

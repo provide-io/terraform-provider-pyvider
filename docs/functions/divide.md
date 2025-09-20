@@ -1,20 +1,23 @@
 ---
 page_title: "Function: divide"
 description: |-
-  Provides the divide function.
+  Terraform function for divide
 ---
 
 # divide (Function)
 
-`divide(...)`
+Terraform function for divide
 
-Provides the divide function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+divide(3, 2) # Returns: 1.5
 
-```
+## Signature
+
+``divide(a, b)``
 
 ## Arguments
+
+- `a`: The first number
+- `b`: The second number
 

@@ -1,20 +1,22 @@
 ---
 page_title: "Function: lookup"
 description: |-
-  Provides the lookup function.
+  Terraform function for lookup
 ---
 
 # lookup (Function)
 
-`lookup(...)`
+Terraform function for lookup
 
-Provides the lookup function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+lookup("input") # Returns: processed output
 
-```
+## Signature
+
+``lookup(input)``
 
 ## Arguments
+
+- `input`: The input value to process
 

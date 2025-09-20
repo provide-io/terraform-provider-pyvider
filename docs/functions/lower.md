@@ -1,20 +1,22 @@
 ---
 page_title: "Function: lower"
 description: |-
-  Provides the lower function.
+  Terraform function for lower
 ---
 
 # lower (Function)
 
-`lower(...)`
+Terraform function for lower
 
-Provides the lower function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+lower("Hello World") # Returns: "hello world"
 
-```
+## Signature
+
+``lower(str)``
 
 ## Arguments
+
+- `str`: The input string to transform
 

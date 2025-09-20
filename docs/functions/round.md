@@ -1,20 +1,23 @@
 ---
 page_title: "Function: round"
 description: |-
-  Provides the round function.
+  Terraform function for round
 ---
 
 # round (Function)
 
-`round(...)`
+Terraform function for round
 
-Provides the round function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+round(3.14159, 2) # Returns: 3.14
 
-```
+## Signature
+
+``round(number, precision)``
 
 ## Arguments
+
+- `number`: The number to round
+- `precision`: Number of decimal places (optional, default: 0)
 

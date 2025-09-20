@@ -1,20 +1,22 @@
 ---
 page_title: "Function: contains"
 description: |-
-  Provides the contains function.
+  Terraform function for contains
 ---
 
 # contains (Function)
 
-`contains(...)`
+Terraform function for contains
 
-Provides the contains function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+contains("input") # Returns: processed output
 
-```
+## Signature
+
+``contains(input)``
 
 ## Arguments
+
+- `input`: The input value to process
 

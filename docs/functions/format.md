@@ -1,20 +1,22 @@
 ---
 page_title: "Function: format"
 description: |-
-  Provides the format function.
+  Terraform function for format
 ---
 
 # format (Function)
 
-`format(...)`
+Terraform function for format
 
-Provides the format function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+format("input") # Returns: processed output
 
-```
+## Signature
+
+``format(input)``
 
 ## Arguments
+
+- `input`: The input value to process
 

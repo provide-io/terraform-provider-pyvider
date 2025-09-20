@@ -1,20 +1,24 @@
 ---
 page_title: "Function: replace"
 description: |-
-  Provides the replace function.
+  Terraform function for replace
 ---
 
 # replace (Function)
 
-`replace(...)`
+Terraform function for replace
 
-Provides the replace function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+replace("hello test", "test", "world") # Returns: "hello world"
 
-```
+## Signature
+
+``replace(str, old, new)``
 
 ## Arguments
+
+- `str`: The input string
+- `old`: The substring to replace
+- `new`: The replacement string
 
