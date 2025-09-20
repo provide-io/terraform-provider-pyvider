@@ -18,7 +18,8 @@ if [ -z "${GPG_KEY_ID:-}" ]; then
 fi
 
 # Create GPG home directory
-export GNUPGHOME="$(mktemp -d)"
+GNUPGHOME="$(mktemp -d)"
+export GNUPGHOME
 chmod 700 "$GNUPGHOME"
 
 # Configure GPG for non-interactive use
@@ -51,23 +52,13 @@ sign_file() {
     echo "📝 Signing $file..."
     
     # Sign the file with passphrase if provided (binary signature, not ASCII armored)
-    if [ -n "${GPG_PASSPHRASE:-}" ]; then
-        gpg --batch --yes \
-            --passphrase "$GPG_PASSPHRASE" \
-            --pinentry-mode loopback \
+    if gpg --batch --yes \
+            ${GPG_PASSPHRASE:+--passphrase "$GPG_PASSPHRASE"} \
+            ${GPG_PASSPHRASE:+--pinentry-mode loopback} \
             --detach-sign \
             --local-user "$GPG_KEY_ID" \
             --output "${file}.sig" \
-            "$file"
-    else
-        gpg --batch --yes \
-            --detach-sign \
-            --local-user "$GPG_KEY_ID" \
-            --output "${file}.sig" \
-            "$file"
-    fi
-    
-    if [ $? -eq 0 ]; then
+            "$file"; then
         echo "✅ Signed: ${file}.sig"
         return 0
     else
