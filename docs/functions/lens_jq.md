@@ -1,30 +1,22 @@
 ---
 page_title: "Function: lens_jq"
 description: |-
-  Provides the lens_jq function.
+  Applies a jq query and returns a native Python object.
 ---
 
 # lens_jq (Function)
 
-`lens_jq(...)`
+Applies a jq query and returns a native Python object.
 
-Provides the lens_jq function.
+## Example Usage
 
-```terraform
-locals {
-  data = {
-    items = [
-      { "name" : "Laptop", "stock" : 15 },
-      { "name" : "Mouse", "stock" : 150 }
-    ]
-  }
-}
+lens_jq("input") # Returns: processed output
 
-output "item_names" {
-  value = provider::pyvider::lens_jq(local.data, "[.items[].name]")
-}
+## Signature
 
-```
+``lens_jq(input)``
 
 ## Arguments
+
+- `input`: The input value to process
 

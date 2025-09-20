@@ -32,45 +32,70 @@ NC := \033[0m # No Color
 # ==============================================================================
 
 .PHONY: all
-all: clean setup build docs test ## Run full development cycle
+all: clean venv setup deps docs build test ## Run full development cycle
 
 .PHONY: dev
-dev: setup build install ## Quick development setup and build
+dev: venv setup deps install-flavor build install ## Quick development setup and build
 
 # ==============================================================================
 # 🔧 Setup & Environment
 # ==============================================================================
 
+.PHONY: venv
+venv: ## Create virtual environment
+	@if [ ! -d .venv ]; then \
+		echo "$(BLUE)🔧 Creating virtual environment...$(NC)"; \
+		uv venv .venv; \
+		echo "$(GREEN)✅ Virtual environment created$(NC)"; \
+	else \
+		echo "$(GREEN)✅ Virtual environment already exists$(NC)"; \
+	fi
+
+.PHONY: activate
+activate: venv ## Show activation command
+	@echo "$(BLUE)To activate the environment, run:$(NC)"
+	@echo "source .venv/bin/activate"
+
 .PHONY: setup
-setup: ## Set up development environment
+setup: venv ## Set up development environment
 	@echo "$(BLUE)🔧 Setting up development environment...$(NC)"
-	@source env.sh && echo "$(GREEN)✅ Environment activated$(NC)"
+	@. .venv/bin/activate && \
+		uv add provide-foundation pyvider-components plating flavorpack && \
+		echo "$(GREEN)✅ Environment setup complete$(NC)"
+
+.PHONY: install-flavor
+install-flavor: venv ## Install flavorpack tool
+	@echo "$(BLUE)📦 Installing flavorpack...$(NC)"
+	@. .venv/bin/activate && \
+		uv tool install flavorpack && \
+		echo "$(GREEN)✅ Flavorpack installed$(NC)"
 
 .PHONY: install-tools
-install-tools: ## Install required development tools
+install-tools: install-flavor ## Install required development tools
 	@echo "$(BLUE)📦 Installing development tools...$(NC)"
 	@command -v uv >/dev/null 2>&1 || (echo "Installing uv..." && curl -LsSf https://astral.sh/uv/install.sh | sh)
-	@uv tool install flavorpack
 	@uv tool install garnish 2>/dev/null || echo "garnish install skipped"
 	@uv tool install tofusoup 2>/dev/null || echo "tofusoup install skipped"
 	@echo "$(GREEN)✅ Tools installed$(NC)"
 
 .PHONY: deps
-deps: ## Install Python dependencies
+deps: venv ## Install Python dependencies
 	@echo "$(BLUE)📦 Installing dependencies...$(NC)"
-	@uv pip install -e .
-	@echo "$(GREEN)✅ Dependencies installed$(NC)"
+	@. .venv/bin/activate && \
+		uv sync --all-groups --dev && \
+		echo "$(GREEN)✅ Dependencies installed$(NC)"
 
 # ==============================================================================
 # 🏗️ Build & Package
 # ==============================================================================
 
 .PHONY: build
-build: keys ## Build the provider PSP package
+build: venv deps install-flavor keys ## Build the provider PSP package
 	@echo "$(BLUE)🏗️ Building provider version $(VERSION)...$(NC)"
-	@flavor pack
-	@echo "$(GREEN)✅ Provider built: $(PSP_FILE)$(NC)"
-	@ls -lh $(PSP_FILE)
+	@. .venv/bin/activate && \
+		flavor pack && \
+		echo "$(GREEN)✅ Provider built: $(PSP_FILE)$(NC)" && \
+		ls -lh $(PSP_FILE)
 
 .PHONY: keys
 keys: ## Generate signing keys if missing
@@ -146,8 +171,9 @@ clean-workenv: ## Clean all flavor work environments for this provider
 	@echo "$(GREEN)✅ Flavor work environments cleaned$(NC)"
 
 .PHONY: clean-all
-clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep clean including workenv and all caches
+clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep clean including venv, workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
+	@rm -rf .venv/
 	@rm -rf workenv/
 	@rm -rf keys/
 	@rm -rf examples/
@@ -159,10 +185,20 @@ clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep c
 # ==============================================================================
 
 .PHONY: docs
-docs: clean-docs ## Build documentation with garnish (cleans first)
+docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
-	@./scripts/build-docs.sh
-	@echo "$(GREEN)✅ Documentation built in docs/$(NC)"
+	@. .venv/bin/activate && \
+		python3 -c "\
+import sys; sys.path.append('../pyvider-components/src'); \
+from plating.api import PlatingAPI; \
+from pathlib import Path; \
+api = PlatingAPI(); \
+Path('docs').mkdir(exist_ok=True); \
+Path('docs/functions').mkdir(exist_ok=True); \
+files = api.generate_function_documentation('docs/functions'); \
+written = api.write_generated_files(files); \
+print(f'Generated {len(written)} function documentation files')" && \
+		echo "$(GREEN)✅ Documentation built in docs/$(NC)"
 
 .PHONY: docs-serve
 docs-serve: docs ## Build and serve documentation locally
@@ -174,7 +210,7 @@ docs-serve: docs ## Build and serve documentation locally
 # ==============================================================================
 
 .PHONY: test
-test: build ## Test the provider binary
+test: venv build ## Test the provider binary
 	@echo "$(BLUE)🧪 Testing provider...$(NC)"
 	@echo "First run (cold start):"
 	@time ./$(PSP_FILE) launch-context || true

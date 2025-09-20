@@ -1,20 +1,22 @@
 ---
 page_title: "Function: sum"
 description: |-
-  Provides the sum function.
+  Terraform function for sum
 ---
 
 # sum (Function)
 
-`sum(...)`
+Terraform function for sum
 
-Provides the sum function.
+## Example Usage
 
-```terraform
-# This is a placeholder example.
-# Please update it with a meaningful use case.
+sum([1, 3, 5, 2, 4]) # Returns: 15
 
-```
+## Signature
+
+``sum(numbers)``
 
 ## Arguments
+
+- `numbers`: A list of numbers to process
 
