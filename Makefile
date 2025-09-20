@@ -16,7 +16,7 @@ help: ## Show this help message
 
 # Configuration
 PROVIDER_NAME := terraform-provider-pyvider
-VERSION ?= $(shell grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2)
+VERSION ?= $(shell grep '^version = ' pyproject.toml | cut -d'"' -f2)
 PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
 
 # Platform detection
