@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to build documentation for pyvider-components using garnish
+# Script to build documentation for pyvider-components using plating
 
 set -euo pipefail
 
@@ -30,7 +30,7 @@ print_warning() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 PYVIDER_COMPONENTS_DIR="${PROJECT_ROOT}/../pyvider-components"
-GARNISH_DIR="${PROJECT_ROOT}/../garnish"
+PLATING_DIR="${PROJECT_ROOT}/../plating"
 TOFUSOUP_DIR="${PROJECT_ROOT}/../tofusoup"
 DOCS_OUTPUT_DIR="${PROJECT_ROOT}/docs"
 
@@ -42,20 +42,22 @@ if [ ! -d "$PYVIDER_COMPONENTS_DIR" ]; then
     exit 1
 fi
 
-if [ ! -d "$GARNISH_DIR" ]; then
-    print_error "garnish directory not found at $GARNISH_DIR"
+if [ ! -d "$PLATING_DIR" ]; then
+    print_error "plating directory not found at $PLATING_DIR"
     exit 1
 fi
 
-# Install garnish if not available
-if ! command -v garnish &> /dev/null; then
-    print_warning "garnish not found in PATH, installing..."
-    
-    # Install garnish using uv pip
+# Install plating if not available
+# Check if plating is available in Python environment
+if ! python3 -c "import plating" &> /dev/null; then
+    print_warning "plating not found in Python environment, installing..."
+
+    # Install plating using uv pip
     if command -v uv &> /dev/null; then
-        cd "$GARNISH_DIR"
+        cd "$PLATING_DIR"
         uv pip install -e . --quiet
-        print_success "Installed garnish"
+        print_success "Installed plating"
+        cd "$PROJECT_ROOT"
     else
         print_error "uv not found. Please install uv first."
         exit 1
@@ -63,95 +65,151 @@ if ! command -v garnish &> /dev/null; then
 fi
 
 # Generate documentation
-print_header "🔧 Generating Documentation with Garnish"
+print_header "🔧 Generating Documentation with Plating"
 
-cd "$PYVIDER_COMPONENTS_DIR"
+cd "$PROJECT_ROOT"
 
-# Check for garnish command
-GARNISH_CMD=""
-if command -v garnish &> /dev/null; then
-    GARNISH_CMD="garnish"
-elif [ -f "$GARNISH_DIR/src/garnish/cli.py" ]; then
-    GARNISH_CMD="python $GARNISH_DIR/src/garnish/cli.py"
-else
-    print_error "Cannot find garnish executable or CLI script"
-    exit 1
-fi
-
-# Run garnish to generate docs
-print_header "🍽️ Running Garnish"
+# Generate documentation using PlatingAPI
+print_header "📚 Running Plating Documentation Generation"
 
 # Create output directory if it doesn't exist
 mkdir -p "$DOCS_OUTPUT_DIR"
 
-# Note: Using consistent directory naming for Terraform Registry compatibility
-# Terraform Registry expects: resources, data-sources (with hyphen), functions
+# Generate documentation using Python PlatingAPI
+echo "📝 Generating documentation with PlatingAPI..."
 
-# Check for correct source path (could be src/pyvider or src/pyvider_components)
-COMPONENTS_SRC=""
-if [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider/components" ]; then
-    COMPONENTS_SRC="$PYVIDER_COMPONENTS_DIR/src/pyvider/components"
-elif [ -d "$PYVIDER_COMPONENTS_DIR/src/pyvider_components" ]; then
-    COMPONENTS_SRC="$PYVIDER_COMPONENTS_DIR/src/pyvider_components"
-else
-    print_warning "Cannot find pyvider components source directory"
-fi
+python3 -c "
+import sys
+sys.path.append('$PYVIDER_COMPONENTS_DIR/src')
 
-if [ -n "$COMPONENTS_SRC" ]; then
-    # First, dress the components (adds .garnish directories with metadata)
-    echo "👗 Dressing components with garnish metadata..."
-    cd "$PYVIDER_COMPONENTS_DIR"
-    $GARNISH_CMD dress || print_warning "Garnish dress had issues"
-    
-    # Then plate the documentation (generates final docs)
-    echo "🍽️ Plating documentation..."
-    $GARNISH_CMD plate \
-        --output-dir "$DOCS_OUTPUT_DIR" || print_warning "Garnish plate had issues"
-    
-    cd "$PROJECT_ROOT"
-    
-    # Ensure proper directory structure for Terraform Registry
-    if [ -d "$DOCS_OUTPUT_DIR/data_sources" ] && [ ! -d "$DOCS_OUTPUT_DIR/data-sources" ]; then
-        mv "$DOCS_OUTPUT_DIR/data_sources" "$DOCS_OUTPUT_DIR/data-sources"
-    fi
-fi
+from pathlib import Path
+from plating.api import PlatingAPI
 
-# Generate example Terraform configurations from garnish examples
-print_header "🧪 Generating Example Terraform Configurations"
+try:
+    api = PlatingAPI()
+    output_dir = Path('$DOCS_OUTPUT_DIR')
+
+    # Create subdirectories for different component types
+    functions_dir = output_dir / 'functions'
+    resources_dir = output_dir / 'resources'
+    data_sources_dir = output_dir / 'data-sources'  # Use hyphen for Terraform Registry compatibility
+
+    functions_dir.mkdir(parents=True, exist_ok=True)
+    resources_dir.mkdir(parents=True, exist_ok=True)
+    data_sources_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate documentation for each component type
+    print('Generating function documentation...')
+    function_files = api.generate_function_documentation(functions_dir)
+    function_written = api.write_generated_files(function_files)
+
+    print('Generating resource documentation...')
+    resource_files = api.generate_resource_documentation(resources_dir)
+    resource_written = api.write_generated_files(resource_files)
+
+    # TODO: Add data source documentation when PlatingAPI supports it
+    # data_source_files = api.generate_data_source_documentation(data_sources_dir)
+    # data_source_written = api.write_generated_files(data_source_files)
+
+    print(f'Successfully generated:')
+    print(f'  - {len(function_written)} function documentation files')
+    print(f'  - {len(resource_written)} resource documentation files')
+    print(f'  - Total: {len(function_written) + len(resource_written)} files')
+
+except Exception as e:
+    print(f'Error generating documentation: {e}')
+    sys.exit(1)
+" || {
+    print_error "Failed to generate documentation with plating"
+    exit 1
+}
+
+# Example generation with plating (simplified approach)
+print_header "🧪 Creating Example Terraform Configurations"
 
 EXAMPLES_OUTPUT_DIR="${PROJECT_ROOT}/examples"
 mkdir -p "$EXAMPLES_OUTPUT_DIR"
 
-# Use garnish to generate example TF files
-if command -v garnish &> /dev/null; then
-    echo "📝 Generating Terraform examples from documentation..."
-    
-    # Extract and build examples from resource docs
-    if [ -d "$DOCS_OUTPUT_DIR/resources" ]; then
-        for doc in "$DOCS_OUTPUT_DIR/resources"/*.md; do
-            if [ -f "$doc" ]; then
-                resource_name=$(basename "$doc" .md)
-                garnish extract-examples \
-                    --input "$doc" \
-                    --output "$EXAMPLES_OUTPUT_DIR/resources/${resource_name}.tf" \
-                    --format terraform 2>/dev/null || true
-            fi
-        done
-    fi
-    
-    # Extract and build examples from data source docs  
-    if [ -d "$DOCS_OUTPUT_DIR/data-sources" ]; then
-        for doc in "$DOCS_OUTPUT_DIR/data-sources"/*.md; do
-            if [ -f "$doc" ]; then
-                data_source_name=$(basename "$doc" .md)
-                garnish extract-examples \
-                    --input "$doc" \
-                    --output "$EXAMPLES_OUTPUT_DIR/data-sources/${data_source_name}.tf" \
-                    --format terraform 2>/dev/null || true
-            fi
-        done
-    fi
-fi
+# Create basic examples directory structure
+mkdir -p "$EXAMPLES_OUTPUT_DIR/resources"
+mkdir -p "$EXAMPLES_OUTPUT_DIR/data-sources"
+mkdir -p "$EXAMPLES_OUTPUT_DIR/functions"
+
+echo "📝 Creating basic example configurations..."
+
+# Create a comprehensive example that demonstrates multiple components
+cat > "$EXAMPLES_OUTPUT_DIR/comprehensive.tf" << 'EOF'
+terraform {
+  required_providers {
+    pyvider = {
+      source  = "local/providers/pyvider"
+      version = "~> 0.0.5"
+    }
+  }
+}
+
+provider "pyvider" {}
+
+# Example resources
+resource "pyvider_file_content" "example" {
+  filename = "example.json"
+  content = jsonencode({
+    message = "Hello from Pyvider"
+    timestamp = timestamp()
+  })
+}
+
+resource "pyvider_local_directory" "example_dir" {
+  path        = "./example-output"
+  create_mode = "0755"
+}
+
+# Example data sources
+data "pyvider_env_variables" "current" {
+  keys = ["USER", "HOME", "PATH"]
+}
+
+data "pyvider_file_info" "example_info" {
+  path = pyvider_file_content.example.filename
+  depends_on = [pyvider_file_content.example]
+}
+
+# Example function usage
+locals {
+  math_examples = {
+    sum = provider::pyvider::add(10, 20)
+    division = provider::pyvider::divide(100, 5)
+  }
+
+  string_examples = {
+    upper = provider::pyvider::upper("terraform")
+    formatted = provider::pyvider::format("Hello %s!", ["World"])
+  }
+
+  collection_examples = {
+    minimum = provider::pyvider::min([5, 2, 8, 1])
+    maximum = provider::pyvider::max([5, 2, 8, 1])
+  }
+}
+
+# Outputs
+output "examples" {
+  value = {
+    file_path = pyvider_file_content.example.filename
+    directory_path = pyvider_local_directory.example_dir.path
+    current_user = data.pyvider_env_variables.current.values["USER"]
+    file_size = data.pyvider_file_info.example_info.size
+    math_results = local.math_examples
+    string_results = local.string_examples
+    collection_results = local.collection_examples
+  }
+}
+EOF
+
+print_success "Comprehensive example created at $EXAMPLES_OUTPUT_DIR/comprehensive.tf"
+
+# TODO: Extract examples from plating-generated documentation when that feature is available
+# For now, we rely on the comprehensive example above
 
 # Use tofusoup for conformance testing if available
 if command -v tofusoup &> /dev/null; then
@@ -210,7 +268,7 @@ See the navigation menu for available resources, data sources, and functions.
 EOF
 fi
 
-print_success "Documentation generated in $DOCS_OUTPUT_DIR"
+print_success "Documentation generated with plating in $DOCS_OUTPUT_DIR"
 
 # Show summary
 echo -e "\n📊 Documentation Summary:"

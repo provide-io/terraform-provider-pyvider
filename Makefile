@@ -74,7 +74,7 @@ install-flavor: venv ## Install flavorpack tool
 install-tools: install-flavor ## Install required development tools
 	@echo "$(BLUE)📦 Installing development tools...$(NC)"
 	@command -v uv >/dev/null 2>&1 || (echo "Installing uv..." && curl -LsSf https://astral.sh/uv/install.sh | sh)
-	@uv tool install garnish 2>/dev/null || echo "garnish install skipped"
+	@uv tool install plating 2>/dev/null || echo "plating install skipped"
 	@uv tool install tofusoup 2>/dev/null || echo "tofusoup install skipped"
 	@echo "$(GREEN)✅ Tools installed$(NC)"
 
@@ -124,12 +124,12 @@ clean-docs: ## Clean entire documentation directory
 	@rm -rf docs/*
 	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
 
-.PHONY: clean-garnish
-clean-garnish: ## Clean garnish test outputs
-	@echo "$(BLUE)🧹 Cleaning garnish test outputs...$(NC)"
-	@rm -rf tests/garnish-tests
-	@find ../pyvider-components -name "*.garnish" -type d -exec rm -rf {}/test-output \; 2>/dev/null || true
-	@echo "$(GREEN)✅ Garnish test outputs cleaned$(NC)"
+.PHONY: clean-plating
+clean-plating: ## Clean plating test outputs
+	@echo "$(BLUE)🧹 Cleaning plating test outputs...$(NC)"
+	@rm -rf tests/plating-tests
+	@find ../pyvider-components -name "*.plating" -type d -exec rm -rf {}/test-output \; 2>/dev/null || true
+	@echo "$(GREEN)✅ Plating test outputs cleaned$(NC)"
 
 .PHONY: clean-examples
 clean-examples: ## Clean example test outputs
@@ -171,7 +171,7 @@ clean-workenv: ## Clean all flavor work environments for this provider
 	@echo "$(GREEN)✅ Flavor work environments cleaned$(NC)"
 
 .PHONY: clean-all
-clean-all: clean clean-docs clean-garnish clean-examples clean-workenv ## Deep clean including venv, workenv and all caches
+clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep clean including venv, workenv and all caches
 	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
 	@rm -rf .venv/
 	@rm -rf workenv/
@@ -225,10 +225,10 @@ test-local: build ## Test provider with local Terraform
 	@cd examples/test && terraform init && terraform validate
 	@echo "$(GREEN)✅ Provider works with Terraform$(NC)"
 
-.PHONY: test-garnish
-test-garnish: ## Run garnish tests for all components
-	@echo "$(BLUE)🧪 Running garnish tests...$(NC)"
-	@./scripts/test-garnish.sh
+.PHONY: test-plating
+test-plating: ## Run plating tests for all components
+	@echo "$(BLUE)🧪 Running plating tests...$(NC)"
+	@./scripts/test-plating.sh
 
 .PHONY: test-examples
 test-examples: build ## Test example configurations
