@@ -27,39 +27,21 @@ jobs:
         with:
           path: terraform-provider-pyvider
       
-      - name: 📥 Checkout pyvider-components
-        uses: actions/checkout@v4
-        with:
-          repository: provide-io/pyvider-components
-          path: pyvider-components
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: 📥 Checkout plating
-        uses: actions/checkout@v4
-        with:
-          repository: provide-io/plating
-          path: plating
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: 📦 Install UV
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-      
-      - name: 📚 Install plating
-        run: |
-          cd plating
-          uv pip install -e .
-      
+
       - name: 📝 Generate Documentation
         run: |
           cd terraform-provider-pyvider
-          ./scripts/build-docs.sh
+          # Use manual docs generation until plating dependencies are available
+          ./scripts/build-docs-manual.sh
       
       - name: 📤 Upload Documentation
         uses: actions/upload-artifact@v4
@@ -97,19 +79,20 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      
+
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: 📦 Install UV
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-      
-      - name: 🔧 Install flavorpack
+
+      - name: 🔧 Install dependencies
         run: |
+          # Install flavorpack from PyPI since workspace dependencies aren't available yet
           uv tool install flavorpack
       
       - name: 🔑 Generate temporary signing keys

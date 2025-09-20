@@ -16,7 +16,7 @@ echo -e "${COLOR_BLUE}📚 Building documentation structure manually...${COLOR_N
 DOCS_DIR="docs"
 
 # Clean and create directories
-rm -rf $DOCS_DIR/*
+rm -rf "${DOCS_DIR:?}/"*
 mkdir -p $DOCS_DIR/{resources,data-sources,functions}
 
 # Create index
@@ -170,6 +170,6 @@ The uppercase version of the input string.
 EOF
 
 echo -e "${COLOR_GREEN}✅ Basic documentation structure created${COLOR_NC}"
-echo "  Resources: $(ls -1 $DOCS_DIR/resources/*.md 2>/dev/null | wc -l)"
-echo "  Data Sources: $(ls -1 $DOCS_DIR/data-sources/*.md 2>/dev/null | wc -l)"
-echo "  Functions: $(ls -1 $DOCS_DIR/functions/*.md 2>/dev/null | wc -l)"
+echo "  Resources: $(find "$DOCS_DIR/resources" -name "*.md" 2>/dev/null | wc -l)"
+echo "  Data Sources: $(find "$DOCS_DIR/data-sources" -name "*.md" 2>/dev/null | wc -l)"
+echo "  Functions: $(find "$DOCS_DIR/functions" -name "*.md" 2>/dev/null | wc -l)"
