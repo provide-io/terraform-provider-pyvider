@@ -1,6 +1,6 @@
 #!/bin/bash
 # Manual documentation builder for terraform-provider-pyvider
-# Creates basic documentation structure when garnish is not working
+# Creates basic documentation structure when plating is not available
 
 set -euo pipefail
 
