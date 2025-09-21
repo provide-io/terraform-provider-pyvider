@@ -14,7 +14,7 @@ Terraform function for divide
 
 ## Signature
 
-``
+``round(number, precision)``
 
 ## Arguments
 

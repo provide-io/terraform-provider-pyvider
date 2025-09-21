@@ -14,7 +14,7 @@ Terraform function for lower
 
 ## Signature
 
-``
+``upper(str)``
 
 ## Arguments
 

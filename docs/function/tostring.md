@@ -14,7 +14,7 @@ Terraform function for tostring
 
 ## Signature
 
-``
+``tostring(input)``
 
 ## Arguments
 

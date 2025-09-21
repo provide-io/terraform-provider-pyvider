@@ -14,7 +14,7 @@ Terraform function for contains
 
 ## Signature
 
-``
+``length(input)``
 
 ## Arguments
 

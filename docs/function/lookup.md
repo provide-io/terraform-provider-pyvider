@@ -14,7 +14,7 @@ Terraform function for contains
 
 ## Signature
 
-``
+``lookup(input)``
 
 ## Arguments
 

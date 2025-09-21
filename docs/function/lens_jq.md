@@ -14,7 +14,7 @@ Applies a jq query and returns a native Python object.
 
 ## Signature
 
-``
+``lens_jq(input)``
 
 ## Arguments
 
