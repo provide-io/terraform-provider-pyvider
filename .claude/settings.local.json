@@ -77,7 +77,8 @@
       "Bash(./scripts/build-docs-manual.sh:*)",
       "Bash(./dist/darwin_arm64/terraform-provider-pyvider_v0.0.5 --version)",
       "Bash(time:*)",
-      "Bash(plating:*)"
+      "Bash(plating:*)",
+      "Read(//Users/tim/code/tf/terraform-plugin-docs/**)"
     ],
     "deny": [],
     "ask": [],
