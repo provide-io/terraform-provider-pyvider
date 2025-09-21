@@ -58,7 +58,3 @@ public_key_path = "keys/provider-public.key"
 pass = ["TF_*", "PLUGIN_*"]
 
 [tool.uv.sources]
-provide-foundation = { workspace = true }
-pyvider-components = { workspace = true }
-plating = { workspace = true }
-flavorpack = { workspace = true }
