@@ -10,18 +10,14 @@ Terraform function for divide
 
 ## Example Usage
 
-{{ example("example") }}
+divide(3, 2) # Returns: 1.5
 
 ## Signature
 
-`{{ signature_markdown }}`
+``divide(a, b)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `a`: The first number
+- `b`: The second number
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

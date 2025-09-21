@@ -10,18 +10,13 @@ Terraform function for lower
 
 ## Example Usage
 
-{{ example("example") }}
+lower("Hello World") # Returns: "hello world"
 
 ## Signature
 
-`{{ signature_markdown }}`
+``lower(str)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `str`: The input string to transform
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

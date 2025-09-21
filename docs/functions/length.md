@@ -10,18 +10,13 @@ Terraform function for length
 
 ## Example Usage
 
-{{ example("example") }}
+length("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``length(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

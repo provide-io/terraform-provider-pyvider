@@ -10,18 +10,13 @@ Terraform function for max
 
 ## Example Usage
 
-{{ example("example") }}
+max([1, 3, 5, 2, 4]) # Returns: 5
 
 ## Signature
 
-`{{ signature_markdown }}`
+``max(numbers)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `numbers`: A list of numbers to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

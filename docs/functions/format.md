@@ -10,18 +10,13 @@ Terraform function for format
 
 ## Example Usage
 
-{{ example("example") }}
+format("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``format(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

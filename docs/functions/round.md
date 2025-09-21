@@ -10,18 +10,14 @@ Terraform function for round
 
 ## Example Usage
 
-{{ example("example") }}
+round(3.14159, 2) # Returns: 3.14
 
 ## Signature
 
-`{{ signature_markdown }}`
+``round(number, precision)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `number`: The number to round
+- `precision`: Number of decimal places (optional, default: 0)
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

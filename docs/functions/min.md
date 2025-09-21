@@ -10,18 +10,13 @@ Terraform function for min
 
 ## Example Usage
 
-{{ example("example") }}
+min([1, 3, 5, 2, 4]) # Returns: 1
 
 ## Signature
 
-`{{ signature_markdown }}`
+``min(numbers)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `numbers`: A list of numbers to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

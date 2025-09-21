@@ -10,18 +10,14 @@ Terraform function for multiply
 
 ## Example Usage
 
-{{ example("example") }}
+multiply(3, 2) # Returns: 6
 
 ## Signature
 
-`{{ signature_markdown }}`
+``multiply(a, b)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `a`: The first number
+- `b`: The second number
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

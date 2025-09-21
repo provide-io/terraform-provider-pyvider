@@ -10,18 +10,14 @@ Terraform function for add
 
 ## Example Usage
 
-{{ example("example") }}
+add(3, 2) # Returns: 5
 
 ## Signature
 
-`{{ signature_markdown }}`
+``add(a, b)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `a`: The first number
+- `b`: The second number
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

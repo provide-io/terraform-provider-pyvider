@@ -10,18 +10,14 @@ Terraform function for join
 
 ## Example Usage
 
-{{ example("example") }}
+join(",", ["hello", "world"]) # Returns: "hello,world"
 
 ## Signature
 
-`{{ signature_markdown }}`
+``join(separator, list)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `separator`: The string to join with
+- `list`: List of strings to join
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

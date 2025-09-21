@@ -10,18 +10,13 @@ Terraform function for tostring
 
 ## Example Usage
 
-{{ example("example") }}
+tostring("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``tostring(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

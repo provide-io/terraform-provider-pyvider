@@ -10,18 +10,13 @@ Applies a jq query and returns a native Python object.
 
 ## Example Usage
 
-{{ example("example") }}
+lens_jq("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``lens_jq(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

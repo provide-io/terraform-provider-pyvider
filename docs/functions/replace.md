@@ -10,18 +10,15 @@ Terraform function for replace
 
 ## Example Usage
 
-{{ example("example") }}
+replace("hello test", "test", "world") # Returns: "hello world"
 
 ## Signature
 
-`{{ signature_markdown }}`
+``replace(str, old, new)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `str`: The input string
+- `old`: The substring to replace
+- `new`: The replacement string
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

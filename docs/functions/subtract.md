@@ -10,18 +10,14 @@ Terraform function for subtract
 
 ## Example Usage
 
-{{ example("example") }}
+subtract(3, 2) # Returns: 1
 
 ## Signature
 
-`{{ signature_markdown }}`
+``subtract(a, b)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `a`: The first number
+- `b`: The second number
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

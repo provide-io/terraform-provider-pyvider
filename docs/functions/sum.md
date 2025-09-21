@@ -10,18 +10,13 @@ Terraform function for sum
 
 ## Example Usage
 
-{{ example("example") }}
+sum([1, 3, 5, 2, 4]) # Returns: 15
 
 ## Signature
 
-`{{ signature_markdown }}`
+``sum(numbers)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `numbers`: A list of numbers to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

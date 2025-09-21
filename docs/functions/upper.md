@@ -10,18 +10,13 @@ Terraform function for upper
 
 ## Example Usage
 
-{{ example("example") }}
+upper("Hello World") # Returns: "HELLO WORLD"
 
 ## Signature
 
-`{{ signature_markdown }}`
+``upper(str)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `str`: The input string to transform
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

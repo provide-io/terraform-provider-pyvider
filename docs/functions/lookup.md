@@ -10,18 +10,13 @@ Terraform function for lookup
 
 ## Example Usage
 
-{{ example("example") }}
+lookup("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``lookup(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

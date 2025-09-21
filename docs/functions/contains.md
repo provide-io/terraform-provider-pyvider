@@ -10,18 +10,13 @@ Terraform function for contains
 
 ## Example Usage
 
-{{ example("example") }}
+contains("input") # Returns: processed output
 
 ## Signature
 
-`{{ signature_markdown }}`
+``contains(input)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `input`: The input value to process
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}

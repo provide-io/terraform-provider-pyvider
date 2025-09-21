@@ -10,18 +10,14 @@ Terraform function for split
 
 ## Example Usage
 
-{{ example("example") }}
+split("hello,world", ",") # Returns: ["hello", "world"]
 
 ## Signature
 
-`{{ signature_markdown }}`
+``split(str, delimiter)``
 
 ## Arguments
 
-{{ arguments_markdown }}
+- `str`: The string to split
+- `delimiter`: The delimiter to split on
 
-{% if has_variadic %}
-## Variadic Arguments
-
-{{ variadic_argument_markdown }}
-{% endif %}
