@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: sum"
 description: |-
-  Terraform function for upper
+  Terraform function for sum
 ---
 
-# upper (Function)
+# sum (Function)
 
-Terraform function for upper
+Terraform function for sum
 
 ## Example Usage
 

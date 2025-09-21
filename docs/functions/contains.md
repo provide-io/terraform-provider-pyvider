@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: contains"
 description: |-
-  Terraform function for upper
+  Terraform function for contains
 ---
 
-# upper (Function)
+# contains (Function)
 
-Terraform function for upper
+Terraform function for contains
 
 ## Example Usage
 

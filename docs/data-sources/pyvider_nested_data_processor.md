@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: pyvider_nested_data_processor"
 description: |-
-  Terraform function for upper
+  Terraform function for pyvider_nested_data_processor
 ---
 
-# upper (Function)
+# pyvider_nested_data_processor (Function)
 
-Terraform function for upper
+Terraform function for pyvider_nested_data_processor
 
 ## Example Usage
 

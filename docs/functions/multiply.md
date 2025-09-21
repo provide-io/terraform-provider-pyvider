@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: multiply"
 description: |-
-  Terraform function for upper
+  Terraform function for multiply
 ---
 
-# upper (Function)
+# multiply (Function)
 
-Terraform function for upper
+Terraform function for multiply
 
 ## Example Usage
 

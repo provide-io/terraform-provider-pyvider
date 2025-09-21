@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: replace"
 description: |-
-  Terraform function for upper
+  Terraform function for replace
 ---
 
-# upper (Function)
+# replace (Function)
 
-Terraform function for upper
+Terraform function for replace
 
 ## Example Usage
 

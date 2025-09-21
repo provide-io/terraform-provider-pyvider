@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: subtract"
 description: |-
-  Terraform function for upper
+  Terraform function for subtract
 ---
 
-# upper (Function)
+# subtract (Function)
 
-Terraform function for upper
+Terraform function for subtract
 
 ## Example Usage
 

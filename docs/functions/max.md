@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: max"
 description: |-
-  Terraform function for upper
+  Terraform function for max
 ---
 
-# upper (Function)
+# max (Function)
 
-Terraform function for upper
+Terraform function for max
 
 ## Example Usage
 

@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: format"
 description: |-
-  Terraform function for upper
+  Terraform function for format
 ---
 
-# upper (Function)
+# format (Function)
 
-Terraform function for upper
+Terraform function for format
 
 ## Example Usage
 

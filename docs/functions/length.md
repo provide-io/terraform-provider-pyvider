@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: length"
 description: |-
-  Terraform function for upper
+  Terraform function for length
 ---
 
-# upper (Function)
+# length (Function)
 
-Terraform function for upper
+Terraform function for length
 
 ## Example Usage
 

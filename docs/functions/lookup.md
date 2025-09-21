@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: lookup"
 description: |-
-  Terraform function for upper
+  Terraform function for lookup
 ---
 
-# upper (Function)
+# lookup (Function)
 
-Terraform function for upper
+Terraform function for lookup
 
 ## Example Usage
 

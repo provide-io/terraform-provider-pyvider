@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: lens_jq"
 description: |-
-  Terraform function for upper
+  Applies a jq query and returns a native Python object.
 ---
 
-# upper (Function)
+# lens_jq (Function)
 
-Terraform function for upper
+Applies a jq query and returns a native Python object.
 
 ## Example Usage
 

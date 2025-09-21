@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: round"
 description: |-
-  Terraform function for upper
+  Terraform function for round
 ---
 
-# upper (Function)
+# round (Function)
 
-Terraform function for upper
+Terraform function for round
 
 ## Example Usage
 

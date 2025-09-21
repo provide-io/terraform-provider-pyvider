@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: tostring"
 description: |-
-  Terraform function for upper
+  Terraform function for tostring
 ---
 
-# upper (Function)
+# tostring (Function)
 
-Terraform function for upper
+Terraform function for tostring
 
 ## Example Usage
 

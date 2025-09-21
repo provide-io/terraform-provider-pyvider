@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: divide"
 description: |-
-  Terraform function for upper
+  Terraform function for divide
 ---
 
-# upper (Function)
+# divide (Function)
 
-Terraform function for upper
+Terraform function for divide
 
 ## Example Usage
 

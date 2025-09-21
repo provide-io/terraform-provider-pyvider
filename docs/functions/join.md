@@ -1,12 +1,12 @@
 ---
-page_title: "Function: upper"
+page_title: "Function: join"
 description: |-
-  Terraform function for upper
+  Terraform function for join
 ---
 
-# upper (Function)
+# join (Function)
 
-Terraform function for upper
+Terraform function for join
 
 ## Example Usage
 
