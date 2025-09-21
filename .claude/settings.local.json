@@ -79,7 +79,9 @@
       "Bash(time:*)",
       "Bash(plating:*)",
       "Read(//Users/tim/code/tf/terraform-plugin-docs/**)",
-      "Bash(./workenv/wrkenv_darwin_arm64/bin/python -m pytest tests/ -v)"
+      "Bash(./workenv/wrkenv_darwin_arm64/bin/python -m pytest tests/ -v)",
+      "Bash(./workenv/wrkenv_darwin_arm64/bin/python -c \"import pymarkdownlnt; help(pymarkdownlnt)\")",
+      "Bash(./workenv/wrkenv_darwin_arm64/bin/python -m pytest tests/test_module_imports.py tests/test_plating_bundle.py tests/test_plating_discovery.py -v)"
     ],
     "deny": [],
     "ask": [],
