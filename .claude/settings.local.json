@@ -74,7 +74,8 @@
       "Bash(/tmp/workflow-test/validate-workflow.sh:*)",
       "Bash(gh release list:*)",
       "Bash(python3:*)",
-      "Bash(./scripts/build-docs-manual.sh:*)"
+      "Bash(./scripts/build-docs-manual.sh:*)",
+      "Bash(./dist/darwin_arm64/terraform-provider-pyvider_v0.0.5 --version)"
     ],
     "deny": [],
     "ask": [],
