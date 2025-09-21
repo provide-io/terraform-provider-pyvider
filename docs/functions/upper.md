@@ -1,22 +1,31 @@
 ---
-page_title: "Function: upper"
+page_title: "upper Function"
 description: |-
-  Terraform function for upper
+  Convert string to uppercase
 ---
 
-# upper (Function)
+# upper Function
 
-Terraform function for upper
+Converts a string to uppercase.
 
 ## Example Usage
 
-upper("Hello World") # Returns: "HELLO WORLD"
+```hcl
+output "uppercase" {
+  value = provider::pyvider::upper("hello")
+}
+```
 
 ## Signature
 
-``upper(str)``
+```
+upper(string) string
+```
 
 ## Arguments
 
-- `str`: The input string to transform
+1. `string` - The string to convert
 
+## Return Value
+
+The uppercase version of the input string.

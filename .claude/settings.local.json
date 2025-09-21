@@ -72,7 +72,9 @@
       "Bash(gh repo list:*)",
       "Bash(/tmp/workflow-test/create-clean-branch.sh:*)",
       "Bash(/tmp/workflow-test/validate-workflow.sh:*)",
-      "Bash(gh release list:*)"
+      "Bash(gh release list:*)",
+      "Bash(python3:*)",
+      "Bash(./scripts/build-docs-manual.sh:*)"
     ],
     "deny": [],
     "ask": [],

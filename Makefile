@@ -225,18 +225,8 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 .PHONY: docs
 docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
-	@. .venv/bin/activate && \
-		python3 -c "\
-import sys; sys.path.append('../pyvider-components/src'); \
-from plating.api import PlatingAPI; \
-from pathlib import Path; \
-api = PlatingAPI(); \
-Path('docs').mkdir(exist_ok=True); \
-Path('docs/functions').mkdir(exist_ok=True); \
-files = api.generate_function_documentation('docs/functions'); \
-written = api.write_generated_files(files); \
-print(f'Generated {len(written)} function documentation files')" && \
-		echo "$(GREEN)✅ Documentation built in docs/$(NC)"
+	@./scripts/build-docs-manual.sh
+	@echo "$(GREEN)✅ Documentation built in docs/$(NC)"
 
 .PHONY: docs-serve
 docs-serve: docs ## Build and serve documentation locally
