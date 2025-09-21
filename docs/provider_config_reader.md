@@ -40,19 +40,19 @@ resource "pyvider_file_content" "config_summary" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Conditional Resource Creation
 
-{{ example("conditional") }}
+
 
 ### Multi-Provider Setup
 
-{{ example("multi_provider") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Provider Configuration Attributes
 

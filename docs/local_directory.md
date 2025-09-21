@@ -49,23 +49,23 @@ output "log_dir_info" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Project Structure Creation
 
-{{ example("project_structure") }}
+
 
 ### Permission Management
 
-{{ example("permissions") }}
+
 
 ### Workspace Setup
 
-{{ example("workspace") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Import
 

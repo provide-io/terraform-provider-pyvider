@@ -44,23 +44,23 @@ resource "pyvider_file_content" "backup" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Conditional Logic
 
-{{ example("conditional") }}
+
 
 ### File System Validation
 
-{{ example("validation") }}
+
 
 ### Permission Checking
 
-{{ example("permissions") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Output Attributes
 

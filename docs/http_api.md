@@ -43,23 +43,23 @@ resource "pyvider_file_content" "downloaded_config" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Advanced HTTP Operations
 
-{{ example("advanced") }}
+
 
 ### API Integration Patterns
 
-{{ example("integration") }}
+
 
 ### Error Handling
 
-{{ example("error_handling") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## HTTP Methods
 

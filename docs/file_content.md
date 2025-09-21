@@ -45,23 +45,23 @@ output "config_hash" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Template-Based Configuration
 
-{{ example("template") }}
+
 
 ### Multi-Line Content
 
-{{ example("multiline") }}
+
 
 ### Environment-Specific Files
 
-{{ example("environment") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Import
 

@@ -46,23 +46,23 @@ resource "pyvider_file_content" "api_config" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### CI/CD Pipeline Tokens
 
-{{ example("cicd") }}
+
 
 ### API Integration Tokens
 
-{{ example("api_integration") }}
+
 
 ### Multi-Environment Tokens
 
-{{ example("multi_environment") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Token Lifecycle
 

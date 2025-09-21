@@ -42,23 +42,23 @@ output "verification_result" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Security Testing
 
-{{ example("security_testing") }}
+
 
 ### Compliance Verification
 
-{{ example("compliance") }}
+
 
 ### CI/CD Integration
 
-{{ example("cicd_testing") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## How Private State Verification Works
 

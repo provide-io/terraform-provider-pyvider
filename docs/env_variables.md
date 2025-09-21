@@ -42,23 +42,23 @@ resource "pyvider_file_content" "config" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Filtering and Transformations
 
-{{ example("filtering") }}
+
 
 ### Sensitive Variable Handling
 
-{{ example("sensitive") }}
+
 
 ### Multi-Environment Configuration
 
-{{ example("multi_environment") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Filtering Options
 

@@ -42,23 +42,23 @@ resource "pyvider_warning_example" "deprecated" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Deprecation Warnings
 
-{{ example("deprecation") }}
+
 
 ### Validation Scenarios
 
-{{ example("validation") }}
+
 
 ### Migration Examples
 
-{{ example("migration") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## Warning Mechanisms
 

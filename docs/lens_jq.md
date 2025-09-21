@@ -48,19 +48,19 @@ output "active_users" {
 
 ### Basic Usage
 
-{{ example("basic") }}
+
 
 ### Complex Transformations
 
-{{ example("complex") }}
+
 
 ### API Response Processing
 
-{{ example("api_processing") }}
+
 
 ## Schema
 
-{{ schema() }}
+No schema information available.
 
 ## JQ Query Language
 
