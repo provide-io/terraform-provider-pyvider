@@ -227,15 +227,14 @@ docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
 	@. .venv/bin/activate && \
 		python3 -c "\
-import sys; sys.path.append('../pyvider-components/src'); \
+import sys; \
+sys.path.append('../pyvider-components/src'); \
 from plating.api import PlatingAPI; \
 from pathlib import Path; \
 api = PlatingAPI(); \
-Path('docs').mkdir(exist_ok=True); \
-Path('docs/functions').mkdir(exist_ok=True); \
-files = api.generate_function_documentation('docs/functions'); \
+files = api.generate_all_documentation('docs'); \
 written = api.write_generated_files(files); \
-print(f'Generated {len(written)} function documentation files')" && \
+print(f'Generated {len(written)} complete documentation files')" && \
 		echo "$(GREEN)✅ Documentation built in docs/$(NC)"
 
 .PHONY: docs-serve
