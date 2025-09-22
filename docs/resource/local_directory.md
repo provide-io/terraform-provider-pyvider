@@ -65,7 +65,7 @@ output "log_dir_info" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Import
 

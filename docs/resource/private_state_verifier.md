@@ -58,7 +58,7 @@ output "verification_result" {
 
 ## Schema
 
-No schema information available.
+
 
 ## How Private State Verification Works
 

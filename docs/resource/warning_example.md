@@ -58,7 +58,7 @@ resource "pyvider_warning_example" "deprecated" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Warning Mechanisms
 

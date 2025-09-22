@@ -59,7 +59,7 @@ resource "pyvider_file_content" "downloaded_config" {
 
 ## Schema
 
-No schema information available.
+
 
 ## HTTP Methods
 

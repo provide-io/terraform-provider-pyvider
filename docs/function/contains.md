@@ -10,13 +10,13 @@ Terraform function for contains
 
 ## Example Usage
 
-contains("input") # Returns: processed output
+
 
 ## Signature
 
-``contains(input)``
+``
 
 ## Arguments
 
-- `input`: The input value to process
+
 

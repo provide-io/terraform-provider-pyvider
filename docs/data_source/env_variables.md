@@ -58,7 +58,7 @@ resource "pyvider_file_content" "config" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Filtering Options
 

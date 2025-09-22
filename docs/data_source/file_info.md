@@ -60,7 +60,7 @@ resource "pyvider_file_content" "backup" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Output Attributes
 

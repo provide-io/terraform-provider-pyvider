@@ -60,7 +60,7 @@ output "active_users" {
 
 ## Schema
 
-No schema information available.
+
 
 ## JQ Query Language
 
