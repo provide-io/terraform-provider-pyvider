@@ -61,7 +61,7 @@ output "config_hash" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Import
 

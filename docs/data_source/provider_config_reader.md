@@ -52,7 +52,7 @@ resource "pyvider_file_content" "config_summary" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Provider Configuration Attributes
 

@@ -62,7 +62,7 @@ resource "pyvider_file_content" "api_config" {
 
 ## Schema
 
-No schema information available.
+
 
 ## Token Lifecycle
 

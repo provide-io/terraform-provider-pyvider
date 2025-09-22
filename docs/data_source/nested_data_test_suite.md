@@ -14,4 +14,3 @@ The type of the None singleton.
 
 ## Argument Reference
 
-No schema information available.
