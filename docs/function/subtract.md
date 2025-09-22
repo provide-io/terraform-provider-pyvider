@@ -14,7 +14,7 @@ Terraform function for divide
 
 ## Signature
 
-``
+``subtract(a, b)``
 
 ## Arguments
 
