@@ -14,7 +14,7 @@ Terraform function for lower
 
 ## Signature
 
-``
+``format(input)``
 
 ## Arguments
 

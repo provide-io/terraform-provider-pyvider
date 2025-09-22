@@ -14,7 +14,7 @@ Terraform function for lower
 
 ## Signature
 
-``
+``replace(str, old, new)``
 
 ## Arguments
 

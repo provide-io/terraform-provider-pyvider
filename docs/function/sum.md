@@ -14,7 +14,7 @@ Terraform function for divide
 
 ## Signature
 
-``
+``sum(numbers)``
 
 ## Arguments
 
