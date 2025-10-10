@@ -83,7 +83,8 @@
       "Bash(./workenv/wrkenv_darwin_arm64/bin/python -c \"import pymarkdownlnt; help(pymarkdownlnt)\")",
       "Bash(./workenv/wrkenv_darwin_arm64/bin/python -m pytest tests/test_module_imports.py tests/test_plating_bundle.py tests/test_plating_discovery.py -v)",
       "Bash(pyvider:*)",
-      "Bash(.venv/bin/uv pip install:*)"
+      "Bash(.venv/bin/uv pip install:*)",
+      "Bash(export PROVIDE_TELEMETRY_DISABLED=true)"
     ],
     "deny": [],
     "ask": [],
