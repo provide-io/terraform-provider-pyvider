@@ -58,3 +58,9 @@ public_key_path = "keys/provider-public.key"
 pass = ["TF_*", "PLUGIN_*"]
 
 [tool.uv.sources]
+flavorpack = { path = "../flavorpack", editable = true }
+provide-foundation = { path = "../provide-foundation", editable = true }
+pyvider = { path = "../pyvider", editable = true }
+pyvider-components = { path = "../pyvider-components", editable = true }
+pyvider-cty = { path = "../pyvider-cty", editable = true }
+plating = { path = "../plating", editable = true }
