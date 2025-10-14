@@ -956,8 +956,8 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = []
-docs = []
+dev = [{ name = "provide-testkit", extras = ["standard", "build"] }]
+docs = [{ name = "provide-testkit", extras = ["docs"] }]
 
 [[package]]
 name = "protobuf"
@@ -1232,7 +1232,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "provide-testkit", extras = ["pyvider-dev"] }]
+dev = [
+    { name = "provide-testkit", extras = ["standard", "typecheck", "advanced-testing", "build", "profiling"] },
+    { name = "pyvider-rpcplugin", extras = ["test"] },
+]
 docs = [{ name = "provide-testkit", extras = ["docs"] }]
 
 [[package]]
@@ -1262,7 +1265,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "provide-testkit", extras = ["grpc-dev", "profiling", "build"] }]
+dev = [
+    { name = "provide-testkit", extras = ["standard", "build", "profiling"] },
+    { name = "pyvider-rpcplugin", extras = ["test"] },
+]
 
 [[package]]
 name = "pyvider-cty"
@@ -1281,12 +1287,8 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.17.1" },
-    { name = "provide-testkit", extras = ["standard", "advanced-testing", "typecheck", "build", "quality"], specifier = ">=0.0.0" },
-    { name = "ruff", specifier = ">=0.11.8" },
-]
-docs = [{ name = "provide-testkit", extras = ["docs"], specifier = ">=0.0.0" }]
+dev = [{ name = "provide-testkit", extras = ["standard", "advanced-testing", "typecheck", "build"] }]
+docs = [{ name = "provide-testkit", extras = ["docs"] }]
 
 [[package]]
 name = "pyvider-rpcplugin"
