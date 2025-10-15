@@ -1464,7 +1464,7 @@ source = { editable = "." }
 dependencies = [
     { name = "flavorpack" },
     { name = "plating" },
-    { name = "provide-foundation" },
+    { name = "provide-foundation", extra = ["all"] },
     { name = "pyvider" },
     { name = "pyvider-components" },
     { name = "pyvider-cty" },
@@ -1474,7 +1474,7 @@ dependencies = [
 requires-dist = [
     { name = "flavorpack", editable = "../flavorpack" },
     { name = "plating", editable = "../plating" },
-    { name = "provide-foundation", editable = "../provide-foundation" },
+    { name = "provide-foundation", extras = ["all"], editable = "../provide-foundation" },
     { name = "pyvider", editable = "../pyvider" },
     { name = "pyvider-components", editable = "../pyvider-components" },
     { name = "pyvider-cty", editable = "../pyvider-cty" },
