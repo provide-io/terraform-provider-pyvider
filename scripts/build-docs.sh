@@ -86,7 +86,7 @@ from pathlib import Path
 from plating.api import PlatingAPI
 
 try:
-    api = PlatingAPI()
+    api = PlatingAPI(provider_name='pyvider', package_name='pyvider.components')
     output_dir = Path('$DOCS_OUTPUT_DIR')
 
     # Create subdirectories for different component types
