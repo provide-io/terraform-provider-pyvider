@@ -80,45 +80,41 @@ echo "📝 Generating documentation with PlatingAPI..."
 
 python3 -c "
 import sys
+import asyncio
 sys.path.append('$PYVIDER_COMPONENTS_DIR/src')
 
 from pathlib import Path
-from plating.api import PlatingAPI
+from plating import Plating, PlatingContext
 
-try:
-    api = PlatingAPI(provider_name='pyvider', package_name='pyvider.components')
-    output_dir = Path('$DOCS_OUTPUT_DIR')
+async def generate_docs():
+    try:
+        # Create plating context with provider name
+        context = PlatingContext(provider_name='pyvider')
+        api = Plating(context, 'pyvider.components')
 
-    # Create subdirectories for different component types
-    functions_dir = output_dir / 'functions'
-    resources_dir = output_dir / 'resources'
-    data_sources_dir = output_dir / 'data-sources'  # Use hyphen for Terraform Registry compatibility
+        output_dir = Path('$DOCS_OUTPUT_DIR')
 
-    functions_dir.mkdir(parents=True, exist_ok=True)
-    resources_dir.mkdir(parents=True, exist_ok=True)
-    data_sources_dir.mkdir(parents=True, exist_ok=True)
+        # Generate all documentation
+        print('Generating documentation with plating...')
+        result = await api.plate(output_dir, validate_markdown=False, force=True)
 
-    # Generate documentation for each component type
-    print('Generating function documentation...')
-    function_files = api.generate_function_documentation(functions_dir)
-    function_written = api.write_generated_files(function_files)
+        if result.success:
+            print(f'Successfully generated {result.files_generated} documentation files')
+            print(f'Processed {result.bundles_processed} component bundles')
+        else:
+            print('Documentation generation failed:')
+            for error in result.errors:
+                print(f'  - {error}')
+            sys.exit(1)
 
-    print('Generating resource documentation...')
-    resource_files = api.generate_resource_documentation(resources_dir)
-    resource_written = api.write_generated_files(resource_files)
+    except Exception as e:
+        print(f'Error generating documentation: {e}')
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
-    # TODO: Add data source documentation when PlatingAPI supports it
-    # data_source_files = api.generate_data_source_documentation(data_sources_dir)
-    # data_source_written = api.write_generated_files(data_source_files)
-
-    print(f'Successfully generated:')
-    print(f'  - {len(function_written)} function documentation files')
-    print(f'  - {len(resource_written)} resource documentation files')
-    print(f'  - Total: {len(function_written) + len(resource_written)} files')
-
-except Exception as e:
-    print(f'Error generating documentation: {e}')
-    sys.exit(1)
+# Run async function
+asyncio.run(generate_docs())
 " || {
     print_error "Failed to generate documentation with plating"
     exit 1
