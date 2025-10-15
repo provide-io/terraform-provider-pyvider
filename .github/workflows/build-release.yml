@@ -196,12 +196,12 @@ jobs:
           if git diff --staged --quiet; then
             echo "📝 No documentation changes to commit"
           else
-            git commit -m "📚 Generate documentation for v${{ inputs.version }}
+            git commit -m "$(cat <<'EOF'
+📚 Generate documentation for v${{ inputs.version }}
 
 Generated documentation using plating with correct provider naming.
-
-🤖 Generated with Claude Code
-Co-Authored-By: Claude <noreply@anthropic.com>"
+EOF
+)"
             git push origin main
             echo "✅ Documentation committed and pushed"
           fi
