@@ -75,47 +75,10 @@ print_header "📚 Running Plating Documentation Generation"
 # Create output directory if it doesn't exist
 mkdir -p "$DOCS_OUTPUT_DIR"
 
-# Generate documentation using Python PlatingAPI
-echo "📝 Generating documentation with PlatingAPI..."
+# Generate documentation using Python script
+echo "📝 Generating documentation with plating..."
 
-python3 -c "
-import sys
-import asyncio
-sys.path.append('$PYVIDER_COMPONENTS_DIR/src')
-
-from pathlib import Path
-from plating import Plating, PlatingContext
-
-async def generate_docs():
-    try:
-        # Create plating context with provider name
-        context = PlatingContext(provider_name='pyvider')
-        api = Plating(context, 'pyvider.components')
-
-        output_dir = Path('$DOCS_OUTPUT_DIR')
-
-        # Generate all documentation
-        print('Generating documentation with plating...')
-        result = await api.plate(output_dir, validate_markdown=False, force=True)
-
-        if result.success:
-            print(f'Successfully generated {result.files_generated} documentation files')
-            print(f'Processed {result.bundles_processed} component bundles')
-        else:
-            print('Documentation generation failed:')
-            for error in result.errors:
-                print(f'  - {error}')
-            sys.exit(1)
-
-    except Exception as e:
-        print(f'Error generating documentation: {e}')
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
-
-# Run async function
-asyncio.run(generate_docs())
-" || {
+python3 "$SCRIPT_DIR/generate_docs.py" || {
     print_error "Failed to generate documentation with plating"
     exit 1
 }
