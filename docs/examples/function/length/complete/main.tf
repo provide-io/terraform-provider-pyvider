@@ -22,31 +22,31 @@ locals {
   # List length examples
   number_list = [1, 2, 3, 4, 5]
   string_list = ["apple", "banana", "cherry"]
-  empty_list  = []
+  empty_list = []
 
-  number_list_length = provider::pyvider::length(local.number_list) # Returns: 5
-  string_list_length = provider::pyvider::length(local.string_list) # Returns: 3
-  empty_list_length  = provider::pyvider::length(local.empty_list)  # Returns: 0
+  number_list_length = provider::pyvider::length(local.number_list)    # Returns: 5
+  string_list_length = provider::pyvider::length(local.string_list)    # Returns: 3
+  empty_list_length = provider::pyvider::length(local.empty_list)      # Returns: 0
 
   # String length examples
   short_string = "Hello"
-  long_string  = "The quick brown fox jumps over the lazy dog"
+  long_string = "The quick brown fox jumps over the lazy dog"
   empty_string = ""
 
-  short_string_length = provider::pyvider::length(local.short_string) # Returns: 5
-  long_string_length  = provider::pyvider::length(local.long_string)  # Returns: 43
-  empty_string_length = provider::pyvider::length(local.empty_string) # Returns: 0
+  short_string_length = provider::pyvider::length(local.short_string)  # Returns: 5
+  long_string_length = provider::pyvider::length(local.long_string)    # Returns: 43
+  empty_string_length = provider::pyvider::length(local.empty_string)  # Returns: 0
 
   # Map length examples
   simple_map = {
     name = "Alice"
-    age  = 30
+    age = 30
     city = "New York"
   }
   empty_map = {}
 
-  simple_map_length = provider::pyvider::length(local.simple_map) # Returns: 3
-  empty_map_length  = provider::pyvider::length(local.empty_map)  # Returns: 0
+  simple_map_length = provider::pyvider::length(local.simple_map)      # Returns: 3
+  empty_map_length = provider::pyvider::length(local.empty_map)        # Returns: 0
 }
 
 # Contains function examples
@@ -54,21 +54,21 @@ locals {
   # List contains examples
   fruits = ["apple", "banana", "cherry", "date"]
 
-  has_apple = provider::pyvider::contains(local.fruits, "apple") # Returns: true
-  has_grape = provider::pyvider::contains(local.fruits, "grape") # Returns: false
+  has_apple = provider::pyvider::contains(local.fruits, "apple")       # Returns: true
+  has_grape = provider::pyvider::contains(local.fruits, "grape")       # Returns: false
 
   # String contains examples
   sample_text = "The quick brown fox"
 
-  contains_fox   = provider::pyvider::contains(local.sample_text, "fox")   # Returns: true
-  contains_cat   = provider::pyvider::contains(local.sample_text, "cat")   # Returns: false
+  contains_fox = provider::pyvider::contains(local.sample_text, "fox") # Returns: true
+  contains_cat = provider::pyvider::contains(local.sample_text, "cat") # Returns: false
   contains_quick = provider::pyvider::contains(local.sample_text, "quick") # Returns: true
 
   # Map contains examples (checks for keys)
   user_data = {
     username = "alice123"
-    email    = "alice@example.com"
-    active   = true
+    email = "alice@example.com"
+    active = true
   }
 
   has_username = provider::pyvider::contains(local.user_data, "username") # Returns: true
@@ -81,12 +81,12 @@ locals {
   config_map = {
     database_host = "db.example.com"
     database_port = 5432
-    debug_mode    = true
+    debug_mode = true
   }
 
-  db_host     = provider::pyvider::lookup(local.config_map, "database_host", "localhost") # Returns: "db.example.com"
-  cache_ttl   = provider::pyvider::lookup(local.config_map, "cache_ttl", 3600)            # Returns: 3600 (default)
-  ssl_enabled = provider::pyvider::lookup(local.config_map, "ssl_enabled", false)         # Returns: false (default)
+  db_host = provider::pyvider::lookup(local.config_map, "database_host", "localhost")     # Returns: "db.example.com"
+  cache_ttl = provider::pyvider::lookup(local.config_map, "cache_ttl", 3600)             # Returns: 3600 (default)
+  ssl_enabled = provider::pyvider::lookup(local.config_map, "ssl_enabled", false)        # Returns: false (default)
 
   # Nested map lookup
   nested_config = {
@@ -101,7 +101,7 @@ locals {
   }
 
   server_info = provider::pyvider::lookup(local.nested_config, "server", {})
-  cache_info  = provider::pyvider::lookup(local.nested_config, "cache", { enabled = false })
+  cache_info = provider::pyvider::lookup(local.nested_config, "cache", { enabled = false })
 }
 
 # Combined collection operations
@@ -116,13 +116,13 @@ locals {
   total_users = provider::pyvider::length(local.users)
 
   # Check if we have any admin users
-  roles     = [for user in local.users : user.role]
+  roles = [for user in local.users : user.role]
   has_admin = provider::pyvider::contains(local.roles, "admin")
 
   # Environment configuration with defaults
   env_defaults = {
-    environment     = "development"
-    log_level       = "info"
+    environment = "development"
+    log_level = "info"
     max_connections = 100
     timeout_seconds = 30
   }
@@ -130,14 +130,14 @@ locals {
   # Simulated environment variables (would come from actual env vars)
   env_vars = {
     environment = "production"
-    log_level   = "warn"
+    log_level = "warn"
   }
 
   # Build final configuration with defaults
-  final_env       = provider::pyvider::lookup(local.env_vars, "environment", local.env_defaults.environment)
+  final_env = provider::pyvider::lookup(local.env_vars, "environment", local.env_defaults.environment)
   final_log_level = provider::pyvider::lookup(local.env_vars, "log_level", local.env_defaults.log_level)
-  final_max_conn  = provider::pyvider::lookup(local.env_vars, "max_connections", local.env_defaults.max_connections)
-  final_timeout   = provider::pyvider::lookup(local.env_vars, "timeout_seconds", local.env_defaults.timeout_seconds)
+  final_max_conn = provider::pyvider::lookup(local.env_vars, "max_connections", local.env_defaults.max_connections)
+  final_timeout = provider::pyvider::lookup(local.env_vars, "timeout_seconds", local.env_defaults.timeout_seconds)
 }
 
 # Validation examples
@@ -145,9 +145,9 @@ locals {
   # Input validation using collection functions
   required_fields = ["name", "email", "password"]
   user_input = {
-    name  = "John Doe"
+    name = "John Doe"
     email = "john@example.com"
-    age   = 25
+    age = 25
   }
 
   # Check if all required fields are present
@@ -165,41 +165,41 @@ output "collection_function_examples" {
     length_operations = {
       lists = {
         numbers = {
-          data   = local.number_list
+          data = local.number_list
           length = local.number_list_length
         }
         strings = {
-          data   = local.string_list
+          data = local.string_list
           length = local.string_list_length
         }
         empty = {
-          data   = local.empty_list
+          data = local.empty_list
           length = local.empty_list_length
         }
       }
 
       strings = {
         short = {
-          data   = local.short_string
+          data = local.short_string
           length = local.short_string_length
         }
         long = {
-          data   = local.long_string
+          data = local.long_string
           length = local.long_string_length
         }
         empty = {
-          data   = local.empty_string
+          data = local.empty_string
           length = local.empty_string_length
         }
       }
 
       maps = {
         simple = {
-          data   = local.simple_map
+          data = local.simple_map
           length = local.simple_map_length
         }
         empty = {
-          data   = local.empty_map
+          data = local.empty_map
           length = local.empty_map_length
         }
       }
@@ -207,20 +207,20 @@ output "collection_function_examples" {
 
     contains_operations = {
       lists = {
-        fruits    = local.fruits
+        fruits = local.fruits
         has_apple = local.has_apple
         has_grape = local.has_grape
       }
 
       strings = {
-        text           = local.sample_text
-        contains_fox   = local.contains_fox
-        contains_cat   = local.contains_cat
+        text = local.sample_text
+        contains_fox = local.contains_fox
+        contains_cat = local.contains_cat
         contains_quick = local.contains_quick
       }
 
       maps = {
-        user_data    = local.user_data
+        user_data = local.user_data
         has_username = local.has_username
         has_password = local.has_password
       }
@@ -228,33 +228,33 @@ output "collection_function_examples" {
 
     lookup_operations = {
       simple_lookups = {
-        db_host     = local.db_host
-        cache_ttl   = local.cache_ttl
+        db_host = local.db_host
+        cache_ttl = local.cache_ttl
         ssl_enabled = local.ssl_enabled
       }
 
       nested_lookups = {
         server_info = local.server_info
-        cache_info  = local.cache_info
+        cache_info = local.cache_info
       }
     }
 
     combined_operations = {
       user_management = {
         total_users = local.total_users
-        has_admin   = local.has_admin
+        has_admin = local.has_admin
       }
 
       configuration = {
-        environment     = local.final_env
-        log_level       = local.final_log_level
+        environment = local.final_env
+        log_level = local.final_log_level
         max_connections = local.final_max_conn
-        timeout         = local.final_timeout
+        timeout = local.final_timeout
       }
 
       validation = {
-        required_fields  = local.required_fields
-        missing_fields   = local.missing_fields
+        required_fields = local.required_fields
+        missing_fields = local.missing_fields
         has_all_required = local.has_all_required
       }
     }
@@ -294,10 +294,10 @@ locals {
 # Example 2: String and list operations
 locals {
   service_names = ["web", "api", "database", "cache", "monitor"]
-  log_message   = "Error connecting to database service"
+  log_message = "Error connecting to database service"
 
   # Check if service exists
-  has_database  = provider::pyvider::contains(local.service_names, "database")
+  has_database = provider::pyvider::contains(local.service_names, "database")
   has_analytics = provider::pyvider::contains(local.service_names, "analytics")
 
   # Check if log contains error
@@ -305,7 +305,7 @@ locals {
 
   # Get collection sizes
   service_count = provider::pyvider::length(local.service_names)
-  log_length    = provider::pyvider::length(local.log_message)
+  log_length = provider::pyvider::length(local.log_message)
 }
 
 # Example 3: Configuration management with lookups
@@ -319,19 +319,19 @@ locals {
   }
 
   feature_flags = {
-    "new_ui"        = true
-    "analytics"     = false
-    "dark_mode"     = true
+    "new_ui"      = true
+    "analytics"   = false
+    "dark_mode"   = true
     "beta_features" = false
   }
 
   # Get configuration values with defaults
-  max_conn        = provider::pyvider::lookup(local.app_settings, "max_connections", "50")
-  timeout         = provider::pyvider::lookup(local.app_settings, "timeout_seconds", "60")
+  max_conn = provider::pyvider::lookup(local.app_settings, "max_connections", "50")
+  timeout = provider::pyvider::lookup(local.app_settings, "timeout_seconds", "60")
   unknown_setting = provider::pyvider::lookup(local.app_settings, "unknown_key", "default_value")
 
   # Check feature flags
-  ui_enabled      = provider::pyvider::lookup(local.feature_flags, "new_ui", false)
+  ui_enabled = provider::pyvider::lookup(local.feature_flags, "new_ui", false)
   missing_feature = provider::pyvider::lookup(local.feature_flags, "missing_feature", false)
 }
 
@@ -347,7 +347,7 @@ locals {
 
   # Check for specific environment variables
   has_database_url = provider::pyvider::contains(local.env_var_names, "APP_DATABASE_URL")
-  has_secret_key   = provider::pyvider::contains(local.env_var_names, "APP_SECRET_KEY")
+  has_secret_key = provider::pyvider::contains(local.env_var_names, "APP_SECRET_KEY")
 
   # Get values with fallbacks
   app_name = provider::pyvider::lookup(
@@ -365,7 +365,7 @@ locals {
 
 # Example 5: Service discovery and validation
 locals {
-  required_services  = ["web", "api", "database"]
+  required_services = ["web", "api", "database"]
   available_services = ["web", "api", "database", "cache", "monitor", "logging"]
 
   # Check if all required services are available
@@ -375,7 +375,7 @@ locals {
   }
 
   # Count available vs required
-  required_count  = provider::pyvider::length(local.required_services)
+  required_count = provider::pyvider::length(local.required_services)
   available_count = provider::pyvider::length(local.available_services)
 
   # Find missing services (this would require more complex logic in real Terraform)
@@ -400,14 +400,14 @@ locals {
   subnet_type = "private"
 
   # Get network configuration
-  vpc_cidr    = provider::pyvider::lookup(local.network_configs, local.current_vpc, "172.16.0.0/16")
+  vpc_cidr = provider::pyvider::lookup(local.network_configs, local.current_vpc, "172.16.0.0/16")
   subnet_mask = provider::pyvider::lookup(local.subnet_configs, local.subnet_type, "/24")
 
   # Configuration validation
-  has_vpc_config    = provider::pyvider::contains(keys(local.network_configs), local.current_vpc)
+  has_vpc_config = provider::pyvider::contains(keys(local.network_configs), local.current_vpc)
   has_subnet_config = provider::pyvider::contains(keys(local.subnet_configs), local.subnet_type)
 
-  total_vpcs         = provider::pyvider::length(local.network_configs)
+  total_vpcs = provider::pyvider::length(local.network_configs)
   total_subnet_types = provider::pyvider::length(local.subnet_configs)
 }
 
@@ -470,47 +470,47 @@ output "collection_function_results" {
   value = {
     database_config = {
       environment = local.environment
-      host        = local.db_host
-      test_host   = local.test_db
+      host = local.db_host
+      test_host = local.test_db
     }
 
     service_management = {
       service_count = local.service_count
-      has_database  = local.has_database
+      has_database = local.has_database
       has_analytics = local.has_analytics
     }
 
     log_analysis = {
       message_length = local.log_length
-      is_error       = local.is_error_log
+      is_error = local.is_error_log
     }
 
     app_configuration = {
-      name            = local.app_name
-      version         = local.app_version
+      name = local.app_name
+      version = local.app_version
       max_connections = local.max_conn
-      timeout         = local.timeout
-      ui_enabled      = local.ui_enabled
+      timeout = local.timeout
+      ui_enabled = local.ui_enabled
     }
 
     environment_vars = {
-      count            = local.env_var_count
+      count = local.env_var_count
       has_database_url = local.has_database_url
-      has_secret_key   = local.has_secret_key
+      has_secret_key = local.has_secret_key
     }
 
     service_discovery = {
-      required_services  = local.required_count
+      required_services = local.required_count
       available_services = local.available_count
-      all_available      = local.all_services_available
-      service_checks     = local.service_checks
+      all_available = local.all_services_available
+      service_checks = local.service_checks
     }
 
     network_config = {
-      vpc_cidr       = local.vpc_cidr
-      subnet_mask    = local.subnet_mask
+      vpc_cidr = local.vpc_cidr
+      subnet_mask = local.subnet_mask
       has_vpc_config = local.has_vpc_config
-      total_vpcs     = local.total_vpcs
+      total_vpcs = local.total_vpcs
     }
 
     examples_file = pyvider_file_content.collection_examples.filename
@@ -552,21 +552,21 @@ variable "user_registrations" {
 
 locals {
   # Define validation rules
-  required_fields     = ["username", "email"]
-  valid_roles         = ["user", "admin", "moderator", "guest"]
+  required_fields = ["username", "email"]
+  valid_roles = ["user", "admin", "moderator", "guest"]
   min_username_length = 3
   max_username_length = 20
 
   # Validate each user registration
   validation_results = [
     for idx, user in var.user_registrations : {
-      index    = idx
+      index = idx
       username = user.username
-      email    = user.email
+      email = user.email
 
       # Check required fields
       has_username = provider::pyvider::contains(user, "username") && provider::pyvider::length(user.username) > 0
-      has_email    = provider::pyvider::contains(user, "email") && provider::pyvider::length(user.email) > 0
+      has_email = provider::pyvider::contains(user, "email") && provider::pyvider::length(user.email) > 0
 
       # Username validation
       username_length = provider::pyvider::length(user.username)
@@ -577,7 +577,7 @@ locals {
       username_has_at_symbol = provider::pyvider::contains(user.username, "@")
 
       # Email validation (basic)
-      email_has_at  = provider::pyvider::contains(user.email, "@")
+      email_has_at = provider::pyvider::contains(user.email, "@")
       email_has_dot = provider::pyvider::contains(user.email, ".")
 
       # Role validation
@@ -612,10 +612,10 @@ locals {
   ]
 
   # Summary statistics
-  total_users   = provider::pyvider::length(var.user_registrations)
-  valid_users   = [for result in local.validation_results : result if result.is_valid]
+  total_users = provider::pyvider::length(var.user_registrations)
+  valid_users = [for result in local.validation_results : result if result.is_valid]
   invalid_users = [for result in local.validation_results : result if !result.is_valid]
-  valid_count   = provider::pyvider::length(local.valid_users)
+  valid_count = provider::pyvider::length(local.valid_users)
   invalid_count = provider::pyvider::length(local.invalid_users)
 }
 
@@ -652,7 +652,7 @@ variable "service_configs" {
 
 locals {
   # Define validation rules for services
-  valid_protocols         = ["http", "https", "tcp", "postgresql", "mysql", "redis"]
+  valid_protocols = ["http", "https", "tcp", "postgresql", "mysql", "redis"]
   required_service_fields = ["host", "port", "protocol"]
 
   # Validate service configurations
@@ -705,7 +705,7 @@ locals {
     for name, validation in local.service_validation :
     name if !validation.is_valid
   ]
-  valid_service_count   = provider::pyvider::length(local.valid_services)
+  valid_service_count = provider::pyvider::length(local.valid_services)
   invalid_service_count = provider::pyvider::length(local.invalid_services)
 }
 
@@ -723,25 +723,25 @@ variable "api_endpoints" {
     { path = "/health", method = "GET", auth = false, public = true },
     { path = "/admin/stats", method = "GET", auth = true },
     { path = "/public/info", method = "GET", auth = false, public = true },
-    { path = "/invalid-path", method = "PATCH", auth = true } # Invalid method for demo
+    { path = "/invalid-path", method = "PATCH", auth = true }  # Invalid method for demo
   ]
 }
 
 locals {
   # Define API validation rules
   valid_http_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-  admin_paths        = ["/admin", "/management", "/config"]
+  admin_paths = ["/admin", "/management", "/config"]
 
   # Validate API endpoints
   endpoint_validation = [
     for idx, endpoint in var.api_endpoints : {
-      index  = idx
-      path   = endpoint.path
+      index = idx
+      path = endpoint.path
       method = endpoint.method
 
       # Path validation
       path_starts_with_slash = provider::pyvider::contains(endpoint.path, "/") && substr(endpoint.path, 0, 1) == "/"
-      path_length_valid      = provider::pyvider::length(endpoint.path) > 1
+      path_length_valid = provider::pyvider::length(endpoint.path) > 1
 
       # Method validation
       method_valid = provider::pyvider::contains(local.valid_http_methods, endpoint.method)
@@ -777,10 +777,10 @@ locals {
   ]
 
   # API endpoint summary
-  total_endpoints        = provider::pyvider::length(var.api_endpoints)
-  valid_endpoints        = [for result in local.endpoint_validation : result if result.is_valid]
-  invalid_endpoints      = [for result in local.endpoint_validation : result if !result.is_valid]
-  valid_endpoint_count   = provider::pyvider::length(local.valid_endpoints)
+  total_endpoints = provider::pyvider::length(var.api_endpoints)
+  valid_endpoints = [for result in local.endpoint_validation : result if result.is_valid]
+  invalid_endpoints = [for result in local.endpoint_validation : result if !result.is_valid]
+  valid_endpoint_count = provider::pyvider::length(local.valid_endpoints)
   invalid_endpoint_count = provider::pyvider::length(local.invalid_endpoints)
 }
 
@@ -881,31 +881,31 @@ resource "pyvider_file_content" "api_validation_report" {
 output "data_validation_results" {
   value = {
     user_validation = {
-      total       = local.total_users
-      valid       = local.valid_count
-      invalid     = local.invalid_count
+      total = local.total_users
+      valid = local.valid_count
+      invalid = local.invalid_count
       report_file = pyvider_file_content.user_validation_report.filename
     }
 
     service_validation = {
-      total            = local.total_services
-      valid            = local.valid_service_count
-      invalid          = local.invalid_service_count
-      valid_services   = local.valid_services
+      total = local.total_services
+      valid = local.valid_service_count
+      invalid = local.invalid_service_count
+      valid_services = local.valid_services
       invalid_services = local.invalid_services
-      report_file      = pyvider_file_content.service_validation_report.filename
+      report_file = pyvider_file_content.service_validation_report.filename
     }
 
     api_validation = {
-      total       = local.total_endpoints
-      valid       = local.valid_endpoint_count
-      invalid     = local.invalid_endpoint_count
+      total = local.total_endpoints
+      valid = local.valid_endpoint_count
+      invalid = local.invalid_endpoint_count
       report_file = pyvider_file_content.api_validation_report.filename
     }
 
     summary = {
-      all_users_valid     = local.invalid_count == 0
-      all_services_valid  = local.invalid_service_count == 0
+      all_users_valid = local.invalid_count == 0
+      all_services_valid = local.invalid_service_count == 0
       all_endpoints_valid = local.invalid_endpoint_count == 0
       overall_valid = (
         local.invalid_count == 0 &&

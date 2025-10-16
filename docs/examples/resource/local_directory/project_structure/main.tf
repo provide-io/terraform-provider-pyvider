@@ -39,33 +39,33 @@ resource "pyvider_local_directory" "project_root" {
 
 # Source code directories
 resource "pyvider_local_directory" "src" {
-  path       = "${local.project_root}/src"
+  path = "${local.project_root}/src"
   depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "src_components" {
-  path       = "${local.project_root}/src/components"
+  path = "${local.project_root}/src/components"
   depends_on = [pyvider_local_directory.src]
 }
 
 resource "pyvider_local_directory" "src_utils" {
-  path       = "${local.project_root}/src/utils"
+  path = "${local.project_root}/src/utils"
   depends_on = [pyvider_local_directory.src]
 }
 
 # Test directories
 resource "pyvider_local_directory" "tests" {
-  path       = "${local.project_root}/tests"
+  path = "${local.project_root}/tests"
   depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "tests_unit" {
-  path       = "${local.project_root}/tests/unit"
+  path = "${local.project_root}/tests/unit"
   depends_on = [pyvider_local_directory.tests]
 }
 
 resource "pyvider_local_directory" "tests_integration" {
-  path       = "${local.project_root}/tests/integration"
+  path = "${local.project_root}/tests/integration"
   depends_on = [pyvider_local_directory.tests]
 }
 
@@ -73,23 +73,23 @@ resource "pyvider_local_directory" "tests_integration" {
 resource "pyvider_local_directory" "docs" {
   path        = "${local.project_root}/docs"
   permissions = "0o755"
-  depends_on  = [pyvider_local_directory.project_root]
+  depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "docs_api" {
-  path       = "${local.project_root}/docs/api"
+  path = "${local.project_root}/docs/api"
   depends_on = [pyvider_local_directory.docs]
 }
 
 # Configuration directories
 resource "pyvider_local_directory" "config" {
   path        = "${local.project_root}/config"
-  permissions = "0o750" # More restrictive for config
-  depends_on  = [pyvider_local_directory.project_root]
+  permissions = "0o750"  # More restrictive for config
+  depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "config_environments" {
-  path       = "${local.project_root}/config/environments"
+  path = "${local.project_root}/config/environments"
   depends_on = [pyvider_local_directory.config]
 }
 
@@ -97,36 +97,36 @@ resource "pyvider_local_directory" "config_environments" {
 resource "pyvider_local_directory" "logs" {
   path        = "${local.project_root}/logs"
   permissions = "0o755"
-  depends_on  = [pyvider_local_directory.project_root]
+  depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "tmp" {
   path        = "${local.project_root}/tmp"
-  permissions = "0o777" # World writable for temp files
-  depends_on  = [pyvider_local_directory.project_root]
+  permissions = "0o777"  # World writable for temp files
+  depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "data" {
   path        = "${local.project_root}/data"
-  permissions = "0o750" # Restrictive for data
-  depends_on  = [pyvider_local_directory.project_root]
+  permissions = "0o750"  # Restrictive for data
+  depends_on = [pyvider_local_directory.project_root]
 }
 
 # Development-specific directories
 resource "pyvider_local_directory" "scripts" {
-  path       = "${local.project_root}/scripts"
+  path = "${local.project_root}/scripts"
   depends_on = [pyvider_local_directory.project_root]
 }
 
 resource "pyvider_local_directory" "tools" {
-  path       = "${local.project_root}/tools"
+  path = "${local.project_root}/tools"
   depends_on = [pyvider_local_directory.project_root]
 }
 
 # Create essential project files
 resource "pyvider_file_content" "readme" {
   filename = "${pyvider_local_directory.project_root.path}/README.md"
-  content  = <<-EOF
+  content = <<-EOF
     # ${var.project_name}
 
     A project created with Terraform and Pyvider Components.
@@ -169,7 +169,7 @@ resource "pyvider_file_content" "readme" {
 
 resource "pyvider_file_content" "gitignore" {
   filename = "${pyvider_local_directory.project_root.path}/.gitignore"
-  content  = <<-EOF
+  content = <<-EOF
     # Logs
     logs/
     *.log
@@ -211,7 +211,7 @@ resource "pyvider_file_content" "gitignore" {
 # Create environment configuration files
 resource "pyvider_file_content" "env_development" {
   filename = "${pyvider_local_directory.config_environments.path}/development.conf"
-  content  = <<-EOF
+  content = <<-EOF
     # Development Environment Configuration
     DEBUG=true
     LOG_LEVEL=debug
@@ -224,7 +224,7 @@ resource "pyvider_file_content" "env_development" {
 
 resource "pyvider_file_content" "env_production" {
   filename = "${pyvider_local_directory.config_environments.path}/production.conf"
-  content  = <<-EOF
+  content = <<-EOF
     # Production Environment Configuration
     DEBUG=false
     LOG_LEVEL=info

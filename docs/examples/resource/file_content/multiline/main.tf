@@ -18,7 +18,7 @@ provider "pyvider" {
 # Create a YAML configuration file
 resource "pyvider_file_content" "kubernetes_config" {
   filename = "/tmp/k8s-deployment.yaml"
-  content  = <<-EOF
+  content = <<-EOF
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -52,7 +52,7 @@ resource "pyvider_file_content" "kubernetes_config" {
 # Create a Docker Compose file
 resource "pyvider_file_content" "docker_compose" {
   filename = "/tmp/docker-compose.yml"
-  content  = <<-EOF
+  content = <<-EOF
     version: '3.8'
 
     services:
@@ -100,7 +100,7 @@ resource "pyvider_file_content" "docker_compose" {
 # Create a complex configuration with heredoc syntax
 resource "pyvider_file_content" "nginx_config" {
   filename = "/tmp/nginx.conf"
-  content  = <<-NGINX
+  content = <<-NGINX
     user nginx;
     worker_processes auto;
     error_log /var/log/nginx/error.log warn;

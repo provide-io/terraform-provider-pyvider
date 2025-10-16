@@ -18,47 +18,47 @@ provider "pyvider" {
 # String conversion from various types
 locals {
   # Number to string conversions
-  integer_value  = 42
-  float_value    = 3.14159
+  integer_value = 42
+  float_value = 3.14159
   negative_value = -100
 
-  int_to_string      = provider::pyvider::tostring(local.integer_value)  # Returns: "42"
-  float_to_string    = provider::pyvider::tostring(local.float_value)    # Returns: "3.14159"
+  int_to_string = provider::pyvider::tostring(local.integer_value)     # Returns: "42"
+  float_to_string = provider::pyvider::tostring(local.float_value)     # Returns: "3.14159"
   negative_to_string = provider::pyvider::tostring(local.negative_value) # Returns: "-100"
 
   # Boolean to string conversions
-  true_value  = true
+  true_value = true
   false_value = false
 
-  true_to_string  = provider::pyvider::tostring(local.true_value)  # Returns: "true"
-  false_to_string = provider::pyvider::tostring(local.false_value) # Returns: "false"
+  true_to_string = provider::pyvider::tostring(local.true_value)       # Returns: "true"
+  false_to_string = provider::pyvider::tostring(local.false_value)     # Returns: "false"
 
   # List to string conversions
   simple_list = [1, 2, 3]
   string_list = ["apple", "banana", "cherry"]
-  mixed_list  = [1, "two", true]
+  mixed_list = [1, "two", true]
 
-  simple_list_string = provider::pyvider::tostring(local.simple_list) # Returns: "[1, 2, 3]"
-  string_list_string = provider::pyvider::tostring(local.string_list) # Returns: '["apple", "banana", "cherry"]'
-  mixed_list_string  = provider::pyvider::tostring(local.mixed_list)  # Returns: '[1, "two", true]'
+  simple_list_string = provider::pyvider::tostring(local.simple_list)  # Returns: "[1, 2, 3]"
+  string_list_string = provider::pyvider::tostring(local.string_list)  # Returns: '["apple", "banana", "cherry"]'
+  mixed_list_string = provider::pyvider::tostring(local.mixed_list)    # Returns: '[1, "two", true]'
 
   # Map to string conversions
   simple_map = {
     name = "Alice"
-    age  = 30
+    age = 30
   }
   nested_map = {
     user = {
       name = "Bob"
       details = {
-        age    = 25
+        age = 25
         active = true
       }
     }
   }
 
-  simple_map_string = provider::pyvider::tostring(local.simple_map) # Returns: '{"age": 30, "name": "Alice"}'
-  nested_map_string = provider::pyvider::tostring(local.nested_map) # Returns: nested JSON structure
+  simple_map_string = provider::pyvider::tostring(local.simple_map)    # Returns: '{"age": 30, "name": "Alice"}'
+  nested_map_string = provider::pyvider::tostring(local.nested_map)    # Returns: nested JSON structure
 }
 
 # Practical use cases for string conversion
@@ -85,9 +85,9 @@ variable "server_config" {
 locals {
   # Convert configuration values to strings for logging/display
   config_strings = {
-    host_info     = "Server: ${var.server_config.host}:${provider::pyvider::tostring(var.server_config.port)}"
-    ssl_status    = "SSL Enabled: ${provider::pyvider::tostring(var.server_config.ssl)}"
-    timeout_list  = "Timeouts: ${provider::pyvider::tostring(var.server_config.timeouts)}"
+    host_info = "Server: ${var.server_config.host}:${provider::pyvider::tostring(var.server_config.port)}"
+    ssl_status = "SSL Enabled: ${provider::pyvider::tostring(var.server_config.ssl)}"
+    timeout_list = "Timeouts: ${provider::pyvider::tostring(var.server_config.timeouts)}"
     metadata_json = "Metadata: ${provider::pyvider::tostring(var.server_config.metadata)}"
   }
 
@@ -153,7 +153,7 @@ variable "user_data" {
       active   = true
       roles    = ["user", "admin"]
       profile = {
-        email      = "alice@example.com"
+        email     = "alice@example.com"
         last_login = "2024-01-15T10:30:00Z"
       }
     },
@@ -173,12 +173,12 @@ locals {
   # Convert user data to JSON strings for API responses
   user_json_strings = [
     for user in var.user_data : {
-      id_string      = provider::pyvider::tostring(user.id)
-      username       = user.username # Already a string
-      active_string  = provider::pyvider::tostring(user.active)
-      roles_string   = provider::pyvider::tostring(user.roles)
-      profile_string = provider::pyvider::tostring(user.profile)
-      full_json      = provider::pyvider::tostring(user)
+      id_string       = provider::pyvider::tostring(user.id)
+      username        = user.username  # Already a string
+      active_string   = provider::pyvider::tostring(user.active)
+      roles_string    = provider::pyvider::tostring(user.roles)
+      profile_string  = provider::pyvider::tostring(user.profile)
+      full_json       = provider::pyvider::tostring(user)
     }
   ]
 
@@ -215,8 +215,8 @@ variable "system_metrics" {
     uptime       = 86400
     alerts       = ["high_memory", "disk_cleanup_needed"]
     status = {
-      healthy        = true
-      maintenance    = false
+      healthy     = true
+      maintenance = false
       backup_running = true
     }
   }
@@ -282,41 +282,41 @@ output "type_conversion_examples" {
     basic_conversions = {
       numbers = {
         integer = {
-          original  = local.integer_value
+          original = local.integer_value
           converted = local.int_to_string
         }
         float = {
-          original  = local.float_value
+          original = local.float_value
           converted = local.float_to_string
         }
         negative = {
-          original  = local.negative_value
+          original = local.negative_value
           converted = local.negative_to_string
         }
       }
 
       booleans = {
         true_value = {
-          original  = local.true_value
+          original = local.true_value
           converted = local.true_to_string
         }
         false_value = {
-          original  = local.false_value
+          original = local.false_value
           converted = local.false_to_string
         }
       }
 
       collections = {
         simple_list = {
-          original  = local.simple_list
+          original = local.simple_list
           converted = local.simple_list_string
         }
         string_list = {
-          original  = local.string_list
+          original = local.string_list
           converted = local.string_list_string
         }
         simple_map = {
-          original  = local.simple_map
+          original = local.simple_map
           converted = local.simple_map_string
         }
       }
@@ -325,7 +325,7 @@ output "type_conversion_examples" {
     practical_usage = {
       configuration = {
         summary_file = pyvider_file_content.config_summary.filename
-        env_file     = pyvider_file_content.environment_vars.filename
+        env_file = pyvider_file_content.environment_vars.filename
       }
 
       user_management = {
@@ -334,14 +334,14 @@ output "type_conversion_examples" {
       }
 
       system_monitoring = {
-        log_file  = pyvider_file_content.system_log.filename
+        log_file = pyvider_file_content.system_log.filename
         log_entry = local.log_entry
       }
     }
 
     conversion_stats = {
-      total_conversions = 15 # Approximate count of conversions performed
-      file_outputs      = 4  # Number of files created with converted data
+      total_conversions = 15  # Approximate count of conversions performed
+      file_outputs = 4        # Number of files created with converted data
     }
   }
 }

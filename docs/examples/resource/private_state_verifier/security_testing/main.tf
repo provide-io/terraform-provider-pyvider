@@ -73,99 +73,99 @@ resource "pyvider_private_state_verifier" "json_test" {
 locals {
   security_tests = {
     unicode = {
-      input            = pyvider_private_state_verifier.unicode_test.input_value
-      output           = pyvider_private_state_verifier.unicode_test.decrypted_token
-      expected         = "SECRET_FOR_UNICODE-ТЕСТ-测试-テスト"
-      passed           = pyvider_private_state_verifier.unicode_test.decrypted_token == "SECRET_FOR_UNICODE-ТЕСТ-测试-テスト"
+      input = pyvider_private_state_verifier.unicode_test.input_value
+      output = pyvider_private_state_verifier.unicode_test.decrypted_token
+      expected = "SECRET_FOR_UNICODE-ТЕСТ-测试-テスト"
+      passed = pyvider_private_state_verifier.unicode_test.decrypted_token == "SECRET_FOR_UNICODE-ТЕСТ-测试-テスト"
       security_concern = "internationalization"
     }
 
     symbols = {
-      input            = pyvider_private_state_verifier.symbols_test.input_value
-      output           = pyvider_private_state_verifier.symbols_test.decrypted_token
-      expected         = "SECRET_FOR_SYMBOLS!@#$%^&*()_+-=[]{}|;:,.<>?"
-      passed           = pyvider_private_state_verifier.symbols_test.decrypted_token == "SECRET_FOR_SYMBOLS!@#$%^&*()_+-=[]{}|;:,.<>?"
+      input = pyvider_private_state_verifier.symbols_test.input_value
+      output = pyvider_private_state_verifier.symbols_test.decrypted_token
+      expected = "SECRET_FOR_SYMBOLS!@#$%^&*()_+-=[]{}|;:,.<>?"
+      passed = pyvider_private_state_verifier.symbols_test.decrypted_token == "SECRET_FOR_SYMBOLS!@#$%^&*()_+-=[]{}|;:,.<>?"
       security_concern = "special_characters"
     }
 
     sql_injection = {
-      input            = pyvider_private_state_verifier.sql_injection_test.input_value
-      output           = pyvider_private_state_verifier.sql_injection_test.decrypted_token
-      expected         = "SECRET_FOR_TEST'; DROP TABLE USERS; --"
-      passed           = pyvider_private_state_verifier.sql_injection_test.decrypted_token == "SECRET_FOR_TEST'; DROP TABLE USERS; --"
+      input = pyvider_private_state_verifier.sql_injection_test.input_value
+      output = pyvider_private_state_verifier.sql_injection_test.decrypted_token
+      expected = "SECRET_FOR_TEST'; DROP TABLE USERS; --"
+      passed = pyvider_private_state_verifier.sql_injection_test.decrypted_token == "SECRET_FOR_TEST'; DROP TABLE USERS; --"
       security_concern = "sql_injection"
     }
 
     xss = {
-      input            = pyvider_private_state_verifier.xss_test.input_value
-      output           = pyvider_private_state_verifier.xss_test.decrypted_token
-      expected         = "SECRET_FOR_<SCRIPT>ALERT('XSS')</SCRIPT>"
-      passed           = pyvider_private_state_verifier.xss_test.decrypted_token == "SECRET_FOR_<SCRIPT>ALERT('XSS')</SCRIPT>"
+      input = pyvider_private_state_verifier.xss_test.input_value
+      output = pyvider_private_state_verifier.xss_test.decrypted_token
+      expected = "SECRET_FOR_<SCRIPT>ALERT('XSS')</SCRIPT>"
+      passed = pyvider_private_state_verifier.xss_test.decrypted_token == "SECRET_FOR_<SCRIPT>ALERT('XSS')</SCRIPT>"
       security_concern = "xss_injection"
     }
 
     path_traversal = {
-      input            = pyvider_private_state_verifier.path_traversal_test.input_value
-      output           = pyvider_private_state_verifier.path_traversal_test.decrypted_token
-      expected         = "SECRET_FOR_../../../ETC/PASSWD"
-      passed           = pyvider_private_state_verifier.path_traversal_test.decrypted_token == "SECRET_FOR_../../../ETC/PASSWD"
+      input = pyvider_private_state_verifier.path_traversal_test.input_value
+      output = pyvider_private_state_verifier.path_traversal_test.decrypted_token
+      expected = "SECRET_FOR_../../../ETC/PASSWD"
+      passed = pyvider_private_state_verifier.path_traversal_test.decrypted_token == "SECRET_FOR_../../../ETC/PASSWD"
       security_concern = "path_traversal"
     }
 
     command_injection = {
-      input            = pyvider_private_state_verifier.command_injection_test.input_value
-      output           = pyvider_private_state_verifier.command_injection_test.decrypted_token
-      expected         = "SECRET_FOR_TEST; CAT /ETC/PASSWD"
-      passed           = pyvider_private_state_verifier.command_injection_test.decrypted_token == "SECRET_FOR_TEST; CAT /ETC/PASSWD"
+      input = pyvider_private_state_verifier.command_injection_test.input_value
+      output = pyvider_private_state_verifier.command_injection_test.decrypted_token
+      expected = "SECRET_FOR_TEST; CAT /ETC/PASSWD"
+      passed = pyvider_private_state_verifier.command_injection_test.decrypted_token == "SECRET_FOR_TEST; CAT /ETC/PASSWD"
       security_concern = "command_injection"
     }
 
     buffer_overflow = {
-      input            = substr(pyvider_private_state_verifier.buffer_overflow_test.input_value, 0, 50)     # Show first 50 chars
-      output           = substr(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token, 0, 50) # Show first 50 chars
-      expected         = "SECRET_FOR_" + join("", [for i in range(1000) : "A"])
-      passed           = pyvider_private_state_verifier.buffer_overflow_test.decrypted_token == ("SECRET_FOR_" + join("", [for i in range(1000) : "A"]))
+      input = substr(pyvider_private_state_verifier.buffer_overflow_test.input_value, 0, 50) # Show first 50 chars
+      output = substr(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token, 0, 50) # Show first 50 chars
+      expected = "SECRET_FOR_" + join("", [for i in range(1000) : "A"])
+      passed = pyvider_private_state_verifier.buffer_overflow_test.decrypted_token == ("SECRET_FOR_" + join("", [for i in range(1000) : "A"]))
       security_concern = "buffer_overflow"
-      full_length      = length(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token)
+      full_length = length(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token)
     }
 
     empty_input = {
-      input            = pyvider_private_state_verifier.empty_test.input_value
-      output           = pyvider_private_state_verifier.empty_test.decrypted_token
-      expected         = "SECRET_FOR_"
-      passed           = pyvider_private_state_verifier.empty_test.decrypted_token == "SECRET_FOR_"
+      input = pyvider_private_state_verifier.empty_test.input_value
+      output = pyvider_private_state_verifier.empty_test.decrypted_token
+      expected = "SECRET_FOR_"
+      passed = pyvider_private_state_verifier.empty_test.decrypted_token == "SECRET_FOR_"
       security_concern = "empty_input"
     }
 
     whitespace = {
-      input            = pyvider_private_state_verifier.whitespace_test.input_value
-      output           = pyvider_private_state_verifier.whitespace_test.decrypted_token
-      expected         = "SECRET_FOR_   SPACES   AND   TABS	"
-      passed           = pyvider_private_state_verifier.whitespace_test.decrypted_token == "SECRET_FOR_   SPACES   AND   TABS	"
+      input = pyvider_private_state_verifier.whitespace_test.input_value
+      output = pyvider_private_state_verifier.whitespace_test.decrypted_token
+      expected = "SECRET_FOR_   SPACES   AND   TABS	"
+      passed = pyvider_private_state_verifier.whitespace_test.decrypted_token == "SECRET_FOR_   SPACES   AND   TABS	"
       security_concern = "whitespace_handling"
     }
 
     binary_like = {
-      input            = pyvider_private_state_verifier.binary_test.input_value
-      output           = pyvider_private_state_verifier.binary_test.decrypted_token
-      expected         = "SECRET_FOR_BINARY-001101001100001"
-      passed           = pyvider_private_state_verifier.binary_test.decrypted_token == "SECRET_FOR_BINARY-001101001100001"
+      input = pyvider_private_state_verifier.binary_test.input_value
+      output = pyvider_private_state_verifier.binary_test.decrypted_token
+      expected = "SECRET_FOR_BINARY-001101001100001"
+      passed = pyvider_private_state_verifier.binary_test.decrypted_token == "SECRET_FOR_BINARY-001101001100001"
       security_concern = "binary_data"
     }
 
     json_like = {
-      input            = pyvider_private_state_verifier.json_test.input_value
-      output           = pyvider_private_state_verifier.json_test.decrypted_token
-      expected         = "SECRET_FOR_{\"MALICIOUS\":\"PAYLOAD\"}"
-      passed           = pyvider_private_state_verifier.json_test.decrypted_token == "SECRET_FOR_{\"MALICIOUS\":\"PAYLOAD\"}"
+      input = pyvider_private_state_verifier.json_test.input_value
+      output = pyvider_private_state_verifier.json_test.decrypted_token
+      expected = "SECRET_FOR_{\"MALICIOUS\":\"PAYLOAD\"}"
+      passed = pyvider_private_state_verifier.json_test.decrypted_token == "SECRET_FOR_{\"MALICIOUS\":\"PAYLOAD\"}"
       security_concern = "json_injection"
     }
   }
 
   security_summary = {
-    total_tests      = length(local.security_tests)
-    passed_tests     = length([for test in local.security_tests : test if test.passed])
-    failed_tests     = length([for test in local.security_tests : test if !test.passed])
+    total_tests = length(local.security_tests)
+    passed_tests = length([for test in local.security_tests : test if test.passed])
+    failed_tests = length([for test in local.security_tests : test if !test.passed])
     all_tests_passed = alltrue([for test in local.security_tests : test.passed])
 
     failed_test_names = [
@@ -181,10 +181,10 @@ locals {
   # Detailed security analysis
   security_analysis = {
     encryption_resilience = local.security_summary.all_tests_passed
-    input_sanitization    = "not_applicable" # Raw input is preserved
-    injection_resistance  = local.security_summary.all_tests_passed
-    buffer_handling       = local.security_tests.buffer_overflow.passed
-    unicode_support       = local.security_tests.unicode.passed
+    input_sanitization = "not_applicable" # Raw input is preserved
+    injection_resistance = local.security_summary.all_tests_passed
+    buffer_handling = local.security_tests.buffer_overflow.passed
+    unicode_support = local.security_tests.unicode.passed
     edge_case_handling = (
       local.security_tests.empty_input.passed &&
       local.security_tests.whitespace.passed
@@ -200,11 +200,11 @@ resource "pyvider_file_content" "security_report" {
     test_type = "security_verification"
 
     executive_summary = {
-      total_security_tests    = local.security_summary.total_tests
-      passed_tests            = local.security_summary.passed_tests
-      failed_tests            = local.security_summary.failed_tests
+      total_security_tests = local.security_summary.total_tests
+      passed_tests = local.security_summary.passed_tests
+      failed_tests = local.security_summary.failed_tests
       overall_security_status = local.security_summary.all_tests_passed ? "secure" : "needs_review"
-      risk_level              = local.security_summary.all_tests_passed ? "low" : "medium"
+      risk_level = local.security_summary.all_tests_passed ? "low" : "medium"
     }
 
     test_results = local.security_tests
@@ -213,43 +213,43 @@ resource "pyvider_file_content" "security_report" {
 
     threat_vectors_tested = [
       {
-        threat      = "SQL Injection"
-        test_name   = "sql_injection"
-        status      = local.security_tests.sql_injection.passed ? "mitigated" : "vulnerable"
+        threat = "SQL Injection"
+        test_name = "sql_injection"
+        status = local.security_tests.sql_injection.passed ? "mitigated" : "vulnerable"
         description = "Tests handling of SQL injection attempts in input"
       },
       {
-        threat      = "Cross-Site Scripting (XSS)"
-        test_name   = "xss"
-        status      = local.security_tests.xss.passed ? "mitigated" : "vulnerable"
+        threat = "Cross-Site Scripting (XSS)"
+        test_name = "xss"
+        status = local.security_tests.xss.passed ? "mitigated" : "vulnerable"
         description = "Tests handling of XSS payload in input"
       },
       {
-        threat      = "Path Traversal"
-        test_name   = "path_traversal"
-        status      = local.security_tests.path_traversal.passed ? "mitigated" : "vulnerable"
+        threat = "Path Traversal"
+        test_name = "path_traversal"
+        status = local.security_tests.path_traversal.passed ? "mitigated" : "vulnerable"
         description = "Tests handling of path traversal attempts"
       },
       {
-        threat      = "Command Injection"
-        test_name   = "command_injection"
-        status      = local.security_tests.command_injection.passed ? "mitigated" : "vulnerable"
+        threat = "Command Injection"
+        test_name = "command_injection"
+        status = local.security_tests.command_injection.passed ? "mitigated" : "vulnerable"
         description = "Tests handling of command injection attempts"
       },
       {
-        threat      = "Buffer Overflow"
-        test_name   = "buffer_overflow"
-        status      = local.security_tests.buffer_overflow.passed ? "mitigated" : "vulnerable"
+        threat = "Buffer Overflow"
+        test_name = "buffer_overflow"
+        status = local.security_tests.buffer_overflow.passed ? "mitigated" : "vulnerable"
         description = "Tests handling of extremely long input values"
       }
     ]
 
     compliance_checks = {
-      input_validation      = "raw_input_preserved"
+      input_validation = "raw_input_preserved"
       output_transformation = "uppercase_conversion"
-      encryption_strength   = "terraform_native"
-      state_protection      = "private_state_encrypted"
-      data_integrity        = local.security_summary.all_tests_passed ? "verified" : "compromised"
+      encryption_strength = "terraform_native"
+      state_protection = "private_state_encrypted"
+      data_integrity = local.security_summary.all_tests_passed ? "verified" : "compromised"
     }
 
     recommendations = concat(
@@ -257,7 +257,7 @@ resource "pyvider_file_content" "security_report" {
         "✅ All security tests passed",
         "✅ Private state encryption is working correctly",
         "✅ Input handling is robust across threat vectors"
-        ] : [
+      ] : [
         "⚠️ Some security tests failed",
         "⚠️ Review failed tests for potential vulnerabilities"
       ],
@@ -403,50 +403,50 @@ resource "pyvider_file_content" "sast_summary" {
     scan_info = {
       timestamp = timestamp()
       scan_type = "static_analysis_security_testing"
-      tool      = "pyvider_private_state_verifier"
-      version   = "1.0"
+      tool = "pyvider_private_state_verifier"
+      version = "1.0"
     }
 
     summary = {
       total_vulnerabilities = local.security_summary.failed_tests
-      critical              = 0
-      high                  = local.security_summary.failed_tests
-      medium                = 0
-      low                   = 0
-      info                  = local.security_summary.passed_tests
+      critical = 0
+      high = local.security_summary.failed_tests
+      medium = 0
+      low = 0
+      info = local.security_summary.passed_tests
     }
 
     findings = [
       for test_name, test in local.security_tests : {
-        id              = "PSV-${upper(substr(test_name, 0, 3))}-001"
-        title           = "Private State ${title(replace(test.security_concern, "_", " "))} Test"
-        severity        = test.passed ? "info" : "high"
-        status          = test.passed ? "passed" : "failed"
-        category        = "encryption_verification"
-        description     = "Testing private state encryption with ${test.security_concern} input vector"
-        recommendation  = test.passed ? "No action required" : "Review encryption handling for this input type"
-        test_vector     = test.input
+        id = "PSV-${upper(substr(test_name, 0, 3))}-001"
+        title = "Private State ${title(replace(test.security_concern, "_", " "))} Test"
+        severity = test.passed ? "info" : "high"
+        status = test.passed ? "passed" : "failed"
+        category = "encryption_verification"
+        description = "Testing private state encryption with ${test.security_concern} input vector"
+        recommendation = test.passed ? "No action required" : "Review encryption handling for this input type"
+        test_vector = test.input
         expected_output = test.expected
-        actual_output   = test.output
+        actual_output = test.output
       }
     ]
 
     compliance = {
       owasp_top_10 = {
-        injection                 = local.security_tests.sql_injection.passed && local.security_tests.command_injection.passed ? "compliant" : "non_compliant"
-        xss                       = local.security_tests.xss.passed ? "compliant" : "non_compliant"
+        injection = local.security_tests.sql_injection.passed && local.security_tests.command_injection.passed ? "compliant" : "non_compliant"
+        xss = local.security_tests.xss.passed ? "compliant" : "non_compliant"
         security_misconfiguration = "not_applicable"
-        sensitive_data_exposure   = local.security_summary.all_tests_passed ? "compliant" : "non_compliant"
+        sensitive_data_exposure = local.security_summary.all_tests_passed ? "compliant" : "non_compliant"
       }
 
       encryption_standards = {
-        data_at_rest   = "terraform_managed"
+        data_at_rest = "terraform_managed"
         key_management = "terraform_managed"
-        algorithm      = "terraform_default"
+        algorithm = "terraform_default"
       }
     }
 
-    exit_code     = local.security_summary.all_tests_passed ? 0 : 1
+    exit_code = local.security_summary.all_tests_passed ? 0 : 1
     pass_criteria = "all_tests_must_pass"
   })
 }
@@ -471,7 +471,7 @@ output "security_testing_results" {
         local.security_tests.command_injection.passed &&
         local.security_tests.xss.passed
       )
-      buffer_secure     = local.security_tests.buffer_overflow.passed
+      buffer_secure = local.security_tests.buffer_overflow.passed
       unicode_compliant = local.security_tests.unicode.passed
     }
 

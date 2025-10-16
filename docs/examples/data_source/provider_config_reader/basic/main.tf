@@ -54,11 +54,11 @@ locals {
     endpoint_configured = data.pyvider_provider_config_reader.current.api_endpoint != null
     auth_configured     = data.pyvider_provider_config_reader.current.api_token != null
     has_custom_headers  = data.pyvider_provider_config_reader.current.api_headers != null && length(data.pyvider_provider_config_reader.current.api_headers) > 0
-    tls_secure          = data.pyvider_provider_config_reader.current.api_insecure_skip_verify != true
+    tls_secure         = data.pyvider_provider_config_reader.current.api_insecure_skip_verify != true
 
     timeout_configured = data.pyvider_provider_config_reader.current.api_timeout != null
-    timeout_value      = data.pyvider_provider_config_reader.current.api_timeout
-    timeout_category = (
+    timeout_value     = data.pyvider_provider_config_reader.current.api_timeout
+    timeout_category  = (
       data.pyvider_provider_config_reader.current.api_timeout == null ? "default" :
       data.pyvider_provider_config_reader.current.api_timeout <= 10 ? "fast" :
       data.pyvider_provider_config_reader.current.api_timeout <= 60 ? "normal" :
@@ -67,8 +67,8 @@ locals {
     )
 
     retries_configured = data.pyvider_provider_config_reader.current.api_retries != null
-    retries_value      = data.pyvider_provider_config_reader.current.api_retries
-    retries_category = (
+    retries_value     = data.pyvider_provider_config_reader.current.api_retries
+    retries_category  = (
       data.pyvider_provider_config_reader.current.api_retries == null ? "default" :
       data.pyvider_provider_config_reader.current.api_retries == 0 ? "no_retries" :
       data.pyvider_provider_config_reader.current.api_retries <= 3 ? "conservative" :
@@ -102,12 +102,12 @@ resource "pyvider_file_content" "environment_config" {
     detected_environment = local.detected_environment
 
     provider_config = {
-      endpoint_url           = data.pyvider_provider_config_reader.current.api_endpoint
-      timeout_seconds        = data.pyvider_provider_config_reader.current.api_timeout
-      retry_count            = data.pyvider_provider_config_reader.current.api_retries
-      tls_verification       = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
+      endpoint_url = data.pyvider_provider_config_reader.current.api_endpoint
+      timeout_seconds = data.pyvider_provider_config_reader.current.api_timeout
+      retry_count = data.pyvider_provider_config_reader.current.api_retries
+      tls_verification = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
       authentication_enabled = data.pyvider_provider_config_reader.current.api_token != null
-      custom_headers_count   = data.pyvider_provider_config_reader.current.api_headers != null ? length(data.pyvider_provider_config_reader.current.api_headers) : 0
+      custom_headers_count = data.pyvider_provider_config_reader.current.api_headers != null ? length(data.pyvider_provider_config_reader.current.api_headers) : 0
     }
 
     analysis = local.config_analysis
@@ -171,17 +171,17 @@ resource "pyvider_file_content" "api_client_config" {
       base_url = data.pyvider_provider_config_reader.current.api_endpoint != null ? data.pyvider_provider_config_reader.current.api_endpoint : "http://localhost:8080"
 
       timeout = {
-        seconds  = data.pyvider_provider_config_reader.current.api_timeout != null ? data.pyvider_provider_config_reader.current.api_timeout : 30
+        seconds = data.pyvider_provider_config_reader.current.api_timeout != null ? data.pyvider_provider_config_reader.current.api_timeout : 30
         category = local.config_analysis.timeout_category
       }
 
       retry_policy = {
         max_attempts = data.pyvider_provider_config_reader.current.api_retries != null ? data.pyvider_provider_config_reader.current.api_retries + 1 : 4
-        strategy     = local.config_analysis.retries_category
+        strategy = local.config_analysis.retries_category
       }
 
       security = {
-        verify_tls    = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
+        verify_tls = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
         auth_required = data.pyvider_provider_config_reader.current.api_token != null
       }
 
@@ -189,10 +189,10 @@ resource "pyvider_file_content" "api_client_config" {
     }
 
     metadata = {
-      environment    = local.detected_environment
+      environment = local.detected_environment
       security_score = local.security_score
-      config_source  = "terraform_provider"
-      generated_at   = timestamp()
+      config_source = "terraform_provider"
+      generated_at = timestamp()
     }
   })
 }
@@ -204,10 +204,10 @@ output "provider_config_analysis" {
 
     configuration = {
       endpoint_configured = local.config_analysis.endpoint_configured
-      auth_configured     = local.config_analysis.auth_configured
-      tls_secure          = local.config_analysis.tls_secure
-      timeout_category    = local.config_analysis.timeout_category
-      retries_category    = local.config_analysis.retries_category
+      auth_configured = local.config_analysis.auth_configured
+      tls_secure = local.config_analysis.tls_secure
+      timeout_category = local.config_analysis.timeout_category
+      retries_category = local.config_analysis.retries_category
     }
 
     security = {

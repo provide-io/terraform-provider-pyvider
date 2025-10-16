@@ -36,17 +36,17 @@ locals {
   web_total_cores = provider::pyvider::multiply(
     var.instance_types[0].cores,
     var.instance_types[0].count
-  ) # 2 * 3 = 6
+  )  # 2 * 3 = 6
 
   api_total_cores = provider::pyvider::multiply(
     var.instance_types[1].cores,
     var.instance_types[1].count
-  ) # 4 * 2 = 8
+  )  # 4 * 2 = 8
 
   db_total_cores = provider::pyvider::multiply(
     var.instance_types[2].cores,
     var.instance_types[2].count
-  ) # 8 * 1 = 8
+  )  # 8 * 1 = 8
 
   # Sum all cores
   all_core_counts = [
@@ -54,7 +54,7 @@ locals {
     local.api_total_cores,
     local.db_total_cores
   ]
-  total_cores = provider::pyvider::sum(local.all_core_counts) # 6 + 8 + 8 = 22
+  total_cores = provider::pyvider::sum(local.all_core_counts)  # 6 + 8 + 8 = 22
 }
 
 # Memory allocation calculations
@@ -73,16 +73,16 @@ locals {
   web_memory_per_instance = provider::pyvider::multiply(
     var.base_memory_gb,
     var.memory_multiplier
-  ) # 4 * 1.5 = 6
+  )  # 4 * 1.5 = 6
 
   # Round to nearest GB
-  web_memory_rounded = provider::pyvider::round(local.web_memory_per_instance, 0) # 6
+  web_memory_rounded = provider::pyvider::round(local.web_memory_per_instance, 0)  # 6
 
   # Calculate total memory for web tier
   web_total_memory = provider::pyvider::multiply(
     local.web_memory_rounded,
     var.instance_types[0].count
-  ) # 6 * 3 = 18
+  )  # 6 * 3 = 18
 }
 
 # Storage calculations
@@ -101,19 +101,19 @@ locals {
   storage_per_instance = provider::pyvider::add(
     var.base_storage_gb,
     var.additional_storage_gb
-  ) # 100 + 50 = 150
+  )  # 100 + 50 = 150
 
   # Calculate total storage needed
   total_instances = provider::pyvider::sum([
     var.instance_types[0].count,
     var.instance_types[1].count,
     var.instance_types[2].count
-  ]) # 3 + 2 + 1 = 6
+  ])  # 3 + 2 + 1 = 6
 
   total_storage = provider::pyvider::multiply(
     local.storage_per_instance,
     local.total_instances
-  ) # 150 * 6 = 900
+  )  # 150 * 6 = 900
 }
 
 # Cost calculations
@@ -132,15 +132,15 @@ locals {
   cost_per_core_month = provider::pyvider::multiply(
     var.cost_per_core_hour,
     var.hours_per_month
-  ) # 0.05 * 730 = 36.5
+  )  # 0.05 * 730 = 36.5
 
   total_monthly_compute_cost = provider::pyvider::multiply(
     local.cost_per_core_month,
     local.total_cores
-  ) # 36.5 * 22 = 803
+  )  # 36.5 * 22 = 803
 
   # Round to nearest dollar
-  monthly_cost_rounded = provider::pyvider::round(local.total_monthly_compute_cost, 0) # 803
+  monthly_cost_rounded = provider::pyvider::round(local.total_monthly_compute_cost, 0)  # 803
 }
 
 # Create resource allocation summary
@@ -176,23 +176,23 @@ resource "pyvider_file_content" "resource_summary" {
 output "resource_calculations" {
   value = {
     cpu = {
-      web_cores   = local.web_total_cores
-      api_cores   = local.api_total_cores
-      db_cores    = local.db_total_cores
+      web_cores = local.web_total_cores
+      api_cores = local.api_total_cores
+      db_cores = local.db_total_cores
       total_cores = local.total_cores
     }
     memory = {
-      web_total_gb    = local.web_total_memory
+      web_total_gb = local.web_total_memory
       per_instance_gb = local.web_memory_rounded
     }
     storage = {
-      per_instance_gb  = local.storage_per_instance
-      total_instances  = local.total_instances
+      per_instance_gb = local.storage_per_instance
+      total_instances = local.total_instances
       total_storage_gb = local.total_storage
     }
     cost = {
       monthly_compute = local.monthly_cost_rounded
-      per_core_month  = local.cost_per_core_month
+      per_core_month = local.cost_per_core_month
     }
   }
 }
@@ -204,46 +204,46 @@ output "resource_calculations" {
 
 # Addition examples
 locals {
-  simple_add = provider::pyvider::add(5, 3)     # Returns: 8
-  float_add  = provider::pyvider::add(2.5, 1.5) # Returns: 4
-  mixed_add  = provider::pyvider::add(10, 2.3)  # Returns: 12.3
+  simple_add = provider::pyvider::add(5, 3)      # Returns: 8
+  float_add = provider::pyvider::add(2.5, 1.5)   # Returns: 4
+  mixed_add = provider::pyvider::add(10, 2.3)    # Returns: 12.3
 }
 
 # Subtraction examples
 locals {
   simple_subtract = provider::pyvider::subtract(10, 4)    # Returns: 6
-  float_subtract  = provider::pyvider::subtract(5.5, 2.1) # Returns: 3.4
+  float_subtract = provider::pyvider::subtract(5.5, 2.1)  # Returns: 3.4
   negative_result = provider::pyvider::subtract(3, 7)     # Returns: -4
 }
 
 # Multiplication examples
 locals {
-  simple_multiply = provider::pyvider::multiply(4, 3)   # Returns: 12
-  float_multiply  = provider::pyvider::multiply(2.5, 4) # Returns: 10
-  zero_multiply   = provider::pyvider::multiply(5, 0)   # Returns: 0
+  simple_multiply = provider::pyvider::multiply(4, 3)     # Returns: 12
+  float_multiply = provider::pyvider::multiply(2.5, 4)    # Returns: 10
+  zero_multiply = provider::pyvider::multiply(5, 0)       # Returns: 0
 }
 
 # Division examples
 locals {
-  simple_divide  = provider::pyvider::divide(12, 3) # Returns: 4
-  float_divide   = provider::pyvider::divide(10, 3) # Returns: 3.333...
-  precise_divide = provider::pyvider::divide(15, 3) # Returns: 5
+  simple_divide = provider::pyvider::divide(12, 3)        # Returns: 4
+  float_divide = provider::pyvider::divide(10, 3)         # Returns: 3.333...
+  precise_divide = provider::pyvider::divide(15, 3)       # Returns: 5
 }
 
 # List operations
 locals {
   numbers = [10, 5, 8, 2, 15]
 
-  list_sum = provider::pyvider::sum(local.numbers) # Returns: 40
-  list_min = provider::pyvider::min(local.numbers) # Returns: 2
-  list_max = provider::pyvider::max(local.numbers) # Returns: 15
+  list_sum = provider::pyvider::sum(local.numbers)         # Returns: 40
+  list_min = provider::pyvider::min(local.numbers)         # Returns: 2
+  list_max = provider::pyvider::max(local.numbers)         # Returns: 15
 }
 
 # Rounding examples
 locals {
-  round_to_int     = provider::pyvider::round(3.7, 0)     # Returns: 4
+  round_to_int = provider::pyvider::round(3.7, 0)         # Returns: 4
   round_to_decimal = provider::pyvider::round(3.14159, 2) # Returns: 3.14
-  round_negative   = provider::pyvider::round(-2.6, 0)    # Returns: -3
+  round_negative = provider::pyvider::round(-2.6, 0)      # Returns: -3
 }
 
 # Output results for verification
@@ -251,22 +251,22 @@ output "numeric_examples" {
   value = {
     addition = {
       simple = local.simple_add
-      float  = local.float_add
-      mixed  = local.mixed_add
+      float = local.float_add
+      mixed = local.mixed_add
     }
     subtraction = {
-      simple   = local.simple_subtract
-      float    = local.float_subtract
+      simple = local.simple_subtract
+      float = local.float_subtract
       negative = local.negative_result
     }
     multiplication = {
       simple = local.simple_multiply
-      float  = local.float_multiply
-      zero   = local.zero_multiply
+      float = local.float_multiply
+      zero = local.zero_multiply
     }
     division = {
-      simple  = local.simple_divide
-      float   = local.float_divide
+      simple = local.simple_divide
+      float = local.float_divide
       precise = local.precise_divide
     }
     list_operations = {
@@ -275,9 +275,9 @@ output "numeric_examples" {
       max = local.list_max
     }
     rounding = {
-      to_int     = local.round_to_int
+      to_int = local.round_to_int
       to_decimal = local.round_to_decimal
-      negative   = local.round_negative
+      negative = local.round_negative
     }
   }
 }
@@ -290,12 +290,12 @@ output "numeric_examples" {
 # Example 1: Basic arithmetic operations
 locals {
   base_price = 99.99
-  tax_rate   = 0.08
-  quantity   = 3
+  tax_rate = 0.08
+  quantity = 3
 
   # Calculate tax and total
-  tax_amount     = provider::pyvider::multiply(local.base_price, local.tax_rate)
-  subtotal       = provider::pyvider::multiply(local.base_price, local.quantity)
+  tax_amount = provider::pyvider::multiply(local.base_price, local.tax_rate)
+  subtotal = provider::pyvider::multiply(local.base_price, local.quantity)
   total_with_tax = provider::pyvider::add(local.subtotal, provider::pyvider::multiply(local.subtotal, local.tax_rate))
 }
 
@@ -303,9 +303,9 @@ locals {
 locals {
   server_response_times = [120, 89, 156, 78, 203, 95, 134]
 
-  total_time       = provider::pyvider::sum(local.server_response_times)
-  max_response     = provider::pyvider::max(local.server_response_times)
-  min_response     = provider::pyvider::min(local.server_response_times)
+  total_time = provider::pyvider::sum(local.server_response_times)
+  max_response = provider::pyvider::max(local.server_response_times)
+  min_response = provider::pyvider::min(local.server_response_times)
   average_response = provider::pyvider::divide(local.total_time, provider::pyvider::length(local.server_response_times))
 }
 
@@ -314,8 +314,8 @@ locals {
   monthly_costs = [1500.50, 2340.75, 987.25, 3456.80, 890.95]
 
   total_monthly_cost = provider::pyvider::sum(local.monthly_costs)
-  highest_month      = provider::pyvider::max(local.monthly_costs)
-  lowest_month       = provider::pyvider::min(local.monthly_costs)
+  highest_month = provider::pyvider::max(local.monthly_costs)
+  lowest_month = provider::pyvider::min(local.monthly_costs)
   average_monthly = provider::pyvider::round(
     provider::pyvider::divide(local.total_monthly_cost, provider::pyvider::length(local.monthly_costs))
   )
@@ -324,17 +324,17 @@ locals {
 # Example 4: Resource scaling calculations
 locals {
   base_cpu_units = 2
-  memory_gb      = 8
+  memory_gb = 8
   scaling_factor = 1.5
 
   # Calculate scaled resources
-  scaled_cpu    = provider::pyvider::multiply(local.base_cpu_units, local.scaling_factor)
+  scaled_cpu = provider::pyvider::multiply(local.base_cpu_units, local.scaling_factor)
   scaled_memory = provider::pyvider::multiply(local.memory_gb, local.scaling_factor)
 
   # Calculate cost (CPU: $0.10/unit/hour, Memory: $0.05/GB/hour)
-  cpu_cost_per_hour    = provider::pyvider::multiply(local.scaled_cpu, 0.10)
+  cpu_cost_per_hour = provider::pyvider::multiply(local.scaled_cpu, 0.10)
   memory_cost_per_hour = provider::pyvider::multiply(local.scaled_memory, 0.05)
-  total_hourly_cost    = provider::pyvider::add(local.cpu_cost_per_hour, local.memory_cost_per_hour)
+  total_hourly_cost = provider::pyvider::add(local.cpu_cost_per_hour, local.memory_cost_per_hour)
 
   # Monthly cost (assume 730 hours/month)
   monthly_cost = provider::pyvider::round(provider::pyvider::multiply(local.total_hourly_cost, 730))
@@ -344,7 +344,7 @@ locals {
 locals {
   request_counts = [1500, 2300, 1800, 3200, 2700, 1900, 2100]
 
-  peak_requests  = provider::pyvider::max(local.request_counts)
+  peak_requests = provider::pyvider::max(local.request_counts)
   total_requests = provider::pyvider::sum(local.request_counts)
   average_requests = provider::pyvider::round(
     provider::pyvider::divide(local.total_requests, provider::pyvider::length(local.request_counts))
@@ -364,20 +364,20 @@ locals {
 # Example 6: Complex nested calculations
 locals {
   # Calculate compound interest: A = P(1 + r/n)^(nt)
-  principal          = 10000
-  annual_rate        = 0.05
+  principal = 10000
+  annual_rate = 0.05
   compounds_per_year = 12
-  years              = 5
+  years = 5
 
   # Break down the calculation step by step
   rate_per_period = provider::pyvider::divide(local.annual_rate, local.compounds_per_year)
-  one_plus_rate   = provider::pyvider::add(1, local.rate_per_period)
-  total_periods   = provider::pyvider::multiply(local.compounds_per_year, local.years)
+  one_plus_rate = provider::pyvider::add(1, local.rate_per_period)
+  total_periods = provider::pyvider::multiply(local.compounds_per_year, local.years)
 
   # For this example, we'll approximate the power calculation
   # In practice, you might use external tools for complex math
-  compound_factor = 1.28 # Approximation of (1.004167)^60
-  final_amount    = provider::pyvider::round(provider::pyvider::multiply(local.principal, local.compound_factor))
+  compound_factor = 1.28  # Approximation of (1.004167)^60
+  final_amount = provider::pyvider::round(provider::pyvider::multiply(local.principal, local.compound_factor))
   interest_earned = provider::pyvider::subtract(local.final_amount, local.principal)
 }
 
@@ -441,41 +441,41 @@ output "numeric_function_results" {
   description = "Results of various numeric calculations"
   value = {
     shopping_cart = {
-      subtotal   = local.subtotal
+      subtotal = local.subtotal
       tax_amount = provider::pyvider::round(local.tax_amount)
-      total      = provider::pyvider::round(local.total_with_tax)
+      total = provider::pyvider::round(local.total_with_tax)
     }
 
     performance_metrics = {
-      total_time       = local.total_time
+      total_time = local.total_time
       average_response = provider::pyvider::round(local.average_response)
-      min_response     = local.min_response
-      max_response     = local.max_response
+      min_response = local.min_response
+      max_response = local.max_response
     }
 
     cost_analysis = {
-      total_monthly   = local.total_monthly_cost
+      total_monthly = local.total_monthly_cost
       average_monthly = local.average_monthly
-      highest_month   = local.highest_month
-      lowest_month    = local.lowest_month
+      highest_month = local.highest_month
+      lowest_month = local.lowest_month
     }
 
     resource_scaling = {
-      scaled_cpu    = local.scaled_cpu
+      scaled_cpu = local.scaled_cpu
       scaled_memory = local.scaled_memory
-      hourly_cost   = provider::pyvider::round(local.total_hourly_cost)
-      monthly_cost  = local.monthly_cost
+      hourly_cost = provider::pyvider::round(local.total_hourly_cost)
+      monthly_cost = local.monthly_cost
     }
 
     request_analytics = {
-      total_requests   = local.total_requests
+      total_requests = local.total_requests
       average_requests = local.average_requests
-      peak_requests    = local.peak_requests
-      variance         = provider::pyvider::round(local.variance)
+      peak_requests = local.peak_requests
+      variance = provider::pyvider::round(local.variance)
     }
 
     investment = {
-      final_amount    = local.final_amount
+      final_amount = local.final_amount
       interest_earned = local.interest_earned
     }
 

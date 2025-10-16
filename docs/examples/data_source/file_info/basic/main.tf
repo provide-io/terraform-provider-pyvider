@@ -197,44 +197,44 @@ output "basic_file_info" {
   value = {
     system_files = {
       hosts_file = {
-        exists      = data.pyvider_file_info.hosts_file.exists
-        size        = data.pyvider_file_info.hosts_file.size
-        type        = data.pyvider_file_info.hosts_file.is_file ? "file" : "other"
+        exists = data.pyvider_file_info.hosts_file.exists
+        size = data.pyvider_file_info.hosts_file.size
+        type = data.pyvider_file_info.hosts_file.is_file ? "file" : "other"
         permissions = data.pyvider_file_info.hosts_file.permissions
-        mime_type   = data.pyvider_file_info.hosts_file.mime_type
+        mime_type = data.pyvider_file_info.hosts_file.mime_type
       }
 
       tmp_directory = {
-        exists       = data.pyvider_file_info.tmp_dir.exists
+        exists = data.pyvider_file_info.tmp_dir.exists
         is_directory = data.pyvider_file_info.tmp_dir.is_dir
-        permissions  = data.pyvider_file_info.tmp_dir.permissions
-        owner        = data.pyvider_file_info.tmp_dir.owner
+        permissions = data.pyvider_file_info.tmp_dir.permissions
+        owner = data.pyvider_file_info.tmp_dir.owner
       }
     }
 
     application_files = {
-      config_exists          = data.pyvider_file_info.config_file.exists
+      config_exists = data.pyvider_file_info.config_file.exists
       current_dir_accessible = data.pyvider_file_info.current_dir.exists
     }
 
     created_files = {
       test_directory = {
-        path        = data.pyvider_file_info.created_dir.path
-        exists      = data.pyvider_file_info.created_dir.exists
+        path = data.pyvider_file_info.created_dir.path
+        exists = data.pyvider_file_info.created_dir.exists
         permissions = data.pyvider_file_info.created_dir.permissions
       }
 
       text_file = {
-        path      = data.pyvider_file_info.created_text.path
-        exists    = data.pyvider_file_info.created_text.exists
-        size      = data.pyvider_file_info.created_text.size
+        path = data.pyvider_file_info.created_text.path
+        exists = data.pyvider_file_info.created_text.exists
+        size = data.pyvider_file_info.created_text.size
         mime_type = data.pyvider_file_info.created_text.mime_type
       }
 
       json_file = {
-        path      = data.pyvider_file_info.created_json.path
-        exists    = data.pyvider_file_info.created_json.exists
-        size      = data.pyvider_file_info.created_json.size
+        path = data.pyvider_file_info.created_json.path
+        exists = data.pyvider_file_info.created_json.exists
+        size = data.pyvider_file_info.created_json.size
         mime_type = data.pyvider_file_info.created_json.mime_type
       }
     }

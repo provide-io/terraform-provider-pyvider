@@ -20,7 +20,7 @@ locals {
 }
 
 output "function_result" {
-  description = "Result of pyvider_nested_data_processor function"
+  description = "Result of pyvider_nested_data_processor function"  
   value       = local.example_result
 }
 

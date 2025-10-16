@@ -36,21 +36,21 @@ variable "app_version" {
 locals {
   database_configs = {
     development = {
-      host      = "localhost"
-      port      = 5432
-      database  = "myapp_dev"
+      host     = "localhost"
+      port     = 5432
+      database = "myapp_dev"
       pool_size = 5
     }
     staging = {
-      host      = "staging-db.example.com"
-      port      = 5432
-      database  = "myapp_staging"
+      host     = "staging-db.example.com"
+      port     = 5432
+      database = "myapp_staging"
       pool_size = 10
     }
     production = {
-      host      = "prod-db.example.com"
-      port      = 5432
-      database  = "myapp_prod"
+      host     = "prod-db.example.com"
+      port     = 5432
+      database = "myapp_prod"
       pool_size = 20
     }
   }
@@ -61,22 +61,22 @@ locals {
   # Environment-specific feature flags
   feature_flags = {
     development = {
-      debug_mode   = true
-      verbose_logs = true
-      dev_tools    = true
-      metrics      = false
+      debug_mode    = true
+      verbose_logs  = true
+      dev_tools     = true
+      metrics       = false
     }
     staging = {
-      debug_mode   = false
-      verbose_logs = true
-      dev_tools    = false
-      metrics      = true
+      debug_mode    = false
+      verbose_logs  = true
+      dev_tools     = false
+      metrics       = true
     }
     production = {
-      debug_mode   = false
-      verbose_logs = false
-      dev_tools    = false
-      metrics      = true
+      debug_mode    = false
+      verbose_logs  = false
+      dev_tools     = false
+      metrics       = true
     }
   }
 }
@@ -147,7 +147,7 @@ resource "pyvider_file_content" "dev_config" {
   count = var.environment != "production" ? 1 : 0
 
   filename = "/tmp/development-tools.conf"
-  content  = <<-EOF
+  content = <<-EOF
     # Development Tools Configuration
     # This file only exists in non-production environments
 

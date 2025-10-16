@@ -17,45 +17,45 @@ provider "pyvider" {
 
 # Filter by prefix with case-sensitive matching
 data "pyvider_env_variables" "app_config_sensitive" {
-  prefix         = "MYAPP_"
+  prefix = "MYAPP_"
   case_sensitive = true
 }
 
 # Filter by prefix with case-insensitive matching
 data "pyvider_env_variables" "app_config_insensitive" {
-  prefix         = "myapp_"
-  case_sensitive = false # Matches MYAPP_, MyApp_, myapp_, etc.
+  prefix = "myapp_"
+  case_sensitive = false  # Matches MYAPP_, MyApp_, myapp_, etc.
 }
 
 # Apply transformations to keys and values
 data "pyvider_env_variables" "transformed_vars" {
-  prefix           = "CONFIG_"
-  transform_keys   = "lower" # CONFIG_DATABASE_URL becomes config_database_url
-  transform_values = "upper" # Transform all values to uppercase
+  prefix = "CONFIG_"
+  transform_keys = "lower"    # CONFIG_DATABASE_URL becomes config_database_url
+  transform_values = "upper"  # Transform all values to uppercase
 }
 
 # Complex regex patterns
 data "pyvider_env_variables" "url_vars" {
-  regex = ".*_URL$" # Matches any variable ending in _URL
+  regex = ".*_URL$"  # Matches any variable ending in _URL
 }
 
 data "pyvider_env_variables" "port_vars" {
-  regex = ".*PORT.*" # Matches variables containing PORT anywhere
+  regex = ".*PORT.*"  # Matches variables containing PORT anywhere
 }
 
 data "pyvider_env_variables" "credential_vars" {
-  regex = ".*(KEY|SECRET|TOKEN|PASSWORD).*" # Security-related variables
+  regex = ".*(KEY|SECRET|TOKEN|PASSWORD).*"  # Security-related variables
 }
 
 # Include empty variables
 data "pyvider_env_variables" "with_empty" {
-  prefix        = "OPTIONAL_"
-  exclude_empty = false # Include variables that exist but are empty
+  prefix = "OPTIONAL_"
+  exclude_empty = false  # Include variables that exist but are empty
 }
 
 # Exclude empty variables (default behavior)
 data "pyvider_env_variables" "without_empty" {
-  prefix        = "OPTIONAL_"
+  prefix = "OPTIONAL_"
   exclude_empty = true
 }
 
@@ -64,7 +64,7 @@ locals {
   # Combine different filtering results
   all_urls = merge(
     data.pyvider_env_variables.url_vars.values,
-    { for k, v in data.pyvider_env_variables.app_config_sensitive.values : k => v if can(regex(".*_URL$", k)) }
+    {for k, v in data.pyvider_env_variables.app_config_sensitive.values : k => v if can(regex(".*_URL$", k))}
   )
 
   # Transform app config variables to a more usable format
@@ -80,14 +80,14 @@ locals {
     }
     ports = {
       for k, v in data.pyvider_env_variables.port_vars.values : k => {
-        value         = v
-        parsed_port   = can(tonumber(v)) ? tonumber(v) : null
+        value = v
+        parsed_port = can(tonumber(v)) ? tonumber(v) : null
         is_valid_port = can(tonumber(v)) && tonumber(v) > 0 && tonumber(v) <= 65535
       }
     }
     credentials = {
       for k, v in data.pyvider_env_variables.credential_vars.values : k => {
-        length    = length(v)
+        length = length(v)
         has_value = v != ""
       }
     }
@@ -112,9 +112,9 @@ resource "pyvider_file_content" "network_config" {
     ports = {
       for port_key, port_data in local.variable_categories.ports :
       lower(port_key) => {
-        value  = port_data.value
+        value = port_data.value
         number = port_data.parsed_port
-        valid  = port_data.is_valid_port
+        valid = port_data.is_valid_port
       }
     }
     generated_at = timestamp()
@@ -134,22 +134,22 @@ resource "pyvider_file_content" "app_settings" {
 resource "pyvider_file_content" "filtering_report" {
   filename = "/tmp/filtering_report.md"
   content = templatefile("${path.module}/filtering_report.md.tpl", {
-    case_sensitive_count   = length(data.pyvider_env_variables.app_config_sensitive.values)
+    case_sensitive_count = length(data.pyvider_env_variables.app_config_sensitive.values)
     case_insensitive_count = length(data.pyvider_env_variables.app_config_insensitive.values)
-    transformed_count      = length(data.pyvider_env_variables.transformed_vars.values)
-    url_vars_count         = length(data.pyvider_env_variables.url_vars.values)
-    port_vars_count        = length(data.pyvider_env_variables.port_vars.values)
-    credential_vars_count  = length(data.pyvider_env_variables.credential_vars.values)
-    with_empty_count       = length(data.pyvider_env_variables.with_empty.values)
-    without_empty_count    = length(data.pyvider_env_variables.without_empty.values)
+    transformed_count = length(data.pyvider_env_variables.transformed_vars.values)
+    url_vars_count = length(data.pyvider_env_variables.url_vars.values)
+    port_vars_count = length(data.pyvider_env_variables.port_vars.values)
+    credential_vars_count = length(data.pyvider_env_variables.credential_vars.values)
+    with_empty_count = length(data.pyvider_env_variables.with_empty.values)
+    without_empty_count = length(data.pyvider_env_variables.without_empty.values)
 
-    case_sensitive_vars   = keys(data.pyvider_env_variables.app_config_sensitive.values)
+    case_sensitive_vars = keys(data.pyvider_env_variables.app_config_sensitive.values)
     case_insensitive_vars = keys(data.pyvider_env_variables.app_config_insensitive.values)
-    url_vars              = keys(data.pyvider_env_variables.url_vars.values)
-    port_vars             = keys(data.pyvider_env_variables.port_vars.values)
-    credential_vars       = keys(data.pyvider_env_variables.credential_vars.values)
+    url_vars = keys(data.pyvider_env_variables.url_vars.values)
+    port_vars = keys(data.pyvider_env_variables.port_vars.values)
+    credential_vars = keys(data.pyvider_env_variables.credential_vars.values)
 
-    app_config          = local.app_config
+    app_config = local.app_config
     variable_categories = local.variable_categories
   })
 }
@@ -160,43 +160,43 @@ resource "pyvider_file_content" "filtering_summary" {
   content = jsonencode({
     filtering_results = {
       case_sensitive = {
-        pattern   = "MYAPP_"
-        count     = length(data.pyvider_env_variables.app_config_sensitive.values)
+        pattern = "MYAPP_"
+        count = length(data.pyvider_env_variables.app_config_sensitive.values)
         variables = keys(data.pyvider_env_variables.app_config_sensitive.values)
       }
       case_insensitive = {
-        pattern   = "myapp_"
-        count     = length(data.pyvider_env_variables.app_config_insensitive.values)
+        pattern = "myapp_"
+        count = length(data.pyvider_env_variables.app_config_insensitive.values)
         variables = keys(data.pyvider_env_variables.app_config_insensitive.values)
       }
       regex_filters = {
         urls = {
-          pattern   = ".*_URL$"
-          count     = length(data.pyvider_env_variables.url_vars.values)
+          pattern = ".*_URL$"
+          count = length(data.pyvider_env_variables.url_vars.values)
           variables = keys(data.pyvider_env_variables.url_vars.values)
         }
         ports = {
-          pattern   = ".*PORT.*"
-          count     = length(data.pyvider_env_variables.port_vars.values)
+          pattern = ".*PORT.*"
+          count = length(data.pyvider_env_variables.port_vars.values)
           variables = keys(data.pyvider_env_variables.port_vars.values)
         }
         credentials = {
-          pattern   = ".*(KEY|SECRET|TOKEN|PASSWORD).*"
-          count     = length(data.pyvider_env_variables.credential_vars.values)
+          pattern = ".*(KEY|SECRET|TOKEN|PASSWORD).*"
+          count = length(data.pyvider_env_variables.credential_vars.values)
           variables = keys(data.pyvider_env_variables.credential_vars.values)
         }
       }
       transformations = {
-        keys_lowercased  = keys(data.pyvider_env_variables.transformed_vars.values)
+        keys_lowercased = keys(data.pyvider_env_variables.transformed_vars.values)
         processed_config = local.app_config
       }
       empty_handling = {
-        with_empty    = length(data.pyvider_env_variables.with_empty.values)
+        with_empty = length(data.pyvider_env_variables.with_empty.values)
         without_empty = length(data.pyvider_env_variables.without_empty.values)
       }
     }
     categorized_variables = local.variable_categories
-    timestamp             = timestamp()
+    timestamp = timestamp()
   })
 }
 
@@ -204,13 +204,13 @@ output "filtering_results" {
   description = "Results of various filtering and transformation approaches"
   value = {
     case_sensitivity = {
-      sensitive_match   = length(data.pyvider_env_variables.app_config_sensitive.values)
+      sensitive_match = length(data.pyvider_env_variables.app_config_sensitive.values)
       insensitive_match = length(data.pyvider_env_variables.app_config_insensitive.values)
     }
 
     regex_patterns = {
-      url_matches        = length(data.pyvider_env_variables.url_vars.values)
-      port_matches       = length(data.pyvider_env_variables.port_vars.values)
+      url_matches = length(data.pyvider_env_variables.url_vars.values)
+      port_matches = length(data.pyvider_env_variables.port_vars.values)
       credential_matches = length(data.pyvider_env_variables.credential_vars.values)
     }
 
@@ -225,8 +225,8 @@ output "filtering_results" {
     }
 
     categorized_data = {
-      total_urls              = length(local.all_urls)
-      valid_ports             = length([for k, v in local.variable_categories.ports : k if v.is_valid_port])
+      total_urls = length(local.all_urls)
+      valid_ports = length([for k, v in local.variable_categories.ports : k if v.is_valid_port])
       credentials_with_values = length([for k, v in local.variable_categories.credentials : k if v.has_value])
     }
 

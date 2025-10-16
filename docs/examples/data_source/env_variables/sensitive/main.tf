@@ -18,12 +18,12 @@ provider "pyvider" {
 # Read a mix of sensitive and non-sensitive variables
 data "pyvider_env_variables" "app_credentials" {
   keys = [
-    "DATABASE_URL",    # Sensitive - contains credentials
-    "API_SECRET_KEY",  # Sensitive - secret key
-    "JWT_SIGNING_KEY", # Sensitive - cryptographic key
-    "APP_NAME",        # Not sensitive - application name
-    "APP_VERSION",     # Not sensitive - version info
-    "LOG_LEVEL"        # Not sensitive - logging configuration
+    "DATABASE_URL",     # Sensitive - contains credentials
+    "API_SECRET_KEY",   # Sensitive - secret key
+    "JWT_SIGNING_KEY",  # Sensitive - cryptographic key
+    "APP_NAME",         # Not sensitive - application name
+    "APP_VERSION",      # Not sensitive - version info
+    "LOG_LEVEL"         # Not sensitive - logging configuration
   ]
 
   # Mark which variables should be treated as sensitive
@@ -55,21 +55,21 @@ data "pyvider_env_variables" "oauth_config" {
 locals {
   # Non-sensitive configuration can be used directly
   app_metadata = {
-    name      = lookup(data.pyvider_env_variables.app_credentials.values, "APP_NAME", "unknown-app")
-    version   = lookup(data.pyvider_env_variables.app_credentials.values, "APP_VERSION", "0.0.0")
+    name     = lookup(data.pyvider_env_variables.app_credentials.values, "APP_NAME", "unknown-app")
+    version  = lookup(data.pyvider_env_variables.app_credentials.values, "APP_VERSION", "0.0.0")
     log_level = lookup(data.pyvider_env_variables.app_credentials.values, "LOG_LEVEL", "INFO")
   }
 
   # For sensitive data, we need to be careful about how we use it
   # We can't directly interpolate sensitive values into strings
   has_database_url = contains(keys(data.pyvider_env_variables.app_credentials.sensitive_values), "DATABASE_URL")
-  has_api_key      = contains(keys(data.pyvider_env_variables.app_credentials.sensitive_values), "API_SECRET_KEY")
+  has_api_key = contains(keys(data.pyvider_env_variables.app_credentials.sensitive_values), "API_SECRET_KEY")
 
   # OAuth configuration (mixed sensitive/non-sensitive)
   oauth_public_config = {
-    client_id    = lookup(data.pyvider_env_variables.oauth_config.values, "OAUTH_CLIENT_ID", "")
+    client_id = lookup(data.pyvider_env_variables.oauth_config.values, "OAUTH_CLIENT_ID", "")
     redirect_uri = lookup(data.pyvider_env_variables.oauth_config.values, "OAUTH_REDIRECT_URI", "")
-    enabled      = lookup(data.pyvider_env_variables.oauth_config.values, "OAUTH_ENABLED", "false") == "true"
+    enabled = lookup(data.pyvider_env_variables.oauth_config.values, "OAUTH_ENABLED", "false") == "true"
   }
 }
 
@@ -78,11 +78,11 @@ resource "pyvider_file_content" "public_config" {
   filename = "/tmp/public_config.yaml"
   content = yamlencode({
     application = local.app_metadata
-    oauth       = local.oauth_public_config
+    oauth = local.oauth_public_config
     security = {
       has_database_credentials = local.has_database_url
-      has_api_key              = local.has_api_key
-      total_secrets            = length(data.pyvider_env_variables.app_credentials.sensitive_values)
+      has_api_key = local.has_api_key
+      total_secrets = length(data.pyvider_env_variables.app_credentials.sensitive_values)
     }
     generated_at = timestamp()
   })
@@ -145,13 +145,13 @@ resource "pyvider_file_content" "security_report" {
   filename = "/tmp/security_report.json"
   content = jsonencode({
     security_assessment = {
-      total_variables_checked   = length(data.pyvider_env_variables.app_credentials.keys)
+      total_variables_checked = length(data.pyvider_env_variables.app_credentials.keys)
       sensitive_variables_found = length(data.pyvider_env_variables.app_credentials.sensitive_values)
-      non_sensitive_variables   = length(data.pyvider_env_variables.app_credentials.values)
+      non_sensitive_variables = length(data.pyvider_env_variables.app_credentials.values)
 
       required_secrets = {
-        expected    = local.required_secrets
-        missing     = local.missing_secrets
+        expected = local.required_secrets
+        missing = local.missing_secrets
         all_present = length(local.missing_secrets) == 0
       }
 
@@ -161,7 +161,7 @@ resource "pyvider_file_content" "security_report" {
         public_settings = local.oauth_public_config
         sensitive_keys_present = {
           client_secret = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_CLIENT_SECRET")
-          private_key   = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_PRIVATE_KEY")
+          private_key = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_PRIVATE_KEY")
         }
       }
 
@@ -212,23 +212,23 @@ output "sensitive_variable_handling" {
     security_status = {
       total_secrets_configured = length(data.pyvider_env_variables.app_credentials.sensitive_values)
       required_secrets_present = length(local.missing_secrets) == 0
-      missing_secrets_count    = length(local.missing_secrets)
+      missing_secrets_count = length(local.missing_secrets)
       # Note: We don't expose the actual missing secret names in output
     }
 
     oauth_status = {
-      public_config     = local.oauth_public_config
+      public_config = local.oauth_public_config
       has_client_secret = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_CLIENT_SECRET")
-      has_private_key   = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_PRIVATE_KEY")
+      has_private_key = contains(keys(data.pyvider_env_variables.oauth_config.sensitive_values), "OAUTH_PRIVATE_KEY")
     }
 
     validation_results = local.credential_validation
 
     files_created = {
-      public_config       = pyvider_file_content.public_config.filename
-      template            = pyvider_file_content.app_config_template.filename
-      security_report     = pyvider_file_content.security_report.filename
-      database_status     = local.has_database_url ? pyvider_file_content.database_status[0].filename : null
+      public_config = pyvider_file_content.public_config.filename
+      template = pyvider_file_content.app_config_template.filename
+      security_report = pyvider_file_content.security_report.filename
+      database_status = local.has_database_url ? pyvider_file_content.database_status[0].filename : null
       no_database_warning = !local.has_database_url ? pyvider_file_content.no_database_warning[0].filename : null
     }
   }

@@ -43,10 +43,10 @@ locals {
 # Example 2: String and list operations
 locals {
   service_names = ["web", "api", "database", "cache", "monitor"]
-  log_message   = "Error connecting to database service"
+  log_message = "Error connecting to database service"
 
   # Check if service exists
-  has_database  = provider::pyvider::contains(local.service_names, "database")
+  has_database = provider::pyvider::contains(local.service_names, "database")
   has_analytics = provider::pyvider::contains(local.service_names, "analytics")
 
   # Check if log contains error
@@ -54,7 +54,7 @@ locals {
 
   # Get collection sizes
   service_count = provider::pyvider::length(local.service_names)
-  log_length    = provider::pyvider::length(local.log_message)
+  log_length = provider::pyvider::length(local.log_message)
 }
 
 # Example 3: Configuration management with lookups
@@ -68,19 +68,19 @@ locals {
   }
 
   feature_flags = {
-    "new_ui"        = true
-    "analytics"     = false
-    "dark_mode"     = true
+    "new_ui"      = true
+    "analytics"   = false
+    "dark_mode"   = true
     "beta_features" = false
   }
 
   # Get configuration values with defaults
-  max_conn        = provider::pyvider::lookup(local.app_settings, "max_connections", "50")
-  timeout         = provider::pyvider::lookup(local.app_settings, "timeout_seconds", "60")
+  max_conn = provider::pyvider::lookup(local.app_settings, "max_connections", "50")
+  timeout = provider::pyvider::lookup(local.app_settings, "timeout_seconds", "60")
   unknown_setting = provider::pyvider::lookup(local.app_settings, "unknown_key", "default_value")
 
   # Check feature flags
-  ui_enabled      = provider::pyvider::lookup(local.feature_flags, "new_ui", false)
+  ui_enabled = provider::pyvider::lookup(local.feature_flags, "new_ui", false)
   missing_feature = provider::pyvider::lookup(local.feature_flags, "missing_feature", false)
 }
 
@@ -96,7 +96,7 @@ locals {
 
   # Check for specific environment variables
   has_database_url = provider::pyvider::contains(local.env_var_names, "APP_DATABASE_URL")
-  has_secret_key   = provider::pyvider::contains(local.env_var_names, "APP_SECRET_KEY")
+  has_secret_key = provider::pyvider::contains(local.env_var_names, "APP_SECRET_KEY")
 
   # Get values with fallbacks
   app_name = provider::pyvider::lookup(
@@ -114,7 +114,7 @@ locals {
 
 # Example 5: Service discovery and validation
 locals {
-  required_services  = ["web", "api", "database"]
+  required_services = ["web", "api", "database"]
   available_services = ["web", "api", "database", "cache", "monitor", "logging"]
 
   # Check if all required services are available
@@ -124,7 +124,7 @@ locals {
   }
 
   # Count available vs required
-  required_count  = provider::pyvider::length(local.required_services)
+  required_count = provider::pyvider::length(local.required_services)
   available_count = provider::pyvider::length(local.available_services)
 
   # Find missing services (this would require more complex logic in real Terraform)
@@ -149,14 +149,14 @@ locals {
   subnet_type = "private"
 
   # Get network configuration
-  vpc_cidr    = provider::pyvider::lookup(local.network_configs, local.current_vpc, "172.16.0.0/16")
+  vpc_cidr = provider::pyvider::lookup(local.network_configs, local.current_vpc, "172.16.0.0/16")
   subnet_mask = provider::pyvider::lookup(local.subnet_configs, local.subnet_type, "/24")
 
   # Configuration validation
-  has_vpc_config    = provider::pyvider::contains(keys(local.network_configs), local.current_vpc)
+  has_vpc_config = provider::pyvider::contains(keys(local.network_configs), local.current_vpc)
   has_subnet_config = provider::pyvider::contains(keys(local.subnet_configs), local.subnet_type)
 
-  total_vpcs         = provider::pyvider::length(local.network_configs)
+  total_vpcs = provider::pyvider::length(local.network_configs)
   total_subnet_types = provider::pyvider::length(local.subnet_configs)
 }
 
@@ -219,47 +219,47 @@ output "collection_function_results" {
   value = {
     database_config = {
       environment = local.environment
-      host        = local.db_host
-      test_host   = local.test_db
+      host = local.db_host
+      test_host = local.test_db
     }
 
     service_management = {
       service_count = local.service_count
-      has_database  = local.has_database
+      has_database = local.has_database
       has_analytics = local.has_analytics
     }
 
     log_analysis = {
       message_length = local.log_length
-      is_error       = local.is_error_log
+      is_error = local.is_error_log
     }
 
     app_configuration = {
-      name            = local.app_name
-      version         = local.app_version
+      name = local.app_name
+      version = local.app_version
       max_connections = local.max_conn
-      timeout         = local.timeout
-      ui_enabled      = local.ui_enabled
+      timeout = local.timeout
+      ui_enabled = local.ui_enabled
     }
 
     environment_vars = {
-      count            = local.env_var_count
+      count = local.env_var_count
       has_database_url = local.has_database_url
-      has_secret_key   = local.has_secret_key
+      has_secret_key = local.has_secret_key
     }
 
     service_discovery = {
-      required_services  = local.required_count
+      required_services = local.required_count
       available_services = local.available_count
-      all_available      = local.all_services_available
-      service_checks     = local.service_checks
+      all_available = local.all_services_available
+      service_checks = local.service_checks
     }
 
     network_config = {
-      vpc_cidr       = local.vpc_cidr
-      subnet_mask    = local.subnet_mask
+      vpc_cidr = local.vpc_cidr
+      subnet_mask = local.subnet_mask
       has_vpc_config = local.has_vpc_config
-      total_vpcs     = local.total_vpcs
+      total_vpcs = local.total_vpcs
     }
 
     examples_file = pyvider_file_content.collection_examples.filename

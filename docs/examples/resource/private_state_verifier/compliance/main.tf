@@ -43,52 +43,52 @@ variable "environment_classification" {
 locals {
   compliance_requirements = {
     SOC2 = {
-      encryption_at_rest    = true
-      access_controls       = true
-      audit_logging         = true
-      data_integrity        = true
+      encryption_at_rest = true
+      access_controls = true
+      audit_logging = true
+      data_integrity = true
       availability_controls = true
     }
     HIPAA = {
-      encryption_at_rest        = true
-      access_controls           = true
-      audit_logging             = true
-      data_integrity            = true
+      encryption_at_rest = true
+      access_controls = true
+      audit_logging = true
+      data_integrity = true
       administrative_safeguards = true
-      physical_safeguards       = true
-      technical_safeguards      = true
+      physical_safeguards = true
+      technical_safeguards = true
     }
     "PCI-DSS" = {
-      encryption_at_rest       = true
-      encryption_in_transit    = true
-      access_controls          = true
-      network_security         = true
+      encryption_at_rest = true
+      encryption_in_transit = true
+      access_controls = true
+      network_security = true
       vulnerability_management = true
-      secure_coding            = true
+      secure_coding = true
     }
     GDPR = {
       data_protection_by_design = true
-      encryption_at_rest        = true
-      access_controls           = true
-      data_portability          = true
-      right_to_erasure          = true
-      audit_logging             = true
+      encryption_at_rest = true
+      access_controls = true
+      data_portability = true
+      right_to_erasure = true
+      audit_logging = true
     }
     FedRAMP = {
-      encryption_at_rest    = true
-      access_controls       = true
-      audit_logging         = true
-      incident_response     = true
+      encryption_at_rest = true
+      access_controls = true
+      audit_logging = true
+      incident_response = true
       continuous_monitoring = true
-      security_controls     = true
+      security_controls = true
     }
     ISO27001 = {
       information_security_policy = true
-      risk_management             = true
-      asset_management            = true
-      access_controls             = true
-      cryptography                = true
-      incident_management         = true
+      risk_management = true
+      asset_management = true
+      access_controls = true
+      cryptography = true
+      incident_management = true
     }
   }
 
@@ -139,92 +139,92 @@ resource "pyvider_private_state_verifier" "cross_border" {
 locals {
   compliance_tests = {
     data_classification = {
-      test_name   = "data_classification"
-      input       = pyvider_private_state_verifier.data_classification.input_value
-      output      = pyvider_private_state_verifier.data_classification.decrypted_token
-      expected    = "SECRET_FOR_${upper(var.environment_classification)}-DATA-CLASSIFICATION-TEST"
-      passed      = pyvider_private_state_verifier.data_classification.decrypted_token == "SECRET_FOR_${upper(var.environment_classification)}-DATA-CLASSIFICATION-TEST"
+      test_name = "data_classification"
+      input = pyvider_private_state_verifier.data_classification.input_value
+      output = pyvider_private_state_verifier.data_classification.decrypted_token
+      expected = "SECRET_FOR_${upper(var.environment_classification)}-DATA-CLASSIFICATION-TEST"
+      passed = pyvider_private_state_verifier.data_classification.decrypted_token == "SECRET_FOR_${upper(var.environment_classification)}-DATA-CLASSIFICATION-TEST"
       requirement = "data_protection"
       criticality = "high"
     }
 
     encryption_strength = {
-      test_name   = "encryption_strength"
-      input       = pyvider_private_state_verifier.encryption_strength.input_value
-      output      = pyvider_private_state_verifier.encryption_strength.decrypted_token
-      expected    = "SECRET_FOR_ENCRYPTION-STRENGTH-VALIDATION-${upper(var.compliance_framework)}"
-      passed      = pyvider_private_state_verifier.encryption_strength.decrypted_token == "SECRET_FOR_ENCRYPTION-STRENGTH-VALIDATION-${upper(var.compliance_framework)}"
+      test_name = "encryption_strength"
+      input = pyvider_private_state_verifier.encryption_strength.input_value
+      output = pyvider_private_state_verifier.encryption_strength.decrypted_token
+      expected = "SECRET_FOR_ENCRYPTION-STRENGTH-VALIDATION-${upper(var.compliance_framework)}"
+      passed = pyvider_private_state_verifier.encryption_strength.decrypted_token == "SECRET_FOR_ENCRYPTION-STRENGTH-VALIDATION-${upper(var.compliance_framework)}"
       requirement = "encryption_at_rest"
       criticality = "critical"
     }
 
     access_control = {
-      test_name   = "access_control"
-      input       = pyvider_private_state_verifier.access_control.input_value
-      output      = pyvider_private_state_verifier.access_control.decrypted_token
-      expected    = "SECRET_FOR_ACCESS-CONTROL-TEST-${upper(var.compliance_framework)}"
-      passed      = pyvider_private_state_verifier.access_control.decrypted_token == "SECRET_FOR_ACCESS-CONTROL-TEST-${upper(var.compliance_framework)}"
+      test_name = "access_control"
+      input = pyvider_private_state_verifier.access_control.input_value
+      output = pyvider_private_state_verifier.access_control.decrypted_token
+      expected = "SECRET_FOR_ACCESS-CONTROL-TEST-${upper(var.compliance_framework)}"
+      passed = pyvider_private_state_verifier.access_control.decrypted_token == "SECRET_FOR_ACCESS-CONTROL-TEST-${upper(var.compliance_framework)}"
       requirement = "access_controls"
       criticality = "high"
     }
 
     audit_trail = {
-      test_name   = "audit_trail"
-      input       = pyvider_private_state_verifier.audit_trail.input_value
-      output      = pyvider_private_state_verifier.audit_trail.decrypted_token
-      expected    = "SECRET_FOR_${upper(pyvider_private_state_verifier.audit_trail.input_value)}"
-      passed      = pyvider_private_state_verifier.audit_trail.decrypted_token == "SECRET_FOR_${upper(pyvider_private_state_verifier.audit_trail.input_value)}"
+      test_name = "audit_trail"
+      input = pyvider_private_state_verifier.audit_trail.input_value
+      output = pyvider_private_state_verifier.audit_trail.decrypted_token
+      expected = "SECRET_FOR_${upper(pyvider_private_state_verifier.audit_trail.input_value)}"
+      passed = pyvider_private_state_verifier.audit_trail.decrypted_token == "SECRET_FOR_${upper(pyvider_private_state_verifier.audit_trail.input_value)}"
       requirement = "audit_logging"
       criticality = "high"
     }
 
     data_integrity = {
-      test_name   = "data_integrity"
-      input       = pyvider_private_state_verifier.data_integrity.input_value
-      output      = pyvider_private_state_verifier.data_integrity.decrypted_token
-      expected    = "SECRET_FOR_DATA-INTEGRITY-CHECK-${upper(var.compliance_framework)}"
-      passed      = pyvider_private_state_verifier.data_integrity.decrypted_token == "SECRET_FOR_DATA-INTEGRITY-CHECK-${upper(var.compliance_framework)}"
+      test_name = "data_integrity"
+      input = pyvider_private_state_verifier.data_integrity.input_value
+      output = pyvider_private_state_verifier.data_integrity.decrypted_token
+      expected = "SECRET_FOR_DATA-INTEGRITY-CHECK-${upper(var.compliance_framework)}"
+      passed = pyvider_private_state_verifier.data_integrity.decrypted_token == "SECRET_FOR_DATA-INTEGRITY-CHECK-${upper(var.compliance_framework)}"
       requirement = "data_integrity"
       criticality = "critical"
     }
 
     pii_handling = {
-      test_name   = "pii_handling"
-      input       = pyvider_private_state_verifier.pii_handling.input_value
-      output      = pyvider_private_state_verifier.pii_handling.decrypted_token
-      expected    = "SECRET_FOR_PII-PROTECTION-TEST-${upper(var.compliance_framework)}"
-      passed      = pyvider_private_state_verifier.pii_handling.decrypted_token == "SECRET_FOR_PII-PROTECTION-TEST-${upper(var.compliance_framework)}"
+      test_name = "pii_handling"
+      input = pyvider_private_state_verifier.pii_handling.input_value
+      output = pyvider_private_state_verifier.pii_handling.decrypted_token
+      expected = "SECRET_FOR_PII-PROTECTION-TEST-${upper(var.compliance_framework)}"
+      passed = pyvider_private_state_verifier.pii_handling.decrypted_token == "SECRET_FOR_PII-PROTECTION-TEST-${upper(var.compliance_framework)}"
       requirement = "data_protection"
       criticality = "critical"
     }
 
     retention_policy = {
-      test_name   = "retention_policy"
-      input       = pyvider_private_state_verifier.retention_policy.input_value
-      output      = pyvider_private_state_verifier.retention_policy.decrypted_token
-      expected    = "SECRET_FOR_RETENTION-POLICY-${upper(var.compliance_framework)}-TEST"
-      passed      = pyvider_private_state_verifier.retention_policy.decrypted_token == "SECRET_FOR_RETENTION-POLICY-${upper(var.compliance_framework)}-TEST"
+      test_name = "retention_policy"
+      input = pyvider_private_state_verifier.retention_policy.input_value
+      output = pyvider_private_state_verifier.retention_policy.decrypted_token
+      expected = "SECRET_FOR_RETENTION-POLICY-${upper(var.compliance_framework)}-TEST"
+      passed = pyvider_private_state_verifier.retention_policy.decrypted_token == "SECRET_FOR_RETENTION-POLICY-${upper(var.compliance_framework)}-TEST"
       requirement = "data_lifecycle"
       criticality = "medium"
     }
 
     cross_border = {
-      test_name   = "cross_border"
-      input       = pyvider_private_state_verifier.cross_border.input_value
-      output      = pyvider_private_state_verifier.cross_border.decrypted_token
-      expected    = "SECRET_FOR_CROSS-BORDER-TRANSFER-${upper(var.compliance_framework)}"
-      passed      = pyvider_private_state_verifier.cross_border.decrypted_token == "SECRET_FOR_CROSS-BORDER-TRANSFER-${upper(var.compliance_framework)}"
+      test_name = "cross_border"
+      input = pyvider_private_state_verifier.cross_border.input_value
+      output = pyvider_private_state_verifier.cross_border.decrypted_token
+      expected = "SECRET_FOR_CROSS-BORDER-TRANSFER-${upper(var.compliance_framework)}"
+      passed = pyvider_private_state_verifier.cross_border.decrypted_token == "SECRET_FOR_CROSS-BORDER-TRANSFER-${upper(var.compliance_framework)}"
       requirement = "data_transfer"
       criticality = "high"
     }
   }
 
   compliance_summary = {
-    framework         = var.compliance_framework
-    classification    = var.environment_classification
-    total_tests       = length(local.compliance_tests)
-    passed_tests      = length([for test in local.compliance_tests : test if test.passed])
-    failed_tests      = length([for test in local.compliance_tests : test if !test.passed])
+    framework = var.compliance_framework
+    classification = var.environment_classification
+    total_tests = length(local.compliance_tests)
+    passed_tests = length([for test in local.compliance_tests : test if test.passed])
+    failed_tests = length([for test in local.compliance_tests : test if !test.passed])
     compliance_status = alltrue([for test in local.compliance_tests : test.passed])
 
     critical_failures = length([
@@ -249,11 +249,11 @@ resource "pyvider_file_content" "compliance_assessment" {
   filename = "/tmp/compliance_assessment_${var.compliance_framework}.json"
   content = jsonencode({
     assessment = {
-      timestamp      = timestamp()
-      framework      = var.compliance_framework
+      timestamp = timestamp()
+      framework = var.compliance_framework
       classification = var.environment_classification
-      assessor       = "pyvider_private_state_verifier"
-      version        = "1.0"
+      assessor = "pyvider_private_state_verifier"
+      version = "1.0"
     }
 
     executive_summary = {
@@ -263,7 +263,7 @@ resource "pyvider_file_content" "compliance_assessment" {
         local.compliance_summary.high_failures > 0 ? "high" :
         local.compliance_summary.failed_tests > 0 ? "medium" : "low"
       )
-      certification_ready  = local.compliance_summary.compliance_status
+      certification_ready = local.compliance_summary.compliance_status
       remediation_required = !local.compliance_summary.compliance_status
     }
 
@@ -274,19 +274,19 @@ resource "pyvider_file_content" "compliance_assessment" {
     requirement_coverage = {
       for requirement, enabled in local.current_requirements :
       requirement => {
-        required  = enabled
-        tested    = contains([for test in local.compliance_tests : test.requirement], requirement)
+        required = enabled
+        tested = contains([for test in local.compliance_tests : test.requirement], requirement)
         compliant = !contains(local.compliance_summary.failed_requirements, requirement)
       }
     }
 
     compliance_metrics = {
-      total_tests           = local.compliance_summary.total_tests
-      passed_tests          = local.compliance_summary.passed_tests
-      failed_tests          = local.compliance_summary.failed_tests
+      total_tests = local.compliance_summary.total_tests
+      passed_tests = local.compliance_summary.passed_tests
+      failed_tests = local.compliance_summary.failed_tests
       compliance_percentage = (local.compliance_summary.passed_tests / local.compliance_summary.total_tests) * 100
-      critical_failures     = local.compliance_summary.critical_failures
-      high_failures         = local.compliance_summary.high_failures
+      critical_failures = local.compliance_summary.critical_failures
+      high_failures = local.compliance_summary.high_failures
     }
 
     recommendations = concat(
@@ -294,7 +294,7 @@ resource "pyvider_file_content" "compliance_assessment" {
         "✅ All compliance tests passed",
         "✅ Ready for ${var.compliance_framework} certification",
         "✅ Private state encryption meets requirements"
-        ] : [
+      ] : [
         "⚠️ Compliance violations detected",
         "⚠️ Remediation required before certification",
         "📋 Review failed tests and implement fixes"
@@ -309,8 +309,8 @@ resource "pyvider_file_content" "compliance_assessment" {
 
     next_assessment = {
       recommended_date = timeadd(timestamp(), "2160h") # 90 days
-      frequency        = "quarterly"
-      scope            = "full_compliance_validation"
+      frequency = "quarterly"
+      scope = "full_compliance_validation"
     }
   })
 }
@@ -420,45 +420,45 @@ resource "pyvider_file_content" "audit_evidence" {
     audit_evidence = {
       timestamp = timestamp()
       framework = var.compliance_framework
-      scope     = "private_state_encryption_verification"
-      auditor   = "automated_compliance_testing"
+      scope = "private_state_encryption_verification"
+      auditor = "automated_compliance_testing"
     }
 
     test_evidence = {
       for test_name, test in local.compliance_tests :
       test_name => {
-        test_id         = "${var.compliance_framework}-PSV-${upper(substr(test_name, 0, 3))}"
-        requirement     = test.requirement
-        criticality     = test.criticality
-        test_input      = test.input
+        test_id = "${var.compliance_framework}-PSV-${upper(substr(test_name, 0, 3))}"
+        requirement = test.requirement
+        criticality = test.criticality
+        test_input = test.input
         expected_output = test.expected
-        actual_output   = test.output
-        test_result     = test.passed ? "pass" : "fail"
-        test_timestamp  = timestamp()
+        actual_output = test.output
+        test_result = test.passed ? "pass" : "fail"
+        test_timestamp = timestamp()
         compliance_mapping = {
-          SOC2      = test.requirement == "encryption_at_rest" ? "CC6.8" : test.requirement == "access_controls" ? "CC6.1" : test.requirement == "audit_logging" ? "CC7.2" : "CC6.7"
-          HIPAA     = test.requirement == "encryption_at_rest" ? "§164.312(a)(2)(iv)" : test.requirement == "access_controls" ? "§164.312(a)(1)" : test.requirement == "audit_logging" ? "§164.312(b)" : "§164.312(c)(1)"
+          SOC2 = test.requirement == "encryption_at_rest" ? "CC6.8" : test.requirement == "access_controls" ? "CC6.1" : test.requirement == "audit_logging" ? "CC7.2" : "CC6.7"
+          HIPAA = test.requirement == "encryption_at_rest" ? "§164.312(a)(2)(iv)" : test.requirement == "access_controls" ? "§164.312(a)(1)" : test.requirement == "audit_logging" ? "§164.312(b)" : "§164.312(c)(1)"
           "PCI-DSS" = test.requirement == "encryption_at_rest" ? "Requirement 3" : test.requirement == "access_controls" ? "Requirement 7" : test.requirement == "audit_logging" ? "Requirement 10" : "Requirement 4"
-          GDPR      = test.requirement == "data_protection" ? "Article 25" : test.requirement == "encryption_at_rest" ? "Article 32" : test.requirement == "audit_logging" ? "Article 30" : "Article 5"
-          FedRAMP   = test.requirement == "encryption_at_rest" ? "SC-28" : test.requirement == "access_controls" ? "AC-2" : test.requirement == "audit_logging" ? "AU-2" : "SC-13"
-          ISO27001  = test.requirement == "encryption_at_rest" ? "A.10.1.1" : test.requirement == "access_controls" ? "A.9.1.1" : test.requirement == "audit_logging" ? "A.12.4.1" : "A.10.1.2"
+          GDPR = test.requirement == "data_protection" ? "Article 25" : test.requirement == "encryption_at_rest" ? "Article 32" : test.requirement == "audit_logging" ? "Article 30" : "Article 5"
+          FedRAMP = test.requirement == "encryption_at_rest" ? "SC-28" : test.requirement == "access_controls" ? "AC-2" : test.requirement == "audit_logging" ? "AU-2" : "SC-13"
+          ISO27001 = test.requirement == "encryption_at_rest" ? "A.10.1.1" : test.requirement == "access_controls" ? "A.9.1.1" : test.requirement == "audit_logging" ? "A.12.4.1" : "A.10.1.2"
         }[var.compliance_framework]
       }
     }
 
     technical_details = {
-      encryption_algorithm     = "terraform_managed"
-      key_management           = "terraform_managed"
-      data_classification      = var.environment_classification
-      state_protection         = "private_state_encrypted"
+      encryption_algorithm = "terraform_managed"
+      key_management = "terraform_managed"
+      data_classification = var.environment_classification
+      state_protection = "private_state_encrypted"
       access_control_mechanism = "terraform_rbac"
     }
 
     compliance_attestation = {
-      overall_compliance      = local.compliance_summary.compliance_status
-      framework_version       = var.compliance_framework
-      assessment_scope        = "encryption_and_data_protection"
-      limitations             = "limited_to_private_state_functionality"
+      overall_compliance = local.compliance_summary.compliance_status
+      framework_version = var.compliance_framework
+      assessment_scope = "encryption_and_data_protection"
+      limitations = "limited_to_private_state_functionality"
       certification_readiness = local.compliance_summary.compliance_status
     }
   })
@@ -467,11 +467,11 @@ resource "pyvider_file_content" "audit_evidence" {
 output "compliance_verification_results" {
   description = "Compliance framework verification results"
   value = {
-    framework      = var.compliance_framework
+    framework = var.compliance_framework
     classification = var.environment_classification
 
     compliance_status = {
-      overall_compliant   = local.compliance_summary.compliance_status
+      overall_compliant = local.compliance_summary.compliance_status
       certification_ready = local.compliance_summary.compliance_status
       risk_level = (
         local.compliance_summary.critical_failures > 0 ? "critical" :
@@ -481,15 +481,15 @@ output "compliance_verification_results" {
     }
 
     test_metrics = {
-      total_tests           = local.compliance_summary.total_tests
-      passed_tests          = local.compliance_summary.passed_tests
-      failed_tests          = local.compliance_summary.failed_tests
+      total_tests = local.compliance_summary.total_tests
+      passed_tests = local.compliance_summary.passed_tests
+      failed_tests = local.compliance_summary.failed_tests
       compliance_percentage = (local.compliance_summary.passed_tests / local.compliance_summary.total_tests) * 100
     }
 
     failure_analysis = {
-      critical_failures   = local.compliance_summary.critical_failures
-      high_failures       = local.compliance_summary.high_failures
+      critical_failures = local.compliance_summary.critical_failures
+      high_failures = local.compliance_summary.high_failures
       failed_requirements = local.compliance_summary.failed_requirements
     }
 

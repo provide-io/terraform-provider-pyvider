@@ -110,8 +110,8 @@ locals {
     for title, slug in local.url_slugs :
     {
       title = title
-      slug  = slug
-      url   = "/docs/${slug}"
+      slug = slug
+      url = "/docs/${slug}"
     }
   ]
 }
@@ -138,7 +138,7 @@ locals {
     component.name => {
       class_name = provider::pyvider::to_kebab_case(component.name)
       full_class = "${provider::pyvider::to_kebab_case(component.type)}-${provider::pyvider::to_kebab_case(component.name)}"
-      type       = component.type
+      type = component.type
     }
   }
 }
@@ -147,10 +147,10 @@ locals {
 variable "app_settings" {
   type = map(any)
   default = {
-    "Database Host"            = "localhost"
-    "API Base URL"             = "https://api.example.com"
-    "Cache Timeout (seconds)"  = 300
-    "Debug Mode Enabled"       = false
+    "Database Host" = "localhost"
+    "API Base URL" = "https://api.example.com"
+    "Cache Timeout (seconds)" = 300
+    "Debug Mode Enabled" = false
     "Max Connection Pool Size" = 20
   }
 }
@@ -176,25 +176,25 @@ locals {
 # File naming patterns
 variable "document_info" {
   type = list(object({
-    title    = string
+    title = string
     category = string
-    version  = string
+    version = string
   }))
   default = [
     {
-      title    = "User Manual"
+      title = "User Manual"
       category = "Documentation"
-      version  = "2.1"
+      version = "2.1"
     },
     {
-      title    = "API Reference Guide"
+      title = "API Reference Guide"
       category = "Technical Documentation"
-      version  = "1.0"
+      version = "1.0"
     },
     {
-      title    = "Installation Instructions"
+      title = "Installation Instructions"
       category = "Setup Guide"
-      version  = "3.2"
+      version = "3.2"
     }
   ]
 }
@@ -222,10 +222,10 @@ variable "service_config" {
   type = map(string)
   default = {
     "Database Connection String" = "postgresql://localhost:5432/mydb"
-    "Redis Cache URL"            = "redis://localhost:6379"
-    "API Service Port"           = "8080"
-    "Log Level Setting"          = "INFO"
-    "JWT Secret Key"             = "your-secret-key"
+    "Redis Cache URL" = "redis://localhost:6379"
+    "API Service Port" = "8080"
+    "Log Level Setting" = "INFO"
+    "JWT Secret Key" = "your-secret-key"
   }
 }
 
@@ -305,8 +305,8 @@ resource "pyvider_file_content" "css_classes" {
 resource "pyvider_file_content" "navigation_config" {
   filename = "/tmp/navigation.json"
   content = jsonencode({
-    title       = "Documentation Navigation"
-    links       = local.navigation_links
+    title = "Documentation Navigation"
+    links = local.navigation_links
     url_mapping = local.url_slugs
   })
 }
@@ -314,8 +314,8 @@ resource "pyvider_file_content" "navigation_config" {
 resource "pyvider_file_content" "config_files" {
   filename = "/tmp/multi_format_config.json"
   content = jsonencode({
-    snake_case   = local.snake_case_config
-    camelCase    = local.camel_case_config
+    snake_case = local.snake_case_config
+    camelCase = local.camel_case_config
     "kebab-case" = local.kebab_case_config
   })
 }
@@ -332,38 +332,38 @@ resource "pyvider_file_content" "environment_variables" {
 output "case_conversion_results" {
   value = {
     conversion_examples = {
-      original    = local.original_texts
-      snake_case  = local.snake_case_results
-      camel_case  = local.camel_case_results
+      original = local.original_texts
+      snake_case = local.snake_case_results
+      camel_case = local.camel_case_results
       pascal_case = local.pascal_case_results
-      kebab_case  = local.kebab_case_results
+      kebab_case = local.kebab_case_results
     }
 
     api_mapping = {
-      total_fields  = length(var.database_fields)
+      total_fields = length(var.database_fields)
       field_mapping = local.api_field_mapping
-      js_file       = pyvider_file_content.javascript_mapping.filename
+      js_file = pyvider_file_content.javascript_mapping.filename
     }
 
     web_assets = {
       navigation_links = length(local.navigation_links)
-      css_classes      = length(local.css_classes)
-      navigation_file  = pyvider_file_content.navigation_config.filename
-      css_file         = pyvider_file_content.css_classes.filename
+      css_classes = length(local.css_classes)
+      navigation_file = pyvider_file_content.navigation_config.filename
+      css_file = pyvider_file_content.css_classes.filename
     }
 
     configuration = {
       formats_generated = 3
-      config_file       = pyvider_file_content.config_files.filename
-      env_file          = pyvider_file_content.environment_variables.filename
-      env_variables     = length(local.env_variables)
+      config_file = pyvider_file_content.config_files.filename
+      env_file = pyvider_file_content.environment_variables.filename
+      env_variables = length(local.env_variables)
     }
 
     file_patterns = {
       documents_processed = length(local.document_files)
       pattern_examples = [for doc in local.document_files : {
-        snake_file    = doc.snake_file
-        kebab_file    = doc.kebab_file
+        snake_file = doc.snake_file
+        kebab_file = doc.kebab_file
         category_path = doc.category_path
       }]
     }

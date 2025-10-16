@@ -17,7 +17,7 @@ provider "pyvider" {
 
 # Example 1: Convert text to uppercase
 locals {
-  greeting       = "hello world!"
+  greeting = "hello world!"
   upper_greeting = provider::pyvider::upper(local.greeting)
 }
 
@@ -35,7 +35,7 @@ locals {
 # Example 3: Format strings with placeholders
 locals {
   app_name = "MyApp"
-  version  = "1.2.3"
+  version = "1.2.3"
   formatted_title = provider::pyvider::format(
     "%s v%s - Environment: %s",
     local.app_name,
@@ -60,8 +60,8 @@ locals {
 
 # Example 5: Split and join strings
 locals {
-  csv_data        = "apple,banana,cherry,date"
-  fruits          = provider::pyvider::split(local.csv_data, ",")
+  csv_data = "apple,banana,cherry,date"
+  fruits = provider::pyvider::split(local.csv_data, ",")
   fruits_with_and = provider::pyvider::join(local.fruits, " and ")
 }
 
@@ -106,14 +106,14 @@ resource "pyvider_file_content" "string_examples" {
 output "string_function_results" {
   description = "Results of various string manipulation functions"
   value = {
-    upper_example    = local.upper_greeting
-    lower_example    = local.username_lower
-    format_example   = local.formatted_title
-    replace_example  = local.database_config
-    split_example    = local.fruits
-    join_example     = local.fruits_with_and
+    upper_example = local.upper_greeting
+    lower_example = local.username_lower
+    format_example = local.formatted_title
+    replace_example = local.database_config
+    split_example = local.fruits
+    join_example = local.fruits_with_and
     pipeline_example = local.processed_input
-    examples_file    = pyvider_file_content.string_examples.filename
+    examples_file = pyvider_file_content.string_examples.filename
   }
 }
 

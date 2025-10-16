@@ -18,49 +18,49 @@ provider "pyvider" {
 # Public directory - world readable/executable
 resource "pyvider_local_directory" "public_files" {
   path        = "/tmp/public"
-  permissions = "0o755" # rwxr-xr-x
+  permissions = "0o755"  # rwxr-xr-x
 }
 
 # Private user directory - only owner access
 resource "pyvider_local_directory" "private_user" {
   path        = "/tmp/private_user"
-  permissions = "0o700" # rwx------
+  permissions = "0o700"  # rwx------
 }
 
 # Group shared directory - owner and group access
 resource "pyvider_local_directory" "group_shared" {
   path        = "/tmp/group_shared"
-  permissions = "0o750" # rwxr-x---
+  permissions = "0o750"  # rwxr-x---
 }
 
 # Read-only shared directory - owner write, others read
 resource "pyvider_local_directory" "readonly_shared" {
   path        = "/tmp/readonly_shared"
-  permissions = "0o744" # rwxr--r--
+  permissions = "0o744"  # rwxr--r--
 }
 
 # Secure configuration directory - restrictive permissions
 resource "pyvider_local_directory" "secure_config" {
   path        = "/tmp/secure_config"
-  permissions = "0o700" # rwx------
+  permissions = "0o700"  # rwx------
 }
 
 # Web server directory - appropriate for web content
 resource "pyvider_local_directory" "web_content" {
   path        = "/tmp/web"
-  permissions = "0o755" # rwxr-xr-x
+  permissions = "0o755"  # rwxr-xr-x
 }
 
 # Log directory - allowing group write for log rotation
 resource "pyvider_local_directory" "logs_group_write" {
   path        = "/tmp/logs_shared"
-  permissions = "0o775" # rwxrwxr-x
+  permissions = "0o775"  # rwxrwxr-x
 }
 
 # Temporary directory - world writable (use with caution)
 resource "pyvider_local_directory" "temp_world" {
   path        = "/tmp/temp_world"
-  permissions = "0o777" # rwxrwxrwx
+  permissions = "0o777"  # rwxrwxrwx
 }
 
 # Create files with different permissions to demonstrate
@@ -80,7 +80,7 @@ resource "pyvider_file_content" "private_secret" {
 
 resource "pyvider_file_content" "group_config" {
   filename = "${pyvider_local_directory.group_shared.path}/team_config.yml"
-  content  = <<-EOF
+  content = <<-EOF
     # Team Configuration
     team_name: "DevOps Team"
     members:
@@ -102,7 +102,7 @@ resource "pyvider_file_content" "group_config" {
 
 resource "pyvider_file_content" "web_index" {
   filename = "${pyvider_local_directory.web_content.path}/index.html"
-  content  = <<-EOF
+  content = <<-EOF
     <!DOCTYPE html>
     <html>
     <head>
@@ -143,7 +143,7 @@ resource "pyvider_file_content" "secure_credentials" {
 # Demonstrate permission checking with a simple script
 resource "pyvider_file_content" "permission_checker" {
   filename = "${pyvider_local_directory.public_files.path}/check_permissions.sh"
-  content  = <<-EOF
+  content = <<-EOF
     #!/bin/bash
 
     echo "=== Directory Permission Check ==="
@@ -225,7 +225,7 @@ output "permission_examples" {
       principle_of_least_privilege = "Grant only the minimum permissions necessary"
       avoid_world_writable         = "0o777 permissions are dangerous and should be avoided"
       separate_config_and_data     = "Use different permission levels for config vs data directories"
-      regular_audits               = "Periodically review directory permissions"
+      regular_audits              = "Periodically review directory permissions"
     }
 
     permission_guide = {

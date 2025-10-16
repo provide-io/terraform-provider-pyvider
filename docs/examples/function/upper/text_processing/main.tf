@@ -68,7 +68,7 @@ locals {
   # Parse log levels from entries
   log_levels = [
     for entry in var.log_entries :
-    provider::pyvider::split(entry, " ")[2] # Extract the log level (3rd element)
+    provider::pyvider::split(entry, " ")[2]  # Extract the log level (3rd element)
   ]
 
   # Create log summary
@@ -94,7 +94,7 @@ variable "base_urls" {
 }
 
 variable "api_endpoints" {
-  type    = list(string)
+  type = list(string)
   default = ["list", "create", "update", "delete"]
 }
 
@@ -113,7 +113,7 @@ locals {
   # Extract service names from URLs
   service_names = [
     for url in var.base_urls :
-    provider::pyvider::split(provider::pyvider::split(url, "/")[4], "?")[0] # Extract path segment after v1
+    provider::pyvider::split(provider::pyvider::split(url, "/")[4], "?")[0]  # Extract path segment after v1
   ]
 }
 
@@ -160,7 +160,7 @@ locals {
   csv_rows = provider::pyvider::split(var.csv_data, "\n")
 
   # Extract header and data rows
-  csv_header    = provider::pyvider::split(local.csv_rows[0], ",")
+  csv_header = provider::pyvider::split(local.csv_rows[0], ",")
   csv_data_rows = slice(local.csv_rows, 1, length(local.csv_rows))
 
   # Process each data row
@@ -225,9 +225,9 @@ resource "pyvider_file_content" "csv_report" {
 output "text_processing_results" {
   value = {
     configuration = {
-      filename        = local.config_filename
+      filename = local.config_filename
       content_preview = substr(local.config_content, 0, 50)
-      file_path       = pyvider_file_content.server_config.filename
+      file_path = pyvider_file_content.server_config.filename
     }
 
     logging = {
@@ -236,23 +236,23 @@ output "text_processing_results" {
     }
 
     api_management = {
-      total_urls    = length(local.api_urls)
+      total_urls = length(local.api_urls)
       service_count = length(local.service_names)
-      services      = local.service_names
-      urls_file     = pyvider_file_content.api_urls.filename
+      services = local.service_names
+      urls_file = pyvider_file_content.api_urls.filename
     }
 
     environment = {
-      app_title    = local.app_title
-      env_file     = pyvider_file_content.environment.filename
+      app_title = local.app_title
+      env_file = pyvider_file_content.environment.filename
       export_count = length(local.env_exports)
     }
 
     csv_processing = {
       header_columns = local.csv_header
-      record_count   = length(local.csv_records)
-      sample_record  = local.csv_records[0]
-      report_file    = pyvider_file_content.csv_report.filename
+      record_count = length(local.csv_records)
+      sample_record = local.csv_records[0]
+      report_file = pyvider_file_content.csv_report.filename
     }
   }
 }

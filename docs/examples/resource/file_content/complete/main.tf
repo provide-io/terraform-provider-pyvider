@@ -108,21 +108,21 @@ variable "app_version" {
 locals {
   database_configs = {
     development = {
-      host      = "localhost"
-      port      = 5432
-      database  = "myapp_dev"
+      host     = "localhost"
+      port     = 5432
+      database = "myapp_dev"
       pool_size = 5
     }
     staging = {
-      host      = "staging-db.example.com"
-      port      = 5432
-      database  = "myapp_staging"
+      host     = "staging-db.example.com"
+      port     = 5432
+      database = "myapp_staging"
       pool_size = 10
     }
     production = {
-      host      = "prod-db.example.com"
-      port      = 5432
-      database  = "myapp_prod"
+      host     = "prod-db.example.com"
+      port     = 5432
+      database = "myapp_prod"
       pool_size = 20
     }
   }
@@ -133,22 +133,22 @@ locals {
   # Environment-specific feature flags
   feature_flags = {
     development = {
-      debug_mode   = true
-      verbose_logs = true
-      dev_tools    = true
-      metrics      = false
+      debug_mode    = true
+      verbose_logs  = true
+      dev_tools     = true
+      metrics       = false
     }
     staging = {
-      debug_mode   = false
-      verbose_logs = true
-      dev_tools    = false
-      metrics      = true
+      debug_mode    = false
+      verbose_logs  = true
+      dev_tools     = false
+      metrics       = true
     }
     production = {
-      debug_mode   = false
-      verbose_logs = false
-      dev_tools    = false
-      metrics      = true
+      debug_mode    = false
+      verbose_logs  = false
+      dev_tools     = false
+      metrics       = true
     }
   }
 }
@@ -219,7 +219,7 @@ resource "pyvider_file_content" "dev_config" {
   count = var.environment != "production" ? 1 : 0
 
   filename = "/tmp/development-tools.conf"
-  content  = <<-EOF
+  content = <<-EOF
     # Development Tools Configuration
     # This file only exists in non-production environments
 
@@ -312,7 +312,7 @@ output "json_config_hash" {
 # Create a YAML configuration file
 resource "pyvider_file_content" "kubernetes_config" {
   filename = "/tmp/k8s-deployment.yaml"
-  content  = <<-EOF
+  content = <<-EOF
     apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -346,7 +346,7 @@ resource "pyvider_file_content" "kubernetes_config" {
 # Create a Docker Compose file
 resource "pyvider_file_content" "docker_compose" {
   filename = "/tmp/docker-compose.yml"
-  content  = <<-EOF
+  content = <<-EOF
     version: '3.8'
 
     services:
@@ -394,7 +394,7 @@ resource "pyvider_file_content" "docker_compose" {
 # Create a complex configuration with heredoc syntax
 resource "pyvider_file_content" "nginx_config" {
   filename = "/tmp/nginx.conf"
-  content  = <<-NGINX
+  content = <<-NGINX
     user nginx;
     worker_processes auto;
     error_log /var/log/nginx/error.log warn;

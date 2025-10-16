@@ -30,15 +30,15 @@ resource "pyvider_file_content" "api_config" {
   filename = "/tmp/api_config.json"
   content = jsonencode({
     authentication = {
-      token_id   = pyvider_timed_token.api_auth.id
+      token_id = pyvider_timed_token.api_auth.id
       token_name = pyvider_timed_token.api_auth.name
       expires_at = pyvider_timed_token.api_auth.expires_at
       # Note: token value is sensitive and not included in config file
       token_available = pyvider_timed_token.api_auth.token != null
     }
-    api_endpoint    = "https://api.example.com/v1"
+    api_endpoint = "https://api.example.com/v1"
     timeout_seconds = 30
-    retry_attempts  = 3
+    retry_attempts = 3
   })
 }
 
@@ -54,15 +54,15 @@ resource "pyvider_file_content" "service_config" {
     service = {
       name = "background-processor"
       authentication = {
-        method     = "bearer_token"
+        method = "bearer_token"
         token_name = pyvider_timed_token.service_auth.name
-        token_id   = pyvider_timed_token.service_auth.id
+        token_id = pyvider_timed_token.service_auth.id
         expires_at = pyvider_timed_token.service_auth.expires_at
       }
       endpoints = {
         health_check = "/health"
-        metrics      = "/metrics"
-        ready        = "/ready"
+        metrics = "/metrics"
+        ready = "/ready"
       }
     }
   })
@@ -83,24 +83,24 @@ resource "pyvider_file_content" "access_control" {
   content = jsonencode({
     access_tokens = {
       readonly = {
-        token_id    = pyvider_timed_token.read_token.id
-        name        = pyvider_timed_token.read_token.name
-        expires_at  = pyvider_timed_token.read_token.expires_at
+        token_id = pyvider_timed_token.read_token.id
+        name = pyvider_timed_token.read_token.name
+        expires_at = pyvider_timed_token.read_token.expires_at
         permissions = ["read", "list"]
-        scope       = "user_data"
+        scope = "user_data"
       }
       readwrite = {
-        token_id    = pyvider_timed_token.write_token.id
-        name        = pyvider_timed_token.write_token.name
-        expires_at  = pyvider_timed_token.write_token.expires_at
+        token_id = pyvider_timed_token.write_token.id
+        name = pyvider_timed_token.write_token.name
+        expires_at = pyvider_timed_token.write_token.expires_at
         permissions = ["read", "write", "delete", "list"]
-        scope       = "user_data"
+        scope = "user_data"
       }
     }
     token_validation = {
       check_expiration = true
-      require_https    = true
-      audience         = "api.example.com"
+      require_https = true
+      audience = "api.example.com"
     }
   })
 }
@@ -115,35 +115,35 @@ resource "pyvider_file_content" "token_monitoring" {
   filename = "/tmp/token_monitoring.json"
   content = jsonencode({
     token_monitoring = {
-      token_id   = pyvider_timed_token.monitored_token.id
+      token_id = pyvider_timed_token.monitored_token.id
       token_name = pyvider_timed_token.monitored_token.name
       expires_at = pyvider_timed_token.monitored_token.expires_at
 
       alerts = {
         expiration_warning = {
-          enabled               = true
-          warn_before_minutes   = 15
+          enabled = true
+          warn_before_minutes = 15
           notification_channels = ["email", "slack"]
         }
         usage_monitoring = {
-          enabled                   = true
-          track_requests            = true
+          enabled = true
+          track_requests = true
           alert_on_unusual_activity = true
         }
       }
 
       rotation_policy = {
-        automatic                = false
+        automatic = false
         manual_approval_required = true
-        advance_notice_hours     = 4
+        advance_notice_hours = 4
       }
     }
 
     metadata = {
       environment = "production"
-      service     = "api-gateway"
-      owner       = "platform-team"
-      created_at  = timestamp()
+      service = "api-gateway"
+      owner = "platform-team"
+      created_at = timestamp()
     }
   })
 }
@@ -191,44 +191,44 @@ output "basic_token_examples" {
   value = {
     tokens_created = {
       simple = {
-        name            = pyvider_timed_token.simple.name
-        id              = pyvider_timed_token.simple.id
-        expires_at      = pyvider_timed_token.simple.expires_at
+        name = pyvider_timed_token.simple.name
+        id = pyvider_timed_token.simple.id
+        expires_at = pyvider_timed_token.simple.expires_at
         token_available = pyvider_timed_token.simple.token != null
       }
 
       api_auth = {
-        name            = pyvider_timed_token.api_auth.name
-        id              = pyvider_timed_token.api_auth.id
-        expires_at      = pyvider_timed_token.api_auth.expires_at
+        name = pyvider_timed_token.api_auth.name
+        id = pyvider_timed_token.api_auth.id
+        expires_at = pyvider_timed_token.api_auth.expires_at
         token_available = pyvider_timed_token.api_auth.token != null
       }
 
       service_auth = {
-        name            = pyvider_timed_token.service_auth.name
-        id              = pyvider_timed_token.service_auth.id
-        expires_at      = pyvider_timed_token.service_auth.expires_at
+        name = pyvider_timed_token.service_auth.name
+        id = pyvider_timed_token.service_auth.id
+        expires_at = pyvider_timed_token.service_auth.expires_at
         token_available = pyvider_timed_token.service_auth.token != null
       }
 
       read_access = {
-        name            = pyvider_timed_token.read_token.name
-        id              = pyvider_timed_token.read_token.id
-        expires_at      = pyvider_timed_token.read_token.expires_at
+        name = pyvider_timed_token.read_token.name
+        id = pyvider_timed_token.read_token.id
+        expires_at = pyvider_timed_token.read_token.expires_at
         token_available = pyvider_timed_token.read_token.token != null
       }
 
       write_access = {
-        name            = pyvider_timed_token.write_token.name
-        id              = pyvider_timed_token.write_token.id
-        expires_at      = pyvider_timed_token.write_token.expires_at
+        name = pyvider_timed_token.write_token.name
+        id = pyvider_timed_token.write_token.id
+        expires_at = pyvider_timed_token.write_token.expires_at
         token_available = pyvider_timed_token.write_token.token != null
       }
 
       monitored = {
-        name            = pyvider_timed_token.monitored_token.name
-        id              = pyvider_timed_token.monitored_token.id
-        expires_at      = pyvider_timed_token.monitored_token.expires_at
+        name = pyvider_timed_token.monitored_token.name
+        id = pyvider_timed_token.monitored_token.id
+        expires_at = pyvider_timed_token.monitored_token.expires_at
         token_available = pyvider_timed_token.monitored_token.token != null
       }
     }

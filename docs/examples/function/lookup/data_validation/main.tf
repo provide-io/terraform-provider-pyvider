@@ -45,21 +45,21 @@ variable "user_registrations" {
 
 locals {
   # Define validation rules
-  required_fields     = ["username", "email"]
-  valid_roles         = ["user", "admin", "moderator", "guest"]
+  required_fields = ["username", "email"]
+  valid_roles = ["user", "admin", "moderator", "guest"]
   min_username_length = 3
   max_username_length = 20
 
   # Validate each user registration
   validation_results = [
     for idx, user in var.user_registrations : {
-      index    = idx
+      index = idx
       username = user.username
-      email    = user.email
+      email = user.email
 
       # Check required fields
       has_username = provider::pyvider::contains(user, "username") && provider::pyvider::length(user.username) > 0
-      has_email    = provider::pyvider::contains(user, "email") && provider::pyvider::length(user.email) > 0
+      has_email = provider::pyvider::contains(user, "email") && provider::pyvider::length(user.email) > 0
 
       # Username validation
       username_length = provider::pyvider::length(user.username)
@@ -70,7 +70,7 @@ locals {
       username_has_at_symbol = provider::pyvider::contains(user.username, "@")
 
       # Email validation (basic)
-      email_has_at  = provider::pyvider::contains(user.email, "@")
+      email_has_at = provider::pyvider::contains(user.email, "@")
       email_has_dot = provider::pyvider::contains(user.email, ".")
 
       # Role validation
@@ -105,10 +105,10 @@ locals {
   ]
 
   # Summary statistics
-  total_users   = provider::pyvider::length(var.user_registrations)
-  valid_users   = [for result in local.validation_results : result if result.is_valid]
+  total_users = provider::pyvider::length(var.user_registrations)
+  valid_users = [for result in local.validation_results : result if result.is_valid]
   invalid_users = [for result in local.validation_results : result if !result.is_valid]
-  valid_count   = provider::pyvider::length(local.valid_users)
+  valid_count = provider::pyvider::length(local.valid_users)
   invalid_count = provider::pyvider::length(local.invalid_users)
 }
 
@@ -145,7 +145,7 @@ variable "service_configs" {
 
 locals {
   # Define validation rules for services
-  valid_protocols         = ["http", "https", "tcp", "postgresql", "mysql", "redis"]
+  valid_protocols = ["http", "https", "tcp", "postgresql", "mysql", "redis"]
   required_service_fields = ["host", "port", "protocol"]
 
   # Validate service configurations
@@ -198,7 +198,7 @@ locals {
     for name, validation in local.service_validation :
     name if !validation.is_valid
   ]
-  valid_service_count   = provider::pyvider::length(local.valid_services)
+  valid_service_count = provider::pyvider::length(local.valid_services)
   invalid_service_count = provider::pyvider::length(local.invalid_services)
 }
 
@@ -216,25 +216,25 @@ variable "api_endpoints" {
     { path = "/health", method = "GET", auth = false, public = true },
     { path = "/admin/stats", method = "GET", auth = true },
     { path = "/public/info", method = "GET", auth = false, public = true },
-    { path = "/invalid-path", method = "PATCH", auth = true } # Invalid method for demo
+    { path = "/invalid-path", method = "PATCH", auth = true }  # Invalid method for demo
   ]
 }
 
 locals {
   # Define API validation rules
   valid_http_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-  admin_paths        = ["/admin", "/management", "/config"]
+  admin_paths = ["/admin", "/management", "/config"]
 
   # Validate API endpoints
   endpoint_validation = [
     for idx, endpoint in var.api_endpoints : {
-      index  = idx
-      path   = endpoint.path
+      index = idx
+      path = endpoint.path
       method = endpoint.method
 
       # Path validation
       path_starts_with_slash = provider::pyvider::contains(endpoint.path, "/") && substr(endpoint.path, 0, 1) == "/"
-      path_length_valid      = provider::pyvider::length(endpoint.path) > 1
+      path_length_valid = provider::pyvider::length(endpoint.path) > 1
 
       # Method validation
       method_valid = provider::pyvider::contains(local.valid_http_methods, endpoint.method)
@@ -270,10 +270,10 @@ locals {
   ]
 
   # API endpoint summary
-  total_endpoints        = provider::pyvider::length(var.api_endpoints)
-  valid_endpoints        = [for result in local.endpoint_validation : result if result.is_valid]
-  invalid_endpoints      = [for result in local.endpoint_validation : result if !result.is_valid]
-  valid_endpoint_count   = provider::pyvider::length(local.valid_endpoints)
+  total_endpoints = provider::pyvider::length(var.api_endpoints)
+  valid_endpoints = [for result in local.endpoint_validation : result if result.is_valid]
+  invalid_endpoints = [for result in local.endpoint_validation : result if !result.is_valid]
+  valid_endpoint_count = provider::pyvider::length(local.valid_endpoints)
   invalid_endpoint_count = provider::pyvider::length(local.invalid_endpoints)
 }
 
@@ -374,31 +374,31 @@ resource "pyvider_file_content" "api_validation_report" {
 output "data_validation_results" {
   value = {
     user_validation = {
-      total       = local.total_users
-      valid       = local.valid_count
-      invalid     = local.invalid_count
+      total = local.total_users
+      valid = local.valid_count
+      invalid = local.invalid_count
       report_file = pyvider_file_content.user_validation_report.filename
     }
 
     service_validation = {
-      total            = local.total_services
-      valid            = local.valid_service_count
-      invalid          = local.invalid_service_count
-      valid_services   = local.valid_services
+      total = local.total_services
+      valid = local.valid_service_count
+      invalid = local.invalid_service_count
+      valid_services = local.valid_services
       invalid_services = local.invalid_services
-      report_file      = pyvider_file_content.service_validation_report.filename
+      report_file = pyvider_file_content.service_validation_report.filename
     }
 
     api_validation = {
-      total       = local.total_endpoints
-      valid       = local.valid_endpoint_count
-      invalid     = local.invalid_endpoint_count
+      total = local.total_endpoints
+      valid = local.valid_endpoint_count
+      invalid = local.invalid_endpoint_count
       report_file = pyvider_file_content.api_validation_report.filename
     }
 
     summary = {
-      all_users_valid     = local.invalid_count == 0
-      all_services_valid  = local.invalid_service_count == 0
+      all_users_valid = local.invalid_count == 0
+      all_services_valid = local.invalid_service_count == 0
       all_endpoints_valid = local.invalid_endpoint_count == 0
       overall_valid = (
         local.invalid_count == 0 &&

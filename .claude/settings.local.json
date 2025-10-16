@@ -96,7 +96,10 @@
       "Bash(for dir in docs/examples/resource/timed_token/*/)",
       "Bash(done)",
       "Bash(while read dir)",
-      "Bash(do if [ -d \"$dir/examples\" ])"
+      "Bash(do if [ -d \"$dir/examples\" ])",
+      "Bash(git checkout:*)",
+      "Bash(/bin/ls:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": [],

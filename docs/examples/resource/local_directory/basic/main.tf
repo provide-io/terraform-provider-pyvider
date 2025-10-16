@@ -23,7 +23,7 @@ resource "pyvider_local_directory" "basic_dir" {
 # Create a directory with specific permissions
 resource "pyvider_local_directory" "secure_dir" {
   path        = "/tmp/pyvider_secure"
-  permissions = "0o700" # Only owner can read/write/execute
+  permissions = "0o700"  # Only owner can read/write/execute
 }
 
 # Create multiple related directories
@@ -40,7 +40,7 @@ resource "pyvider_local_directory" "app_logs" {
 
 resource "pyvider_local_directory" "app_data" {
   path        = "/tmp/myapp/data"
-  permissions = "0o750" # More restrictive for data directory
+  permissions = "0o750"  # More restrictive for data directory
 
   depends_on = [pyvider_local_directory.app_root]
 }
@@ -84,16 +84,16 @@ output "directory_info" {
     app_structure = {
       root = {
         path       = pyvider_local_directory.app_root.path
-        file_count = pyvider_local_directory.app_root.file_count # Should show 1 (config.ini)
+        file_count = pyvider_local_directory.app_root.file_count  # Should show 1 (config.ini)
       }
       logs = {
-        path        = pyvider_local_directory.app_logs.path
-        file_count  = pyvider_local_directory.app_logs.file_count # Should show 1 (app.log)
+        path       = pyvider_local_directory.app_logs.path
+        file_count = pyvider_local_directory.app_logs.file_count  # Should show 1 (app.log)
         permissions = pyvider_local_directory.app_logs.permissions
       }
       data = {
         path        = pyvider_local_directory.app_data.path
-        file_count  = pyvider_local_directory.app_data.file_count # Should show 0
+        file_count  = pyvider_local_directory.app_data.file_count  # Should show 0
         permissions = pyvider_local_directory.app_data.permissions
       }
     }

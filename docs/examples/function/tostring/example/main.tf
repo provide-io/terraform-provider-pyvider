@@ -20,7 +20,7 @@ locals {
 }
 
 output "function_result" {
-  description = "Result of tostring function"
+  description = "Result of tostring function"  
   value       = local.example_result
 }
 

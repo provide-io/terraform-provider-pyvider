@@ -27,7 +27,7 @@ data "pyvider_env_variables" "terraform_vars" {
 
 # Read variables using regex pattern
 data "pyvider_env_variables" "path_vars" {
-  regex = ".*PATH.*" # Matches PATH, LD_LIBRARY_PATH, etc.
+  regex = ".*PATH.*"  # Matches PATH, LD_LIBRARY_PATH, etc.
 }
 
 # Create a system info file using environment variables
@@ -110,9 +110,9 @@ resource "pyvider_file_content" "environment_analysis" {
   content = jsonencode({
     environment_type = local.is_ci ? "ci" : "development"
     user_info = {
-      username         = lookup(data.pyvider_env_variables.system_info.values, "USER", "unknown")
-      home_directory   = lookup(data.pyvider_env_variables.system_info.values, "HOME", "/tmp")
-      preferred_shell  = lookup(data.pyvider_env_variables.system_info.values, "SHELL", "/bin/sh")
+      username        = lookup(data.pyvider_env_variables.system_info.values, "USER", "unknown")
+      home_directory  = lookup(data.pyvider_env_variables.system_info.values, "HOME", "/tmp")
+      preferred_shell = lookup(data.pyvider_env_variables.system_info.values, "SHELL", "/bin/sh")
       preferred_editor = local.preferred_editor
     }
     system_info = {
@@ -122,7 +122,7 @@ resource "pyvider_file_content" "environment_analysis" {
       is_ci_environment = local.is_ci
     }
     application_config = local.config
-    timestamp          = timestamp()
+    timestamp = timestamp()
   })
 }
 
@@ -135,8 +135,8 @@ output "basic_examples" {
     }
 
     environment_stats = {
-      total_variables     = length(data.pyvider_env_variables.system_info.all_environment)
-      terraform_variables = length(data.pyvider_env_variables.terraform_vars.values)
+      total_variables      = length(data.pyvider_env_variables.system_info.all_environment)
+      terraform_variables  = length(data.pyvider_env_variables.terraform_vars.values)
       path_variables      = length(data.pyvider_env_variables.path_vars.values)
     }
 

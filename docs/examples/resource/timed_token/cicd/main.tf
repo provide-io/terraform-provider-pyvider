@@ -26,14 +26,14 @@ resource "pyvider_file_content" "github_actions_config" {
   content = yamlencode({
     deployment = {
       token_info = {
-        name            = pyvider_timed_token.github_deploy.name
-        id              = pyvider_timed_token.github_deploy.id
-        expires_at      = pyvider_timed_token.github_deploy.expires_at
+        name = pyvider_timed_token.github_deploy.name
+        id = pyvider_timed_token.github_deploy.id
+        expires_at = pyvider_timed_token.github_deploy.expires_at
         token_available = pyvider_timed_token.github_deploy.token != null
       }
-      environment         = "production"
+      environment = "production"
       deployment_strategy = "rolling"
-      timeout_minutes     = 30
+      timeout_minutes = 30
     }
 
     workflow = {
@@ -53,9 +53,9 @@ resource "pyvider_file_content" "github_actions_config" {
             },
             {
               name = "Deploy with temporary token"
-              run  = "deploy.sh"
+              run = "deploy.sh"
               env = {
-                DEPLOY_TOKEN_ID      = pyvider_timed_token.github_deploy.id
+                DEPLOY_TOKEN_ID = pyvider_timed_token.github_deploy.id
                 DEPLOY_TOKEN_EXPIRES = pyvider_timed_token.github_deploy.expires_at
               }
             }
@@ -152,8 +152,8 @@ resource "pyvider_file_content" "gitlab_ci_config" {
     stages = ["build", "test", "deploy"]
 
     variables = {
-      CI_TOKEN_NAME    = pyvider_timed_token.gitlab_ci.name
-      CI_TOKEN_ID      = pyvider_timed_token.gitlab_ci.id
+      CI_TOKEN_NAME = pyvider_timed_token.gitlab_ci.name
+      CI_TOKEN_ID = pyvider_timed_token.gitlab_ci.id
       TOKEN_EXPIRES_AT = pyvider_timed_token.gitlab_ci.expires_at
     }
 
@@ -170,7 +170,7 @@ resource "pyvider_file_content" "gitlab_ci_config" {
         "# Build commands using the temporary token"
       ]
       artifacts = {
-        paths     = ["dist/"]
+        paths = ["dist/"]
         expire_in = "1 hour"
       }
     }
@@ -291,8 +291,8 @@ resource "pyvider_file_content" "circleci_config" {
           }
         ]
         environment = {
-          CI_TOKEN_NAME    = pyvider_timed_token.circleci.name
-          CI_TOKEN_ID      = pyvider_timed_token.circleci.id
+          CI_TOKEN_NAME = pyvider_timed_token.circleci.name
+          CI_TOKEN_ID = pyvider_timed_token.circleci.id
           TOKEN_EXPIRES_AT = pyvider_timed_token.circleci.expires_at
         }
       }
@@ -394,50 +394,50 @@ resource "pyvider_file_content" "cicd_token_summary" {
     ci_cd_tokens = {
       github_actions = {
         token_name = pyvider_timed_token.github_deploy.name
-        token_id   = pyvider_timed_token.github_deploy.id
+        token_id = pyvider_timed_token.github_deploy.id
         expires_at = pyvider_timed_token.github_deploy.expires_at
-        platform   = "GitHub Actions"
-        use_case   = "Production deployment"
+        platform = "GitHub Actions"
+        use_case = "Production deployment"
       }
 
       jenkins = {
         token_name = pyvider_timed_token.jenkins_build.name
-        token_id   = pyvider_timed_token.jenkins_build.id
+        token_id = pyvider_timed_token.jenkins_build.id
         expires_at = pyvider_timed_token.jenkins_build.expires_at
-        platform   = "Jenkins"
-        use_case   = "Build pipeline"
+        platform = "Jenkins"
+        use_case = "Build pipeline"
       }
 
       gitlab_ci = {
         token_name = pyvider_timed_token.gitlab_ci.name
-        token_id   = pyvider_timed_token.gitlab_ci.id
+        token_id = pyvider_timed_token.gitlab_ci.id
         expires_at = pyvider_timed_token.gitlab_ci.expires_at
-        platform   = "GitLab CI/CD"
-        use_case   = "CI/CD deployment"
+        platform = "GitLab CI/CD"
+        use_case = "CI/CD deployment"
       }
 
       azure_devops = {
         token_name = pyvider_timed_token.azure_devops.name
-        token_id   = pyvider_timed_token.azure_devops.id
+        token_id = pyvider_timed_token.azure_devops.id
         expires_at = pyvider_timed_token.azure_devops.expires_at
-        platform   = "Azure DevOps"
-        use_case   = "Build and deployment"
+        platform = "Azure DevOps"
+        use_case = "Build and deployment"
       }
 
       circleci = {
         token_name = pyvider_timed_token.circleci.name
-        token_id   = pyvider_timed_token.circleci.id
+        token_id = pyvider_timed_token.circleci.id
         expires_at = pyvider_timed_token.circleci.expires_at
-        platform   = "CircleCI"
-        use_case   = "Workflow automation"
+        platform = "CircleCI"
+        use_case = "Workflow automation"
       }
     }
 
     security_features = {
-      automatic_expiration      = true
+      automatic_expiration = true
       sensitive_data_protection = true
-      platform_agnostic         = true
-      no_permanent_credentials  = true
+      platform_agnostic = true
+      no_permanent_credentials = true
     }
 
     best_practices = [
@@ -451,9 +451,9 @@ resource "pyvider_file_content" "cicd_token_summary" {
 
     recommendations = {
       token_rotation = "Implement automated token rotation for production workloads"
-      monitoring     = "Set up alerts before token expiration"
-      security       = "Audit token usage and access patterns"
-      documentation  = "Document token lifecycle and responsibilities"
+      monitoring = "Set up alerts before token expiration"
+      security = "Audit token usage and access patterns"
+      documentation = "Document token lifecycle and responsibilities"
     }
   })
 }
@@ -465,28 +465,28 @@ output "cicd_token_configurations" {
 
     tokens_created = {
       github_actions = {
-        name       = pyvider_timed_token.github_deploy.name
-        id         = pyvider_timed_token.github_deploy.id
+        name = pyvider_timed_token.github_deploy.name
+        id = pyvider_timed_token.github_deploy.id
         expires_at = pyvider_timed_token.github_deploy.expires_at
       }
       jenkins = {
-        name       = pyvider_timed_token.jenkins_build.name
-        id         = pyvider_timed_token.jenkins_build.id
+        name = pyvider_timed_token.jenkins_build.name
+        id = pyvider_timed_token.jenkins_build.id
         expires_at = pyvider_timed_token.jenkins_build.expires_at
       }
       gitlab_ci = {
-        name       = pyvider_timed_token.gitlab_ci.name
-        id         = pyvider_timed_token.gitlab_ci.id
+        name = pyvider_timed_token.gitlab_ci.name
+        id = pyvider_timed_token.gitlab_ci.id
         expires_at = pyvider_timed_token.gitlab_ci.expires_at
       }
       azure_devops = {
-        name       = pyvider_timed_token.azure_devops.name
-        id         = pyvider_timed_token.azure_devops.id
+        name = pyvider_timed_token.azure_devops.name
+        id = pyvider_timed_token.azure_devops.id
         expires_at = pyvider_timed_token.azure_devops.expires_at
       }
       circleci = {
-        name       = pyvider_timed_token.circleci.name
-        id         = pyvider_timed_token.circleci.id
+        name = pyvider_timed_token.circleci.name
+        id = pyvider_timed_token.circleci.id
         expires_at = pyvider_timed_token.circleci.expires_at
       }
     }
@@ -501,10 +501,10 @@ output "cicd_token_configurations" {
     ]
 
     security_summary = {
-      total_tokens               = 5
-      all_tokens_time_limited    = true
+      total_tokens = 5
+      all_tokens_time_limited = true
       sensitive_values_protected = true
-      automatic_expiration       = true
+      automatic_expiration = true
     }
   }
 }

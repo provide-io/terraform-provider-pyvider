@@ -44,38 +44,38 @@ resource "pyvider_private_state_verifier" "long_input_test" {
 locals {
   verification_results = {
     simple_test = {
-      input    = pyvider_private_state_verifier.simple_test.input_value
-      output   = pyvider_private_state_verifier.simple_test.decrypted_token
+      input = pyvider_private_state_verifier.simple_test.input_value
+      output = pyvider_private_state_verifier.simple_test.decrypted_token
       expected = "SECRET_FOR_BASIC-TEST"
-      passed   = pyvider_private_state_verifier.simple_test.decrypted_token == "SECRET_FOR_BASIC-TEST"
+      passed = pyvider_private_state_verifier.simple_test.decrypted_token == "SECRET_FOR_BASIC-TEST"
     }
 
     alphanumeric_test = {
-      input    = pyvider_private_state_verifier.alphanumeric_test.input_value
-      output   = pyvider_private_state_verifier.alphanumeric_test.decrypted_token
+      input = pyvider_private_state_verifier.alphanumeric_test.input_value
+      output = pyvider_private_state_verifier.alphanumeric_test.decrypted_token
       expected = "SECRET_FOR_TEST123"
-      passed   = pyvider_private_state_verifier.alphanumeric_test.decrypted_token == "SECRET_FOR_TEST123"
+      passed = pyvider_private_state_verifier.alphanumeric_test.decrypted_token == "SECRET_FOR_TEST123"
     }
 
     special_chars_test = {
-      input    = pyvider_private_state_verifier.special_chars_test.input_value
-      output   = pyvider_private_state_verifier.special_chars_test.decrypted_token
+      input = pyvider_private_state_verifier.special_chars_test.input_value
+      output = pyvider_private_state_verifier.special_chars_test.decrypted_token
       expected = "SECRET_FOR_TEST-WITH-DASHES_AND_UNDERSCORES"
-      passed   = pyvider_private_state_verifier.special_chars_test.decrypted_token == "SECRET_FOR_TEST-WITH-DASHES_AND_UNDERSCORES"
+      passed = pyvider_private_state_verifier.special_chars_test.decrypted_token == "SECRET_FOR_TEST-WITH-DASHES_AND_UNDERSCORES"
     }
 
     mixed_case_test = {
-      input    = pyvider_private_state_verifier.mixed_case_test.input_value
-      output   = pyvider_private_state_verifier.mixed_case_test.decrypted_token
+      input = pyvider_private_state_verifier.mixed_case_test.input_value
+      output = pyvider_private_state_verifier.mixed_case_test.decrypted_token
       expected = "SECRET_FOR_MIXEDCASEINPUT"
-      passed   = pyvider_private_state_verifier.mixed_case_test.decrypted_token == "SECRET_FOR_MIXEDCASEINPUT"
+      passed = pyvider_private_state_verifier.mixed_case_test.decrypted_token == "SECRET_FOR_MIXEDCASEINPUT"
     }
 
     long_input_test = {
-      input    = pyvider_private_state_verifier.long_input_test.input_value
-      output   = pyvider_private_state_verifier.long_input_test.decrypted_token
+      input = pyvider_private_state_verifier.long_input_test.input_value
+      output = pyvider_private_state_verifier.long_input_test.decrypted_token
       expected = "SECRET_FOR_THIS-IS-A-VERY-LONG-INPUT-VALUE-FOR-TESTING-PRIVATE-STATE-ENCRYPTION"
-      passed   = pyvider_private_state_verifier.long_input_test.decrypted_token == "SECRET_FOR_THIS-IS-A-VERY-LONG-INPUT-VALUE-FOR-TESTING-PRIVATE-STATE-ENCRYPTION"
+      passed = pyvider_private_state_verifier.long_input_test.decrypted_token == "SECRET_FOR_THIS-IS-A-VERY-LONG-INPUT-VALUE-FOR-TESTING-PRIVATE-STATE-ENCRYPTION"
     }
   }
 
@@ -95,34 +95,34 @@ resource "pyvider_file_content" "verification_report" {
   content = jsonencode({
     timestamp = timestamp()
     test_summary = {
-      total_tests       = length(local.verification_results)
-      passed_tests      = length([for result in local.verification_results : result if result.passed])
-      failed_tests      = length(local.failed_tests)
-      all_tests_passed  = local.all_tests_passed
+      total_tests = length(local.verification_results)
+      passed_tests = length([for result in local.verification_results : result if result.passed])
+      failed_tests = length(local.failed_tests)
+      all_tests_passed = local.all_tests_passed
       failed_test_names = local.failed_tests
     }
 
     test_results = local.verification_results
 
     security_validation = {
-      private_state_encryption  = "verified"
+      private_state_encryption = "verified"
       secret_generation_pattern = "SECRET_FOR_{UPPER_INPUT}"
-      state_file_protection     = "enabled"
-      decryption_mechanism      = "terraform_native"
+      state_file_protection = "enabled"
+      decryption_mechanism = "terraform_native"
     }
 
     compliance = {
-      encryption_at_rest         = true
-      secure_secret_storage      = true
-      no_plaintext_secrets       = true
+      encryption_at_rest = true
+      secure_secret_storage = true
+      no_plaintext_secrets = true
       terraform_state_protection = true
     }
 
     test_methodology = {
-      input_variation     = "tested multiple input formats"
+      input_variation = "tested multiple input formats"
       output_verification = "verified expected secret format"
-      encryption_cycle    = "tested full encrypt/decrypt cycle"
-      state_persistence   = "verified across terraform operations"
+      encryption_cycle = "tested full encrypt/decrypt cycle"
+      state_persistence = "verified across terraform operations"
     }
   })
 }
@@ -209,12 +209,12 @@ resource "pyvider_file_content" "ci_summary" {
   content = jsonencode({
     test_run = {
       timestamp = timestamp()
-      status    = local.all_tests_passed ? "success" : "failure"
+      status = local.all_tests_passed ? "success" : "failure"
       exit_code = local.all_tests_passed ? 0 : 1
     }
 
     metrics = {
-      total_tests  = length(local.verification_results)
+      total_tests = length(local.verification_results)
       passed_tests = length([for result in local.verification_results : result if result.passed])
       failed_tests = length(local.failed_tests)
       success_rate = (length([for result in local.verification_results : result if result.passed]) / length(local.verification_results)) * 100
@@ -222,23 +222,23 @@ resource "pyvider_file_content" "ci_summary" {
 
     validation_points = [
       {
-        name        = "private_state_encryption"
-        status      = local.all_tests_passed ? "passed" : "failed"
+        name = "private_state_encryption"
+        status = local.all_tests_passed ? "passed" : "failed"
         description = "Verify private state encryption works correctly"
       },
       {
-        name        = "secret_generation"
-        status      = local.all_tests_passed ? "passed" : "failed"
+        name = "secret_generation"
+        status = local.all_tests_passed ? "passed" : "failed"
         description = "Verify secret generation follows expected pattern"
       },
       {
-        name        = "input_transformation"
-        status      = local.all_tests_passed ? "passed" : "failed"
+        name = "input_transformation"
+        status = local.all_tests_passed ? "passed" : "failed"
         description = "Verify input values are properly transformed"
       },
       {
-        name        = "state_security"
-        status      = "passed"
+        name = "state_security"
+        status = "passed"
         description = "Verify no sensitive data exposed in regular state"
       }
     ]
@@ -255,26 +255,26 @@ output "basic_verification_results" {
   description = "Results of basic private state encryption verification"
   value = {
     test_summary = {
-      total_tests      = length(local.verification_results)
-      passed_tests     = length([for result in local.verification_results : result if result.passed])
-      failed_tests     = length(local.failed_tests)
+      total_tests = length(local.verification_results)
+      passed_tests = length([for result in local.verification_results : result if result.passed])
+      failed_tests = length(local.failed_tests)
       all_tests_passed = local.all_tests_passed
-      success_rate     = (length([for result in local.verification_results : result if result.passed]) / length(local.verification_results)) * 100
+      success_rate = (length([for result in local.verification_results : result if result.passed]) / length(local.verification_results)) * 100
     }
 
     individual_results = {
-      simple_test_passed        = local.verification_results.simple_test.passed
-      alphanumeric_test_passed  = local.verification_results.alphanumeric_test.passed
+      simple_test_passed = local.verification_results.simple_test.passed
+      alphanumeric_test_passed = local.verification_results.alphanumeric_test.passed
       special_chars_test_passed = local.verification_results.special_chars_test.passed
-      mixed_case_test_passed    = local.verification_results.mixed_case_test.passed
-      long_input_test_passed    = local.verification_results.long_input_test.passed
+      mixed_case_test_passed = local.verification_results.mixed_case_test.passed
+      long_input_test_passed = local.verification_results.long_input_test.passed
     }
 
     security_validation = {
       private_state_working = local.all_tests_passed
-      encryption_verified   = true
-      decryption_verified   = true
-      pattern_verified      = local.all_tests_passed
+      encryption_verified = true
+      decryption_verified = true
+      pattern_verified = local.all_tests_passed
     }
 
     files_created = [
