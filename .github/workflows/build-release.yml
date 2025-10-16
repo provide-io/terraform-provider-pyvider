@@ -134,12 +134,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
+      - name: 🤖 Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PROVIDE_BOT_APP_ID }}
+          private-key: ${{ secrets.PROVIDE_BOT_PRIVATE_KEY }}
+
       - name: 📥 Checkout
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
@@ -170,8 +178,10 @@ jobs:
 
       - name: 💾 Commit Documentation
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Configure git with providebot[bot] identity
+          # The App ID will need to be replaced with your actual app's user ID
+          git config user.name "providebot[bot]"
+          git config user.email "178697328+providebot[bot]@users.noreply.github.com"
 
           # Add generated documentation
           git add docs/
@@ -182,7 +192,7 @@ jobs:
           else
             git commit -m "📚 Generate documentation for v${{ inputs.version }}"
             git push origin main
-            echo "✅ Documentation committed and pushed"
+            echo "✅ Documentation committed and pushed by providebot[bot]"
           fi
 
       - name: 📥 Download all artifacts
@@ -324,9 +334,10 @@ jobs:
       
       - name: 🏷️ Create Git tag
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+          # Configure git with providebot[bot] identity
+          git config user.name "providebot[bot]"
+          git config user.email "178697328+providebot[bot]@users.noreply.github.com"
+
           # Create and push tag (ensure it exists before release)
           git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}" || echo "Tag might already exist"
           git push origin "v${{ inputs.version }}" || echo "Tag already exists on remote"

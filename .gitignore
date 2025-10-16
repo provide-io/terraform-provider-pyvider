@@ -406,3 +406,6 @@ public*key*
 config.json
 .psp.*
 .soup
+
+# Test artifacts
+tests/plating-tests/
