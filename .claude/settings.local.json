@@ -89,7 +89,9 @@
       "Bash(git ls-tree:*)",
       "Bash(gh workflow:*)",
       "Bash(https://api.github.com/repos/provide-io/terraform-provider-pyvider/actions/workflows/build-release.yml/dispatches )",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(awk:*)",
+      "Bash(git -C /Users/tim/code/gh/provide-io/terraform-provider-pyvider log --oneline -20)"
     ],
     "deny": [],
     "ask": [],
