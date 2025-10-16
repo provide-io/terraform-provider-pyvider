@@ -99,7 +99,9 @@
       "Bash(do if [ -d \"$dir/examples\" ])",
       "Bash(git checkout:*)",
       "Bash(/bin/ls:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(./scripts/validate_all_examples.sh:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": [],
