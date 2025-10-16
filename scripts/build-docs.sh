@@ -75,116 +75,42 @@ print_header "📚 Running Plating Documentation Generation"
 # Create output directory if it doesn't exist
 mkdir -p "$DOCS_OUTPUT_DIR"
 
-# Generate documentation using Python script
-echo "📝 Generating documentation with plating..."
+# Generate documentation and examples using plating CLI
+print_header "📚 Generating Documentation and Examples with Plating CLI"
 
-python3 "$SCRIPT_DIR/generate_docs.py" || {
-    print_error "Failed to generate documentation with plating"
+"$SCRIPT_DIR/generate_docs_and_examples.sh" || {
+    print_error "Failed to generate documentation and examples with plating"
     exit 1
 }
 
-# Example generation with plating (simplified approach)
-print_header "🧪 Creating Example Terraform Configurations"
+print_success "Documentation and examples generated with plating"
 
-EXAMPLES_OUTPUT_DIR="${PROJECT_ROOT}/examples"
-mkdir -p "$EXAMPLES_OUTPUT_DIR"
+# Validate generated examples
+print_header "🔍 Validating Generated Examples"
 
-# Create basic examples directory structure
-mkdir -p "$EXAMPLES_OUTPUT_DIR/resources"
-mkdir -p "$EXAMPLES_OUTPUT_DIR/data-sources"
-mkdir -p "$EXAMPLES_OUTPUT_DIR/functions"
-
-echo "📝 Creating basic example configurations..."
-
-# Create a comprehensive example that demonstrates multiple components
-cat > "$EXAMPLES_OUTPUT_DIR/comprehensive.tf" << 'EOF'
-terraform {
-  required_providers {
-    pyvider = {
-      source  = "local/providers/pyvider"
-      version = "~> 0.0.5"
-    }
-  }
+"$SCRIPT_DIR/validate_examples.sh" || {
+    print_warning "Some examples failed validation - please review and fix"
+    # Don't fail the build for now, just warn
 }
-
-provider "pyvider" {}
-
-# Example resources
-resource "pyvider_file_content" "example" {
-  filename = "example.json"
-  content = jsonencode({
-    message = "Hello from Pyvider"
-    timestamp = timestamp()
-  })
-}
-
-resource "pyvider_local_directory" "example_dir" {
-  path        = "./example-output"
-  create_mode = "0755"
-}
-
-# Example data sources
-data "pyvider_env_variables" "current" {
-  keys = ["USER", "HOME", "PATH"]
-}
-
-data "pyvider_file_info" "example_info" {
-  path = pyvider_file_content.example.filename
-  depends_on = [pyvider_file_content.example]
-}
-
-# Example function usage
-locals {
-  math_examples = {
-    sum = provider::pyvider::add(10, 20)
-    division = provider::pyvider::divide(100, 5)
-  }
-
-  string_examples = {
-    upper = provider::pyvider::upper("terraform")
-    formatted = provider::pyvider::format("Hello %s!", ["World"])
-  }
-
-  collection_examples = {
-    minimum = provider::pyvider::min([5, 2, 8, 1])
-    maximum = provider::pyvider::max([5, 2, 8, 1])
-  }
-}
-
-# Outputs
-output "examples" {
-  value = {
-    file_path = pyvider_file_content.example.filename
-    directory_path = pyvider_local_directory.example_dir.path
-    current_user = data.pyvider_env_variables.current.values["USER"]
-    file_size = data.pyvider_file_info.example_info.size
-    math_results = local.math_examples
-    string_results = local.string_examples
-    collection_results = local.collection_examples
-  }
-}
-EOF
-
-print_success "Comprehensive example created at $EXAMPLES_OUTPUT_DIR/comprehensive.tf"
-
-# TODO: Extract examples from plating-generated documentation when that feature is available
-# For now, we rely on the comprehensive example above
 
 # Use tofusoup for conformance testing if available
 if command -v tofusoup &> /dev/null; then
     echo "🍲 Running tofusoup conformance tests on examples..."
-    
+
     # Create test configurations
     TOFUSOUP_TEST_DIR="${PROJECT_ROOT}/tests/conformance"
     mkdir -p "$TOFUSOUP_TEST_DIR"
-    
+
+    # Set examples directory (from plating generation)
+    EXAMPLES_OUTPUT_DIR="${PROJECT_ROOT}/docs/examples"
+
     # Generate conformance test configurations
     tofusoup generate \
         --provider pyvider \
         --examples "$EXAMPLES_OUTPUT_DIR" \
         --output "$TOFUSOUP_TEST_DIR" \
         --format hcl 2>/dev/null || print_warning "Tofusoup test generation had issues"
-    
+
     print_success "Generated conformance test configurations in $TOFUSOUP_TEST_DIR"
 fi
 
