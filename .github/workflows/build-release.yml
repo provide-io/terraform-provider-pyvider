@@ -155,12 +155,12 @@ jobs:
         run: |
           echo "📝 Generating documentation with plating..."
 
-          # Install plating and pyvider-components from GitHub
-          echo "Installing plating from GitHub..."
-          uv pip install --system git+https://github.com/provide-io/plating.git
+          # Install plating and pyvider-components from PyPI
+          echo "Installing plating from PyPI..."
+          uv pip install --system plating
 
-          echo "Installing pyvider-components from GitHub..."
-          uv pip install --system git+https://github.com/provide-io/pyvider-components.git
+          echo "Installing pyvider-components from PyPI..."
+          uv pip install --system pyvider-components
 
           # Run documentation generation script
           python3 scripts/generate_docs.py
