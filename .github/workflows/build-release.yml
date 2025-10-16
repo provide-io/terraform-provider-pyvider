@@ -3,10 +3,6 @@ name: 🚀 Build and Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to release (e.g., 0.1.0)'
-        required: true
-        type: string
       prerelease:
         description: 'Is this a pre-release?'
         required: false
@@ -47,6 +43,13 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: 📖 Read VERSION
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Building version: ${VERSION}"
+
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
@@ -71,20 +74,8 @@ jobs:
       
       - name: 🏗️ Build PSP package
         run: |
-          # Convert version to PEP 440 format for Python packaging
-          PEP_VERSION="${{ inputs.version }}"
-          if [[ "$PEP_VERSION" == *"-"* ]]; then
-            BASE_VERSION=$(echo "$PEP_VERSION" | cut -d'-' -f1)
-            POST_VERSION=$(echo "$PEP_VERSION" | cut -d'-' -f2)
-            PEP_VERSION="${BASE_VERSION}.post${POST_VERSION}"
-          fi
-          
-          # Update version in pyproject.toml
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
-          else
-            sed -i "s/version = \"[^\"]*\"/version = \"${PEP_VERSION}\"/" pyproject.toml
-          fi
+          # The version is already set dynamically from VERSION file
+          # No need to update pyproject.toml as it uses dynamic = ["version"]
           
           # Build the PSP package
           # Note: flavorpack >= 0.0.5 automatically uses manylinux2014 wheels on Linux
@@ -98,20 +89,20 @@ jobs:
       - name: 📦 Package for Terraform
         run: |
           # Rename PSP to Terraform provider binary format
-          BINARY_NAME="terraform-provider-pyvider_v${{ inputs.version }}"
+          BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
           cp terraform-provider-pyvider.psp "$BINARY_NAME"
           chmod +x "$BINARY_NAME"
-          
+
           # Test execution with timing and launch-context
           echo "🧪 Testing provider binary execution..."
           echo "First run (cold start):"
           time ./"$BINARY_NAME" launch-context || true
-          
+
           echo -e "\nSecond run (warm start):"
           time ./"$BINARY_NAME" launch-context || true
-          
+
           # Create zip archive with proper naming
-          ZIP_NAME="terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip"
+          ZIP_NAME="terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip"
           zip "$ZIP_NAME" "$BINARY_NAME"
           
           echo "📦 Created Terraform provider package:"
@@ -125,7 +116,7 @@ jobs:
         with:
           name: provider-${{ matrix.target }}
           path: |
-            terraform-provider-pyvider_${{ inputs.version }}_${{ matrix.target }}.zip
+            terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
           retention-days: 7
 
   release:
@@ -148,6 +139,13 @@ jobs:
         with:
           submodules: 'recursive'
           token: ${{ steps.app-token.outputs.token }}
+
+      - name: 📖 Read VERSION
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Releasing version: ${VERSION}"
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
@@ -190,7 +188,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "📝 No documentation changes to commit"
           else
-            git commit -m "📚 Generate documentation for v${{ inputs.version }}"
+            git commit -m "📚 Generate documentation for v${{ steps.version.outputs.VERSION }}"
             git push origin main
             echo "✅ Documentation committed and pushed by providebot[bot]"
           fi
@@ -208,7 +206,7 @@ jobs:
           find artifacts -name "*.zip" -type f -exec mv {} release/ \;
           
           # Copy and rename manifest file
-          cp terraform-registry-manifest.json "release/terraform-provider-pyvider_${{ inputs.version }}_manifest.json"
+          cp terraform-registry-manifest.json "release/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_manifest.json"
           
           echo "📦 Release files:"
           ls -la release/
@@ -218,10 +216,10 @@ jobs:
           cd release
           
           # Generate SHA256 checksums for all files
-          sha256sum * > "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
+          sha256sum * > "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
           
           echo "📝 Checksums:"
-          cat "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
+          cat "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
       
       - name: 🔐 Sign checksums with GPG
         env:
@@ -242,13 +240,13 @@ jobs:
           
           # Check all required files exist
           REQUIRED_FILES=(
-            "terraform-provider-pyvider_${{ inputs.version }}_linux_amd64.zip"
-            "terraform-provider-pyvider_${{ inputs.version }}_linux_arm64.zip"
-            "terraform-provider-pyvider_${{ inputs.version }}_darwin_amd64.zip"
-            "terraform-provider-pyvider_${{ inputs.version }}_darwin_arm64.zip"
-            "terraform-provider-pyvider_${{ inputs.version }}_manifest.json"
-            "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"
-            "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_linux_amd64.zip"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_linux_arm64.zip"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_darwin_amd64.zip"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_darwin_arm64.zip"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_manifest.json"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
+            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig"
           )
           
           for file in "${REQUIRED_FILES[@]}"; do
@@ -263,7 +261,7 @@ jobs:
           # Verify SHA256SUMS contains all required entries
           echo -e "\n📝 Checking SHA256SUMS entries..."
           for platform in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64; do
-            if grep -q "${platform}.zip" "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"; then
+            if grep -q "${platform}.zip" "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"; then
               echo "✅ SHA256SUMS contains ${platform}"
             else
               echo "❌ SHA256SUMS missing ${platform}"
@@ -272,7 +270,7 @@ jobs:
           done
           
           # Verify manifest.json
-          if grep -q "manifest.json" "terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS"; then
+          if grep -q "manifest.json" "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"; then
             echo "✅ SHA256SUMS contains manifest.json"
           else
             echo "❌ SHA256SUMS missing manifest.json"
@@ -284,7 +282,7 @@ jobs:
       - name: 📝 Generate release notes
         run: |
           cat > release-notes.md << EOF
-          # Terraform Provider Pyvider v${{ inputs.version }}
+          # Terraform Provider Pyvider v${{ steps.version.outputs.VERSION }}
           
           ## 📦 Installation
           
@@ -294,7 +292,7 @@ jobs:
             required_providers {
               pyvider = {
                 source  = "provide-io/pyvider"
-                version = "${{ inputs.version }}"
+                version = "${{ steps.version.outputs.VERSION }}"
               }
             }
           }
@@ -310,14 +308,14 @@ jobs:
           Verify your download with:
           \`\`\`bash
           # Download the SHA256SUMS and signature files
-          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ inputs.version }}/terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS
-          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ inputs.version }}/terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig
+          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ steps.version.outputs.VERSION }}/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS
+          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ steps.version.outputs.VERSION }}/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig
           
           # Verify the signature
-          gpg --verify terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS.sig terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS
+          gpg --verify terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS
           
           # Verify the checksum
-          sha256sum -c terraform-provider-pyvider_${{ inputs.version }}_SHA256SUMS 2>&1 | grep OK
+          sha256sum -c terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS 2>&1 | grep OK
           \`\`\`
           
           ## 📋 Supported Platforms
@@ -339,14 +337,14 @@ jobs:
           git config user.email "178697328+providebot[bot]@users.noreply.github.com"
 
           # Create and push tag (ensure it exists before release)
-          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}" || echo "Tag might already exist"
-          git push origin "v${{ inputs.version }}" || echo "Tag already exists on remote"
+          git tag -a "v${{ steps.version.outputs.VERSION }}" -m "Release v${{ steps.version.outputs.VERSION }}" || echo "Tag might already exist"
+          git push origin "v${{ steps.version.outputs.VERSION }}" || echo "Tag already exists on remote"
       
       - name: 🚀 Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: "v${{ inputs.version }}"
-          name: "v${{ inputs.version }}"
+          tag: "v${{ steps.version.outputs.VERSION }}"
+          name: "v${{ steps.version.outputs.VERSION }}"
           bodyFile: "release-notes.md"
           artifacts: "release/*"
           prerelease: ${{ inputs.prerelease }}
