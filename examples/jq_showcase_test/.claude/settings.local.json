@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//REDACTED_ABS_PATH**)",
+      "Read(//REDACTED_ABS_PATH**)",
+      "Read(//REDACTED_ABS_PATH**)",
+      "Bash(tofu apply:*)",
+      "Bash(tofu force-unlock:*)",
+      "Bash(pkill:*)",
+      "Bash(tofu validate:*)",
+      "Bash(python -m py_compile:*)",
+      "Read(//REDACTED_ABS_PATH**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

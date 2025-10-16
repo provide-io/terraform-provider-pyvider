@@ -1,0 +1,6 @@
+# Configuration for integrated test
+private_state_shared_secret = "test-secret-key-for-integrated-test-12345"
+
+[logging]
+level = "DEBUG"
+format = "emoji"

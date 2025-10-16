@@ -1,10 +1,16 @@
+#
+# provider.tf
+#
+
 terraform {
   required_providers {
     pyvider = {
       source = "local/providers/pyvider"
-      version = "0.0.6"
+      version = "0.1.0"
     }
   }
 }
 
-provider "pyvider" {}
+provider "pyvider" {
+  api_token = "Asdf1asdfasdfasdf"
+}
