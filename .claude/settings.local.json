@@ -92,7 +92,9 @@
       "Bash(git pull:*)",
       "Bash(awk:*)",
       "Bash(git -C /Users/tim/code/gh/provide-io/terraform-provider-pyvider log --oneline -20)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(for dir in docs/examples/resource/timed_token/*/)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": [],
