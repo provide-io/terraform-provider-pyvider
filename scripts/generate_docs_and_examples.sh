@@ -17,10 +17,16 @@ echo -e "${GREEN}📝 Generating documentation and examples with plating CLI...$
 # Ensure we're in the project root
 cd "$PROJECT_ROOT"
 
+# Activate virtual environment if available
+if [ -d "$PROJECT_ROOT/.venv" ]; then
+    echo -e "${GREEN}🔧 Activating virtual environment...${NC}"
+    source "$PROJECT_ROOT/.venv/bin/activate"
+fi
+
 # Check if plating is installed
 if ! command -v plating &> /dev/null; then
     echo -e "${YELLOW}⚠️  plating CLI not found, installing...${NC}"
-    pip install plating || {
+    uv pip install --system plating || pip install plating || {
         echo -e "${RED}❌ Failed to install plating${NC}"
         exit 1
     }
@@ -29,7 +35,7 @@ fi
 # Check if pyvider-components is installed
 python3 -c "import pyvider.components" 2>/dev/null || {
     echo -e "${YELLOW}⚠️  pyvider-components not installed, installing...${NC}"
-    pip install pyvider-components || {
+    uv pip install --system pyvider-components || pip install pyvider-components || {
         echo -e "${RED}❌ Failed to install pyvider-components${NC}"
         exit 1
     }

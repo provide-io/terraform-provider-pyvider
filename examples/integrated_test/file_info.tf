@@ -1,8 +1,8 @@
 
 # Create a temporary file to test with
 resource "local_file" "test_file" {
-  content     = "This is a test file for file_info data source"
-  filename    = "/tmp/test_file.txt"
+  content  = "This is a test file for file_info data source"
+  filename = "/tmp/test_file.txt"
 }
 
 # # Test file that exists
@@ -33,14 +33,14 @@ data "pyvider_file_info" "directory" {
 
 output "nonexistent_file_info" {
   value = {
-    path = data.pyvider_file_info.nonexistent_file.path
+    path   = data.pyvider_file_info.nonexistent_file.path
     exists = data.pyvider_file_info.nonexistent_file.exists
   }
 }
 
 output "directory_info" {
   value = {
-    path = data.pyvider_file_info.directory.path
+    path   = data.pyvider_file_info.directory.path
     exists = data.pyvider_file_info.directory.exists
     is_dir = data.pyvider_file_info.directory.is_dir
   }
@@ -67,7 +67,7 @@ variable "complex_demo" {
     number_example = 42
     bool_example   = true
     list_example   = ["one", "two", "three"]
-    set_example    = ["red", "green", "blue"]  # Fixed: List as default
+    set_example    = ["red", "green", "blue"] # Fixed: List as default
     map_example = {
       key1 = "value1"
       key2 = "value2"
@@ -86,7 +86,7 @@ variable "complex_demo" {
 }
 
 locals {
-  demo_set = toset(var.complex_demo.set_example)  # Convert to set at runtime
+  demo_set    = toset(var.complex_demo.set_example) # Convert to set at runtime
   demo_string = var.complex_demo.string_example
   demo_number = var.complex_demo.number_example
   demo_bool   = var.complex_demo.bool_example

@@ -13,15 +13,15 @@ resource "pyvider_file_content" "test_update" {
 
 # Read the file using local_file to verify
 data "local_file" "verify_create" {
-  filename = pyvider_file_content.test_create.filename
+  filename   = pyvider_file_content.test_create.filename
   depends_on = [pyvider_file_content.test_create]
 }
 
 output "created_file" {
   value = {
-    filename = pyvider_file_content.test_create.filename
-    content = pyvider_file_content.test_create.content
-    exists = pyvider_file_content.test_create.exists
+    filename     = pyvider_file_content.test_create.filename
+    content      = pyvider_file_content.test_create.content
+    exists       = pyvider_file_content.test_create.exists
     content_hash = pyvider_file_content.test_create.content_hash
   }
 }
@@ -29,7 +29,7 @@ output "created_file" {
 output "verification" {
   value = {
     file_content = data.local_file.verify_create.content
-    matches = data.local_file.verify_create.content == pyvider_file_content.test_create.content
+    matches      = data.local_file.verify_create.content == pyvider_file_content.test_create.content
   }
 }
 

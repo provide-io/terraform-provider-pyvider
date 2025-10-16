@@ -227,6 +227,22 @@ docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
 	@bash scripts/build-docs.sh
 
+.PHONY: generate-docs
+generate-docs: venv deps ## Generate documentation and examples with plating CLI
+	@echo "$(BLUE)📚 Generating docs and examples...$(NC)"
+	@bash scripts/generate_docs_and_examples.sh
+
+.PHONY: validate-examples
+validate-examples: ## Validate all Terraform examples
+	@echo "$(BLUE)🔍 Validating examples...$(NC)"
+	@bash scripts/validate_examples.sh
+
+.PHONY: lint-examples
+lint-examples: ## Run terraform fmt on examples
+	@echo "$(BLUE)🎨 Formatting examples...$(NC)"
+	@terraform fmt -recursive docs/examples/ examples/ || true
+	@echo "$(GREEN)✅ Examples formatted$(NC)"
+
 .PHONY: docs-serve
 docs-serve: docs ## Build and serve documentation locally
 	@echo "$(BLUE)🌐 Serving documentation on http://localhost:8000$(NC)"

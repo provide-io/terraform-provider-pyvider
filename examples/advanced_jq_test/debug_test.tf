@@ -1,5 +1,5 @@
 output "debug_simple_dict" {
-  value = provider::pyvider::lens_jq({"test": "value"}, ".test")
+  value = provider::pyvider::lens_jq({ "test" : "value" }, ".test")
 }
 
 output "debug_file_content" {
@@ -7,7 +7,7 @@ output "debug_file_content" {
 }
 
 locals {
-  simple_test = {"test": "value"}
+  simple_test = { "test" : "value" }
 }
 
 output "debug_local_simple" {

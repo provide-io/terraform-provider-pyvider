@@ -8,7 +8,7 @@ description: |-
 
 > Processes complex nested data structures for testing CTY data handling and validation
 
-The `pyvider_nested_data_processor` data source is designed for testing and validating complex nested data structures within Terraform providers. It processes nested objects, maps, and lists to ensure proper CTY (Cloud Terraform YAML) data type handling and serialization.
+The `pyvider_nested_data_processor` data source is designed for testing and validating complex nested data structures within Terraform providers. It processes nested objects, maps, and lists to ensure proper CTY data type handling and serialization.
 
 ## When to Use This
 

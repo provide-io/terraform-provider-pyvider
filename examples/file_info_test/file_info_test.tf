@@ -5,7 +5,7 @@
 terraform {
   required_providers {
     pyvider = {
-      source = "local/providers/pyvider"
+      source  = "local/providers/pyvider"
       version = "0.1.0"
     }
   }
@@ -17,8 +17,8 @@ provider "pyvider" {
 
 # Create a temporary file to test with
 resource "local_file" "test_file" {
-  content     = "This is a test file for file_info data source"
-  filename    = "/tmp/test_file.txt"
+  content  = "This is a test file for file_info data source"
+  filename = "/tmp/test_file.txt"
 }
 
 # # Test file that exists
@@ -49,14 +49,14 @@ data "pyvider_file_info" "directory" {
 
 output "nonexistent_file_info" {
   value = {
-    path = data.pyvider_file_info.nonexistent_file.path
+    path   = data.pyvider_file_info.nonexistent_file.path
     exists = data.pyvider_file_info.nonexistent_file.exists
   }
 }
 
 output "directory_info" {
   value = {
-    path = data.pyvider_file_info.directory.path
+    path   = data.pyvider_file_info.directory.path
     exists = data.pyvider_file_info.directory.exists
     is_dir = data.pyvider_file_info.directory.is_dir
   }
