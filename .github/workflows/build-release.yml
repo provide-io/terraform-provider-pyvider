@@ -155,28 +155,12 @@ jobs:
         run: |
           echo "📝 Generating documentation with plating..."
 
-          # Install plating and pyvider-components from sibling directories
-          # These are available via submodules in the parent directory
-          cd ..
+          # Install plating and pyvider-components from GitHub
+          echo "Installing plating from GitHub..."
+          uv pip install git+https://github.com/provide-io/plating.git
 
-          # Install plating
-          if [ -d "plating" ]; then
-            echo "Installing plating from sibling directory..."
-            uv pip install -e plating/
-          else
-            echo "⚠️ plating directory not found, skipping"
-          fi
-
-          # Install pyvider-components
-          if [ -d "pyvider-components" ]; then
-            echo "Installing pyvider-components from sibling directory..."
-            uv pip install -e pyvider-components/
-          else
-            echo "⚠️ pyvider-components directory not found, skipping"
-          fi
-
-          # Return to terraform-provider-pyvider directory
-          cd terraform-provider-pyvider
+          echo "Installing pyvider-components from GitHub..."
+          uv pip install git+https://github.com/provide-io/pyvider-components.git
 
           # Run documentation generation script
           python3 scripts/generate_docs.py
