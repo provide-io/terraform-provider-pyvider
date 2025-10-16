@@ -140,7 +140,57 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-      
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: 📚 Generate Documentation
+        run: |
+          echo "📝 Generating documentation with plating..."
+
+          # Create virtual environment and install dependencies
+          uv venv .venv
+          source .venv/bin/activate
+
+          # Install plating and pyvider-components
+          uv pip install -e '../plating'
+          uv pip install -e '../pyvider-components'
+
+          # Run documentation build script
+          bash scripts/build-docs.sh
+
+          echo "✅ Documentation generated"
+          ls -la docs/
+
+      - name: 💾 Commit Documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add generated documentation
+          git add docs/
+
+          # Commit if there are changes
+          if git diff --staged --quiet; then
+            echo "📝 No documentation changes to commit"
+          else
+            git commit -m "📚 Generate documentation for v${{ inputs.version }}
+
+Generated documentation using plating with correct provider naming.
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <code@tim.life>"
+            git push origin main
+            echo "✅ Documentation committed and pushed"
+          fi
+
       - name: 📥 Download all artifacts
         uses: actions/download-artifact@v4
         with:
