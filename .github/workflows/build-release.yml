@@ -157,10 +157,10 @@ jobs:
 
           # Install plating and pyvider-components from GitHub
           echo "Installing plating from GitHub..."
-          uv pip install git+https://github.com/provide-io/plating.git
+          uv pip install --system git+https://github.com/provide-io/plating.git
 
           echo "Installing pyvider-components from GitHub..."
-          uv pip install git+https://github.com/provide-io/pyvider-components.git
+          uv pip install --system git+https://github.com/provide-io/pyvider-components.git
 
           # Run documentation generation script
           python3 scripts/generate_docs.py
