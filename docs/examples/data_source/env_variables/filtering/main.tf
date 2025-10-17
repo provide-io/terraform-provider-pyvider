@@ -130,31 +130,7 @@ resource "pyvider_file_content" "app_settings" {
   ))
 }
 
-# Create a summary of filtering results
-resource "pyvider_file_content" "filtering_report" {
-  filename = "/tmp/filtering_report.md"
-  content = templatefile("${path.module}/filtering_report.md.tpl", {
-    case_sensitive_count = length(data.pyvider_env_variables.app_config_sensitive.values)
-    case_insensitive_count = length(data.pyvider_env_variables.app_config_insensitive.values)
-    transformed_count = length(data.pyvider_env_variables.transformed_vars.values)
-    url_vars_count = length(data.pyvider_env_variables.url_vars.values)
-    port_vars_count = length(data.pyvider_env_variables.port_vars.values)
-    credential_vars_count = length(data.pyvider_env_variables.credential_vars.values)
-    with_empty_count = length(data.pyvider_env_variables.with_empty.values)
-    without_empty_count = length(data.pyvider_env_variables.without_empty.values)
-
-    case_sensitive_vars = keys(data.pyvider_env_variables.app_config_sensitive.values)
-    case_insensitive_vars = keys(data.pyvider_env_variables.app_config_insensitive.values)
-    url_vars = keys(data.pyvider_env_variables.url_vars.values)
-    port_vars = keys(data.pyvider_env_variables.port_vars.values)
-    credential_vars = keys(data.pyvider_env_variables.credential_vars.values)
-
-    app_config = local.app_config
-    variable_categories = local.variable_categories
-  })
-}
-
-# Alternative approach without external template file
+# Create a summary of filtering results using inline JSON encoding
 resource "pyvider_file_content" "filtering_summary" {
   filename = "/tmp/filtering_summary.json"
   content = jsonencode({

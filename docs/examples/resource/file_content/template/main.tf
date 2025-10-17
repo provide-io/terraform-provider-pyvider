@@ -42,29 +42,24 @@ resource "pyvider_file_content" "app_properties" {
   ])
 }
 
-# Create a shell script with executable content
+# Create a shell script with executable content using inline template
 resource "pyvider_file_content" "deploy_script" {
   filename = "/tmp/deploy.sh"
-  content = templatefile("${path.module}/deploy.sh.tpl", {
-    app_name = "my-terraform-app"
-    version  = "1.0.0"
-    user     = lookup(data.pyvider_env_variables.app_vars.values, "USER", "deploy")
-  })
+  content = join("\n", [
+    "#!/bin/bash",
+    "set -e",
+    "",
+    "APP_NAME=\"my-terraform-app\"",
+    "VERSION=\"1.0.0\"",
+    "USER=\"${lookup(data.pyvider_env_variables.app_vars.values, "USER", "deploy")}\"",
+    "",
+    "echo \"Deploying $APP_NAME version $VERSION as user $USER\"",
+    "echo \"Timestamp: $(date)\"",
+    "",
+    "# Add your deployment logic here",
+    "echo \"Deployment complete!\""
+  ])
 }
-
-# Example template file content (this would be a separate .tpl file)
-# #!/bin/bash
-# set -e
-#
-# APP_NAME="${app_name}"
-# VERSION="${version}"
-# USER="${user}"
-#
-# echo "Deploying $APP_NAME version $VERSION as user $USER"
-# echo "Timestamp: $(date)"
-#
-# # Add your deployment logic here
-# echo "Deployment complete!"
 
 output "template_outputs" {
   description = "Information about template-generated files"

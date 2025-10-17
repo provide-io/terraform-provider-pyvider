@@ -374,7 +374,7 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/vim,venv,emacs,macos,python,windows,sublimetext,terraform
 *.pyc
 
-.terraform.lock.hcl
+.terraform.lock.hcl*
 
 *bfile*
 
