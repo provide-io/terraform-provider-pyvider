@@ -42,7 +42,7 @@ locals {
 locals {
   word_list = ["apple", "banana", "cherry"]
 
-  comma_separated = provider::pyvider::join(", local.word_list, ")     # Returns: "apple, banana, cherry"
+  comma_separated = provider::pyvider::join(local.word_list, ", ")     # Returns: "apple, banana, cherry"
   pipe_separated = provider::pyvider::join(local.word_list, " | ")     # Returns: "apple | banana | cherry"
   no_separator = provider::pyvider::join(local.word_list, "")          # Returns: "applebananacherry"
 }
