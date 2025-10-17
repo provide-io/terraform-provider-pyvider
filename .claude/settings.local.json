@@ -14,7 +14,9 @@
       "Bash(terraform validate:*)",
       "Bash(./scripts/validate_all_examples.sh:*)",
       "Bash(tee:*)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(timeout 30 terraform init:*)",
+      "Bash(timeout 30 terraform plan:*)"
     ],
     "deny": [],
     "ask": [],
