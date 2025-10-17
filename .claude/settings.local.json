@@ -37,7 +37,9 @@
       "Bash(do sleep 10)",
       "Bash(do sleep 15)",
       "Bash(while ! grep -q \"Total examples\" /tmp/validation_round3.log)",
-      "Bash(python -m pytest:*)"
+      "Bash(python -m pytest:*)",
+      "Bash(while ! grep -q \"Total examples\" /tmp/validation_final.log)",
+      "Bash(do sleep 20)"
     ],
     "deny": [],
     "ask": [],
