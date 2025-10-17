@@ -101,7 +101,8 @@
       "Bash(/bin/ls:*)",
       "Bash(xargs:*)",
       "Bash(./scripts/validate_all_examples.sh:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(TF_LOG=DEBUG terraform init:*)"
     ],
     "deny": [],
     "ask": [],
