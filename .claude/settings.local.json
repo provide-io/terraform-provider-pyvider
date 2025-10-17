@@ -35,7 +35,8 @@
       "Read(//tmp/**)",
       "Bash(while ! grep -q \"Total examples\" /tmp/validation_round2.log)",
       "Bash(do sleep 10)",
-      "Bash(do sleep 15)"
+      "Bash(do sleep 15)",
+      "Bash(while ! grep -q \"Total examples\" /tmp/validation_round3.log)"
     ],
     "deny": [],
     "ask": [],

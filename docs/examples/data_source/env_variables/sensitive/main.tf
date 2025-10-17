@@ -37,8 +37,7 @@ data "pyvider_env_variables" "app_credentials" {
 # Read environment variables with prefix filtering for secrets
 data "pyvider_env_variables" "secrets" {
   prefix = "SECRET_"
-  # All variables with SECRET_ prefix are treated as sensitive
-  sensitive_keys = [for k in keys(data.pyvider_env_variables.secrets.all_environment) : k if can(regex("^SECRET_", k))]
+  # All variables with SECRET_ prefix are treated as sensitive by default
 }
 
 # Read configuration with selective sensitivity
