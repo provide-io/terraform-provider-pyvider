@@ -3,7 +3,10 @@
     "allow": [
       "Read(//Users/tim/code/gh/provide-io/pyvider/src/pyvider/protocols/tfprotov6/handlers/**)",
       "Read(//Users/tim/code/gh/provide-io/pyvider-components/src/pyvider/components/functions/**)",
-      "Read(//Users/tim/code/gh/provide-io/pyvider/**)"
+      "Read(//Users/tim/code/gh/provide-io/pyvider/**)",
+      "Bash(uv pip install:*)",
+      "Bash(pyvider install:*)",
+      "Bash(terraform -chdir=docs/examples/function/add/basic validate:*)"
     ],
     "deny": [],
     "ask": [],
