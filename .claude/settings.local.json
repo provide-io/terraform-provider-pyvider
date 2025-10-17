@@ -26,7 +26,8 @@
       "Bash(pyvider components list functions:*)",
       "Bash(python3:*)",
       "Bash(/dev/null)",
-      "Bash(find . -name \"main.tf\" -exec echo \"=== {} ===\" ; -exec head -20 {} ;)"
+      "Bash(find . -name \"main.tf\" -exec echo \"=== {} ===\" ; -exec head -20 {} ;)",
+      "Bash(find docs/examples/function -type d ( -name \"utility_functions\" -o -name \"text_processing\" -o -name \"data_validation\" ) -exec rm -rf {} +)"
     ],
     "deny": [],
     "ask": [],
