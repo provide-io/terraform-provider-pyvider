@@ -20,7 +20,8 @@
       "Bash(while ! grep -q \"Total examples\" /tmp/validation_baseline.log)",
       "Bash(do sleep 5)",
       "Bash(done)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": [],
