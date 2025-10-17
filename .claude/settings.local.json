@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(while pgrep -f \"validate_all_examples.*with_all_fixes\")"
+      "Read(//Users/tim/code/gh/provide-io/pyvider/src/pyvider/protocols/tfprotov6/handlers/**)"
     ],
     "deny": [],
     "ask": [],
