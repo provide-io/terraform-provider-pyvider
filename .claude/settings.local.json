@@ -44,7 +44,8 @@
       "Bash(for file in docs/examples/function/*/basic/main.tf)",
       "Bash(do)",
       "Bash(echo:*)",
-      "Bash(soup stir:*)"
+      "Bash(soup stir:*)",
+      "Bash(./scripts/generate_docs_and_examples.sh:*)"
     ],
     "deny": [],
     "ask": [],
