@@ -1,7 +1,7 @@
 
 # Minimal HTTP API test
 data "pyvider_http_api" "minimal_test" {
-  url = "https://httpbin.org/get"
+  url    = "https://httpbin.org/get"
   method = "GET"
   headers = {
     "User-Agent" = "Terraform/Pyvider-Test"
@@ -12,21 +12,21 @@ data "pyvider_http_api" "minimal_test" {
 # Test only the attributes that exist in the minimal schema
 output "minimal_test_basic" {
   value = {
-    status_code = data.pyvider_http_api.minimal_test.status_code
+    status_code   = data.pyvider_http_api.minimal_test.status_code
     response_time = data.pyvider_http_api.minimal_test.response_time_ms
-    header_count = data.pyvider_http_api.minimal_test.header_count
-    content_type = data.pyvider_http_api.minimal_test.content_type
-    has_error = data.pyvider_http_api.minimal_test.error_message != null
+    header_count  = data.pyvider_http_api.minimal_test.header_count
+    content_type  = data.pyvider_http_api.minimal_test.content_type
+    has_error     = data.pyvider_http_api.minimal_test.error_message != null
   }
 }
 
 # Test header access (string map)
 output "minimal_test_headers" {
   value = {
-    all_headers = data.pyvider_http_api.minimal_test.response_headers
+    all_headers         = data.pyvider_http_api.minimal_test.response_headers
     content_type_header = try(data.pyvider_http_api.minimal_test.response_headers["Content-Type"], "not_found")
-    server_header = try(data.pyvider_http_api.minimal_test.response_headers["Server"], "not_found")
-    header_count = data.pyvider_http_api.minimal_test.header_count
+    server_header       = try(data.pyvider_http_api.minimal_test.response_headers["Server"], "not_found")
+    header_count        = data.pyvider_http_api.minimal_test.header_count
   }
 }
 
@@ -57,18 +57,18 @@ output "minimal_test_json" {
 # Test conditional logic and error handling
 output "test_summary" {
   value = {
-    test_status = "Minimal HTTP API test"
-    success = data.pyvider_http_api.minimal_test.status_code == 200
-    has_error = data.pyvider_http_api.minimal_test.error_message != null
+    test_status   = "Minimal HTTP API test"
+    success       = data.pyvider_http_api.minimal_test.status_code == 200
+    has_error     = data.pyvider_http_api.minimal_test.error_message != null
     error_message = data.pyvider_http_api.minimal_test.error_message
-    
+
     response_summary = {
-      status_code = data.pyvider_http_api.minimal_test.status_code
+      status_code      = data.pyvider_http_api.minimal_test.status_code
       response_time_ms = data.pyvider_http_api.minimal_test.response_time_ms
-      header_count = data.pyvider_http_api.minimal_test.header_count
+      header_count     = data.pyvider_http_api.minimal_test.header_count
       has_content_type = data.pyvider_http_api.minimal_test.content_type != null
     }
-    
+
     schema_validation_result = "SUCCESS - No 'unexpected keyword argument' errors"
   }
 }

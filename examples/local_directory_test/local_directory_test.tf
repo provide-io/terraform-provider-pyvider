@@ -15,7 +15,7 @@ output "default_perms_output" {
 
 # --- Test Case 2: Create a directory with custom permissions ---
 resource "pyvider_local_directory" "test_custom_perms" {
-  path        = "/tmp/pyvider_test_dir_custom"
+  path = "/tmp/pyvider_test_dir_custom"
   #permissions = "0777"
   permissions = "0o777"
 }
