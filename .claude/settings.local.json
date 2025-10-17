@@ -11,7 +11,10 @@
       "Bash(/Users/tim/.terraform.d/plugins/local/providers/pyvider/0.1.0/darwin_arm64/terraform-provider-pyvider --launch-context)",
       "Bash(terraform init:*)",
       "Bash(terraform plan:*)",
-      "Bash(terraform validate:*)"
+      "Bash(terraform validate:*)",
+      "Bash(./scripts/validate_all_examples.sh:*)",
+      "Bash(tee:*)",
+      "Read(//private/tmp/**)"
     ],
     "deny": [],
     "ask": [],
