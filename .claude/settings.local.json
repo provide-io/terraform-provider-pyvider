@@ -7,7 +7,8 @@
       "Bash(uv pip install:*)",
       "Bash(pyvider install:*)",
       "Bash(terraform -chdir=docs/examples/function/add/basic validate:*)",
-      "Read(//private/tmp/test-variadic/**)"
+      "Read(//private/tmp/test-variadic/**)",
+      "Bash(/Users/tim/.terraform.d/plugins/local/providers/pyvider/0.1.0/darwin_arm64/terraform-provider-pyvider --launch-context)"
     ],
     "deny": [],
     "ask": [],
