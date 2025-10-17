@@ -55,22 +55,17 @@ locals {
   has_apple = provider::pyvider::contains(local.fruits, "apple")       # Returns: true
   has_grape = provider::pyvider::contains(local.fruits, "grape")       # Returns: false
 
-  # String contains examples
-  sample_text = "The quick brown fox"
+  # Number list contains examples
+  numbers = [1, 2, 3, 4, 5]
 
-  contains_fox = provider::pyvider::contains(local.sample_text, "fox") # Returns: true
-  contains_cat = provider::pyvider::contains(local.sample_text, "cat") # Returns: false
-  contains_quick = provider::pyvider::contains(local.sample_text, "quick") # Returns: true
+  has_three = provider::pyvider::contains(local.numbers, 3)            # Returns: true
+  has_ten = provider::pyvider::contains(local.numbers, 10)             # Returns: false
 
-  # Map contains examples (checks for keys)
-  user_data = {
-    username = "alice123"
-    email = "alice@example.com"
-    active = true
-  }
+  # Mixed type list examples
+  mixed_list = ["apple", "banana", 123, true]
 
-  has_username = provider::pyvider::contains(local.user_data, "username") # Returns: true
-  has_password = provider::pyvider::contains(local.user_data, "password") # Returns: false
+  has_banana = provider::pyvider::contains(local.mixed_list, "banana") # Returns: true
+  has_false = provider::pyvider::contains(local.mixed_list, false)     # Returns: false
 }
 
 # Lookup function examples
@@ -142,16 +137,12 @@ locals {
 locals {
   # Input validation using collection functions
   required_fields = ["name", "email", "password"]
-  user_input = {
-    name = "John Doe"
-    email = "john@example.com"
-    age = 25
-  }
+  provided_fields = ["name", "email", "age"]
 
   # Check if all required fields are present
   missing_fields = [
     for field in local.required_fields :
-    field if !provider::pyvider::contains(local.user_input, field)
+    field if !provider::pyvider::contains(local.provided_fields, field)
   ]
 
   has_all_required = provider::pyvider::length(local.missing_fields) == 0
@@ -204,23 +195,22 @@ output "collection_function_examples" {
     }
 
     contains_operations = {
-      lists = {
+      string_lists = {
         fruits = local.fruits
         has_apple = local.has_apple
         has_grape = local.has_grape
       }
 
-      strings = {
-        text = local.sample_text
-        contains_fox = local.contains_fox
-        contains_cat = local.contains_cat
-        contains_quick = local.contains_quick
+      number_lists = {
+        numbers = local.numbers
+        has_three = local.has_three
+        has_ten = local.has_ten
       }
 
-      maps = {
-        user_data = local.user_data
-        has_username = local.has_username
-        has_password = local.has_password
+      mixed_lists = {
+        mixed_list = local.mixed_list
+        has_banana = local.has_banana
+        has_false = local.has_false
       }
     }
 

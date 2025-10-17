@@ -48,10 +48,10 @@ locals {
 
 # Case conversion examples
 locals {
-  original_text = "Hello World"
+  case_original_text = "Hello World"
 
-  uppercase_text = provider::pyvider::upper(local.original_text)    # Returns: "HELLO WORLD"
-  lowercase_text = provider::pyvider::lower(local.original_text)    # Returns: "hello world"
+  uppercase_text = provider::pyvider::upper(local.case_original_text)    # Returns: "HELLO WORLD"
+  lowercase_text = provider::pyvider::lower(local.case_original_text)    # Returns: "hello world"
 }
 
 # String formatting examples
@@ -91,10 +91,10 @@ locals {
 
 # String replacement examples
 locals {
-  original_text = "The quick brown fox jumps over the lazy dog"
+  replacement_original_text = "The quick brown fox jumps over the lazy dog"
 
-  replace_fox = provider::pyvider::replace(local.original_text, "fox", "cat")    # Returns: "The quick brown cat jumps over the lazy dog"
-  replace_spaces = provider::pyvider::replace(local.original_text, " ", "_")     # Returns: "The_quick_brown_fox_jumps_over_the_lazy_dog"
+  replace_fox = provider::pyvider::replace(local.replacement_original_text, "fox", "cat")    # Returns: "The quick brown cat jumps over the lazy dog"
+  replace_spaces = provider::pyvider::replace(local.replacement_original_text, " ", "_")     # Returns: "The_quick_brown_fox_jumps_over_the_lazy_dog"
 }
 
 # Combined string operations
@@ -120,7 +120,7 @@ locals {
 output "string_manipulation_examples" {
   value = {
     case_conversion = {
-      original = local.original_text
+      original = local.case_original_text
       uppercase = local.uppercase_text
       lowercase = local.lowercase_text
     }
@@ -146,7 +146,7 @@ output "string_manipulation_examples" {
     }
 
     replacement = {
-      original = local.original_text
+      original = local.replacement_original_text
       fox_to_cat = local.replace_fox
       spaces_to_underscores = local.replace_spaces
     }
