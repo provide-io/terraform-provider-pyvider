@@ -21,7 +21,9 @@
       "Bash(do sleep 5)",
       "Bash(done)",
       "Bash(cat:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(cut:*)",
+      "Bash(pyvider components list functions:*)"
     ],
     "deny": [],
     "ask": [],
