@@ -40,7 +40,10 @@
       "Bash(python -m pytest:*)",
       "Bash(while ! grep -q \"Total examples\" /tmp/validation_final.log)",
       "Bash(do sleep 20)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(for file in docs/examples/function/*/basic/main.tf)",
+      "Bash(do)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": [],
