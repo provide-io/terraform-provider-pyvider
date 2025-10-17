@@ -9,8 +9,8 @@
       "directory": "resource_calculations",
       "success": true,
       "skipped": false,
-      "start_time": 1291626.743453166,
-      "end_time": 1291631.944138708,
+      "start_time": 1291844.788025166,
+      "end_time": 1291849.891535541,
       "failed_stage": null,
       "error_message": null,
       "outputs": 0,
@@ -19,7 +19,7 @@
       "resources": 0,
       "data_sources": 0
     },
-    "timestamp": "2025-10-17T15:38:11.309650",
+    "timestamp": "2025-10-17T15:41:49.259024",
     "provider_version": "0.1.0"
   },
   "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/basic": {
@@ -32,8 +32,8 @@
       "directory": "basic",
       "success": true,
       "skipped": false,
-      "start_time": 1291626.742694833,
-      "end_time": 1291631.947018291,
+      "start_time": 1291844.7874545,
+      "end_time": 1291849.897152458,
       "failed_stage": null,
       "error_message": null,
       "outputs": 0,
@@ -42,7 +42,7 @@
       "resources": 0,
       "data_sources": 0
     },
-    "timestamp": "2025-10-17T15:38:11.312129",
+    "timestamp": "2025-10-17T15:41:49.264318",
     "provider_version": "0.1.0"
   },
   "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/example": {
@@ -55,8 +55,8 @@
       "directory": "example",
       "success": true,
       "skipped": false,
-      "start_time": 1291626.743247958,
-      "end_time": 1291631.976012791,
+      "start_time": 1291844.787865041,
+      "end_time": 1291849.929802416,
       "failed_stage": null,
       "error_message": null,
       "outputs": 0,
@@ -65,7 +65,76 @@
       "resources": 0,
       "data_sources": 0
     },
-    "timestamp": "2025-10-17T15:38:11.341079",
+    "timestamp": "2025-10-17T15:41:49.297107",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/resource_calculations": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/resource_calculations",
+    "file_hashes": {
+      "main.tf": "61075103f1bfca1f06dad37e227b1e90b6d88e72ffea27ce2039ca2f09bbc47c",
+      ".terraform.lock.hcl": "2f938aaf236aabd9c83c71efd87ade0f0ab1d36f7bcd53c1d9bf948a4bc2eb57"
+    },
+    "result": {
+      "directory": "resource_calculations",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291820.339900541,
+      "end_time": 1291825.525469208,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:41:24.892886",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/basic": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/basic",
+    "file_hashes": {
+      "main.tf": "ae6bbbd7bd44a02b083af62e3df493e19c99c1f00b96720664e88cc22885047e",
+      ".terraform.lock.hcl": "44953e6ddad3245ef6e9d96bf5dc846db7904c56a742a425a2cc0cb387356d61"
+    },
+    "result": {
+      "directory": "basic",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291820.339225708,
+      "end_time": 1291825.528211291,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:41:24.895189",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/example": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/max/example",
+    "file_hashes": {
+      "main.tf": "e02120669078975ca3007322a912e27918fe90c423acb60f153350f846e3c4e5",
+      ".terraform.lock.hcl": "479b6be1e65b1b14f137c05e43f01382a5e46d22194409d5cf58028d3dd24099"
+    },
+    "result": {
+      "directory": "example",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291820.339729208,
+      "end_time": 1291825.56008975,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:41:24.927141",
     "provider_version": "0.1.0"
   }
 }
