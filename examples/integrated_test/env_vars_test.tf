@@ -37,13 +37,13 @@ data "pyvider_env_variables" "with_sensitive" {
 
 # Test 6: Test exclude_empty flag
 data "pyvider_env_variables" "with_empty" {
-  keys           = ["TEST_VAR1", "TEST_EMPTY_VAR"]
-  exclude_empty  = true # This is the default, but we're being explicit
+  keys          = ["TEST_VAR1", "TEST_EMPTY_VAR"]
+  exclude_empty = true # This is the default, but we're being explicit
 }
 
 data "pyvider_env_variables" "without_empty" {
-  keys           = ["TEST_VAR1", "TEST_EMPTY_VAR"]
-  exclude_empty  = false
+  keys          = ["TEST_VAR1", "TEST_EMPTY_VAR"]
+  exclude_empty = false
 }
 
 

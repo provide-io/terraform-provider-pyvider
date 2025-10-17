@@ -12,7 +12,7 @@ locals {
 # --- Using the `pyvider_lens_jq` function ---
 output "ex9_container_summary_from_function" {
   description = "Example 9: A complex summary object created directly by the lens_jq function."
-  
+
   value = provider::pyvider::lens_jq(local.complex_data, local.container_summary_query)
 }
 
@@ -24,6 +24,6 @@ data "pyvider_lens_jq" "container_summary_from_ds" {
 
 output "ex10_container_summary_from_ds" {
   description = "Example 10: The same complex summary created by the lens_jq data source."
-  
+
   value = data.pyvider_lens_jq.container_summary_from_ds.result
 }

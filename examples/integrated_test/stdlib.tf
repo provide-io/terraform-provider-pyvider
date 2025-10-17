@@ -1,6 +1,6 @@
 locals {
   sample_list = ["a", "b", "c"]
-  sample_map  = {
+  sample_map = {
     "key1" = "value1"
     "key2" = "value2"
   }

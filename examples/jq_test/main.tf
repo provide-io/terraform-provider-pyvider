@@ -40,7 +40,7 @@ output "ex1_store_location" {
 output "ex2_first_item_name" {
   description = "Example 2: Extracts the name of the first item in the 'items' array."
   #value       = provider::pyvider::pyvider_jens_jq(local.sample_data_for_func, ".items[0].name")
-  value       = provider::pyvider::lens_jq(local.sample_data_for_func, ".items[0].name")
+  value = provider::pyvider::lens_jq(local.sample_data_for_func, ".items[0].name")
 }
 
 # ===================================================================
