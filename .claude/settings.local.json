@@ -43,7 +43,8 @@
       "Bash(find:*)",
       "Bash(for file in docs/examples/function/*/basic/main.tf)",
       "Bash(do)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(soup stir:*)"
     ],
     "deny": [],
     "ask": [],
