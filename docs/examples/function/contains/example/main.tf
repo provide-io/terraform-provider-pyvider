@@ -40,21 +40,22 @@ locals {
   )
 }
 
-# Example 2: String and list operations
+# Example 2: List operations
 locals {
   service_names = ["web", "api", "database", "cache", "monitor"]
-  log_message = "Error connecting to database service"
+  log_levels = ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
 
-  # Check if service exists
+  # Check if service exists in list
   has_database = provider::pyvider::contains(local.service_names, "database")
   has_analytics = provider::pyvider::contains(local.service_names, "analytics")
 
-  # Check if log contains error
-  is_error_log = provider::pyvider::contains(local.log_message, "Error")
+  # Check if log level is in list
+  has_error_level = provider::pyvider::contains(local.log_levels, "ERROR")
+  has_trace_level = provider::pyvider::contains(local.log_levels, "TRACE")
 
   # Get collection sizes
   service_count = provider::pyvider::length(local.service_names)
-  log_length = provider::pyvider::length(local.log_message)
+  log_level_count = provider::pyvider::length(local.log_levels)
 }
 
 # Example 3: Configuration management with lookups
@@ -177,10 +178,11 @@ resource "pyvider_file_content" "collection_examples" {
     "Has database service: ${local.has_database}",
     "Has analytics service: ${local.has_analytics}",
     "",
-    "=== Log Analysis ===",
-    "Log message: '${local.log_message}'",
-    "Message length: ${local.log_length} characters",
-    "Is error log: ${local.is_error_log}",
+    "=== Log Level Validation ===",
+    "Available log levels: ${jsonencode(local.log_levels)}",
+    "Log level count: ${local.log_level_count}",
+    "Has ERROR level: ${local.has_error_level}",
+    "Has TRACE level: ${local.has_trace_level}",
     "",
     "=== Application Settings ===",
     "Max connections: ${local.max_conn}",
@@ -229,9 +231,10 @@ output "collection_function_results" {
       has_analytics = local.has_analytics
     }
 
-    log_analysis = {
-      message_length = local.log_length
-      is_error = local.is_error_log
+    log_level_validation = {
+      level_count = local.log_level_count
+      has_error_level = local.has_error_level
+      has_trace_level = local.has_trace_level
     }
 
     app_configuration = {

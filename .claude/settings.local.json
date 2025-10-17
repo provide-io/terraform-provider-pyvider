@@ -27,7 +27,15 @@
       "Bash(python3:*)",
       "Bash(/dev/null)",
       "Bash(find . -name \"main.tf\" -exec echo \"=== {} ===\" ; -exec head -20 {} ;)",
-      "Bash(find docs/examples/function -type d ( -name \"utility_functions\" -o -name \"text_processing\" -o -name \"data_validation\" ) -exec rm -rf {} +)"
+      "Bash(find docs/examples/function -type d ( -name \"utility_functions\" -o -name \"text_processing\" -o -name \"data_validation\" ) -exec rm -rf {} +)",
+      "Bash(./scripts/build-docs.sh:*)",
+      "Bash(src/pyvider/components/functions/collection_functions.plating/examples/data_validation.tf )",
+      "Bash(src/pyvider/components/functions/string_manipulation.plating/examples/text_processing.tf )",
+      "Bash(src/pyvider/components/functions/string_manipulation.plating/examples/utility_functions.tf)",
+      "Read(//tmp/**)",
+      "Bash(while ! grep -q \"Total examples\" /tmp/validation_round2.log)",
+      "Bash(do sleep 10)",
+      "Bash(do sleep 15)"
     ],
     "deny": [],
     "ask": [],
