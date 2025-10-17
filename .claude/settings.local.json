@@ -103,7 +103,9 @@
       "Bash(./scripts/validate_all_examples.sh:*)",
       "Bash(tee:*)",
       "Bash(TF_LOG=DEBUG terraform init:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(1)",
+      "Read(//tmp/**)"
     ],
     "deny": [],
     "ask": [],
