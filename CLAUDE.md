@@ -312,15 +312,8 @@ Functions can declare variadic parameters using Python's `*args` syntax:
 ```python
 # In pyvider-components/src/pyvider/components/functions/numeric_functions.py
 @register_function(
-    summary="Round a number",
-    return_type=Number,
-    parameters=[
-        ParameterMeta(
-            name="number",
-            description="The number to round",
-            type=Number,
-        ),
-    ]
+    name="round",
+    summary="Round a number to specified precision",
 )
 def round_number(number: float, *options) -> int | float:
     """Round a number to specified precision."""
