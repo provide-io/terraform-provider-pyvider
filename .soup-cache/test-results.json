@@ -67,5 +67,143 @@
     },
     "timestamp": "2025-10-17T15:42:51.878952",
     "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/basic": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/basic",
+    "file_hashes": {
+      "main.tf": "9c91995134f125b4847edfcf6dac520808ece83fab993f8b17d41bdf662f2f3c",
+      ".terraform.lock.hcl": "b53394c899a2cb1f83ed1253dc79614ad7de5012bad06ffa593fbaf76ec061cb"
+    },
+    "result": {
+      "directory": "basic",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291930.144342541,
+      "end_time": 1291963.26149675,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 1,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:43:42.629914",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/resource_calculations": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/resource_calculations",
+    "file_hashes": {
+      "main.tf": "86143c8bf360bb0c325abd715b618a571d8e88a06406c8624aca437ad3d6e094",
+      ".terraform.lock.hcl": "02a6003749ddd91f75a8d1473fbf85e556111ced1da27957659fccb617968e42"
+    },
+    "result": {
+      "directory": "resource_calculations",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291930.145029791,
+      "end_time": 1291968.308981416,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 1,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 1,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:43:47.677288",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/example": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/multiply/example",
+    "file_hashes": {
+      "main.tf": "39526815284099be1ef203e1937f274f15600646aeb454866027f3d29aa0bbff",
+      ".terraform.lock.hcl": "b57aa572ca8166379460e5548afa9f21c1b4b289a4958d046403220790dabbd7"
+    },
+    "result": {
+      "directory": "example",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291930.144838375,
+      "end_time": 1291968.337812375,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 1,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 1,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:43:47.706130",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/resource_calculations": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/resource_calculations",
+    "file_hashes": {
+      "main.tf": "936ff5310801dff1375d2dae562773debc3ca9fa039884bfd7d606288526d072",
+      ".terraform.lock.hcl": "4ddcb0719d5a7be1eb1ea63c0c85ff1870fc987043fd3d88d7e55ccb72a12d77"
+    },
+    "result": {
+      "directory": "resource_calculations",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291994.663650666,
+      "end_time": 1291999.782488958,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:44:19.151317",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/basic": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/basic",
+    "file_hashes": {
+      "main.tf": "f70ccc99b1c1e5671dbbabaab0746c855e2077c4eae89c04a40db1830b4a4a64",
+      ".terraform.lock.hcl": "22b16f349907d62d6c9bb33172004f361fdae0af622c5965a7c790511616e256"
+    },
+    "result": {
+      "directory": "basic",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291994.662868708,
+      "end_time": 1291999.784735791,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:44:19.153171",
+    "provider_version": "0.1.0"
+  },
+  "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/example": {
+    "test_path": "/Users/tim/code/gh/provide-io/terraform-provider-pyvider/docs/examples/function/add/example",
+    "file_hashes": {
+      "main.tf": "2f2f7283a0024bdf063702b582d98cfc3d5ff099dca8a0e98dad0eb33b23a8f0",
+      ".terraform.lock.hcl": "9121c000de2714b49ccd52be462110a80ecd897430aac56b7cb7b64d2ad59d87"
+    },
+    "result": {
+      "directory": "example",
+      "success": true,
+      "skipped": false,
+      "start_time": 1291994.663433958,
+      "end_time": 1291999.815344,
+      "failed_stage": null,
+      "error_message": null,
+      "outputs": 0,
+      "has_warnings": false,
+      "providers": 0,
+      "resources": 0,
+      "data_sources": 0
+    },
+    "timestamp": "2025-10-17T15:44:19.183893",
+    "provider_version": "0.1.0"
   }
 }
