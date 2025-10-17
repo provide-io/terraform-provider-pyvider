@@ -24,7 +24,8 @@
       "Bash(awk:*)",
       "Bash(cut:*)",
       "Bash(pyvider components list functions:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [],
     "ask": [],
