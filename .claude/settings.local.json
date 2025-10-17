@@ -25,7 +25,8 @@
       "Bash(cut:*)",
       "Bash(pyvider components list functions:*)",
       "Bash(python3:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(find . -name \"main.tf\" -exec echo \"=== {} ===\" ; -exec head -20 {} ;)"
     ],
     "deny": [],
     "ask": [],
