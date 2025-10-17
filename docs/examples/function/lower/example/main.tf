@@ -60,7 +60,7 @@ locals {
 locals {
   csv_data = "apple,banana,cherry,date"
   fruits = provider::pyvider::split(local.csv_data, ",")
-  fruits_with_and = provider::pyvider::join(local.fruits, " and ")
+  fruits_with_and = provider::pyvider::join(" and ", local.fruits)
 }
 
 # Example 6: Complex string processing pipeline
