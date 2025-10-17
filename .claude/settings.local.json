@@ -16,7 +16,11 @@
       "Bash(tee:*)",
       "Read(//private/tmp/**)",
       "Bash(timeout 30 terraform init:*)",
-      "Bash(timeout 30 terraform plan:*)"
+      "Bash(timeout 30 terraform plan:*)",
+      "Bash(while ! grep -q \"Total examples\" /tmp/validation_baseline.log)",
+      "Bash(do sleep 5)",
+      "Bash(done)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": [],
