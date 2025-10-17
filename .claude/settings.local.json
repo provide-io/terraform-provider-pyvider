@@ -45,7 +45,8 @@
       "Bash(do)",
       "Bash(echo:*)",
       "Bash(soup stir:*)",
-      "Bash(./scripts/generate_docs_and_examples.sh:*)"
+      "Bash(./scripts/generate_docs_and_examples.sh:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": [],

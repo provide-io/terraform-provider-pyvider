@@ -34,7 +34,6 @@ No provider configuration required.
 - [`pyvider_file_info`](./data-sources/file_info.md)
 - [`pyvider_http_api`](./data-sources/http_api.md)
 - [`pyvider_lens_jq`](./data-sources/lens_jq.md)
-- [`pyvider_nested_data_test_suite`](./data-sources/nested_data_test_suite.md)
 - [`pyvider_provider_config_reader`](./data-sources/provider_config_reader.md)
 
 ## Functions
