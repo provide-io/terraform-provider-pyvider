@@ -45,7 +45,8 @@ locals {
   highest_month = provider::pyvider::max(local.monthly_costs)
   lowest_month = provider::pyvider::min(local.monthly_costs)
   average_monthly = provider::pyvider::round(
-    provider::pyvider::divide(local.total_monthly_cost, provider::pyvider::length(local.monthly_costs))
+    provider::pyvider::divide(local.total_monthly_cost, provider::pyvider::length(local.monthly_costs)),
+    2
   )
 }
 
@@ -65,7 +66,7 @@ locals {
   total_hourly_cost = provider::pyvider::add(local.cpu_cost_per_hour, local.memory_cost_per_hour)
 
   # Monthly cost (assume 730 hours/month)
-  monthly_cost = provider::pyvider::round(provider::pyvider::multiply(local.total_hourly_cost, 730))
+  monthly_cost = provider::pyvider::round(provider::pyvider::multiply(local.total_hourly_cost, 730), 2)
 }
 
 # Example 5: Performance metrics calculation
@@ -75,7 +76,8 @@ locals {
   peak_requests = provider::pyvider::max(local.request_counts)
   total_requests = provider::pyvider::sum(local.request_counts)
   average_requests = provider::pyvider::round(
-    provider::pyvider::divide(local.total_requests, provider::pyvider::length(local.request_counts))
+    provider::pyvider::divide(local.total_requests, provider::pyvider::length(local.request_counts)),
+    0
   )
 
   # Calculate variance from average
@@ -105,7 +107,7 @@ locals {
   # For this example, we'll approximate the power calculation
   # In practice, you might use external tools for complex math
   compound_factor = 1.28  # Approximation of (1.004167)^60
-  final_amount = provider::pyvider::round(provider::pyvider::multiply(local.principal, local.compound_factor))
+  final_amount = provider::pyvider::round(provider::pyvider::multiply(local.principal, local.compound_factor), 2)
   interest_earned = provider::pyvider::subtract(local.final_amount, local.principal)
 }
 
@@ -120,13 +122,13 @@ resource "pyvider_file_content" "numeric_calculations" {
     "Quantity: ${local.quantity}",
     "Tax rate: ${local.tax_rate * 100}%",
     "Subtotal: $${local.subtotal}",
-    "Tax amount: $${provider::pyvider::round(local.tax_amount)}",
-    "Total with tax: $${provider::pyvider::round(local.total_with_tax)}",
+    "Tax amount: $${provider::pyvider::round(local.tax_amount, 2)}",
+    "Total with tax: $${provider::pyvider::round(local.total_with_tax, 2)}",
     "",
     "=== Server Performance Metrics ===",
     "Response times (ms): ${jsonencode(local.server_response_times)}",
     "Total time: ${local.total_time}ms",
-    "Average response: ${provider::pyvider::round(local.average_response)}ms",
+    "Average response: ${provider::pyvider::round(local.average_response, 0)}ms",
     "Min response: ${local.min_response}ms",
     "Max response: ${local.max_response}ms",
     "",
@@ -143,7 +145,7 @@ resource "pyvider_file_content" "numeric_calculations" {
     "Scaling factor: ${local.scaling_factor}x",
     "Scaled CPU: ${local.scaled_cpu} units",
     "Scaled Memory: ${local.scaled_memory} GB",
-    "Hourly cost: $${provider::pyvider::round(local.total_hourly_cost)}",
+    "Hourly cost: $${provider::pyvider::round(local.total_hourly_cost, 2)}",
     "Monthly cost: $${local.monthly_cost}",
     "",
     "=== Request Analytics ===",
@@ -151,7 +153,7 @@ resource "pyvider_file_content" "numeric_calculations" {
     "Total requests: ${local.total_requests}",
     "Average requests: ${local.average_requests}",
     "Peak requests: ${local.peak_requests}",
-    "Variance: ${provider::pyvider::round(local.variance)}",
+    "Variance: ${provider::pyvider::round(local.variance, 0)}",
     "",
     "=== Investment Calculation ===",
     "Principal: $${local.principal}",
@@ -170,13 +172,13 @@ output "numeric_function_results" {
   value = {
     shopping_cart = {
       subtotal = local.subtotal
-      tax_amount = provider::pyvider::round(local.tax_amount)
-      total = provider::pyvider::round(local.total_with_tax)
+      tax_amount = provider::pyvider::round(local.tax_amount, 2)
+      total = provider::pyvider::round(local.total_with_tax, 2)
     }
 
     performance_metrics = {
       total_time = local.total_time
-      average_response = provider::pyvider::round(local.average_response)
+      average_response = provider::pyvider::round(local.average_response, 0)
       min_response = local.min_response
       max_response = local.max_response
     }
@@ -191,7 +193,7 @@ output "numeric_function_results" {
     resource_scaling = {
       scaled_cpu = local.scaled_cpu
       scaled_memory = local.scaled_memory
-      hourly_cost = provider::pyvider::round(local.total_hourly_cost)
+      hourly_cost = provider::pyvider::round(local.total_hourly_cost, 2)
       monthly_cost = local.monthly_cost
     }
 
@@ -199,7 +201,7 @@ output "numeric_function_results" {
       total_requests = local.total_requests
       average_requests = local.average_requests
       peak_requests = local.peak_requests
-      variance = provider::pyvider::round(local.variance)
+      variance = provider::pyvider::round(local.variance, 0)
     }
 
     investment = {
