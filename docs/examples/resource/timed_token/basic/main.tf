@@ -188,6 +188,7 @@ resource "pyvider_file_content" "token_registry" {
 
 output "basic_token_examples" {
   description = "Information about created tokens (sensitive values excluded)"
+  sensitive   = true
   value = {
     tokens_created = {
       simple = {

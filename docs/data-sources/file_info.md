@@ -70,7 +70,7 @@ data "pyvider_file_info" "current_dir" {
 # Create some files to demonstrate with
 resource "pyvider_local_directory" "test_dir" {
   path        = "/tmp/file_info_test"
-  permissions = "0755"
+  permissions = "0o755"
 }
 
 resource "pyvider_file_content" "sample_text" {

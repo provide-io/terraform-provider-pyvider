@@ -460,6 +460,7 @@ resource "pyvider_file_content" "cicd_token_summary" {
 
 output "cicd_token_configurations" {
   description = "CI/CD platform token configurations"
+  sensitive   = true
   value = {
     platforms_configured = ["GitHub Actions", "Jenkins", "GitLab CI/CD", "Azure DevOps", "CircleCI"]
 
