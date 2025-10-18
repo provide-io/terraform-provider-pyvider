@@ -39,35 +39,35 @@ while IFS= read -r example_dir; do
         rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup 2>/dev/null || true
 
         # Initialize
-        if ! terraform init -backend=false &>/dev/null; then
+        if ! timeout 30 terraform init -backend=false &>/dev/null; then
             echo -e "${RED}✗ init${NC}"
             INIT_FAILURES+=("$example_name")
             exit 1
         fi
 
         # Validate
-        if ! terraform validate &>/dev/null; then
+        if ! timeout 15 terraform validate &>/dev/null; then
             echo -e "${RED}✗ validate${NC}"
             PLAN_FAILURES+=("$example_name")
             exit 1
         fi
 
         # Plan
-        if ! terraform plan -out=tfplan &>/dev/null; then
+        if ! timeout 30 terraform plan -out=tfplan &>/dev/null; then
             echo -e "${RED}✗ plan${NC}"
             PLAN_FAILURES+=("$example_name")
             exit 1
         fi
 
         # Apply (since no remote connections, should be safe)
-        if ! terraform apply -auto-approve tfplan &>/dev/null; then
+        if ! timeout 30 terraform apply -auto-approve tfplan &>/dev/null; then
             echo -e "${RED}✗ apply${NC}"
             APPLY_FAILURES+=("$example_name")
             exit 1
         fi
 
         # Destroy to clean up
-        terraform destroy -auto-approve &>/dev/null || true
+        timeout 30 terraform destroy -auto-approve &>/dev/null || true
 
         # Clean up
         rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup tfplan 2>/dev/null || true
