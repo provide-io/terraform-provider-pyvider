@@ -64,7 +64,10 @@
       "Bash(while ! grep -q \"Total tests\" /tmp/FINAL_validation.log)",
       "Bash(if grep -q \"Total tests\" /tmp/FINAL_validation.log)",
       "Bash(then tail -80 /tmp/FINAL_validation.log)",
-      "Read(///**)"
+      "Read(///**)",
+      "Bash(pkill -f \"soup stir\")",
+      "Bash(pkill -f \"tail -f\")",
+      "Bash(while ! grep -q \"Total tests\" /tmp/test_fixes_round1.log)"
     ],
     "deny": [],
     "ask": [],
