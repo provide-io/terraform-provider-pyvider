@@ -46,7 +46,11 @@
       "Bash(echo:*)",
       "Bash(soup stir:*)",
       "Bash(./scripts/generate_docs_and_examples.sh:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(if grep -q \"Total tests\" /tmp/phase1_validation.log)",
+      "Bash(then tail -50 /tmp/phase1_validation.log)",
+      "Bash(else echo \"Still running... Current status:\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": [],
