@@ -244,6 +244,45 @@ When executed, the provider:
 
 ### Development Workflow
 
+#### For Development Builds (Testing Local Changes)
+
+**IMPORTANT**: When developing and testing changes to pyvider packages, you do NOT need to rebuild or reinstall the provider package each time. The `pyvider install` command creates a **persistent wrapper script** that uses your virtual environment.
+
+**Fast iteration workflow**:
+```bash
+# 1. Initial setup (one-time)
+make setup                    # Or: source env.sh
+pyvider install              # Creates wrapper script pointing to your venv
+
+# 2. Make code changes to pyvider packages
+cd ../pyvider && vim src/pyvider/...
+cd ../pyvider-components && vim src/pyvider/components/...
+
+# 3. Install changes to venv (NO rebuild needed!)
+cd ../pyvider && uv pip install -e .
+cd ../pyvider-components && uv pip install -e .
+
+# 4. Test immediately
+cd /path/to/test && terraform plan
+
+# The wrapper script automatically uses the updated venv code!
+```
+
+**When you DO need to reinstall**:
+- Only if you change the venv location/path
+- Only if the wrapper script gets deleted
+- NOT needed for code changes to pyvider packages
+
+**How it works**:
+- `pyvider install` creates: `~/.terraform.d/plugins/local/providers/pyvider/0.1.0/darwin_arm64/terraform-provider-pyvider`
+- This is a bash wrapper script that:
+  - Activates your project's `.venv`
+  - Runs `pyvider provide` command
+  - Uses whatever code is currently installed in that venv
+- Changes to pyvider packages are immediately available after `uv pip install -e .`
+
+#### For Production Builds (PSP Packages)
+
 1. **Always start with**: `make setup` or `source env.sh` to set up the development environment
 2. **Make code changes** in sibling pyvider packages if needed
 3. **Build**: Run `make build` to create both PSP and versioned binary
@@ -261,6 +300,142 @@ When executed, the provider:
 - Local installation follows Terraform's plugin directory structure
 - Cleanup targets are comprehensive and prevent workspace pollution
 - Platform detection is automatic based on `uname -s` and `uname -m`
+
+### Smart Variadic Parameters Implementation
+
+Pyvider supports **Smart Variadic Parameters** for provider functions, enabling true optional parameters with excellent developer experience.
+
+#### How It Works
+
+Functions can declare variadic parameters using Python's `*args` syntax:
+
+```python
+# In pyvider-components/src/pyvider/components/functions/numeric_functions.py
+@pyvider_function(
+    summary="Round a number",
+    return_type=Number,
+    parameters=[
+        ParameterMeta(
+            name="number",
+            description="The number to round",
+            type=Number,
+        ),
+    ]
+)
+def round_number(number: float, *options) -> int | float:
+    """Round a number to specified precision."""
+    precision = options[0] if options else 0
+    return round(number, precision)
+```
+
+#### Usage in Terraform
+
+```hcl
+# Without optional parameter (uses default)
+output "rounded" {
+  value = provider::pyvider::round(3.14159)  # → 3
+}
+
+# With optional parameter
+output "precise" {
+  value = provider::pyvider::round(3.14159, 2)  # → 3.14
+}
+
+# String functions with options
+output "camelCase" {
+  value = provider::pyvider::to_camel_case("my_var")      # → "myVar"
+}
+
+output "PascalCase" {
+  value = provider::pyvider::to_camel_case("my_var", true) # → "MyVar"
+}
+```
+
+#### Implementation Details
+
+The variadic parameter system consists of three key components:
+
+**1. Schema Generation** (`pyvider/src/pyvider/functions/adapters.py`):
+- `_extract_parameters_meta()` detects `*args` (VAR_POSITIONAL) parameters
+- Returns separate `parameters` (required) and `variadic_parameter` (optional)
+- Provides metadata for both to the protocol layer
+
+**2. Protocol Conversion** (`pyvider/src/pyvider/protocols/tfprotov6/adapters/function_adapter.py`):
+- `dict_to_proto_function()` includes `variadic_parameter` in protobuf Function message
+- Terraform protocol 6.0 natively supports variadic parameters
+
+**3. Function Invocation** (`pyvider/src/pyvider/protocols/tfprotov6/handlers/call_function.py`):
+- `_process_function_arguments()` handles variadic parameters from extra request arguments
+- Extracts variadic args beyond required parameters and places in tuple
+- `_invoke_function()` builds positional args in signature order:
+  - Required parameters → positional_args (in declaration order)
+  - Variadic parameters → variadic_args (from *args tuple)
+  - Combined as: `function(*positional_args, *variadic_args)`
+  - This prevents "multiple values for parameter" errors
+
+#### Key Technical Points
+
+**Parameter Ordering Fix**: The critical fix in `_invoke_function()` ensures proper argument ordering:
+
+```python
+# Build arguments in signature order
+positional_args = []      # Required params in order
+variadic_args = []        # Optional variadic params
+
+for param_name, param in func_sig.parameters.items():
+    if param.kind == inspect.Parameter.VAR_POSITIONAL:
+        variadic_args = native_kwargs[param_name]
+    elif param.kind in (...POSITIONAL...):
+        positional_args.append(native_kwargs[param_name])
+
+# Combine and invoke
+all_args = positional_args + list(variadic_args)
+result = function_obj(*all_args)  # Correct call!
+```
+
+**Without this fix**: `round(number=3.14, *(2,))` → Error: multiple values for 'number'
+**With this fix**: `round(3.14, 2)` → Success: 3.14
+
+#### Benefits
+
+✅ **True optional parameters** - no need for null sentinels or required defaults
+✅ **Clean syntax** - `round(3.14, 2)` vs `round(3.14, null, 2)`
+✅ **Better DX** - parameters are genuinely optional, not just nullable
+✅ **Type safety** - variadic args are properly typed and validated
+✅ **Native Terraform** - uses protocol 6.0 variadic parameter support
+
+#### Functions Using Variadic Parameters
+
+Current functions with smart variadic parameters:
+- `round(number, *options)` - optional precision parameter
+- `to_camel_case(text, *options)` - optional upper_first parameter
+- `format_size(size_bytes, *options)` - optional precision parameter
+- `truncate_text(text, *options)` - optional max_length and suffix parameters
+- `pluralize_word(word, *options)` - optional count and plural parameters
+
+#### Testing Variadic Functions
+
+```bash
+# Create test configuration
+cat > test.tf << 'EOF'
+terraform {
+  required_providers {
+    pyvider = { source = "local/providers/pyvider" }
+  }
+}
+
+output "test_with_option" {
+  value = provider::pyvider::round(3.14159, 2)  # → 3.14
+}
+
+output "test_without_option" {
+  value = provider::pyvider::round(3.14159)     # → 3
+}
+EOF
+
+# Test
+terraform init && terraform plan
+```
 
 ## GitHub Actions Release Process
 
