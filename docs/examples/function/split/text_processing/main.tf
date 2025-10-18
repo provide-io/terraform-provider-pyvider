@@ -18,7 +18,7 @@ provider "pyvider" {
 # Configuration file processing
 variable "config_template" {
   type    = string
-  default = "server_name: {hostname}\nport: {port}\ndebug: {debug_mode}\nlog_level: {level}"
+  default = "server_name: {}\nport: {}\ndebug: {}\nlog_level: {}"
 }
 
 variable "server_config" {
@@ -38,19 +38,19 @@ variable "server_config" {
 
 locals {
   # Generate configuration content
-  config_content = provider::pyvider::format(var.config_template, {
-    hostname   = var.server_config.hostname
-    port       = var.server_config.port
-    debug_mode = var.server_config.debug_mode
-    level      = provider::pyvider::upper(var.server_config.level)
-  })
+  config_content = provider::pyvider::format(var.config_template, [
+    var.server_config.hostname,
+    var.server_config.port,
+    var.server_config.debug_mode,
+    provider::pyvider::upper(var.server_config.level)
+  ])
 
   # Create normalized filename from hostname
-  config_filename = provider::pyvider::format("{name}_config.yaml", {
-    name = provider::pyvider::lower(
+  config_filename = provider::pyvider::format("{}_config.yaml", [
+    provider::pyvider::lower(
       provider::pyvider::replace(var.server_config.hostname, "-", "_")
     )
-  })
+  ])
 }
 
 # Log file path generation
@@ -72,15 +72,15 @@ locals {
   ]
 
   # Create log summary
-  log_summary = provider::pyvider::join([
+  log_summary = provider::pyvider::join("\n", [
     "Log Analysis Summary:",
-    provider::pyvider::format("Total entries: {count}", {
-      count = length(var.log_entries)
-    }),
-    provider::pyvider::format("Levels found: {levels}", {
-      levels = provider::pyvider::join(local.log_levels, ", ")
-    })
-  ], "\n")
+    provider::pyvider::format("Total entries: {}", [
+      length(var.log_entries)
+    ]),
+    provider::pyvider::format("Levels found: {}", [
+      provider::pyvider::join(", ", local.log_levels)
+    ])
+  ])
 }
 
 # URL and path manipulation
@@ -103,10 +103,10 @@ locals {
   api_urls = flatten([
     for base_url in var.base_urls : [
       for endpoint in var.api_endpoints :
-      provider::pyvider::format("{base}/{action}", {
-        base   = base_url
-        action = endpoint
-      })
+      provider::pyvider::format("{}/{}", [
+        base_url,
+        endpoint
+      ])
     ]
   ])
 
@@ -132,14 +132,14 @@ locals {
   # Convert environment variables to different formats
   env_exports = [
     for key, value in var.env_config :
-    provider::pyvider::format("export {key}={value}", {
-      key   = key
-      value = provider::pyvider::format("\"{val}\"", { val = value })
-    })
+    provider::pyvider::format("export {}={}", [
+      key,
+      provider::pyvider::format("\"{}\"", [value])
+    ])
   ]
 
   # Create .env file content
-  env_file_content = provider::pyvider::join(local.env_exports, "\n")
+  env_file_content = provider::pyvider::join("\n", local.env_exports)
 
   # Generate application title from app name
   app_title = provider::pyvider::replace(
@@ -173,21 +173,21 @@ locals {
   ]
 
   # Generate a summary report
-  csv_summary = provider::pyvider::join([
+  csv_summary = provider::pyvider::join("\n", [
     "CSV Processing Summary:",
-    provider::pyvider::format("Columns: {headers}", {
-      headers = provider::pyvider::join(local.csv_header, ", ")
-    }),
-    provider::pyvider::format("Records: {count}", {
-      count = length(local.csv_records)
-    }),
+    provider::pyvider::format("Columns: {}", [
+      provider::pyvider::join(", ", local.csv_header)
+    ]),
+    provider::pyvider::format("Records: {}", [
+      length(local.csv_records)
+    ]),
     "Sample record:",
-    provider::pyvider::format("  {name} ({age}) from {city}", {
-      name = local.csv_records[0].name
-      age  = local.csv_records[0].age
-      city = local.csv_records[0].city
-    })
-  ], "\n")
+    provider::pyvider::format("  {} ({}) from {}", [
+      local.csv_records[0].name,
+      local.csv_records[0].age,
+      local.csv_records[0].city
+    ])
+  ])
 }
 
 # Create output files with processed content

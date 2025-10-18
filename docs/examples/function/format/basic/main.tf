@@ -25,26 +25,26 @@ locals {
 
 # String formatting examples
 locals {
-  template_string = "Hello, {name}! You have {count} messages."
+  template_string = "Hello, {}! You have {} messages."
 
-  formatted_message = provider::pyvider::format(local.template_string, {
-    name = "Alice"
-    count = 5
-  })  # Returns: "Hello, Alice! You have 5 messages."
+  formatted_message = provider::pyvider::format(local.template_string, [
+    "Alice",
+    5
+  ])  # Returns: "Hello, Alice! You have 5 messages."
 
   # Simple template
-  simple_format = provider::pyvider::format("User: {user}", {
-    user = "admin"
-  })  # Returns: "User: admin"
+  simple_format = provider::pyvider::format("User: {}", [
+    "admin"
+  ])  # Returns: "User: admin"
 }
 
 # String joining examples
 locals {
   word_list = ["apple", "banana", "cherry"]
 
-  comma_separated = provider::pyvider::join(local.word_list, ", ")     # Returns: "apple, banana, cherry"
-  pipe_separated = provider::pyvider::join(local.word_list, " | ")     # Returns: "apple | banana | cherry"
-  no_separator = provider::pyvider::join(local.word_list, "")          # Returns: "applebananacherry"
+  comma_separated = provider::pyvider::join(", ", local.word_list)     # Returns: "apple, banana, cherry"
+  pipe_separated = provider::pyvider::join(" | ", local.word_list)     # Returns: "apple | banana | cherry"
+  no_separator = provider::pyvider::join("", local.word_list)          # Returns: "applebananacherry"
 }
 
 # String splitting examples
@@ -73,16 +73,16 @@ locals {
   # Clean and normalize user input
   cleaned_input = provider::pyvider::lower(
     provider::pyvider::replace(
-      provider::pyvider::replace(user_input, "  ", " "),  # Remove extra spaces
-      " ", "_"                                            # Replace remaining spaces with underscores
+      provider::pyvider::replace(local.user_input, "  ", " "),  # Remove extra spaces
+      " ", "_"                                                   # Replace remaining spaces with underscores
     )
   )  # Returns: "mixed_case_text"
 
   # Create a filename from user input
-  filename = provider::pyvider::format("{base}.{ext}", {
-    base = local.cleaned_input
-    ext = "txt"
-  })  # Returns: "mixed_case_text.txt"
+  filename = provider::pyvider::format("{}.{}", [
+    local.cleaned_input,
+    "txt"
+  ])  # Returns: "mixed_case_text.txt"
 }
 
 # Output results for verification
@@ -121,7 +121,7 @@ output "string_manipulation_examples" {
     }
 
     combined_operations = {
-      user_input = user_input
+      user_input = local.user_input
       cleaned = local.cleaned_input
       filename = local.filename
     }

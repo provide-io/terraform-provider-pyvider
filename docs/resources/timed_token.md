@@ -1516,22 +1516,22 @@ resource "pyvider_timed_token" "trace_collector" {
   name  = "${local.current_config.token_prefix}-trace-collector"
 }
 
-# Create environment-specific token registry using template
+# Create environment-specific token registry using inline JSON encoding
 resource "pyvider_file_content" "token_registry" {
   filename = "/tmp/${var.environment}_token_registry.json"
-  content  = templatefile("${path.module}/data/token_registry.json.tftpl", local.token_registry_vars)
+  content  = jsonencode(local.token_registry_vars)
 }
 
-# Create environment-specific application configuration using template
+# Create environment-specific application configuration using inline YAML encoding
 resource "pyvider_file_content" "app_config" {
   filename = "/tmp/${var.environment}_app_config.yaml"
-  content  = templatefile("${path.module}/data/app_config.yaml.tftpl", local.app_config_vars)
+  content  = yamlencode(local.app_config_vars)
 }
 
-# Create monitoring configuration using template
+# Create monitoring configuration using inline JSON encoding
 resource "pyvider_file_content" "monitoring_config" {
   filename = "/tmp/${var.environment}_monitoring.json"
-  content  = templatefile("${path.module}/data/monitoring_config.json.tftpl", local.monitoring_config_vars)
+  content  = jsonencode(local.monitoring_config_vars)
 }
 
 # Create deployment summary
