@@ -123,8 +123,8 @@ locals {
     buffer_overflow = {
       input = substr(pyvider_private_state_verifier.buffer_overflow_test.input_value, 0, 50) # Show first 50 chars
       output = substr(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token, 0, 50) # Show first 50 chars
-      expected = "SECRET_FOR_" + join("", [for i in range(1000) : "A"])
-      passed = pyvider_private_state_verifier.buffer_overflow_test.decrypted_token == ("SECRET_FOR_" + join("", [for i in range(1000) : "A"]))
+      expected = join("", concat(["SECRET_FOR_"], [for i in range(1000) : "A"]))
+      passed = pyvider_private_state_verifier.buffer_overflow_test.decrypted_token == join("", concat(["SECRET_FOR_"], [for i in range(1000) : "A"]))
       security_concern = "buffer_overflow"
       full_length = length(pyvider_private_state_verifier.buffer_overflow_test.decrypted_token)
     }
