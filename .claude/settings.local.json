@@ -60,7 +60,10 @@
       "Bash(while ! grep -q \"Total tests\" /tmp/phase2_validation.log)",
       "Bash(while ! grep -q \"Total tests\" /tmp/phase3_validation.log)",
       "Bash(while ! grep -q \"Total tests\" /tmp/final_validation.log)",
-      "Bash(while ! grep -q \"Total tests\" /tmp/absolute_final_validation.log)"
+      "Bash(while ! grep -q \"Total tests\" /tmp/absolute_final_validation.log)",
+      "Bash(while ! grep -q \"Total tests\" /tmp/FINAL_validation.log)",
+      "Bash(if grep -q \"Total tests\" /tmp/FINAL_validation.log)",
+      "Bash(then tail -80 /tmp/FINAL_validation.log)"
     ],
     "deny": [],
     "ask": [],
