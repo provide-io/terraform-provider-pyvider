@@ -274,8 +274,8 @@ resource "pyvider_file_content" "github_actions_workflow" {
           {
             name = "Run Private State Tests"
             run = join("\n", [
-              "terraform plan -var=\"ci_environment=github-actions\" -var=\"build_number=${{ github.run_number }}\"",
-              "terraform apply -auto-approve -var=\"ci_environment=github-actions\" -var=\"build_number=${{ github.run_number }}\"",
+              "terraform plan -var=\"ci_environment=github-actions\" -var=\"build_number=$${{ github.run_number }}\"",
+              "terraform apply -auto-approve -var=\"ci_environment=github-actions\" -var=\"build_number=$${{ github.run_number }}\"",
             ])
             env = {
               TF_LOG = "INFO"

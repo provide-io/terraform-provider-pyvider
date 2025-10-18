@@ -260,8 +260,10 @@ resource "pyvider_file_content" "environment_comparison" {
     }
 
     validation = {
-      has_database = contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_DATABASE_URL") ||
-                    contains(keys(data.pyvider_env_variables.app_common.values), "APP_DATABASE_URL")
+      has_database = (
+        contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_DATABASE_URL") ||
+        contains(keys(data.pyvider_env_variables.app_common.values), "APP_DATABASE_URL")
+      )
 
       has_api_config = contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_API_BASE_URL")
 
