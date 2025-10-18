@@ -58,7 +58,8 @@
       "Bash(pkill -f validate_all_examples.sh)",
       "Bash(while ! grep -q \"Total tests\" /tmp/phase1_validation.log)",
       "Bash(while ! grep -q \"Total tests\" /tmp/phase2_validation.log)",
-      "Bash(while ! grep -q \"Total tests\" /tmp/phase3_validation.log)"
+      "Bash(while ! grep -q \"Total tests\" /tmp/phase3_validation.log)",
+      "Bash(while ! grep -q \"Total tests\" /tmp/final_validation.log)"
     ],
     "deny": [],
     "ask": [],
