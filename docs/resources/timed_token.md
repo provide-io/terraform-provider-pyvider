@@ -1237,10 +1237,6 @@ output "api_integration_results" {
 }
 ```
 
-### Multi-Environment Tokens
-
-
-
 ## Schema
 
 
