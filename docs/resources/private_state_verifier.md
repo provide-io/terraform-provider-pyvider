@@ -1374,8 +1374,8 @@ resource "pyvider_file_content" "github_actions_workflow" {
           {
             name = "Run Private State Tests"
             run = join("\n", [
-              "terraform plan -var=\"ci_environment=github-actions\" -var=\"build_number=${{ github.run_number }}\"",
-              "terraform apply -auto-approve -var=\"ci_environment=github-actions\" -var=\"build_number=${{ github.run_number }}\"",
+              "terraform plan -var=\"ci_environment=github-actions\" -var=\"build_number=$${{ github.run_number }}\"",
+              "terraform apply -auto-approve -var=\"ci_environment=github-actions\" -var=\"build_number=$${{ github.run_number }}\"",
             ])
             env = {
               TF_LOG = "INFO"
@@ -1424,14 +1424,14 @@ resource "pyvider_file_content" "jenkins_pipeline" {
     "        stage('Plan Tests') {",
     "            steps {",
     "                echo 'Planning private state verification tests'",
-    "                sh 'terraform plan -var=\"ci_environment=jenkins\" -var=\"build_number=${BUILD_NUMBER}\"'",
+    "                sh 'terraform plan -var=\"ci_environment=jenkins\" -var=\"build_number=$${BUILD_NUMBER}\"'",
     "            }",
     "        }",
     "        ",
     "        stage('Execute Tests') {",
     "            steps {",
     "                echo 'Executing private state verification tests'",
-    "                sh 'terraform apply -auto-approve -var=\"ci_environment=jenkins\" -var=\"build_number=${BUILD_NUMBER}\"'",
+    "                sh 'terraform apply -auto-approve -var=\"ci_environment=jenkins\" -var=\"build_number=$${BUILD_NUMBER}\"'",
     "            }",
     "        }",
     "        ",

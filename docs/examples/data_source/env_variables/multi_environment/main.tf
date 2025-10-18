@@ -351,6 +351,7 @@ resource "pyvider_file_content" "validation_report" {
 
 output "multi_environment_config" {
   description = "Multi-environment configuration management results"
+  sensitive   = true
   value = {
     environment = var.environment
 

@@ -72,7 +72,8 @@
       "Bash(while ! grep -q \"Total tests\" /tmp/FINAL_FINAL_validation.log)",
       "Bash(while ! grep -q \"Total tests\" /tmp/ABSOLUTE_FINAL_validation.log)",
       "Bash(paste - -)",
-      "Bash(while ! grep -q \"Total tests\" /tmp/DEBUGGING_FINAL.log)"
+      "Bash(while ! grep -q \"Total tests\" /tmp/DEBUGGING_FINAL.log)",
+      "Bash(while ! grep -q \"Total tests\" /tmp/DEBUGGING_VALIDATION_SUCCESS.log)"
     ],
     "deny": [],
     "ask": [],
