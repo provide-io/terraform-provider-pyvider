@@ -1174,6 +1174,7 @@ resource "pyvider_file_content" "api_integration_summary" {
 
 output "api_integration_results" {
   description = "API integration token configurations and results"
+  sensitive   = true
   value = {
     integrations = {
       external_api = {
