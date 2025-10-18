@@ -38,9 +38,7 @@ locals {
   version = "1.2.3"
   formatted_title = provider::pyvider::format(
     "%s v%s - Environment: %s",
-    local.app_name,
-    local.version,
-    "production"
+    [local.app_name, local.version, "production"]
   )
 }
 
