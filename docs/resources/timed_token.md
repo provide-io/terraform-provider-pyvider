@@ -1126,13 +1126,11 @@ resource "pyvider_file_content" "api_integration_summary" {
     "  Token: ${pyvider_timed_token.external_api.name}",
     "  ID: ${pyvider_timed_token.external_api.id}",
     "  Expires: ${pyvider_timed_token.external_api.expires_at}",
-    "  API Status: ${data.pyvider_http_api.authenticated_request.status_code}",
     "",
     "Webhook Authentication:",
     "  Token: ${pyvider_timed_token.webhook_auth.name}",
     "  ID: ${pyvider_timed_token.webhook_auth.id}",
     "  Expires: ${pyvider_timed_token.webhook_auth.expires_at}",
-    "  Registration Status: ${data.pyvider_http_api.register_webhook.status_code}",
     "",
     "Database API Integration:",
     "  Token: ${pyvider_timed_token.database_api.name}",
@@ -1174,22 +1172,19 @@ resource "pyvider_file_content" "api_integration_summary" {
 
 output "api_integration_results" {
   description = "API integration token configurations and results"
+  sensitive   = true
   value = {
     integrations = {
       external_api = {
         token_name = pyvider_timed_token.external_api.name
         token_id = pyvider_timed_token.external_api.id
         expires_at = pyvider_timed_token.external_api.expires_at
-        api_status = data.pyvider_http_api.authenticated_request.status_code
-        api_success = data.pyvider_http_api.authenticated_request.status_code >= 200 && data.pyvider_http_api.authenticated_request.status_code < 300
       }
 
       webhook = {
         token_name = pyvider_timed_token.webhook_auth.name
         token_id = pyvider_timed_token.webhook_auth.id
         expires_at = pyvider_timed_token.webhook_auth.expires_at
-        registration_status = data.pyvider_http_api.register_webhook.status_code
-        registration_success = data.pyvider_http_api.register_webhook.status_code >= 200 && data.pyvider_http_api.register_webhook.status_code < 300
       }
 
       database_api = {
@@ -1236,10 +1231,6 @@ output "api_integration_results" {
   }
 }
 ```
-
-### Multi-Environment Tokens
-
-
 
 ## Schema
 
