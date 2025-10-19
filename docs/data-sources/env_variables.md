@@ -526,13 +526,14 @@ resource "pyvider_file_content" "security_report" {
   filename = "/tmp/security_report.json"
   content = jsonencode({
     security_assessment = {
-      total_variables_checked = length(data.pyvider_env_variables.app_credentials.keys)
+      total_variables_checked = length(local.required_secrets)
+      total_variables_found = length(data.pyvider_env_variables.app_credentials.all_values)
       sensitive_variables_found = length(data.pyvider_env_variables.app_credentials.sensitive_values)
       non_sensitive_variables = length(data.pyvider_env_variables.app_credentials.values)
 
       required_secrets = {
-        expected = local.required_secrets
-        missing = local.missing_secrets
+        expected_count = length(local.required_secrets)
+        missing_count = length(local.missing_secrets)
         all_present = length(local.missing_secrets) == 0
       }
 
@@ -546,11 +547,14 @@ resource "pyvider_file_content" "security_report" {
         }
       }
 
-      recommendations = concat(
-        length(local.missing_secrets) > 0 ? ["Set missing environment variables: ${join(", ", local.missing_secrets)}"] : [],
-        !local.credential_validation.database_url_format_valid ? ["Check DATABASE_URL format"] : [],
-        !local.credential_validation.api_key_length_valid ? ["API_SECRET_KEY should be at least 32 characters"] : []
+      recommendations_count = (
+        (length(local.missing_secrets) > 0 ? 1 : 0) +
+        (!local.credential_validation.database_url_format_valid ? 1 : 0) +
+        (!local.credential_validation.api_key_length_valid ? 1 : 0)
       )
+      has_database_url_issue = !local.credential_validation.database_url_format_valid
+      has_api_key_length_issue = !local.credential_validation.api_key_length_valid
+      has_missing_secrets = length(local.missing_secrets) > 0
     }
     generated_at = timestamp()
   })
@@ -869,8 +873,10 @@ resource "pyvider_file_content" "environment_comparison" {
     }
 
     validation = {
-      has_database = contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_DATABASE_URL") ||
-                    contains(keys(data.pyvider_env_variables.app_common.values), "APP_DATABASE_URL")
+      has_database = (
+        contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_DATABASE_URL") ||
+        contains(keys(data.pyvider_env_variables.app_common.values), "APP_DATABASE_URL")
+      )
 
       has_api_config = contains(keys(data.pyvider_env_variables.env_config.values), "${upper(var.environment)}_API_BASE_URL")
 
@@ -958,6 +964,7 @@ resource "pyvider_file_content" "validation_report" {
 
 output "multi_environment_config" {
   description = "Multi-environment configuration management results"
+  sensitive   = true
   value = {
     environment = var.environment
 

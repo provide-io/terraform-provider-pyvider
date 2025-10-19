@@ -20,31 +20,31 @@ resource "pyvider_timed_token" "external_api" {
   name = "external-service-integration"
 }
 
-# Use token for API authentication
-data "pyvider_http_api" "authenticated_request" {
-  url = "https://api.example.com/v1/data"
-  headers = {
-    "Authorization" = "Bearer ${pyvider_timed_token.external_api.token}"
-    "Content-Type"  = "application/json"
-    "X-API-Version" = "2024-01-01"
-    "X-Token-ID"    = pyvider_timed_token.external_api.id
-  }
-}
+# Example: Use token for API authentication (commented out to avoid network calls in tests)
+# data "pyvider_http_api" "authenticated_request" {
+#   url = "https://api.example.com/v1/data"
+#   headers = {
+#     "Authorization" = "Bearer ${pyvider_timed_token.external_api.token}"
+#     "Content-Type"  = "application/json"
+#     "X-API-Version" = "2024-01-01"
+#     "X-Token-ID"    = pyvider_timed_token.external_api.id
+#   }
+# }
 
 # Example 2: Webhook authentication token
 resource "pyvider_timed_token" "webhook_auth" {
   name = "webhook-callback-auth"
 }
 
-# Configure webhook with temporary authentication
-data "pyvider_http_api" "register_webhook" {
-  url    = "https://webhooks.example.com/register"
-  method = "POST"
-  headers = {
-    "Authorization" = "Bearer ${pyvider_timed_token.webhook_auth.token}"
-    "Content-Type"  = "application/json"
-  }
-}
+# Example: Configure webhook with temporary authentication (commented out to avoid network calls in tests)
+# data "pyvider_http_api" "register_webhook" {
+#   url    = "https://webhooks.example.com/register"
+#   method = "POST"
+#   headers = {
+#     "Authorization" = "Bearer ${pyvider_timed_token.webhook_auth.token}"
+#     "Content-Type"  = "application/json"
+#   }
+# }
 
 # Create webhook configuration file
 resource "pyvider_file_content" "webhook_config" {
