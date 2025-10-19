@@ -76,7 +76,8 @@
       "Bash(while ! grep -q \"Total tests\" /tmp/DEBUGGING_VALIDATION_SUCCESS.log)",
       "Bash(while ! grep -q \"Total tests\" /tmp/FINAL_REPORT.log)",
       "Bash(paste - - -)",
-      "Bash(sort -k4 -rn)"
+      "Bash(sort -k4 -rn)",
+      "Bash(for log in docs/examples/function/lens_jq/advanced/.soup/logs/terraform.log docs/examples/data_source/lens_jq/api_processing/.soup/logs/terraform.log docs/examples/data_source/lens_jq/complex/.soup/logs/terraform.log docs/examples/resource/local_directory/workspace/.soup/logs/terraform.log docs/examples/data_source/http_api/advanced/.soup/logs/terraform.log)"
     ],
     "deny": [],
     "ask": [],
