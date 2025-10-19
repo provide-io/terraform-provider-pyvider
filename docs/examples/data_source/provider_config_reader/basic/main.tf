@@ -105,7 +105,7 @@ resource "pyvider_file_content" "environment_config" {
       endpoint_url = data.pyvider_provider_config_reader.current.api_endpoint
       timeout_seconds = data.pyvider_provider_config_reader.current.api_timeout
       retry_count = data.pyvider_provider_config_reader.current.api_retries
-      tls_verification = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
+      tls_verification = data.pyvider_provider_config_reader.current.api_insecure_skip_verify != null ? !data.pyvider_provider_config_reader.current.api_insecure_skip_verify : true
       authentication_enabled = data.pyvider_provider_config_reader.current.api_token != null
       custom_headers_count = data.pyvider_provider_config_reader.current.api_headers != null ? length(data.pyvider_provider_config_reader.current.api_headers) : 0
     }
@@ -181,7 +181,7 @@ resource "pyvider_file_content" "api_client_config" {
       }
 
       security = {
-        verify_tls = !data.pyvider_provider_config_reader.current.api_insecure_skip_verify
+        verify_tls = data.pyvider_provider_config_reader.current.api_insecure_skip_verify != null ? !data.pyvider_provider_config_reader.current.api_insecure_skip_verify : true
         auth_required = data.pyvider_provider_config_reader.current.api_token != null
       }
 
@@ -199,6 +199,7 @@ resource "pyvider_file_content" "api_client_config" {
 
 output "provider_config_analysis" {
   description = "Analysis of current provider configuration"
+  sensitive   = true
   value = {
     detected_environment = local.detected_environment
 
