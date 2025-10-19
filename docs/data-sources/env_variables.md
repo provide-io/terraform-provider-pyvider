@@ -419,7 +419,7 @@ data "pyvider_env_variables" "app_credentials" {
 data "pyvider_env_variables" "secrets" {
   prefix = "SECRET_"
   # All variables with SECRET_ prefix are treated as sensitive
-  sensitive_keys = [for k in keys(data.pyvider_env_variables.secrets.all_environment) : k if can(regex("^SECRET_", k))]
+  # Note: Can't use sensitive_keys with self-reference; all SECRET_* vars are sensitive by default
 }
 
 # Read configuration with selective sensitivity
