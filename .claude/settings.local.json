@@ -80,7 +80,8 @@
       "Bash(for log in docs/examples/function/lens_jq/advanced/.soup/logs/terraform.log docs/examples/data_source/lens_jq/api_processing/.soup/logs/terraform.log docs/examples/data_source/lens_jq/complex/.soup/logs/terraform.log docs/examples/resource/local_directory/workspace/.soup/logs/terraform.log docs/examples/data_source/http_api/advanced/.soup/logs/terraform.log)",
       "Bash(terraform -chdir=docs/examples/data_source/http_api/advanced validate)",
       "Bash(/Users/tim/code/gh/provide-io/terraform-provider-pyvider/scripts/build-docs.sh)",
-      "Bash(for dir in docs/examples/data_source/lens_jq/*/.soup/logs)"
+      "Bash(for dir in docs/examples/data_source/lens_jq/*/.soup/logs)",
+      "Read(//Users/tim/**)"
     ],
     "deny": [],
     "ask": [],
