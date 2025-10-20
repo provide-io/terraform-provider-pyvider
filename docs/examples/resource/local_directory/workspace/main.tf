@@ -136,8 +136,7 @@ resource "pyvider_file_content" "workspace_files" {
   for_each = local.config.files
 
   filename = "${pyvider_local_directory.workspace_root.path}/${each.key}"
-  content = can(jsondecode(jsonencode(each.value))) && length(regexall("\\{|\\[", jsonencode(each.value))) > 0 ?
-    jsonencode(each.value) : each.value
+  content  = can(jsondecode(jsonencode(each.value))) && length(regexall("\\{|\\[", jsonencode(each.value))) > 0 ? jsonencode(each.value) : each.value
 
   depends_on = [pyvider_local_directory.workspace_root]
 }

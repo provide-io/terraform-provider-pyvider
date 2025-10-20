@@ -1,10 +1,10 @@
-# Resource: private_state_verifier - cicd_testing Example
+# Function: lens_jq - advanced Example
 
-This directory contains a complete, executable Terraform example demonstrating the `private_state_verifier` resource.
+This directory contains a complete, executable Terraform example demonstrating the `lens_jq` function.
 
 ## What This Example Does
 
-CI/CD pipeline integration examples for private state verification
+JQ transformation function examples
 
 ## How to Run
 
