@@ -409,3 +409,4 @@ config.json
 
 # Test artifacts
 tests/plating-tests/
+examples
