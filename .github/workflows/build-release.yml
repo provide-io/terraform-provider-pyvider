@@ -68,8 +68,8 @@ jobs:
       
       - name: 🔑 Generate temporary signing keys
         run: |
-          # Generate Ed25519 keys using flavor keygen
-          flavor keygen --out-dir keys
+          # Generate Ed25519 keys using flavor keygen (run via uv to use venv)
+          uv run flavor keygen --out-dir keys
           echo "✅ Generated temporary signing keys"
           ls -la keys/
 
@@ -89,7 +89,7 @@ jobs:
           # Note: flavorpack >= 0.0.5 automatically uses manylinux2014 wheels on Linux
           echo "🏗️ Building PSP package (with retry on failure)..."
 
-          if ! flavor pack \
+          if ! uv run flavor pack \
             --manifest pyproject.toml \
             --output "terraform-provider-pyvider.psp"; then
             echo "⚠️ First build attempt failed, waiting 30s and retrying..."
@@ -99,7 +99,7 @@ jobs:
             python3 -m pip index versions flavorpack 2>/dev/null || true
 
             # Retry build
-            flavor pack \
+            uv run flavor pack \
               --manifest pyproject.toml \
               --output "terraform-provider-pyvider.psp"
           fi
