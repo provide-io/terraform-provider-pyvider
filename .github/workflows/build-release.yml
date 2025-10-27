@@ -71,18 +71,38 @@ jobs:
           flavor keygen --out-dir keys
           echo "✅ Generated temporary signing keys"
           ls -la keys/
-      
+
+      - name: 🧹 Clear package caches
+        run: |
+          echo "🧹 Clearing pip and uv caches to ensure fresh PyPI index..."
+          pip cache purge 2>/dev/null || echo "No pip cache to clear"
+          uv cache clean 2>/dev/null || echo "No uv cache to clear"
+          echo "✅ Caches cleared"
+
       - name: 🏗️ Build PSP package
         run: |
           # The version is already set dynamically from VERSION file
           # No need to update pyproject.toml as it uses dynamic = ["version"]
-          
-          # Build the PSP package
+
+          # Build the PSP package with retry logic for transient PyPI issues
           # Note: flavorpack >= 0.0.5 automatically uses manylinux2014 wheels on Linux
-          flavor pack \
+          echo "🏗️ Building PSP package (with retry on failure)..."
+
+          if ! flavor pack \
             --manifest pyproject.toml \
-            --output "terraform-provider-pyvider.psp"
-          
+            --output "terraform-provider-pyvider.psp"; then
+            echo "⚠️ First build attempt failed, waiting 30s and retrying..."
+            sleep 30
+
+            # Force PyPI index refresh by checking latest version
+            python3 -m pip index versions flavorpack 2>/dev/null || true
+
+            # Retry build
+            flavor pack \
+              --manifest pyproject.toml \
+              --output "terraform-provider-pyvider.psp"
+          fi
+
           echo "✅ Built PSP package:"
           ls -la terraform-provider-pyvider.psp
       
