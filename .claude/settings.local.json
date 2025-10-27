@@ -81,7 +81,11 @@
       "Bash(terraform -chdir=docs/examples/data_source/http_api/advanced validate)",
       "Bash(/Users/tim/code/gh/provide-io/terraform-provider-pyvider/scripts/build-docs.sh)",
       "Bash(for dir in docs/examples/data_source/lens_jq/*/.soup/logs)",
-      "Read(//Users/tim/**)"
+      "Read(//Users/tim/**)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh run view:*)",
+      "Bash(uv pip index:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": [],
