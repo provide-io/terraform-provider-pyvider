@@ -88,7 +88,8 @@
       "WebSearch",
       "WebFetch(domain:pypi.org)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": [],
     "ask": [],
