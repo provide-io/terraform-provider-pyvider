@@ -10,7 +10,6 @@ dependencies = [
     "plating>=0.0.1000",
     "pyvider>=0.0.1000",
     "pyvider-components>=0.0.1000",
-    "pyvider-cty>=0.0.1000",
 ]
 
 [project.scripts]
