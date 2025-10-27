@@ -5,11 +5,14 @@ description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "provide-foundation[all]",
-    "flavorpack>=0.0.1000",
-    "plating>=0.0.1000",
     "pyvider>=0.0.1000",
     "pyvider-components>=0.0.1000",
+]
+
+[dependency-groups]
+dev = [
+    "flavorpack>=0.0.1000",
+    "plating>=0.0.1000",
 ]
 
 [project.scripts]
@@ -56,9 +59,5 @@ public_key_path = "keys/provider-public.key"
 pass = ["TF_*", "PLUGIN_*"]
 
 [tool.uv.sources]
-flavorpack = { path = "../flavorpack", editable = true }
-provide-foundation = { path = "../provide-foundation", editable = true }
 pyvider = { path = "../pyvider", editable = true }
 pyvider-components = { path = "../pyvider-components", editable = true }
-pyvider-cty = { path = "../pyvider-cty", editable = true }
-plating = { path = "../plating", editable = true }

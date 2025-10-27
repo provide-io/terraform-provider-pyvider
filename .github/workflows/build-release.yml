@@ -62,8 +62,9 @@ jobs:
 
       - name: 🔧 Install dependencies
         run: |
-          # Install flavorpack from PyPI since workspace dependencies aren't available yet
-          uv tool install flavorpack
+          # Install project dependencies and dev tools (flavorpack, plating)
+          # Dev tools are NOT included in the PSP package - only used for building
+          uv sync --group dev
       
       - name: 🔑 Generate temporary signing keys
         run: |
@@ -181,12 +182,8 @@ jobs:
         run: |
           echo "📝 Generating documentation with plating..."
 
-          # Install plating and pyvider-components from PyPI
-          echo "Installing plating from PyPI..."
-          uv pip install --system plating
-
-          echo "Installing pyvider-components from PyPI..."
-          uv pip install --system pyvider-components
+          # Install project dependencies and dev tools (includes plating and pyvider-components)
+          uv sync --group dev
 
           # Run documentation generation script
           python3 scripts/generate_docs.py
