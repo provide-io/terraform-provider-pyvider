@@ -85,7 +85,8 @@
       "WebFetch(domain:github.com)",
       "Bash(gh run view:*)",
       "Bash(uv pip index:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:pypi.org)"
     ],
     "deny": [],
     "ask": [],
