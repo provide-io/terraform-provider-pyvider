@@ -23,22 +23,25 @@ if [ -d "$PROJECT_ROOT/.venv" ]; then
     source "$PROJECT_ROOT/.venv/bin/activate"
 fi
 
-# Check if plating is installed
-if ! command -v plating &> /dev/null; then
-    echo -e "${YELLOW}⚠️  plating CLI not found, installing...${NC}"
-    uv pip install --system plating || pip install plating || {
-        echo -e "${RED}❌ Failed to install plating${NC}"
-        exit 1
-    }
+# Determine which python/plating command to use (CI vs local)
+if [ -n "${CI:-}" ]; then
+    PYTHON_CMD="uv run python3"
+    PLATING_CMD="uv run plating"
+else
+    PYTHON_CMD="python3"
+    PLATING_CMD="plating"
 fi
 
+# Check if plating is installed
+$PYTHON_CMD -c "import plating" 2>/dev/null || {
+    echo -e "${YELLOW}⚠️  plating not found, please run: uv sync --group dev${NC}"
+    exit 1
+}
+
 # Check if pyvider-components is installed
-python3 -c "import pyvider.components" 2>/dev/null || {
-    echo -e "${YELLOW}⚠️  pyvider-components not installed, installing...${NC}"
-    uv pip install --system pyvider-components || pip install pyvider-components || {
-        echo -e "${RED}❌ Failed to install pyvider-components${NC}"
-        exit 1
-    }
+$PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
+    echo -e "${YELLOW}⚠️  pyvider-components not found, please run: uv sync --group dev${NC}"
+    exit 1
 }
 
 # Output directory for documentation and examples
@@ -55,7 +58,7 @@ echo -e "${GREEN}🍽️  Running plating to generate documentation and examples
 # This will:
 # 1. Generate documentation from .plating/docs/ templates
 # 2. Copy examples from .plating/examples/ directories
-plating plate \
+$PLATING_CMD plate \
     --provider-name pyvider \
     --package-name pyvider.components \
     --output-dir "$OUTPUT_DIR" \

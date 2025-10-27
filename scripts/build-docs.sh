@@ -57,11 +57,19 @@ fi
 
 # Verify required packages are installed
 print_header "🔍 Verifying required packages"
-python3 -c "import plating" 2>/dev/null || {
+
+# In CI, use uv run to access venv; locally use python3 directly
+if [ -n "${CI:-}" ]; then
+    PYTHON_CMD="uv run python3"
+else
+    PYTHON_CMD="python3"
+fi
+
+$PYTHON_CMD -c "import plating" 2>/dev/null || {
     print_error "plating package not found. Run: uv sync --group dev"
     exit 1
 }
-python3 -c "import pyvider.components" 2>/dev/null || {
+$PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
     print_error "pyvider-components package not found. Run: uv sync --group dev"
     exit 1
 }
