@@ -57,7 +57,3 @@ public_key_path = "keys/provider-public.key"
 [tool.flavor.execution.runtime.env]
 # Pass through all Terraform environment variables as-is
 pass = ["TF_*", "PLUGIN_*"]
-
-[tool.uv.sources]
-pyvider = { path = "../pyvider", editable = true }
-pyvider-components = { path = "../pyvider-components", editable = true }
