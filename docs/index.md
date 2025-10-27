@@ -22,11 +22,9 @@ No provider configuration required.
 
 ## Resources
 
-- [`pyvider_adorner`](./resources/adorner.md)
 - [`pyvider_file_content`](./resources/file_content.md)
 - [`pyvider_local_directory`](./resources/local_directory.md)
 - [`pyvider_private_state_verifier`](./resources/private_state_verifier.md)
-- [`pyvider_readme`](./resources/readme.md)
 - [`pyvider_timed_token`](./resources/timed_token.md)
 - [`pyvider_warning_example`](./resources/warning_example.md)
 
