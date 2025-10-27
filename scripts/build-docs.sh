@@ -36,33 +36,36 @@ DOCS_OUTPUT_DIR="${PROJECT_ROOT}/docs"
 
 print_header "📚 Building Documentation for Terraform Provider Pyvider"
 
-# Check if directories exist
-if [ ! -d "$PYVIDER_COMPONENTS_DIR" ]; then
-    print_error "pyvider-components directory not found at $PYVIDER_COMPONENTS_DIR"
-    exit 1
-fi
+# Note: In CI/CD, pyvider-components and plating are installed as packages via uv sync
+# We don't need the source directories - plating works with installed packages
+# Only check for directories in local development mode
+if [ -n "${CI:-}" ]; then
+    print_warning "Running in CI mode - skipping source directory checks"
+    print_warning "Packages should be installed via: uv sync --group dev"
+else
+    # Local development: check if directories exist (optional)
+    if [ ! -d "$PYVIDER_COMPONENTS_DIR" ]; then
+        print_warning "pyvider-components directory not found at $PYVIDER_COMPONENTS_DIR"
+        print_warning "Assuming packages are installed via pip/uv"
+    fi
 
-if [ ! -d "$PLATING_DIR" ]; then
-    print_error "plating directory not found at $PLATING_DIR"
-    exit 1
-fi
-
-# Install plating if not available
-# Check if plating is available in Python environment
-if ! python3 -c "import plating" &> /dev/null; then
-    print_warning "plating not found in Python environment, installing..."
-
-    # Install plating using uv pip
-    if command -v uv &> /dev/null; then
-        cd "$PLATING_DIR"
-        uv pip install -e . --quiet
-        print_success "Installed plating"
-        cd "$PROJECT_ROOT"
-    else
-        print_error "uv not found. Please install uv first."
-        exit 1
+    if [ ! -d "$PLATING_DIR" ]; then
+        print_warning "plating directory not found at $PLATING_DIR"
+        print_warning "Assuming packages are installed via pip/uv"
     fi
 fi
+
+# Verify required packages are installed
+print_header "🔍 Verifying required packages"
+python3 -c "import plating" 2>/dev/null || {
+    print_error "plating package not found. Run: uv sync --group dev"
+    exit 1
+}
+python3 -c "import pyvider.components" 2>/dev/null || {
+    print_error "pyvider-components package not found. Run: uv sync --group dev"
+    exit 1
+}
+print_success "Required packages are installed"
 
 # Generate documentation
 print_header "🔧 Generating Documentation with Plating"
