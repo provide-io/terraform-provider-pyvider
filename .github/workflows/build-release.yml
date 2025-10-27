@@ -180,15 +180,15 @@ jobs:
 
       - name: 📚 Generate Documentation
         run: |
-          echo "📝 Generating documentation with plating..."
+          echo "📝 Generating documentation and examples with plating..."
 
           # Install project dependencies and dev tools (includes plating and pyvider-components)
           uv sync --group dev
 
-          # Run documentation generation script
-          python3 scripts/generate_docs.py
+          # Run full documentation build (generates docs + examples + validation)
+          ./scripts/build-docs.sh
 
-          echo "✅ Documentation generated"
+          echo "✅ Documentation and examples generated"
           ls -la docs/
 
       - name: 💾 Commit Documentation
