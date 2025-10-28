@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             platform: linux
             arch: amd64
             target: linux_amd64
@@ -26,7 +26,7 @@ jobs:
             platform: linux
             arch: arm64
             target: linux_arm64
-          - os: macos-latest
+          - os: macos-15
             platform: darwin
             arch: arm64
             target: darwin_arm64
@@ -62,13 +62,14 @@ jobs:
 
       - name: 🔧 Install dependencies
         run: |
-          # Install flavorpack from PyPI since workspace dependencies aren't available yet
-          uv tool install flavorpack
+          # Install project dependencies and dev tools (flavorpack, plating)
+          # Dev tools are NOT included in the PSP package - only used for building
+          uv sync --group dev
       
       - name: 🔑 Generate temporary signing keys
         run: |
-          # Generate Ed25519 keys using flavor keygen
-          flavor keygen --out-dir keys
+          # Generate Ed25519 keys using flavor keygen (run via uv to use venv)
+          uv run flavor keygen --out-dir keys
           echo "✅ Generated temporary signing keys"
           ls -la keys/
 
@@ -88,7 +89,7 @@ jobs:
           # Note: flavorpack >= 0.0.5 automatically uses manylinux2014 wheels on Linux
           echo "🏗️ Building PSP package (with retry on failure)..."
 
-          if ! flavor pack \
+          if ! uv run flavor pack \
             --manifest pyproject.toml \
             --output "terraform-provider-pyvider.psp"; then
             echo "⚠️ First build attempt failed, waiting 30s and retrying..."
@@ -98,7 +99,7 @@ jobs:
             python3 -m pip index versions flavorpack 2>/dev/null || true
 
             # Retry build
-            flavor pack \
+            uv run flavor pack \
               --manifest pyproject.toml \
               --output "terraform-provider-pyvider.psp"
           fi
@@ -179,19 +180,15 @@ jobs:
 
       - name: 📚 Generate Documentation
         run: |
-          echo "📝 Generating documentation with plating..."
+          echo "📝 Generating documentation and examples with plating..."
 
-          # Install plating and pyvider-components from PyPI
-          echo "Installing plating from PyPI..."
-          uv pip install --system plating
+          # Install project dependencies and dev tools (includes plating and pyvider-components)
+          uv sync --group dev
 
-          echo "Installing pyvider-components from PyPI..."
-          uv pip install --system pyvider-components
+          # Run full documentation build (generates docs + examples + validation)
+          ./scripts/build-docs.sh
 
-          # Run documentation generation script
-          python3 scripts/generate_docs.py
-
-          echo "✅ Documentation generated"
+          echo "✅ Documentation and examples generated"
           ls -la docs/
 
       - name: 💾 Commit Documentation
