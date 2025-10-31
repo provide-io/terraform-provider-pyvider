@@ -8,5 +8,6 @@ terraform {
 }
 
 provider "pyvider" {
+  #provider_testmode = true
   api_token = "placeholder-token"
 }

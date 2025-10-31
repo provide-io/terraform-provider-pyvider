@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2025 provide.io llc. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+
 """Generate documentation for terraform-provider-pyvider using plating."""
 
 import asyncio
@@ -34,11 +38,8 @@ async def generate_docs(output_dir: Path, provider_name: str = "pyvider") -> int
         result = await api.plate(output_dir, validate_markdown=False, force=True)
 
         if result.success:
-            print(f"✅ Successfully generated {result.files_generated} documentation files")
-            print(f"📦 Processed {result.bundles_processed} component bundles")
 
             if result.output_files:
-                print(f"📄 Generated files in {output_dir}/:")
                 for file in result.output_files[:5]:
                     print(f"  • {file.relative_to(output_dir)}")
                 if len(result.output_files) > 5:
@@ -76,3 +77,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# 🌍🔌🔚
