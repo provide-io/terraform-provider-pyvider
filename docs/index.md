@@ -8,6 +8,12 @@ description: |-
 
 Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
 
+## Getting Started
+
+New to the pyvider provider? Start with our step-by-step tutorial:
+
+**[→ Getting Started Tutorial](getting-started.md)** - Create your first resources in 10-15 minutes
+
 ## Example Usage
 
 ```terraform
