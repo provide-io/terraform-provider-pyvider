@@ -11,6 +11,24 @@ This provider is built entirely in Python using the `pyvider` framework and pack
 * **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_jq`, `pyvider_jq_cty`).
 * **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
 
+## Relationship to pyvider-components
+
+This provider is built using components from the [pyvider-components](https://github.com/provide-io/pyvider-components) repository, which serves as the reference implementation and example library for the Pyvider framework.
+
+**Key Relationship:**
+- **pyvider-components**: Example library with 100+ component demonstrations for learning
+- **terraform-provider-pyvider**: Production-ready provider that packages those components for Terraform use
+
+```
+pyvider-components (examples) ──packages──> terraform-provider-pyvider (production)
+```
+
+**Why two repositories?**
+- **pyvider-components** is for developers building their own providers (learning/reference)
+- **terraform-provider-pyvider** is for users wanting to use the provider in Terraform (production)
+
+**Building your own provider?** Start with [pyvider-components](https://github.com/provide-io/pyvider-components) to see working examples, then use the [pyvider framework](https://github.com/provide-io/pyvider) to build your custom provider.
+
 ## Getting Started
 
 **New to the pyvider provider?** Check out our comprehensive tutorial:
