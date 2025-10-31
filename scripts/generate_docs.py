@@ -38,7 +38,6 @@ async def generate_docs(output_dir: Path, provider_name: str = "pyvider") -> int
         result = await api.plate(output_dir, validate_markdown=False, force=True)
 
         if result.success:
-
             if result.output_files:
                 for file in result.output_files[:5]:
                     print(f"  • {file.relative_to(output_dir)}")
@@ -55,6 +54,7 @@ async def generate_docs(output_dir: Path, provider_name: str = "pyvider") -> int
     except Exception as e:
         print(f"❌ Error generating documentation: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 
@@ -66,6 +66,7 @@ def main() -> int:
 
     # Get provider name from environment or use default
     import os
+
     provider_name = os.environ.get("PROVIDER_NAME", "pyvider")
 
     # Ensure output directory exists
