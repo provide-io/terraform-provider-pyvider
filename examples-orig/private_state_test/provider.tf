@@ -8,4 +8,6 @@ terraform {
 }
 
 # The provider requires the encryption key to be set.
-provider "pyvider" {}
+provider "pyvider" {
+  provider_testmode = true
+}
