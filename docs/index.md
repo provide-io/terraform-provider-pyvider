@@ -71,6 +71,24 @@ New to the pyvider provider? Start with our step-by-step tutorial:
 
 **[→ Getting Started Tutorial](getting-started.md)** - Create your first resources in 10-15 minutes
 
+## Need Help?
+
+**Having issues?** Check our comprehensive troubleshooting guide:
+
+- **[Troubleshooting Guide](troubleshooting.md)** - Solutions to common problems
+  - Installation issues (provider not found, permissions)
+  - Configuration errors (validation, schema, types)
+  - Runtime errors (file operations, HTTP/API, state)
+  - Debug techniques (TF_LOG, state inspection)
+
+**Want to learn more?**
+- [Common Patterns](how-to-guides/common-patterns.md) - Frequently used configurations
+- [pyvider Framework Docs](https://docs.provide.io/pyvider/) - Build your own provider
+
+**Have questions?**
+- [GitHub Discussions](https://github.com/provide-io/terraform-provider-pyvider/discussions) - Community support
+- [GitHub Issues](https://github.com/provide-io/terraform-provider-pyvider/issues) - Report bugs
+
 ## Example Usage
 
 ```terraform
