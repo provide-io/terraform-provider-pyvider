@@ -1,8 +1,28 @@
 # Terraform Provider: Pyvider
 
-The `pyvider` provider is the official, self-hosted provider for the Pyvider framework. It serves as a comprehensive demonstration of the framework's capabilities and provides a suite of utility resources, data sources, and functions that are useful for testing, diagnostics, and general infrastructure tasks.
+> **⚠️ Proof of Concept:** This is a proof-of-concept Terraform provider demonstrating what's possible when building providers in Python using the pyvider framework. Use it to learn Python-based provider development or to access utility resources for testing and diagnostics—but not for production infrastructure.
 
-This provider is built entirely in Python using the `pyvider` framework and packaged using the `pyvider-builder` toolchain.
+**What it is:** A working Terraform provider with 100+ resources, data sources, and functions, built entirely in Python.
+
+**What it does:** Provides utilities for file management, environment diagnostics, data transformation (jq), and infrastructure testing.
+
+**Why it matters:** Proves you can build fully functional Terraform providers in Python instead of Go, and serves as a reference implementation for the [pyvider framework](https://github.com/provide-io/pyvider).
+
+## When to Use This Provider
+
+**✅ Use this provider for:**
+- Learning how to build Terraform providers in Python
+- Studying working examples of provider patterns
+- Quick testing and diagnostic utilities
+- Proof-of-concept work
+- Understanding the pyvider framework capabilities
+
+**❌ Don't use this provider for:**
+- Production infrastructure management (build a custom provider instead)
+- Critical systems or workflows
+- Long-term production configurations
+
+**For production needs:** Build your own custom provider using [pyvider](https://github.com/provide-io/pyvider), or use established providers (AWS, Azure, etc.).
 
 ## Features
 
@@ -17,15 +37,15 @@ This provider is built using components from the [pyvider-components](https://gi
 
 **Key Relationship:**
 - **pyvider-components**: Example library with 100+ component demonstrations for learning
-- **terraform-provider-pyvider**: Production-ready provider that packages those components for Terraform use
+- **terraform-provider-pyvider**: Proof-of-concept provider that packages those components for Terraform testing and learning
 
 ```
-pyvider-components (examples) ──packages──> terraform-provider-pyvider (production)
+pyvider-components (examples) ──packages──> terraform-provider-pyvider (POC/testing)
 ```
 
 **Why two repositories?**
 - **pyvider-components** is for developers building their own providers (learning/reference)
-- **terraform-provider-pyvider** is for users wanting to use the provider in Terraform (production)
+- **terraform-provider-pyvider** is for learning and testing the provider in Terraform (proof-of-concept)
 
 **Building your own provider?** Start with [pyvider-components](https://github.com/provide-io/pyvider-components) to see working examples, then use the [pyvider framework](https://github.com/provide-io/pyvider) to build your custom provider.
 
