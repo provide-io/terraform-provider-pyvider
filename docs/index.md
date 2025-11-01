@@ -34,6 +34,18 @@ Terraform provider for pyvider - A Python-based Terraform provider built with th
     Consider building a custom provider using [pyvider](https://github.com/provide-io/pyvider)
     tailored to your specific needs.
 
+---
+
+## Part of the provide.io Ecosystem
+
+This project is part of a larger ecosystem of tools for Python and Terraform development.
+
+**[View Ecosystem Overview →](https://docs.provide.io/provide-foundation/ecosystem/)**
+
+Understand how provide-foundation, pyvider, flavorpack, and other projects work together.
+
+---
+
 ## When to Use This Provider
 
 **✅ Use for learning and testing:**
