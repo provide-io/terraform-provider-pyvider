@@ -61,3 +61,9 @@ public_key_path = "keys/provider-public.key"
 [tool.flavor.execution.runtime.env]
 # Pass through all Terraform environment variables as-is
 pass = ["TF_*", "PLUGIN_*"]
+
+[pyvider]
+# Provider metadata
+name = "pyvider"
+# Component packages to use for this provider
+component_packages = ["pyvider.components"]
