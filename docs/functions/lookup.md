@@ -1,8 +1,8 @@
 ---
 page_title: "Function: lookup"
+subcategory: "Collections"
 description: |-
   Read a value from a map with an optional default.
-subcategory: "Utilities"
 ---
 
 # lookup (Function)

@@ -1,8 +1,8 @@
 ---
 page_title: "Resource: pyvider_file_content"
+subcategory: "File Operations"
 description: |-
   Terraform resource for pyvider_file_content
-subcategory: "Utilities"
 ---
 
 # pyvider_file_content (Resource)

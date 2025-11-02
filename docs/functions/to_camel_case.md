@@ -1,8 +1,8 @@
 ---
 page_title: "Function: to_camel_case"
+subcategory: "String Utilities"
 description: |-
   Convert text to camelCase (or PascalCase if upper_first is true).
-subcategory: "Utilities"
 ---
 
 # to_camel_case (Function)

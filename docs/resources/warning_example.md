@@ -1,8 +1,8 @@
 ---
 page_title: "Resource: pyvider_warning_example"
+subcategory: "Test Mode"
 description: |-
   Terraform resource for pyvider_warning_example
-subcategory: "Utilities"
 ---
 
 # pyvider_warning_example (Resource)

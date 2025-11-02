@@ -1,8 +1,8 @@
 ---
 page_title: "Function: max"
+subcategory: "Math"
 description: |-
   Terraform function for max
-subcategory: "Utilities"
 ---
 
 # max (Function)

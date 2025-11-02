@@ -1,8 +1,8 @@
 ---
 page_title: "Function: lens_jq"
+subcategory: "Lens"
 description: |-
   Applies a jq query and returns a native Python object.
-subcategory: "Utilities"
 ---
 
 # lens_jq (Function)

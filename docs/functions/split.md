@@ -1,8 +1,8 @@
 ---
 page_title: "Function: split"
+subcategory: "String Utilities"
 description: |-
   Split a string by a delimiter.
-subcategory: "Utilities"
 ---
 
 # split (Function)

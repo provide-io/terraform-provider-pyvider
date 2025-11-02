@@ -1,0 +1,68 @@
+nav:
+- Overview: index.md
+- Guides:
+    Common Patterns: guides/common-patterns.md
+    Getting Started: guides/getting-started.md
+    Troubleshooting: guides/troubleshooting.md
+- null:
+    Resources:
+      timed_token: resources/pyvider_timed_token.md
+    Data Sources:
+      env_variables: data-sources/pyvider_env_variables.md
+      nested_data_processor: data-sources/pyvider_nested_data_processor.md
+      provider_config_reader: data-sources/pyvider_provider_config_reader.md
+- Collections:
+    Functions:
+      contains: functions/contains.md
+      length: functions/length.md
+      lookup: functions/lookup.md
+- File Operations:
+    Resources:
+      file_content: resources/pyvider_file_content.md
+      local_directory: resources/pyvider_local_directory.md
+    Data Sources:
+      file_info: data-sources/pyvider_file_info.md
+- Lens:
+    Data Sources:
+      lens_jq: data-sources/pyvider_lens_jq.md
+    Functions:
+      lens_jq: functions/lens_jq.md
+- Math:
+    Functions:
+      add: functions/add.md
+      divide: functions/divide.md
+      max: functions/max.md
+      min: functions/min.md
+      multiply: functions/multiply.md
+      round: functions/round.md
+      subtract: functions/subtract.md
+      sum: functions/sum.md
+- Network:
+    Data Sources:
+      http_api: data-sources/pyvider_http_api.md
+- String Utilities:
+    Functions:
+      format: functions/format.md
+      format_size: functions/format_size.md
+      join: functions/join.md
+      lower: functions/lower.md
+      pluralize: functions/pluralize.md
+      replace: functions/replace.md
+      split: functions/split.md
+      to_camel_case: functions/to_camel_case.md
+      to_kebab_case: functions/to_kebab_case.md
+      to_snake_case: functions/to_snake_case.md
+      truncate: functions/truncate.md
+      upper: functions/upper.md
+- Type Conversion:
+    Functions:
+      tostring: functions/tostring.md
+- Test Mode:
+    Resources:
+      private_state_verifier: resources/pyvider_private_state_verifier.md
+      warning_example: resources/pyvider_warning_example.md
+    Data Sources:
+      mixed_map_test: data-sources/pyvider_mixed_map_test.md
+      nested_resource_test: data-sources/pyvider_nested_resource_test.md
+      simple_map_test: data-sources/pyvider_simple_map_test.md
+      structured_object_test: data-sources/pyvider_structured_object_test.md

@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_mixed_map_test"
+subcategory: "Test Mode"
 description: |-
   Terraform data source for pyvider_mixed_map_test
-subcategory: "Test Mode"
 ---
 
 # pyvider_mixed_map_test (Data Source)

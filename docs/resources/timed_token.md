@@ -2,7 +2,6 @@
 page_title: "Resource: pyvider_timed_token"
 description: |-
   Terraform resource for pyvider_timed_token
-subcategory: "Utilities"
 ---
 
 # pyvider_timed_token (Resource)

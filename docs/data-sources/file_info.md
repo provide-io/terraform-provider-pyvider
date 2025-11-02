@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_file_info"
+subcategory: "File Operations"
 description: |-
   Terraform data source for pyvider_file_info
-subcategory: "Utilities"
 ---
 
 # pyvider_file_info (Data Source)

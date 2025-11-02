@@ -1,8 +1,8 @@
 ---
 page_title: "Function: add"
+subcategory: "Math"
 description: |-
   Terraform function for add
-subcategory: "Utilities"
 ---
 
 # add (Function)

@@ -1,8 +1,7 @@
 ---
-page_title: "Function: pyvider_nested_data_processor"
+page_title: "Data Source: pyvider_nested_data_processor"
 description: |-
-  Terraform function for pyvider_nested_data_processor
-subcategory: "Utilities"
+  Terraform data source for pyvider_nested_data_processor
 ---
 
 # pyvider_nested_data_processor (Function)

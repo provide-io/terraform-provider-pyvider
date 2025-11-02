@@ -1,8 +1,8 @@
 ---
 page_title: "Function: min"
+subcategory: "Math"
 description: |-
   Terraform function for min
-subcategory: "Utilities"
 ---
 
 # min (Function)

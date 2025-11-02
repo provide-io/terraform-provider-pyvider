@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_lens_jq"
+subcategory: "Lens"
 description: |-
   Terraform data source for pyvider_lens_jq
-subcategory: "Lens"
 ---
 
 # pyvider_lens_jq (Data Source)

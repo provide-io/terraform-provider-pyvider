@@ -1,8 +1,8 @@
 ---
 page_title: "Resource: pyvider_private_state_verifier"
+subcategory: "Test Mode"
 description: |-
   Terraform resource for pyvider_private_state_verifier
-subcategory: "Test Mode"
 ---
 
 # pyvider_private_state_verifier (Resource)

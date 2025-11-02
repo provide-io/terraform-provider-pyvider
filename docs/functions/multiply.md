@@ -1,8 +1,8 @@
 ---
 page_title: "Function: multiply"
+subcategory: "Math"
 description: |-
   Terraform function for multiply
-subcategory: "Utilities"
 ---
 
 # multiply (Function)

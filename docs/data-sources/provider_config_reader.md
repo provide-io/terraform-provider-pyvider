@@ -2,7 +2,6 @@
 page_title: "Data Source: pyvider_provider_config_reader"
 description: |-
   Terraform data source for pyvider_provider_config_reader
-subcategory: "Utilities"
 ---
 
 # pyvider_provider_config_reader (Data Source)

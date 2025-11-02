@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_structured_object_test"
+subcategory: "Test Mode"
 description: |-
   Terraform data source for pyvider_structured_object_test
-subcategory: "Test Mode"
 ---
 
 # pyvider_structured_object_test (Data Source)
