@@ -1,6 +1,6 @@
 ---
 page_title: "Function: truncate"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Truncate text to specified length with optional suffix.
 ---

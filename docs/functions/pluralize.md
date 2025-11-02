@@ -1,6 +1,6 @@
 ---
 page_title: "Function: pluralize"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Pluralize a word based on count with optional custom plural form.
 ---

@@ -1,6 +1,6 @@
 ---
 page_title: "Function: sum"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for sum
 ---

@@ -1,6 +1,6 @@
 ---
 page_title: "Function: min"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for min
 ---

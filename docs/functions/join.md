@@ -1,6 +1,6 @@
 ---
 page_title: "Function: join"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Join a list of strings with a delimiter.
 ---

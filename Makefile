@@ -230,6 +230,17 @@ docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 		echo "$(YELLOW)⏭️  Documentation generation was skipped (SKIP_DOCS=true)$(NC)"; \
 	fi
 
+.PHONY: inject-partials
+inject-partials: ## Inject global partials into component templates
+	@echo "$(BLUE)🔧 Injecting global partials...$(NC)"
+	@python3 scripts/inject_global_partials.py
+	@echo "$(GREEN)✅ Global partials injected$(NC)"
+
+.PHONY: inject-partials-dry-run
+inject-partials-dry-run: ## Preview global partial injections (dry-run)
+	@echo "$(BLUE)📋 Preview: injecting global partials (dry-run)...$(NC)"
+	@python3 scripts/inject_global_partials.py --dry-run
+
 .PHONY: generate-docs
 generate-docs: venv deps ## Generate documentation and examples with plating CLI
 	@echo "$(BLUE)📚 Generating docs and examples...$(NC)"

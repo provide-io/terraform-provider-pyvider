@@ -1,3 +1,8 @@
+---
+page_title: "Common Patterns"
+guide_order: 2
+---
+
 # Common Patterns
 
 This guide demonstrates practical patterns for using the pyvider provider in real-world Terraform configurations.
@@ -16,7 +21,7 @@ You need to deploy the same infrastructure with different settings for each envi
 
 Use Terraform workspaces or variables with pyvider data sources to load environment-specific configuration.
 
-```hcl
+```terraform
 # variables.tf
 variable "environment" {
   description = "Deployment environment"
@@ -66,7 +71,7 @@ output "config_path" {
 
 Load configuration from environment-specific files:
 
-```hcl
+```terraform
 # Read environment variables
 data "pyvider_env_variables" "terraform_env" {
   keys = ["TERRAFORM_WORKSPACE", "ENV"]
@@ -101,7 +106,7 @@ You need to create configuration files with dynamic content from Terraform varia
 
 Use pyvider's string functions to build templates and generate files.
 
-```hcl
+```terraform
 variable "service_name" {
   default = "my-service"
 }
@@ -161,7 +166,7 @@ output "manifest_path" {
 
 Generate multiple configuration files from a list:
 
-```hcl
+```terraform
 variable "services" {
   type = map(object({
     port     = number
@@ -214,7 +219,7 @@ You need to fetch data from an API to use in your Terraform deployment.
 
 Use the `pyvider_http_api` data source to make HTTP requests.
 
-```hcl
+```terraform
 # Fetch service discovery information
 data "pyvider_http_api" "service_registry" {
   url    = "https://registry.example.com/api/services"
@@ -256,7 +261,7 @@ output "api_endpoint" {
 
 ### POST Requests with Body
 
-```hcl
+```terraform
 # Register deployment with external system
 data "pyvider_http_api" "register_deployment" {
   url    = "https://deploy-tracker.example.com/api/deployments"
@@ -301,7 +306,7 @@ You need to create certain resources only in specific environments or conditions
 
 Use the `count` or `for_each` meta-arguments with conditions.
 
-```hcl
+```terraform
 variable "create_debug_files" {
   description = "Create debug configuration files"
   type        = bool
@@ -363,7 +368,7 @@ output "dev_helpers_path" {
 
 ### Dynamic Conditional Creation
 
-```hcl
+```terraform
 variable "enabled_features" {
   description = "List of features to enable"
   type        = list(string)
@@ -428,7 +433,7 @@ You need to validate inputs and handle errors before creating resources.
 
 Use preconditions, validation blocks, and try/catch functions.
 
-```hcl
+```terraform
 variable "config_file_path" {
   description = "Path to configuration file"
   type        = string
@@ -488,7 +493,7 @@ output "config_exists" {
 
 ### Graceful Fallbacks
 
-```hcl
+```terraform
 # Try to read environment variable with fallback
 data "pyvider_env_variables" "optional_config" {
   keys = ["APP_CONFIG_URL", "APP_PORT"]
@@ -545,7 +550,7 @@ output "config_summary" {
 
 Real-world example combining multiple patterns:
 
-```hcl
+```terraform
 # variables.tf
 variable "environment" {
   type    = string
@@ -661,7 +666,7 @@ output "service_url" {
 
 Always validate inputs to catch errors early:
 
-```hcl
+```terraform
 variable "port" {
   validation {
     condition     = var.port > 1024 && var.port < 65536
@@ -674,7 +679,7 @@ variable "port" {
 
 Validate state before creating resources:
 
-```hcl
+```terraform
 resource "pyvider_file_content" "config" {
   lifecycle {
     precondition {
@@ -689,7 +694,7 @@ resource "pyvider_file_content" "config" {
 
 Use try() and coalesce() for graceful fallbacks:
 
-```hcl
+```terraform
 locals {
   port = try(tonumber(var.custom_port), 8080)
   url  = coalesce(var.custom_url, "https://default.example.com")
@@ -700,7 +705,7 @@ locals {
 
 Add comments explaining complex logic:
 
-```hcl
+```terraform
 # Use production registry in prod, local cache otherwise
 locals {
   # Production uses external service discovery

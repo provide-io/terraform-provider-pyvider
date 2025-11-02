@@ -1,6 +1,6 @@
 ---
 page_title: "Function: contains"
-subcategory: "Collections"
+subcategory: "Functions"
 description: |-
   Terraform function for contains
 ---

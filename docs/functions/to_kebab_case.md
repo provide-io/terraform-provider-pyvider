@@ -1,6 +1,6 @@
 ---
 page_title: "Function: to_kebab_case"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Convert text to kebab-case using provide-foundation utilities.
 ---

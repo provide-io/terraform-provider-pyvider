@@ -1,6 +1,6 @@
 ---
 page_title: "Function: round"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Round a number to specified decimal places.
 ---
