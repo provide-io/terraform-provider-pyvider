@@ -225,7 +225,10 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 .PHONY: docs
 docs: venv deps clean-docs ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
-	@bash scripts/build-docs.sh
+	@SKIP_DOCS=$(SKIP_DOCS) bash scripts/build-docs.sh
+	@if [ "$(SKIP_DOCS)" = "true" ]; then \
+		echo "$(YELLOW)⏭️  Documentation generation was skipped (SKIP_DOCS=true)$(NC)"; \
+	fi
 
 .PHONY: generate-docs
 generate-docs: venv deps ## Generate documentation and examples with plating CLI

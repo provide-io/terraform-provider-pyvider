@@ -36,6 +36,12 @@ DOCS_OUTPUT_DIR="${PROJECT_ROOT}/docs"
 
 print_header "📚 Building Documentation for Terraform Provider Pyvider"
 
+# Check if documentation generation is disabled
+if [ "${SKIP_DOCS:-false}" = "true" ]; then
+    print_warning "Skipping documentation generation (SKIP_DOCS=true)"
+    exit 0
+fi
+
 # Note: In CI/CD, pyvider-components and plating are installed as packages via uv sync
 # We don't need the source directories - plating works with installed packages
 # Only check for directories in local development mode
