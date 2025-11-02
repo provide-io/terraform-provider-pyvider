@@ -1,0 +1,35 @@
+---
+page_title: "Function: to_kebab_case"
+description: |-
+  Convert text to kebab-case using provide-foundation utilities.
+subcategory: "Utilities"
+---
+
+# to_kebab_case (Function)
+
+Convert text to kebab-case using provide-foundation utilities.
+
+## Example Usage
+
+```terraform
+locals {
+  example_result = upper(
+    # Function arguments here
+  )
+}
+
+output "function_result" {
+  description = "Result of upper function"
+  value       = local.example_result
+}
+
+```
+
+## Signature
+
+``to_kebab_case(input)``
+
+## Arguments
+
+
+
