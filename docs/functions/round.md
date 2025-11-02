@@ -1,8 +1,8 @@
 ---
 page_title: "Function: round"
+subcategory: "Math"
 description: |-
   Round a number to specified decimal places.
-subcategory: "Utilities"
 ---
 
 # round (Function)

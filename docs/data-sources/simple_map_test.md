@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_simple_map_test"
+subcategory: "Test Mode"
 description: |-
   Terraform data source for pyvider_simple_map_test
-subcategory: "Test Mode"
 ---
 
 # pyvider_simple_map_test (Data Source)

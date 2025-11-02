@@ -1,8 +1,8 @@
 ---
 page_title: "Function: contains"
+subcategory: "Collections"
 description: |-
   Terraform function for contains
-subcategory: "Utilities"
 ---
 
 # contains (Function)

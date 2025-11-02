@@ -1,8 +1,8 @@
 ---
 page_title: "Function: lower"
+subcategory: "String Utilities"
 description: |-
   Convert a string to lowercase.
-subcategory: "Utilities"
 ---
 
 # lower (Function)

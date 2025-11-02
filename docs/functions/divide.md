@@ -1,8 +1,8 @@
 ---
 page_title: "Function: divide"
+subcategory: "Math"
 description: |-
   Terraform function for divide
-subcategory: "Utilities"
 ---
 
 # divide (Function)

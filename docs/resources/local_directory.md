@@ -1,8 +1,8 @@
 ---
 page_title: "Resource: pyvider_local_directory"
+subcategory: "File Operations"
 description: |-
   Terraform resource for pyvider_local_directory
-subcategory: "Utilities"
 ---
 
 # pyvider_local_directory (Resource)

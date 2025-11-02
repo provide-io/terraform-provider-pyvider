@@ -1,8 +1,8 @@
 ---
 page_title: "Function: replace"
+subcategory: "String Utilities"
 description: |-
   Replace all occurrences of a substring.
-subcategory: "Utilities"
 ---
 
 # replace (Function)

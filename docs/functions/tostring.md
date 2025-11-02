@@ -1,8 +1,8 @@
 ---
 page_title: "Function: tostring"
+subcategory: "Type Conversion"
 description: |-
   Terraform function for tostring
-subcategory: "Utilities"
 ---
 
 # tostring (Function)

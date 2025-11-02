@@ -1,8 +1,8 @@
 ---
 page_title: "Data Source: pyvider_http_api"
+subcategory: "Network"
 description: |-
   Terraform data source for pyvider_http_api
-subcategory: "Utilities"
 ---
 
 # pyvider_http_api (Data Source)

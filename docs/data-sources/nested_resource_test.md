@@ -1,8 +1,8 @@
 ---
 page_title: "Resource: pyvider_nested_resource_test"
+subcategory: "Test Mode"
 description: |-
   Terraform resource for pyvider_nested_resource_test
-subcategory: "Test Mode"
 ---
 
 # pyvider_nested_resource_test (Resource)

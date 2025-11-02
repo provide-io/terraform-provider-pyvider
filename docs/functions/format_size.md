@@ -1,8 +1,8 @@
 ---
 page_title: "Function: format_size"
+subcategory: "String Utilities"
 description: |-
   Format bytes as human-readable size (e.g., "1.5 KB", "2.3 MB").
-subcategory: "Utilities"
 ---
 
 # format_size (Function)

@@ -1,8 +1,8 @@
 ---
 page_title: "Function: length"
+subcategory: "Collections"
 description: |-
   Terraform function for length
-subcategory: "Utilities"
 ---
 
 # length (Function)

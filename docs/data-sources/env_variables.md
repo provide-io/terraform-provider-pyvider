@@ -2,7 +2,6 @@
 page_title: "Data Source: pyvider_env_variables"
 description: |-
   Terraform data source for pyvider_env_variables
-subcategory: "Utilities"
 ---
 
 # pyvider_env_variables (Data Source)
