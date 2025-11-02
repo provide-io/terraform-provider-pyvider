@@ -1,6 +1,6 @@
 ---
 page_title: "Function: split"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Split a string by a delimiter.
 ---

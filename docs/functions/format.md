@@ -1,6 +1,6 @@
 ---
 page_title: "Function: format"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Format a template string with positional arguments.
 ---

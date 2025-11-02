@@ -1,6 +1,6 @@
 ---
 page_title: "Function: upper"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Convert a string to uppercase.
 ---

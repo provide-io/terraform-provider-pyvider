@@ -1,3 +1,8 @@
+---
+page_title: "Getting Started with Pyvider"
+guide_order: 1
+---
+
 # Getting Started with pyvider Terraform Provider
 
 **Time to Complete:** 10-15 minutes
@@ -82,7 +87,7 @@ cd pyvider-tutorial
 
 Create a file named `main.tf`:
 
-```hcl
+```terraform
 # main.tf
 
 terraform {
@@ -217,7 +222,7 @@ Current timestamp: 2025-10-30T15:39:55Z
 
 Now let's read the file content back using a data source. Add to your `main.tf`:
 
-```hcl
+```terraform
 # Read the file content back
 data "pyvider_file_content" "read_greeting" {
   path = pyvider_file_content.greeting.path
@@ -256,7 +261,7 @@ greeting_file = "./hello.txt"
 
 Let's update the file content. Modify the `pyvider_file_content.greeting` resource:
 
-```hcl
+```terraform
 resource "pyvider_file_content" "greeting" {
   path = "${path.module}/hello.txt"
 
@@ -410,7 +415,7 @@ ls -la $(dirname /path/to/file)
 
 Here's the complete `main.tf` with all features:
 
-```hcl
+```terraform
 terraform {
   required_version = ">= 1.0"
 

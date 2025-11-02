@@ -1,6 +1,6 @@
 ---
 page_title: "Function: add"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for add
 ---

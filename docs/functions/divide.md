@@ -1,6 +1,6 @@
 ---
 page_title: "Function: divide"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for divide
 ---

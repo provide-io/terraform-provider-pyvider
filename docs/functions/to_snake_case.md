@@ -1,6 +1,6 @@
 ---
 page_title: "Function: to_snake_case"
-subcategory: "String Utilities"
+subcategory: "Functions"
 description: |-
   Convert text to snake_case using provide-foundation utilities.
 ---

@@ -32,14 +32,6 @@ No provider configuration required.
 - [`pyvider_nested_data_processor`](./data-sources/nested_data_processor.md)
 - [`pyvider_provider_config_reader`](./data-sources/provider_config_reader.md)
 
-## Collections
-
-### Functions
-
-- [`contains`](./functions/contains.md)
-- [`length`](./functions/length.md)
-- [`lookup`](./functions/lookup.md)
-
 ## File Operations
 
 ### Resources
@@ -51,6 +43,35 @@ No provider configuration required.
 
 - [`pyvider_file_info`](./data-sources/file_info.md)
 
+## Functions
+
+### Functions
+
+- [`add`](./functions/add.md)
+- [`contains`](./functions/contains.md)
+- [`divide`](./functions/divide.md)
+- [`format`](./functions/format.md)
+- [`format_size`](./functions/format_size.md)
+- [`join`](./functions/join.md)
+- [`length`](./functions/length.md)
+- [`lookup`](./functions/lookup.md)
+- [`lower`](./functions/lower.md)
+- [`max`](./functions/max.md)
+- [`min`](./functions/min.md)
+- [`multiply`](./functions/multiply.md)
+- [`pluralize`](./functions/pluralize.md)
+- [`replace`](./functions/replace.md)
+- [`round`](./functions/round.md)
+- [`split`](./functions/split.md)
+- [`subtract`](./functions/subtract.md)
+- [`sum`](./functions/sum.md)
+- [`to_camel_case`](./functions/to_camel_case.md)
+- [`to_kebab_case`](./functions/to_kebab_case.md)
+- [`to_snake_case`](./functions/to_snake_case.md)
+- [`tostring`](./functions/tostring.md)
+- [`truncate`](./functions/truncate.md)
+- [`upper`](./functions/upper.md)
+
 ## Lens
 
 ### Data Sources
@@ -61,47 +82,11 @@ No provider configuration required.
 
 - [`lens_jq`](./functions/lens_jq.md)
 
-## Math
-
-### Functions
-
-- [`add`](./functions/add.md)
-- [`divide`](./functions/divide.md)
-- [`max`](./functions/max.md)
-- [`min`](./functions/min.md)
-- [`multiply`](./functions/multiply.md)
-- [`round`](./functions/round.md)
-- [`subtract`](./functions/subtract.md)
-- [`sum`](./functions/sum.md)
-
 ## Network
 
 ### Data Sources
 
 - [`pyvider_http_api`](./data-sources/http_api.md)
-
-## String Utilities
-
-### Functions
-
-- [`format`](./functions/format.md)
-- [`format_size`](./functions/format_size.md)
-- [`join`](./functions/join.md)
-- [`lower`](./functions/lower.md)
-- [`pluralize`](./functions/pluralize.md)
-- [`replace`](./functions/replace.md)
-- [`split`](./functions/split.md)
-- [`to_camel_case`](./functions/to_camel_case.md)
-- [`to_kebab_case`](./functions/to_kebab_case.md)
-- [`to_snake_case`](./functions/to_snake_case.md)
-- [`truncate`](./functions/truncate.md)
-- [`upper`](./functions/upper.md)
-
-## Type Conversion
-
-### Functions
-
-- [`tostring`](./functions/tostring.md)
 
 ## Test Mode
 

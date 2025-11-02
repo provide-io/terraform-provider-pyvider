@@ -1,6 +1,6 @@
 ---
 page_title: "Function: subtract"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for subtract
 ---

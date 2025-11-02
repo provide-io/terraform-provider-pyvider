@@ -81,6 +81,13 @@ $PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
 }
 print_success "Required packages are installed"
 
+# Inject global partials into component templates
+print_header "🔧 Injecting Global Partials into Templates"
+
+python3 "$SCRIPT_DIR/inject_global_partials.py" || {
+    print_warning "Failed to inject global partials (continuing with build)"
+}
+
 # Generate documentation
 print_header "🔧 Generating Documentation with Plating"
 

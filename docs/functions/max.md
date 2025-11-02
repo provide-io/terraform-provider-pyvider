@@ -1,6 +1,6 @@
 ---
 page_title: "Function: max"
-subcategory: "Math"
+subcategory: "Functions"
 description: |-
   Terraform function for max
 ---

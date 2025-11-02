@@ -1,6 +1,6 @@
 ---
 page_title: "Function: length"
-subcategory: "Collections"
+subcategory: "Functions"
 description: |-
   Terraform function for length
 ---
