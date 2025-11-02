@@ -1,1 +1,0 @@
-{ "results": [{"part_id": "P-QBC-100", "passed": true, "score": 0.998}, {"part_id": "P-CRYO-SHIELD", "passed": true, "score": 0.995}, {"part_id": "P-QBC-200", "passed": false, "failure_reason": "tolerance_exceeded"}] }
