@@ -2,8 +2,10 @@
 """
 Pre-process plating templates to inject global partials.
 
-This script scans all .tmpl.md files in pyvider-components and replaces
-{{ global('partial_name') }} with the content from docs/_partials/_partial_name.md
+This script implements a hybrid approach:
+1. AUTOMATIC INJECTION: Injects global_header after first heading and global_footer at end
+   - Unless opted-out via frontmatter (skip_global_header: true / skip_global_footer: true)
+2. MANUAL INJECTION: Also processes {{ global('partial_name') }} syntax
 
 Usage:
     ./scripts/inject_global_partials.py           # Inject partials
@@ -13,6 +15,73 @@ Usage:
 import re
 from pathlib import Path
 import sys
+import yaml
+
+
+def parse_frontmatter(content: str) -> tuple[dict, str]:
+    """Extract YAML frontmatter and remaining content.
+
+    Returns:
+        (frontmatter_dict, body_without_frontmatter)
+    """
+    if not content.startswith('---'):
+        return {}, content
+
+    # Find the second --- delimiter
+    lines = content.split('\n')
+    if len(lines) < 2:
+        return {}, content
+
+    # Find closing ---
+    close_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == '---':
+            close_idx = i
+            break
+
+    if close_idx is None:
+        return {}, content
+
+    # Parse YAML frontmatter
+    frontmatter_text = '\n'.join(lines[1:close_idx])
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text) or {}
+    except yaml.YAMLError:
+        frontmatter = {}
+
+    # Reconstruct body (keep the closing --- and everything after)
+    body = '\n'.join(lines[close_idx:])
+
+    return frontmatter, body
+
+
+def should_skip_header(frontmatter: dict) -> bool:
+    """Check if global_header should be skipped."""
+    return frontmatter.get('skip_global_header', False)
+
+
+def should_skip_footer(frontmatter: dict) -> bool:
+    """Check if global_footer should be skipped."""
+    return frontmatter.get('skip_global_footer', False)
+
+
+def remove_old_injections(body: str) -> str:
+    """Remove old HTML-comment based injections to prepare for new ones."""
+    # Remove old header injection (with HTML comments)
+    body = re.sub(
+        r'\n*<!-- Injected from global partial: _global_header\.md -->\n.*?\n<!-- End global partial -->\n*',
+        '',
+        body,
+        flags=re.DOTALL
+    )
+    # Remove old footer injection (with HTML comments)
+    body = re.sub(
+        r'\n*<!-- Injected from global partial: _global_footer\.md -->\n.*?\n<!-- End global partial -->',
+        '',
+        body,
+        flags=re.DOTALL
+    )
+    return body
 
 
 def inject_global_partials(
@@ -21,6 +90,11 @@ def inject_global_partials(
     dry_run: bool = False
 ) -> int:
     """Inject global partials into component templates.
+
+    Implements hybrid approach:
+    - Auto-inject header after first heading and footer at end
+    - Allow opt-out via frontmatter flags
+    - Still process manual {{ global(...) }} syntax
 
     Args:
         components_dir: Root directory of pyvider-components
@@ -37,11 +111,22 @@ def inject_global_partials(
         print(f"⚠️  No template files found in {components_dir}")
         return 0
 
+    # Load global partials
+    global_header_file = partials_dir / "_global_header.md"
+    global_footer_file = partials_dir / "_global_footer.md"
+
+    global_header_content = ""
+    global_footer_content = ""
+
+    if global_header_file.exists():
+        global_header_content = global_header_file.read_text(encoding='utf-8').strip()
+    if global_footer_file.exists():
+        global_footer_content = global_footer_file.read_text(encoding='utf-8').strip()
+
     # Pattern to match {{ global('name') }} or {{ global("name") }}
-    pattern = re.compile(r"\{\{\s*global\(['\"]([^'\"]+)['\"]\)\s*\}\}")
+    manual_pattern = re.compile(r"\{\{\s*global\(['\"]([^'\"]+)['\"]\)\s*\}\}")
 
     files_changed = 0
-    files_with_warnings = []
 
     for template_file in template_files:
         try:
@@ -52,44 +137,124 @@ def inject_global_partials(
 
         original_content = content
 
-        # Find all global() references
-        matches = list(pattern.finditer(content))
+        # Parse frontmatter FIRST (before cleaning)
+        frontmatter, full_body_with_delim = parse_frontmatter(content)
 
-        if not matches:
-            continue
+        # Remove old HTML-comment based injections from body only
+        body = remove_old_injections(full_body_with_delim)
 
-        for match in matches:
+        skip_header = should_skip_header(frontmatter)
+        skip_footer = should_skip_footer(frontmatter)
+
+        # Check if file already has injected content (to prevent double injection)
+        # Check for both HTML comment markers and actual content
+        already_has_header = ("<!-- Injected from global partial: _global_header.md -->" in body or
+                              "POC (proof-of-concept)" in body) if global_header_content else False
+        already_has_footer = ("<!-- Injected from global partial: _global_footer.md -->" in body) if global_footer_content else False
+
+        # --- AUTOMATIC INJECTION ---
+
+        # Auto-inject header after H1 heading and its description paragraph
+        # (unless opted-out or already present)
+        if global_header_content and not skip_header and not already_has_header:
+            # Find first # heading
+            heading_pattern = re.compile(r'^# .+$', re.MULTILINE)
+            heading_match = heading_pattern.search(body)
+
+            if heading_match:
+                # Start after the heading
+                insert_pos = heading_match.end()
+
+                # Find the first non-empty line after heading (the description paragraph)
+                # and insert after that paragraph
+                remaining = body[insert_pos:]
+                lines = remaining.split('\n')
+
+                # Skip empty lines and the description paragraph
+                desc_end = 0
+                found_desc = False
+                for i, line in enumerate(lines):
+                    if line.strip() and not line.startswith('#'):
+                        # Found the description line
+                        found_desc = True
+                        desc_end = i + 1
+                        break
+
+                if found_desc:
+                    # Insert after the description line
+                    insert_pos += len('\n'.join(lines[:desc_end])) + 1
+
+                # Inject without HTML comments (plating may strip them)
+                header_injection = f"\n\n{global_header_content}\n"
+                body = body[:insert_pos] + header_injection + body[insert_pos:]
+
+        # Auto-inject footer at end (unless opted-out or already present)
+        if global_footer_content and not skip_footer and not already_has_footer:
+            # Inject without HTML comments
+            footer_injection = f"\n\n{global_footer_content}"
+            body = body.rstrip() + footer_injection
+
+        # --- MANUAL INJECTION ---
+
+        # Process manual {{ global('name') }} syntax
+        manual_matches = list(manual_pattern.finditer(body))
+
+        for match in manual_matches:
             partial_name = match.group(1)
             partial_file = partials_dir / f"_{partial_name}.md"
 
             if not partial_file.exists():
                 print(f"⚠️  Warning: Global partial '{partial_name}' not found at {partial_file}")
-                files_with_warnings.append((template_file, partial_name))
                 continue
 
             try:
-                # Read partial content
                 partial_content = partial_file.read_text(encoding='utf-8').strip()
             except Exception as e:
                 print(f"❌ Error reading partial {partial_file}: {e}")
                 continue
 
-            # Replace the {{ global('name') }} with actual content
-            # Add a comment to indicate this was injected
+            # Replace with content plus markers
             injection = f"<!-- Injected from global partial: _{partial_name}.md -->\n{partial_content}\n<!-- End global partial -->"
+            body = body.replace(match.group(0), injection)
 
-            content = content.replace(match.group(0), injection)
+        # Reconstruct full content: original frontmatter + updated body
+        # body includes the closing --- delimiter from parse_frontmatter
+        if frontmatter:
+            # Extract original frontmatter section from original content
+            if original_content.startswith('---'):
+                close_idx = original_content.find('---', 3)
+                if close_idx != -1:
+                    original_fm_section = original_content[:close_idx + 3]
+                    # body starts with "---\n", remove that since we have the fm section
+                    body_lines = body.split('\n', 1)  # Split on first newline only
+                    if body_lines[0].strip() == '---' and len(body_lines) > 1:
+                        body_without_delim = body_lines[1]
+                    else:
+                        body_without_delim = body
+                    updated_content = original_fm_section + '\n' + body_without_delim
+                else:
+                    updated_content = body
+            else:
+                updated_content = body
+        else:
+            updated_content = body
 
         # Write back if changed
-        if content != original_content:
+        if updated_content != original_content:
             if dry_run:
                 print(f"Would update: {template_file}")
-                # Show what changed
-                rel_path = template_file.relative_to(components_dir)
-                print(f"  Partials injected: {', '.join(m.group(1) for m in matches)}")
+                changes = []
+                if global_header_content and not skip_header and not already_has_header:
+                    changes.append("auto-inject header")
+                if global_footer_content and not skip_footer and not already_has_footer:
+                    changes.append("auto-inject footer")
+                if manual_matches:
+                    changes.append(f"manual inject: {', '.join(m.group(1) for m in manual_matches)}")
+                if changes:
+                    print(f"  Changes: {', '.join(changes)}")
             else:
                 try:
-                    template_file.write_text(content, encoding='utf-8')
+                    template_file.write_text(updated_content, encoding='utf-8')
                     print(f"✅ Updated: {template_file}")
                 except Exception as e:
                     print(f"❌ Error writing {template_file}: {e}")

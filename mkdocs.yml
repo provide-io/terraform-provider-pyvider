@@ -6,18 +6,17 @@ nav:
     Troubleshooting: guides/troubleshooting.md
 - null:
     Resources:
-      timed_token: resources/pyvider_timed_token.md
-    Data Sources:
-      env_variables: data-sources/pyvider_env_variables.md
-      nested_data_processor: data-sources/pyvider_nested_data_processor.md
-      provider_config_reader: data-sources/pyvider_provider_config_reader.md
-- File Operations:
-    Resources:
       file_content: resources/pyvider_file_content.md
       local_directory: resources/pyvider_local_directory.md
+      private_state_verifier: resources/pyvider_private_state_verifier.md
+      timed_token: resources/pyvider_timed_token.md
+      warning_example: resources/pyvider_warning_example.md
     Data Sources:
+      env_variables: data-sources/pyvider_env_variables.md
       file_info: data-sources/pyvider_file_info.md
-- Functions:
+      http_api: data-sources/pyvider_http_api.md
+      lens_jq: data-sources/pyvider_lens_jq.md
+      provider_config_reader: data-sources/pyvider_provider_config_reader.md
     Functions:
       add: functions/add.md
       contains: functions/contains.md
@@ -26,6 +25,7 @@ nav:
       format_size: functions/format_size.md
       join: functions/join.md
       length: functions/length.md
+      lens_jq: functions/lens_jq.md
       lookup: functions/lookup.md
       lower: functions/lower.md
       max: functions/max.md
@@ -43,20 +43,3 @@ nav:
       tostring: functions/tostring.md
       truncate: functions/truncate.md
       upper: functions/upper.md
-- Lens:
-    Data Sources:
-      lens_jq: data-sources/pyvider_lens_jq.md
-    Functions:
-      lens_jq: functions/lens_jq.md
-- Network:
-    Data Sources:
-      http_api: data-sources/pyvider_http_api.md
-- Test Mode:
-    Resources:
-      private_state_verifier: resources/pyvider_private_state_verifier.md
-      warning_example: resources/pyvider_warning_example.md
-    Data Sources:
-      mixed_map_test: data-sources/pyvider_mixed_map_test.md
-      nested_resource_test: data-sources/pyvider_nested_resource_test.md
-      simple_map_test: data-sources/pyvider_simple_map_test.md
-      structured_object_test: data-sources/pyvider_structured_object_test.md

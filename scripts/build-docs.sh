@@ -81,13 +81,6 @@ $PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
 }
 print_success "Required packages are installed"
 
-# Inject global partials into component templates
-print_header "🔧 Injecting Global Partials into Templates"
-
-python3 "$SCRIPT_DIR/inject_global_partials.py" || {
-    print_warning "Failed to inject global partials (continuing with build)"
-}
-
 # Generate documentation
 print_header "🔧 Generating Documentation with Plating"
 
@@ -100,6 +93,7 @@ print_header "📚 Running Plating Documentation Generation"
 mkdir -p "$DOCS_OUTPUT_DIR"
 
 # Generate documentation and examples using plating CLI
+# Note: Guide copying is now handled by plating via --guides-dir flag
 print_header "📚 Generating Documentation and Examples with Plating CLI"
 
 "$SCRIPT_DIR/generate_docs_and_examples.sh" || {
@@ -182,6 +176,7 @@ print_success "Documentation generated with plating in $DOCS_OUTPUT_DIR"
 # Show summary
 echo -e "\n📊 Documentation Summary:"
 if [ -d "$DOCS_OUTPUT_DIR" ]; then
+    echo "  Guides: $(find "$DOCS_OUTPUT_DIR/guides" -name "*.md" 2>/dev/null | wc -l | xargs)"
     echo "  Resources: $(find "$DOCS_OUTPUT_DIR/resources" -name "*.md" 2>/dev/null | wc -l | xargs)"
     echo "  Data Sources: $(find "$DOCS_OUTPUT_DIR/data-sources" -name "*.md" 2>/dev/null | wc -l | xargs)"
     echo "  Functions: $(find "$DOCS_OUTPUT_DIR/functions" -name "*.md" 2>/dev/null | wc -l | xargs)"

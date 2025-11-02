@@ -20,30 +20,21 @@ provider "pyvider" {
 
 No provider configuration required.
 
-## None
-
-### Resources
-
-- [`pyvider_timed_token`](./resources/timed_token.md)
-
-### Data Sources
-
-- [`pyvider_env_variables`](./data-sources/env_variables.md)
-- [`pyvider_nested_data_processor`](./data-sources/nested_data_processor.md)
-- [`pyvider_provider_config_reader`](./data-sources/provider_config_reader.md)
-
-## File Operations
-
 ### Resources
 
 - [`pyvider_file_content`](./resources/file_content.md)
 - [`pyvider_local_directory`](./resources/local_directory.md)
+- [`pyvider_private_state_verifier`](./resources/private_state_verifier.md)
+- [`pyvider_timed_token`](./resources/timed_token.md)
+- [`pyvider_warning_example`](./resources/warning_example.md)
 
 ### Data Sources
 
+- [`pyvider_env_variables`](./data-sources/env_variables.md)
 - [`pyvider_file_info`](./data-sources/file_info.md)
-
-## Functions
+- [`pyvider_http_api`](./data-sources/http_api.md)
+- [`pyvider_lens_jq`](./data-sources/lens_jq.md)
+- [`pyvider_provider_config_reader`](./data-sources/provider_config_reader.md)
 
 ### Functions
 
@@ -54,6 +45,7 @@ No provider configuration required.
 - [`format_size`](./functions/format_size.md)
 - [`join`](./functions/join.md)
 - [`length`](./functions/length.md)
+- [`lens_jq`](./functions/lens_jq.md)
 - [`lookup`](./functions/lookup.md)
 - [`lower`](./functions/lower.md)
 - [`max`](./functions/max.md)
@@ -71,34 +63,4 @@ No provider configuration required.
 - [`tostring`](./functions/tostring.md)
 - [`truncate`](./functions/truncate.md)
 - [`upper`](./functions/upper.md)
-
-## Lens
-
-### Data Sources
-
-- [`pyvider_lens_jq`](./data-sources/lens_jq.md)
-
-### Functions
-
-- [`lens_jq`](./functions/lens_jq.md)
-
-## Network
-
-### Data Sources
-
-- [`pyvider_http_api`](./data-sources/http_api.md)
-
-## Test Mode
-
-### Test Resources
-
-- [`pyvider_private_state_verifier`](./resources/private_state_verifier.md)
-- [`pyvider_warning_example`](./resources/warning_example.md)
-
-### Test Data Sources
-
-- [`pyvider_mixed_map_test`](./data-sources/mixed_map_test.md)
-- [`pyvider_nested_resource_test`](./data-sources/nested_resource_test.md)
-- [`pyvider_simple_map_test`](./data-sources/simple_map_test.md)
-- [`pyvider_structured_object_test`](./data-sources/structured_object_test.md)
 
