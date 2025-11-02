@@ -47,6 +47,8 @@ $PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
 # Output directory for documentation and examples
 OUTPUT_DIR="${PROJECT_ROOT}/docs"
 EXAMPLES_DIR="${OUTPUT_DIR}/examples"
+GUIDES_DIR="${PROJECT_ROOT}/guides"
+GLOBAL_PARTIALS_DIR="${PROJECT_ROOT}/../pyvider-components/docs/_partials"
 
 # Create output directories
 mkdir -p "$OUTPUT_DIR"
@@ -54,20 +56,37 @@ mkdir -p "$EXAMPLES_DIR"
 
 echo -e "${GREEN}🍽️  Running plating to generate documentation and examples...${NC}"
 
-# Run plating with --generate-examples flag
+# Build plating command with optional --guides-dir flag
+PLATING_ARGS=(
+    "plate"
+    "--provider-name" "pyvider"
+    "--package-name" "pyvider.components"
+    "--output-dir" "$OUTPUT_DIR"
+    "--generate-examples"
+    "--force"
+    "--validate"
+)
+
+# Add --guides-dir if guides/ directory exists
+if [ -d "$GUIDES_DIR" ]; then
+    PLATING_ARGS+=("--guides-dir" "$GUIDES_DIR")
+fi
+
+# Add --global-partials-dir if global partials directory exists
+if [ -d "$GLOBAL_PARTIALS_DIR" ]; then
+    PLATING_ARGS+=("--global-partials-dir" "$GLOBAL_PARTIALS_DIR")
+fi
+
+# Run plating with generated arguments
 # This will:
-# 1. Generate documentation from .plating/docs/ templates
-# 2. Copy examples from .plating/examples/ directories
-$PLATING_CMD plate \
-    --provider-name pyvider \
-    --package-name pyvider.components \
-    --output-dir "$OUTPUT_DIR" \
-    --generate-examples \
-    --force \
-    --validate || {
-        echo -e "${RED}❌ Plating failed to generate documentation and examples${NC}"
-        exit 1
-    }
+# 1. Copy guides from guides/ to docs/guides/ (if --guides-dir provided)
+# 2. Generate documentation from .plating/docs/ templates
+# 3. Inject global headers/footers from partials (if --global-partials-dir provided)
+# 4. Copy examples from .plating/examples/ directories
+$PLATING_CMD "${PLATING_ARGS[@]}" || {
+    echo -e "${RED}❌ Plating failed to generate documentation and examples${NC}"
+    exit 1
+}
 
 echo -e "${GREEN}✅ Documentation and examples generated successfully${NC}"
 

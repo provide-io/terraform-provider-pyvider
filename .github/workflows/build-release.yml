@@ -146,9 +146,141 @@ jobs:
             terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
           retention-days: 7
 
+  test:
+    name: 🧪 Test Provider Conformance
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux
+            arch: amd64
+            target: linux_amd64
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+            target: linux_arm64
+          - os: macos-15
+            platform: darwin
+            arch: arm64
+            target: darwin_arm64
+          - os: macos-15-intel
+            platform: darwin
+            arch: amd64
+            target: darwin_amd64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: 📖 Read VERSION
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "🧪 Testing version: ${VERSION}"
+
+      - name: 📥 Download provider binary
+        uses: actions/download-artifact@v4
+        with:
+          name: provider-${{ matrix.target }}
+          path: provider-binary
+
+      - name: 📦 Extract provider binary
+        run: |
+          cd provider-binary
+          unzip terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
+          chmod +x terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}
+          echo "✅ Extracted provider binary:"
+          ls -la terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}
+
+      - name: 🔧 Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+          tofu_wrapper: false
+
+      - name: 🔌 Install provider locally
+        run: |
+          # Install to Terraform plugin directory with full version (including prerelease suffix)
+          PLUGIN_DIR="${HOME}/.terraform.d/plugins/local/providers/pyvider/${{ steps.version.outputs.VERSION }}/${{ matrix.target }}"
+          mkdir -p "$PLUGIN_DIR"
+
+          # Copy provider binary with full version
+          cp provider-binary/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }} \
+             "$PLUGIN_DIR/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
+          chmod +x "$PLUGIN_DIR/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
+
+          echo "✅ Provider installed to: $PLUGIN_DIR"
+          ls -la "$PLUGIN_DIR"
+
+      - name: 🧪 Run provider tests with OpenTofu
+        run: |
+          # Navigate to a simple function example for testing
+          cd examples/function/add/basic
+
+          echo "🔍 Testing provider functionality..."
+          echo "Current directory: $(pwd)"
+
+          # Update version constraint in main.tf to match the provider version being tested
+          # This is necessary because >= constraints don't match prerelease versions
+          sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' main.tf
+
+          echo "Updated main.tf with version ${{ steps.version.outputs.VERSION }}"
+          echo "Files:"
+          ls -la
+
+          # Initialize OpenTofu/Terraform
+          echo ""
+          echo "📦 Running: tofu init"
+          tofu init
+
+          # Validate configuration
+          echo ""
+          echo "✅ Running: tofu validate"
+          tofu validate
+
+          # Generate plan
+          echo ""
+          echo "📋 Running: tofu plan"
+          tofu plan
+
+          # Apply configuration (functions are evaluated during plan/apply)
+          echo ""
+          echo "🚀 Running: tofu apply -auto-approve"
+          tofu apply -auto-approve
+
+          # Display outputs to verify provider functions work correctly
+          echo ""
+          echo "📊 Running: tofu output"
+          tofu output
+
+          # Clean up
+          echo ""
+          echo "🧹 Running: tofu destroy -auto-approve"
+          tofu destroy -auto-approve
+
+          echo ""
+          echo "✅ All provider tests passed!"
+
+      - name: 📤 Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ matrix.target }}
+          path: |
+            examples/function/add/basic/.terraform/
+            examples/function/add/basic/terraform.tfstate*
+            examples/function/add/basic/.terraform.lock.hcl
+          retention-days: 7
+
   release:
     name: 🎉 Create Release
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
