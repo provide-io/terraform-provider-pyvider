@@ -7,6 +7,9 @@ description: |-
 
 Convert a string to uppercase.
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform

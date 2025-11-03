@@ -7,6 +7,9 @@ description: |-
 
 Replace all occurrences of a substring.
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform

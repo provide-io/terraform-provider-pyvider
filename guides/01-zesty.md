@@ -1,13 +1,14 @@
 ---
-page_title: "Troubleshooting"
-guide_order: 3
+page_title: "Apples"
 ---
 
 # Troubleshooting
 
 Common issues and solutions for the pyvider Terraform provider.
 
-~> **Note:** This provider is a proof-of-concept. Many issues stem from its experimental nature. For production infrastructure, consider building a custom provider using [pyvider](https://github.com/provide-io/pyvider).
+!!! info "POC Status Reminder"
+    This provider is a proof-of-concept. Many issues stem from its experimental nature.
+    For production infrastructure, consider building a custom provider using [pyvider](https://github.com/provide-io/pyvider).
 
 ---
 
