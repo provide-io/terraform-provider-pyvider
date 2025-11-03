@@ -59,8 +59,8 @@ public_key_path = "keys/provider-public.key"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
-# Pass through all Terraform environment variables as-is
-pass = ["TF_*", "PLUGIN_*"]
+# Pass through all Terraform, Pyvider, and Foundation environment variables as-is
+pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 
 [pyvider]
 # Provider metadata

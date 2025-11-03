@@ -7,5 +7,5 @@ terraform {
 }
 
 provider "pyvider" {
-  # Add your configuration options here
+  # No testmode configured
 }

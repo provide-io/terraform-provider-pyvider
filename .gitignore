@@ -417,3 +417,4 @@ tests/plating-tests/
 # Cached provider binaries and test files
 **/tfdata/providers/**
 *-test-*.psp
+.claude

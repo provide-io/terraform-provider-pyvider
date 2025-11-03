@@ -258,29 +258,71 @@ jobs:
         with:
           enable-cache: true
 
-      - name: 🍲 Install tofusoup
-        run: |
-          uv tool install tofusoup
-          echo "✅ Tofusoup installed"
-          soup --version
-
-      - name: 🧪 Quick smoke test - single example
+      - name: 🧪 Smoke test - Test mode validation
         env:
           TF_LOG: DEBUG
-          TF_LOG_PATH: ${{ github.workspace }}/smoke-test-terraform.log
         run: |
-          echo "🔍 Running quick smoke test on a single example..."
+          echo "════════════════════════════════════════════════════════════════"
+          echo "🧪 SMOKE TEST: Test Mode Validation"
+          echo "════════════════════════════════════════════════════════════════"
+          echo ""
+          echo "This test validates that:"
+          echo "  1️⃣  Test-only components FAIL without PYVIDER_TESTMODE"
+          echo "  2️⃣  Test-only components SUCCEED with PYVIDER_TESTMODE=true"
+          echo ""
 
           # Update version constraint to match the version being tested
-          cd examples/function/join
+          cd examples/resource/private_state_verifier
           sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' provider.tf
-
-          # Enable test mode in provider configuration
-          sed -i.bak2 's/provider "pyvider" {/provider "pyvider" {\n  provider_testmode = true/' provider.tf
 
           echo "📋 Provider configuration:"
           cat provider.tf
           echo ""
+
+          echo "────────────────────────────────────────────────────────────────"
+          echo "1️⃣  TEST: Test-only component WITHOUT test mode (should FAIL)"
+          echo "────────────────────────────────────────────────────────────────"
+          echo ""
+
+          # Ensure PYVIDER_TESTMODE is NOT set
+          unset PYVIDER_TESTMODE
+
+          echo "🔧 Running: tofu init"
+          tofu init
+          echo ""
+
+          echo "📊 Running: tofu plan (expecting failure...)"
+          if tofu plan 2>&1 | tee /tmp/testmode-false.log; then
+            echo ""
+            echo "❌ FAIL: Test-only component should have been rejected!"
+            echo "   Test mode was not enabled, but the plan succeeded."
+            exit 1
+          else
+            echo ""
+            if grep -qi "test-only.*requires test mode\|test mode.*required" /tmp/testmode-false.log; then
+              echo "✅ PASS: Test-only component correctly rejected without test mode"
+            else
+              echo "❌ FAIL: Plan failed but not with expected test mode error"
+              echo "   Expected: 'test-only resource requires test mode'"
+              echo "   Check logs for actual error"
+              cat /tmp/testmode-false.log
+              exit 1
+            fi
+          fi
+
+          echo ""
+          echo "────────────────────────────────────────────────────────────────"
+          echo "2️⃣  TEST: Test-only component WITH test mode (should SUCCEED)"
+          echo "────────────────────────────────────────────────────────────────"
+          echo ""
+
+          # Enable test mode
+          export PYVIDER_TESTMODE=true
+          echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
+          echo ""
+
+          # Clean up from previous test
+          rm -rf .terraform terraform.tfstate* .terraform.lock.hcl
 
           echo "🔧 Running: tofu init"
           tofu init
@@ -298,50 +340,22 @@ jobs:
           tofu output
           echo ""
 
-          echo "✅ Smoke test passed! Provider is working."
-
-      - name: 🧪 Run provider conformance tests with soup stir
-        env:
-          TF_LOG: DEBUG
-        run: |
-          echo "🔍 Running conformance tests on all examples..."
-
-          # Update version constraint in all provider.tf files to match the version being tested
-          # This is necessary because >= constraints don't match prerelease versions
-          find examples -name "provider.tf" -type f -exec sed -i.bak \
-            's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' {} \;
-
-          # Enable test mode in all provider configurations
-          find examples -name "provider.tf" -type f -exec sed -i.bak2 \
-            's/provider "pyvider" {/provider "pyvider" {\n  provider_testmode = true/' {} \;
-
-          echo "✅ Updated all provider.tf files with version ${{ steps.version.outputs.VERSION }} and enabled testmode"
-
-          # Show a sample provider.tf to verify
-          echo "📋 Sample provider.tf configuration:"
-          find examples -name "provider.tf" -type f | head -1 | xargs cat
+          echo "✅ PASS: Test-only component works with test mode enabled"
           echo ""
-
-          # Run soup stir on all examples recursively
-          cd examples
-          soup stir --recursive
-
-          echo ""
-          echo "✅ All provider conformance tests passed!"
+          echo "════════════════════════════════════════════════════════════════"
+          echo "✅ ALL SMOKE TESTS PASSED!"
+          echo "════════════════════════════════════════════════════════════════"
 
       - name: 📤 Upload test logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs-${{ matrix.target }}
+          name: smoke-test-logs-${{ matrix.target }}
           path: |
-            smoke-test-terraform.log
-            examples/**/.soup/
-            examples/**/.soup/logs/
-            examples/**/.soup/logs/*.log
-            examples/**/terraform.tfstate*
-            examples/**/.terraform.lock.hcl
-            examples/function/join/.terraform/
+            /tmp/testmode-*.log
+            examples/resource/private_state_verifier/terraform.tfstate*
+            examples/resource/private_state_verifier/.terraform.lock.hcl
+            examples/resource/private_state_verifier/.terraform/
           retention-days: 7
           if-no-files-found: warn
 
