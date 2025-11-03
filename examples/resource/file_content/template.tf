@@ -1,61 +1,54 @@
-# Template-based configuration with dynamic content
+# Config file generation with templates
 
-# Read environment variables for the template
-data "pyvider_env_variables" "app_vars" {
-  keys = ["USER", "HOME", "HOSTNAME"]
-}
+locals {
+  template_app_config = {
+    name = "my-application"
+    version = "1.0.0"
+    port = 8080
+    database = {
+      host = "localhost"
+      port = 5432
+      name = "myapp"
+    }
+    features = ["api", "web", "admin"]
+  }
 
-# Create a configuration file using template functions
-resource "pyvider_file_content" "app_properties" {
-  filename = "/tmp/application.properties"
-  content = join("\n", [
-    "# Application Configuration",
-    "# Generated on ${timestamp()}",
+  # Build nginx config
+  nginx_config = provider::pyvider::join("\n", [
+    "server {",
+    "  listen ${local.template_app_config.port};",
+    "  server_name ${local.template_app_config.name};",
     "",
-    "app.user=${lookup(data.pyvider_env_variables.app_vars.values, "USER", "unknown")}",
-    "app.home=${lookup(data.pyvider_env_variables.app_vars.values, "HOME", "/tmp")}",
-    "app.hostname=${lookup(data.pyvider_env_variables.app_vars.values, "HOSTNAME", "localhost")}",
-    "",
-    "# Database Configuration",
-    "database.url=jdbc:postgresql://localhost:5432/myapp",
-    "database.username=app_user",
-    "database.pool.size=10",
-    "",
-    "# Feature Flags",
-    "features.new_ui=true",
-    "features.analytics=false"
+    "  location / {",
+    "    proxy_pass http://localhost:3000;",
+    "  }",
+    "}"
+  ])
+
+  # Build env file
+  env_file = provider::pyvider::join("\n", [
+    "APP_NAME=${local.template_app_config.name}",
+    "APP_VERSION=${local.template_app_config.version}",
+    "APP_PORT=${local.template_app_config.port}",
+    "DB_HOST=${local.template_app_config.database.host}",
+    "DB_PORT=${local.template_app_config.database.port}",
+    "DB_NAME=${local.template_app_config.database.name}"
   ])
 }
 
-# Create a shell script with executable content using inline template
-resource "pyvider_file_content" "deploy_script" {
-  filename = "/tmp/deploy.sh"
-  content = join("\n", [
-    "#!/bin/bash",
-    "set -e",
-    "",
-    "APP_NAME=\"my-terraform-app\"",
-    "VERSION=\"1.0.0\"",
-    "USER=\"${lookup(data.pyvider_env_variables.app_vars.values, "USER", "deploy")}\"",
-    "",
-    "echo \"Deploying $APP_NAME version $VERSION as user $USER\"",
-    "echo \"Timestamp: $(date)\"",
-    "",
-    "# Add your deployment logic here",
-    "echo \"Deployment complete!\""
-  ])
+resource "pyvider_file_content" "nginx_config" {
+  filename = "/tmp/${local.template_app_config.name}-nginx.conf"
+  content  = local.nginx_config
 }
 
-output "template_outputs" {
-  description = "Information about template-generated files"
+resource "pyvider_file_content" "env_file" {
+  filename = "/tmp/${local.template_app_config.name}.env"
+  content  = local.env_file
+}
+
+output "template_app_config" {
   value = {
-    properties_file = {
-      path = pyvider_file_content.app_properties.filename
-      hash = pyvider_file_content.app_properties.content_hash
-    }
-    deploy_script = {
-      path = pyvider_file_content.deploy_script.filename
-      hash = pyvider_file_content.deploy_script.content_hash
-    }
+    nginx = pyvider_file_content.nginx_config.filename
+    env   = pyvider_file_content.env_file.filename
   }
 }

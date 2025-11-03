@@ -1,75 +1,18 @@
-# Basic type conversion function examples
-
-# Example 1: Number to string conversions
+# Basic type conversion
 locals {
-  integer = 42
-  float   = 3.14159
+  basic_number = 42
+  basic_boolean = true
+  basic_list = [1, 2, 3]
 
-  int_string   = provider::pyvider::tostring(local.integer) # "42"
-  float_string = provider::pyvider::tostring(local.float)   # "3.14159"
+  basic_num_str = provider::pyvider::tostring(local.basic_number)  # "42"
+  basic_bool_str = provider::pyvider::tostring(local.basic_boolean)  # "true"
+  basic_list_str = provider::pyvider::tostring(local.basic_list)  # "[1, 2, 3]"
 }
 
-# Example 2: Boolean to string conversions
-locals {
-  is_enabled = true
-  is_debug   = false
-
-  enabled_str = provider::pyvider::tostring(local.is_enabled) # "true"
-  debug_str   = provider::pyvider::tostring(local.is_debug)   # "false"
-}
-
-# Example 3: List to string conversions
-locals {
-  numbers = [1, 2, 3, 4, 5]
-  colors  = ["red", "green", "blue"]
-
-  numbers_str = provider::pyvider::tostring(local.numbers) # "[1, 2, 3, 4, 5]"
-  colors_str  = provider::pyvider::tostring(local.colors)  # '["red", "green", "blue"]'
-}
-
-# Example 4: Map to string conversions
-locals {
-  config = {
-    host = "localhost"
-    port = 8080
-    ssl  = true
-  }
-
-  config_str = provider::pyvider::tostring(local.config) # '{"host": "localhost", "port": 8080, "ssl": true}'
-}
-
-# Example 5: Practical use in string interpolation
-locals {
-  server_port = 8080
-  use_ssl     = true
-
-  connection_info = "Server running on port ${provider::pyvider::tostring(local.server_port)} (SSL: ${provider::pyvider::tostring(local.use_ssl)})"
-}
-
-# Create output file
-resource "pyvider_file_content" "conversion_examples" {
-  filename = "/tmp/type_conversion_examples.txt"
-  content = join("\n", [
-    "Type Conversion Examples",
-    "========================",
-    "",
-    "Integer: ${local.int_string}",
-    "Float: ${local.float_string}",
-    "Boolean: ${local.enabled_str}",
-    "List: ${local.numbers_str}",
-    "Map: ${local.config_str}",
-    "",
-    "Connection: ${local.connection_info}"
-  ])
-}
-
-output "conversion_results" {
+output "basic_list_str" {
   value = {
-    integer_str = local.int_string
-    float_str   = local.float_string
-    boolean_str = local.enabled_str
-    list_str    = local.numbers_str
-    map_str     = local.config_str
-    example     = local.connection_info
+    number = local.basic_num_str
+    boolean = local.basic_bool_str
+    list = local.basic_list_str
   }
 }

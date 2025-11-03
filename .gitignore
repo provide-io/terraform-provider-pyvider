@@ -405,9 +405,15 @@ bin/
 public*key*
 config.json
 .psp.*
-.soup
+.soup/
+.soup/**
 
 # Test artifacts
 tests/plating-tests/
 *.pem
 *.key
+*.psp
+
+# Cached provider binaries and test files
+**/tfdata/providers/**
+*-test-*.psp

@@ -1,61 +1,19 @@
-# Basic file information examples
-
-# Create test directory and files
-resource "pyvider_local_directory" "test_dir" {
-  path        = "/tmp/file_info_test"
-  permissions = "0o755"
+# First, create a file to inspect.
+resource "pyvider_file_content" "example" {
+  filename = "/tmp/file_info_example.txt"
+  content  = "This is a test file."
 }
 
-resource "pyvider_file_content" "sample_text" {
-  filename = "/tmp/file_info_test/sample.txt"
-  content  = "This is a sample text file."
-
-  depends_on = [pyvider_local_directory.test_dir]
+# Now, use the data source to get information about the file.
+data "pyvider_file_info" "example" {
+  path = pyvider_file_content.example.filename
 }
 
-resource "pyvider_file_content" "config_file" {
-  filename = "/tmp/file_info_test/config.json"
-  content = jsonencode({
-    app_name = "test-app"
-    version  = "1.0.0"
-  })
-
-  depends_on = [pyvider_local_directory.test_dir]
-}
-
-# Example 1: Get information about a text file
-data "pyvider_file_info" "sample" {
-  path = pyvider_file_content.sample_text.filename
-}
-
-# Example 2: Get information about a JSON file
-data "pyvider_file_info" "config" {
-  path = pyvider_file_content.config_file.filename
-}
-
-# Example 3: Get information about a directory
-data "pyvider_file_info" "directory" {
-  path = pyvider_local_directory.test_dir.path
-}
-
-output "file_info_results" {
+output "basic_file_info_example" {
   value = {
-    text_file = {
-      path    = data.pyvider_file_info.sample.path
-      exists  = data.pyvider_file_info.sample.exists
-      size    = data.pyvider_file_info.sample.size
-      is_file = data.pyvider_file_info.sample.is_file
-      is_dir  = data.pyvider_file_info.sample.is_dir
-    }
-    json_file = {
-      path   = data.pyvider_file_info.config.path
-      exists = data.pyvider_file_info.config.exists
-      size   = data.pyvider_file_info.config.size
-    }
-    directory = {
-      path   = data.pyvider_file_info.directory.path
-      exists = data.pyvider_file_info.directory.exists
-      is_dir = data.pyvider_file_info.directory.is_dir
-    }
+    path    = data.pyvider_file_info.example.path
+    exists  = data.pyvider_file_info.example.exists
+    size    = data.pyvider_file_info.example.size
+    is_file = data.pyvider_file_info.example.is_file
   }
 }
