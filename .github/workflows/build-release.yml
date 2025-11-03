@@ -210,62 +210,124 @@ jobs:
           PLUGIN_DIR="${HOME}/.terraform.d/plugins/local/providers/pyvider/${{ steps.version.outputs.VERSION }}/${{ matrix.target }}"
           mkdir -p "$PLUGIN_DIR"
 
-          # Copy provider binary with full version
+          # Copy provider binary (Terraform expects binary without version suffix in filename)
           cp provider-binary/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }} \
-             "$PLUGIN_DIR/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
-          chmod +x "$PLUGIN_DIR/terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
+             "$PLUGIN_DIR/terraform-provider-pyvider"
+          chmod +x "$PLUGIN_DIR/terraform-provider-pyvider"
 
           echo "✅ Provider installed to: $PLUGIN_DIR"
           ls -la "$PLUGIN_DIR"
 
-      - name: 🧪 Run provider tests with OpenTofu
+      - name: 🔍 Verify provider binary
         run: |
-          # Navigate to a simple function example for testing
-          cd examples/function/add/basic
+          PROVIDER_PATH="${HOME}/.terraform.d/plugins/local/providers/pyvider/${{ steps.version.outputs.VERSION }}/${{ matrix.target }}/terraform-provider-pyvider"
 
-          echo "🔍 Testing provider functionality..."
-          echo "Current directory: $(pwd)"
-
-          # Update version constraint in main.tf to match the provider version being tested
-          # This is necessary because >= constraints don't match prerelease versions
-          sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' main.tf
-
-          echo "Updated main.tf with version ${{ steps.version.outputs.VERSION }}"
-          echo "Files:"
-          ls -la
-
-          # Initialize OpenTofu/Terraform
+          echo "🔍 Verifying provider binary..."
+          echo "Provider path: $PROVIDER_PATH"
           echo ""
-          echo "📦 Running: tofu init"
+
+          echo "File info:"
+          ls -lah "$PROVIDER_PATH"
+          file "$PROVIDER_PATH" || echo "file command not available"
+          echo ""
+
+          echo "Testing provider executable:"
+          # Try to run the provider (may not support --version, but should at least execute)
+          if "$PROVIDER_PATH" --version 2>&1; then
+            echo "✅ Provider supports --version"
+          else
+            echo "⚠️  Provider doesn't support --version (this is OK for some providers)"
+          fi
+
+          echo ""
+          echo "Checking if provider can execute:"
+          if "$PROVIDER_PATH" 2>&1 | head -5; then
+            echo "✅ Provider binary is executable"
+          else
+            echo "❌ Provider binary failed to execute"
+            exit 1
+          fi
+
+      - name: 🐍 Setup Python for tofusoup
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install UV for tofusoup
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: 🍲 Install tofusoup
+        run: |
+          uv tool install tofusoup
+          echo "✅ Tofusoup installed"
+          soup --version
+
+      - name: 🧪 Quick smoke test - single example
+        env:
+          TF_LOG: DEBUG
+          TF_LOG_PATH: ${{ github.workspace }}/smoke-test-terraform.log
+        run: |
+          echo "🔍 Running quick smoke test on a single example..."
+
+          # Update version constraint to match the version being tested
+          cd examples/function/join
+          sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' provider.tf
+
+          # Enable test mode in provider configuration
+          sed -i.bak2 's/provider "pyvider" {/provider "pyvider" {\n  provider_testmode = true/' provider.tf
+
+          echo "📋 Provider configuration:"
+          cat provider.tf
+          echo ""
+
+          echo "🔧 Running: tofu init"
           tofu init
-
-          # Validate configuration
           echo ""
-          echo "✅ Running: tofu validate"
-          tofu validate
 
-          # Generate plan
-          echo ""
-          echo "📋 Running: tofu plan"
+          echo "📊 Running: tofu plan"
           tofu plan
-
-          # Apply configuration (functions are evaluated during plan/apply)
           echo ""
+
           echo "🚀 Running: tofu apply -auto-approve"
           tofu apply -auto-approve
-
-          # Display outputs to verify provider functions work correctly
           echo ""
-          echo "📊 Running: tofu output"
+
+          echo "📤 Running: tofu output"
           tofu output
-
-          # Clean up
           echo ""
-          echo "🧹 Running: tofu destroy -auto-approve"
-          tofu destroy -auto-approve
+
+          echo "✅ Smoke test passed! Provider is working."
+
+      - name: 🧪 Run provider conformance tests with soup stir
+        env:
+          TF_LOG: DEBUG
+        run: |
+          echo "🔍 Running conformance tests on all examples..."
+
+          # Update version constraint in all provider.tf files to match the version being tested
+          # This is necessary because >= constraints don't match prerelease versions
+          find examples -name "provider.tf" -type f -exec sed -i.bak \
+            's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' {} \;
+
+          # Enable test mode in all provider configurations
+          find examples -name "provider.tf" -type f -exec sed -i.bak2 \
+            's/provider "pyvider" {/provider "pyvider" {\n  provider_testmode = true/' {} \;
+
+          echo "✅ Updated all provider.tf files with version ${{ steps.version.outputs.VERSION }} and enabled testmode"
+
+          # Show a sample provider.tf to verify
+          echo "📋 Sample provider.tf configuration:"
+          find examples -name "provider.tf" -type f | head -1 | xargs cat
+          echo ""
+
+          # Run soup stir on all examples recursively
+          cd examples
+          soup stir --recursive
 
           echo ""
-          echo "✅ All provider tests passed!"
+          echo "✅ All provider conformance tests passed!"
 
       - name: 📤 Upload test logs
         if: always()
@@ -273,10 +335,15 @@ jobs:
         with:
           name: test-logs-${{ matrix.target }}
           path: |
-            examples/function/add/basic/.terraform/
-            examples/function/add/basic/terraform.tfstate*
-            examples/function/add/basic/.terraform.lock.hcl
+            smoke-test-terraform.log
+            examples/**/.soup/
+            examples/**/.soup/logs/
+            examples/**/.soup/logs/*.log
+            examples/**/terraform.tfstate*
+            examples/**/.terraform.lock.hcl
+            examples/function/join/.terraform/
           retention-days: 7
+          if-no-files-found: warn
 
   release:
     name: 🎉 Create Release

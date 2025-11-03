@@ -16,7 +16,7 @@ help: ## Show this help message
 
 # Configuration
 PROVIDER_NAME := terraform-provider-pyvider
-VERSION ?= $(shell grep '^version = ' pyproject.toml | cut -d'"' -f2)
+VERSION ?= $(shell cat VERSION 2>/dev/null || echo "0.0.0")
 PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
 
 # Platform detection
@@ -294,14 +294,9 @@ test-plating: ## Run plating tests for all components
 	@./scripts/test-plating.sh
 
 .PHONY: test-examples
-test-examples: build ## Test example configurations
-	@echo "$(BLUE)🧪 Testing example configurations...$(NC)"
-	@for dir in examples/*/; do \
-		if [ -f "$$dir/main.tf" ]; then \
-			echo "Testing $$dir..."; \
-			cd "$$dir" && terraform init -upgrade && terraform validate && cd ../..; \
-		fi; \
-	done
+test-examples: build install ## Test example configurations with soup stir
+	@echo "$(BLUE)🧪 Testing example configurations with soup stir...$(NC)"
+	@cd examples && soup stir --recursive
 	@echo "$(GREEN)✅ All examples validated$(NC)"
 
 .PHONY: lint
