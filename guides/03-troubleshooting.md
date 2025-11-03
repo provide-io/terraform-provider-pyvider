@@ -1,10 +1,10 @@
 ---
-page_title: "[04] Troubleshooting"
+page_title: "03) Troubleshooting"
 description: "Diagnose and resolve common issues you might hit while experimenting with the pyvider provider."
-guide_order: 5
+guide_order: 4
 ---
 
-# [04] Troubleshooting
+# Troubleshooting
 
 Common issues and solutions for the pyvider Terraform provider.
 
@@ -595,8 +595,7 @@ terraform console
 
 ### Documentation Resources
 
-- **[Getting Started Tutorial](getting-started.md)** - Step-by-step first provider usage
-- **[Common Patterns](how-to-guides/common-patterns.md)** - Frequently used configurations
+- **[Getting Started Tutorial](./02) getting-started.md)** - Step-by-step first provider usage
 - **[Resource Reference](resources/)** - Complete resource documentation
 - **[Data Sources](data-sources/)** - Available data sources
 - **[FAQ](faq.md)** - Frequently asked questions

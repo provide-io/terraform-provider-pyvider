@@ -1,12 +1,12 @@
 ---
-page_title: "[01] Tour the Example Provider"
+page_title: "01) Tour the Example Provider"
 description: "See what ships with the pyvider provider so you know which examples to explore."
 guide_order: 2
 ---
 
-# [01] Tour the Example Provider
+# Tour the Example Provider
 
-The `pyvider` Terraform provider packages more than one hundred example components. This tour highlights the major capability areas so you can decide which examples to try first.
+The `pyvider` Terraform provider packages a curated subset of the example components from the `pyvider-components` library (which showcases well over one hundred examples). This tour highlights the major capability areas so you can decide which examples to try first.
 
 ## What's inside
 
@@ -87,6 +87,5 @@ Because functions run wherever Terraform evaluates expressions, they are perfect
 
 ## Keep exploring
 
-- Follow [02] [Getting Started with Pyvider](./getting-started.md) to run a complete example.
-- Review [03] [Common Patterns](./common-patterns.md) once you are comfortable with the basics.
-- Ready to build something custom? Visit [05] [Build Your Own Provider with Pyvider](./build-your-own-provider.md).
+- Follow 02) [Getting Started with Pyvider](./02-getting-started.md) to run a complete example.
+- Ready to build something custom? Visit 04) [Build Your Own Provider with Pyvider](./04-build-your-own-provider.md).

@@ -1,10 +1,10 @@
 ---
-page_title: "[00] Understand the Pyvider Framework"
+page_title: "00) Understand the Pyvider Framework"
 description: "Get oriented with the ideas behind Pyvider before you dive into the example provider."
 guide_order: 1
 ---
 
-# [00] Understand the Pyvider Framework
+# Understand the Pyvider Framework
 
 Pyvider is a Python framework that implements the Terraform Plugin Protocol v6. Instead of writing Go, you describe providers, resources, and data sources with Python classes, type-safe schemas, and async handlers. This guide gives you the mental model you need before exploring the `pyvider` Terraform provider.
 
@@ -46,6 +46,5 @@ Use this repository to learn the flow from framework → components → provider
 
 ## Next steps
 
-- Move on to [01] [Tour the Example Provider](./provider-tour.md) to understand what is shipped.
-- Dive into [02] [Getting Started with Pyvider](./getting-started.md) when you want to run Terraform locally.
-- Keep [03] [Common Patterns](./common-patterns.md) handy as you tinker.
+- Move on to 01) [Tour the Example Provider](./01-provider-tour.md) to understand what is shipped.
+- Dive into 02) [Getting Started with Pyvider](./02-getting-started.md) when you want to run Terraform locally.

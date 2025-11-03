@@ -2,7 +2,7 @@
 
 > **⚠️ Proof of Concept:** This is a proof-of-concept Terraform provider demonstrating what's possible when building providers in Python using the pyvider framework. Use it to learn Python-based provider development or to access utility resources for testing and diagnostics—but not for production infrastructure.
 
-**What it is:** A working Terraform provider with 100+ resources, data sources, and functions, built entirely in Python.
+**What it is:** A working Terraform provider that bundles a representative set of example resources, data sources, and functions—built entirely in Python.
 
 **What it does:** Provides utilities for file management, environment diagnostics, data transformation (jq), and infrastructure testing.
 
@@ -36,7 +36,7 @@
 This provider is built using components from the [pyvider-components](https://github.com/provide-io/pyvider-components) repository, which serves as the reference implementation and example library for the Pyvider framework.
 
 **Key Relationship:**
-- **pyvider-components**: Example library with 100+ component demonstrations for learning
+- **pyvider-components**: Example library with 100+ component demonstrations for learning (this provider pulls in a curated subset)
 - **terraform-provider-pyvider**: Proof-of-concept provider that packages those components for Terraform testing and learning
 
 ```
