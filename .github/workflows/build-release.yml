@@ -41,16 +41,35 @@ jobs:
             target: darwin_amd64
     
     runs-on: ${{ matrix.os }}
-    
+
     steps:
-      - name: 📥 Checkout
+      - name: 📥 Checkout terraform-provider-pyvider
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
+          path: terraform-provider-pyvider
+
+      - name: 📥 Checkout pyvider
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/pyvider
+          path: pyvider
+
+      - name: 📥 Checkout pyvider-components
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/pyvider-components
+          path: pyvider-components
+
+      - name: 📥 Checkout provide-foundation
+        uses: actions/checkout@v4
+        with:
+          repository: provide-io/provide-foundation
+          path: provide-foundation
 
       - name: 📖 Read VERSION
         id: version
         run: |
+          cd terraform-provider-pyvider
           VERSION=$(cat VERSION)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           echo "📦 Building version: ${VERSION}"
@@ -68,12 +87,18 @@ jobs:
 
       - name: 🔧 Install dependencies
         run: |
+          cd terraform-provider-pyvider
+          # Install local editable packages first
+          uv pip install -e ../provide-foundation
+          uv pip install -e ../pyvider
+          uv pip install -e ../pyvider-components
           # Install project dependencies and dev tools (flavorpack, plating)
           # Dev tools are NOT included in the PSP package - only used for building
           uv sync --group dev
-      
+
       - name: 🔑 Generate temporary signing keys
         run: |
+          cd terraform-provider-pyvider
           # Generate Ed25519 keys using flavor keygen (run via uv to use venv)
           uv run flavor keygen --out-dir keys
           echo "✅ Generated temporary signing keys"
@@ -88,6 +113,7 @@ jobs:
 
       - name: 🏗️ Build PSP package
         run: |
+          cd terraform-provider-pyvider
           # The version is already set dynamically from VERSION file
           # No need to update pyproject.toml as it uses dynamic = ["version"]
 
@@ -112,9 +138,10 @@ jobs:
 
           echo "✅ Built PSP package:"
           ls -la terraform-provider-pyvider.psp
-      
+
       - name: 📦 Package for Terraform
         run: |
+          cd terraform-provider-pyvider
           # Rename PSP to Terraform provider binary format
           BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
           cp terraform-provider-pyvider.psp "$BINARY_NAME"
@@ -143,7 +170,7 @@ jobs:
         with:
           name: provider-${{ matrix.target }}
           path: |
-            terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
+            terraform-provider-pyvider/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
           retention-days: 7
 
   test:
@@ -172,14 +199,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: 📥 Checkout
+      - name: 📥 Checkout terraform-provider-pyvider
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
+          path: terraform-provider-pyvider
 
       - name: 📖 Read VERSION
         id: version
         run: |
+          cd terraform-provider-pyvider
           VERSION=$(cat VERSION)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           echo "🧪 Testing version: ${VERSION}"
@@ -272,7 +300,7 @@ jobs:
           echo ""
 
           # Update version constraint to match the version being tested
-          cd examples/resource/private_state_verifier
+          cd terraform-provider-pyvider/examples/resource/private_state_verifier
           sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' provider.tf
 
           echo "📋 Provider configuration:"
@@ -353,9 +381,9 @@ jobs:
           name: smoke-test-logs-${{ matrix.target }}
           path: |
             /tmp/testmode-*.log
-            examples/resource/private_state_verifier/terraform.tfstate*
-            examples/resource/private_state_verifier/.terraform.lock.hcl
-            examples/resource/private_state_verifier/.terraform/
+            terraform-provider-pyvider/examples/resource/private_state_verifier/terraform.tfstate*
+            terraform-provider-pyvider/examples/resource/private_state_verifier/.terraform.lock.hcl
+            terraform-provider-pyvider/examples/resource/private_state_verifier/.terraform/
           retention-days: 7
           if-no-files-found: warn
 
