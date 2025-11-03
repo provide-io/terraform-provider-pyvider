@@ -37,8 +37,6 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
 
       - name: 📖 Read VERSION
         id: version
@@ -60,9 +58,8 @@ jobs:
       - name: 🔧 Install dependencies
         run: |
           uv venv
-          uv pip install -e .
-          uv pip install -e '../pyvider[dev]'
-          uv pip install -e '../pyvider-components'
+          # Install project dependencies and dev tools
+          uv sync --group dev
 
       - name: 🏗️ Build provider
         run: |
@@ -77,11 +74,7 @@ jobs:
           TARGET="${PLATFORM}_${ARCH}"
 
           # Create plugin directory
-          if [ "$PLATFORM" = "darwin" ]; then
-            PLUGIN_DIR="$HOME/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${TARGET}"
-          else
-            PLUGIN_DIR="$HOME/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${TARGET}"
-          fi
+          PLUGIN_DIR="$HOME/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${TARGET}"
 
           mkdir -p "$PLUGIN_DIR"
           cp "dist/terraform-provider-pyvider.psp" "${PLUGIN_DIR}/terraform-provider-pyvider"
@@ -104,9 +97,11 @@ jobs:
         env:
           TF_LOG: DEBUG
           PYVIDER_TESTMODE: true
+          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
         run: |
-          # Export PYVIDER_TESTMODE for all subprocesses
+          # Export environment variables for all subprocesses
           export PYVIDER_TESTMODE=true
+          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
 
           echo "🔍 Running conformance tests on all examples..."
           echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
