@@ -2,11 +2,14 @@
 page_title: "Pyvider Provider"
 description: |-
   Terraform provider for pyvider
+template_output: "index.md"
 ---
 
 # Pyvider Provider
 
 ---
+
+yup. 
 
 ```
 this is a test
@@ -14,6 +17,7 @@ this is a test
 
 ---
 
+## and is it working?
 
 Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
 

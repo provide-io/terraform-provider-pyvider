@@ -60,7 +60,6 @@ nav:
     02) Getting Started with Pyvider: guides/02-getting-started.md
     03) Troubleshooting: guides/03-troubleshooting.md
     04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
-    Pyvider Provider: guides/provider-overview.tmpl.md
 - Resources:
     timed_token: resources/timed_token.md
 - Data Sources:
