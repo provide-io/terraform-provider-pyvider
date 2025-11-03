@@ -47,8 +47,8 @@ $PYTHON_CMD -c "import pyvider.components" 2>/dev/null || {
 # Output directory for documentation and examples
 OUTPUT_DIR="${PROJECT_ROOT}/docs"
 EXAMPLES_DIR="${OUTPUT_DIR}/examples"
-GUIDES_DIR="${PROJECT_ROOT}/guides"
-GLOBAL_PARTIALS_DIR="${PROJECT_ROOT}/../pyvider-components/docs/_partials"
+GUIDES_DIR="${PROJECT_ROOT}/plating/guides"
+GLOBAL_PARTIALS_DIR="${PROJECT_ROOT}/plating/partials"
 
 # Create output directories
 mkdir -p "$OUTPUT_DIR"
