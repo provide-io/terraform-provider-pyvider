@@ -1,4 +1,3 @@
----
 page_title: "Getting Started with Pyvider"
 guide_order: 1
 ---

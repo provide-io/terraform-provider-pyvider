@@ -11,9 +11,9 @@ copyright: Copyright &copy; 2024-2025 provide.io
 dev_addr: 127.0.0.1:8010
 docs_dir: docs
 hooks:
-  - docs/hooks.py
+- scripts/mkdocs_hooks.py
 plugins:
-  - search
+- search
 theme:
   features:
   - navigation.instant
@@ -55,10 +55,12 @@ theme:
 nav:
 - Overview: index.md
 - Guides:
+    Understand the Pyvider Framework: guides/pyvider-orientation.md
+    Tour the Example Provider: guides/provider-tour.md
     Getting Started with Pyvider: guides/getting-started.md
     Common Patterns: guides/common-patterns.md
     Troubleshooting: guides/troubleshooting.md
-    Apples: guides/zesty.md
+    Build Your Own Provider with Pyvider: guides/build-your-own-provider.md
 - Resources:
     timed_token: resources/timed_token.md
 - Data Sources:

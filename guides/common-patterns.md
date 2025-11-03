@@ -1,6 +1,7 @@
 ---
 page_title: "Common Patterns"
-guide_order: 2
+description: "Practical patterns to reuse while experimenting with the pyvider provider."
+guide_order: 4
 ---
 
 # Common Patterns
