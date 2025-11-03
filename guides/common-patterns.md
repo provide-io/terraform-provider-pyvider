@@ -1,10 +1,10 @@
 ---
-page_title: "Common Patterns"
+page_title: "[03] Common Patterns"
 description: "Practical patterns to reuse while experimenting with the pyvider provider."
 guide_order: 4
 ---
 
-# Common Patterns
+# [03] Common Patterns
 
 This guide demonstrates practical patterns for using the pyvider provider in real-world Terraform configurations.
 

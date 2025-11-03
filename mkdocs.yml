@@ -55,12 +55,13 @@ theme:
 nav:
 - Overview: index.md
 - Guides:
-    Understand the Pyvider Framework: guides/pyvider-orientation.md
-    Tour the Example Provider: guides/provider-tour.md
-    Getting Started with Pyvider: guides/getting-started.md
-    Common Patterns: guides/common-patterns.md
-    Troubleshooting: guides/troubleshooting.md
-    Build Your Own Provider with Pyvider: guides/build-your-own-provider.md
+    '[00] Understand the Pyvider Framework': guides/pyvider-orientation.md
+    '[01] Tour the Example Provider': guides/provider-tour.md
+    '[02] Getting Started with Pyvider': guides/getting-started.md
+    '[03] Common Patterns': guides/common-patterns.md
+    '[04] Troubleshooting': guides/troubleshooting.md
+    '[05] Build Your Own Provider with Pyvider': guides/build-your-own-provider.md
+    Pyvider Provider: guides/index.tmpl.md
 - Resources:
     timed_token: resources/timed_token.md
 - Data Sources:

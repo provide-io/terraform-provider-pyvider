@@ -1,13 +1,14 @@
 ---
-page_title: "Troubleshooting"
-guide_order: 3
+page_title: "[04] Troubleshooting"
+description: "Diagnose and resolve common issues you might hit while experimenting with the pyvider provider."
+guide_order: 5
 ---
 
-# Troubleshooting
+# [04] Troubleshooting
 
 Common issues and solutions for the pyvider Terraform provider.
 
-~> **Note:** This provider is a proof-of-concept. Many issues stem from its experimental nature. For production infrastructure, consider building a custom provider using [pyvider](https://github.com/provide-io/pyvider).
+~> **Note:** Remember: this is a proof-of-concept provider. Many rough edges come from the provider's experimental status. If you need production guarantees, plan to build a custom provider with [Pyvider](https://github.com/provide-io/pyvider).
 
 ---
 
