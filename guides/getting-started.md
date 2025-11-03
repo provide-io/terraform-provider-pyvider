@@ -1,6 +1,7 @@
 ---
 page_title: "Getting Started with Pyvider"
-guide_order: 1
+description: "Step-by-step tutorial for installing and using the pyvider Terraform provider for the first time."
+guide_order: 3
 ---
 
 # Getting Started with pyvider Terraform Provider
@@ -8,6 +9,9 @@ guide_order: 1
 **Time to Complete:** 10-15 minutes
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
+
+!!! note "New to Pyvider?"
+    Start with the [Pyvider orientation](./pyvider-orientation.md) and the [provider tour](./provider-tour.md) if you want background on what this proof-of-concept provider includes and why you probably will not ship it to production.
 
 ---
 
@@ -72,7 +76,9 @@ mv terraform-provider-pyvider ~/.terraform.d/plugins/provide.io/pyvider/pyvider/
 chmod +x ~/.terraform.d/plugins/provide.io/pyvider/pyvider/1.0.0/darwin_amd64/terraform-provider-pyvider
 ```
 
-**Note:** Adjust paths for your platform (linux_amd64, windows_amd64, etc.)
+### Note
+
+Adjust paths for your platform (linux_amd64, windows_amd64, etc.)
 
 ---
 
