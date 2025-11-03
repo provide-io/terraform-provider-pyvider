@@ -43,33 +43,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: 📥 Checkout terraform-provider-pyvider
+      - name: 📥 Checkout
         uses: actions/checkout@v4
-        with:
-          path: terraform-provider-pyvider
-
-      - name: 📥 Checkout pyvider
-        uses: actions/checkout@v4
-        with:
-          repository: provide-io/pyvider
-          path: pyvider
-
-      - name: 📥 Checkout pyvider-components
-        uses: actions/checkout@v4
-        with:
-          repository: provide-io/pyvider-components
-          path: pyvider-components
-
-      - name: 📥 Checkout provide-foundation
-        uses: actions/checkout@v4
-        with:
-          repository: provide-io/provide-foundation
-          path: provide-foundation
 
       - name: 📖 Read VERSION
         id: version
         run: |
-          cd terraform-provider-pyvider
           VERSION=$(cat VERSION)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           echo "📦 Building version: ${VERSION}"
@@ -83,22 +62,16 @@ jobs:
         uses: astral-sh/setup-uv@v4
         continue-on-error: true
         with:
-          enable-cache: true
+          enable-cache: false
 
       - name: 🔧 Install dependencies
         run: |
-          cd terraform-provider-pyvider
-          # Install local editable packages first
-          uv pip install -e ../provide-foundation
-          uv pip install -e ../pyvider
-          uv pip install -e ../pyvider-components
           # Install project dependencies and dev tools (flavorpack, plating)
           # Dev tools are NOT included in the PSP package - only used for building
           uv sync --group dev
 
       - name: 🔑 Generate temporary signing keys
         run: |
-          cd terraform-provider-pyvider
           # Generate Ed25519 keys using flavor keygen (run via uv to use venv)
           uv run flavor keygen --out-dir keys
           echo "✅ Generated temporary signing keys"
@@ -113,7 +86,6 @@ jobs:
 
       - name: 🏗️ Build PSP package
         run: |
-          cd terraform-provider-pyvider
           # The version is already set dynamically from VERSION file
           # No need to update pyproject.toml as it uses dynamic = ["version"]
 
@@ -141,7 +113,6 @@ jobs:
 
       - name: 📦 Package for Terraform
         run: |
-          cd terraform-provider-pyvider
           # Rename PSP to Terraform provider binary format
           BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
           cp terraform-provider-pyvider.psp "$BINARY_NAME"
@@ -170,7 +141,7 @@ jobs:
         with:
           name: provider-${{ matrix.target }}
           path: |
-            terraform-provider-pyvider/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
+            terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
           retention-days: 7
 
   test:
@@ -199,15 +170,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: 📥 Checkout terraform-provider-pyvider
+      - name: 📥 Checkout
         uses: actions/checkout@v4
-        with:
-          path: terraform-provider-pyvider
 
       - name: 📖 Read VERSION
         id: version
         run: |
-          cd terraform-provider-pyvider
           VERSION=$(cat VERSION)
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           echo "🧪 Testing version: ${VERSION}"
@@ -284,11 +252,12 @@ jobs:
       - name: 📦 Install UV for tofusoup
         uses: astral-sh/setup-uv@v4
         with:
-          enable-cache: true
+          enable-cache: false
 
       - name: 🧪 Smoke test - Test mode validation
         env:
           TF_LOG: DEBUG
+          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
         run: |
           echo "════════════════════════════════════════════════════════════════"
           echo "🧪 SMOKE TEST: Test Mode Validation"
@@ -300,7 +269,7 @@ jobs:
           echo ""
 
           # Update version constraint to match the version being tested
-          cd terraform-provider-pyvider/examples/resource/private_state_verifier
+          cd examples/resource/private_state_verifier
           sed -i.bak 's/version = ">= [^"]*"/version = "${{ steps.version.outputs.VERSION }}"/' provider.tf
 
           echo "📋 Provider configuration:"
@@ -319,23 +288,20 @@ jobs:
           tofu init
           echo ""
 
-          echo "📊 Running: tofu plan (expecting failure...)"
-          if tofu plan 2>&1 | tee /tmp/testmode-false.log; then
+          echo "📊 Running: tofu plan (expecting rejection...)"
+          tofu plan 2>&1 | tee /tmp/testmode-false.log || true
+
+          # Check if error message is present (regardless of exit code)
+          if grep -qi "test-only.*requires test mode\|test mode.*required" /tmp/testmode-false.log; then
             echo ""
-            echo "❌ FAIL: Test-only component should have been rejected!"
-            echo "   Test mode was not enabled, but the plan succeeded."
-            exit 1
+            echo "✅ PASS: Test-only component correctly rejected without test mode"
           else
             echo ""
-            if grep -qi "test-only.*requires test mode\|test mode.*required" /tmp/testmode-false.log; then
-              echo "✅ PASS: Test-only component correctly rejected without test mode"
-            else
-              echo "❌ FAIL: Plan failed but not with expected test mode error"
-              echo "   Expected: 'test-only resource requires test mode'"
-              echo "   Check logs for actual error"
-              cat /tmp/testmode-false.log
-              exit 1
-            fi
+            echo "❌ FAIL: Test-only component was not rejected as expected"
+            echo "   Expected error: 'test-only resource requires test mode'"
+            echo "   Check logs for actual output:"
+            cat /tmp/testmode-false.log
+            exit 1
           fi
 
           echo ""
@@ -344,8 +310,9 @@ jobs:
           echo "────────────────────────────────────────────────────────────────"
           echo ""
 
-          # Enable test mode
+          # Enable test mode and set required secrets
           export PYVIDER_TESTMODE=true
+          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
           echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
           echo ""
 
@@ -381,9 +348,9 @@ jobs:
           name: smoke-test-logs-${{ matrix.target }}
           path: |
             /tmp/testmode-*.log
-            terraform-provider-pyvider/examples/resource/private_state_verifier/terraform.tfstate*
-            terraform-provider-pyvider/examples/resource/private_state_verifier/.terraform.lock.hcl
-            terraform-provider-pyvider/examples/resource/private_state_verifier/.terraform/
+            examples/resource/private_state_verifier/terraform.tfstate*
+            examples/resource/private_state_verifier/.terraform.lock.hcl
+            examples/resource/private_state_verifier/.terraform/
           retention-days: 7
           if-no-files-found: warn
 
