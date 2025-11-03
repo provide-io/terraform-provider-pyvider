@@ -7,6 +7,9 @@ description: |-
 
 Format bytes as human-readable size (e.g., "1.5 KB", "2.3 MB").
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
