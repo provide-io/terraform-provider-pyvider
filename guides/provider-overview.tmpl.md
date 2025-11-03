@@ -2,6 +2,7 @@
 page_title: "Pyvider Provider"
 description: |-
   Terraform provider for pyvider
+template_output: "index.md"
 ---
 
 # Pyvider Provider
