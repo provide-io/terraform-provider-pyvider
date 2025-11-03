@@ -1,17 +1,17 @@
 ---
-page_title: "Getting Started with Pyvider"
+page_title: "[02] Getting Started with Pyvider"
 description: "Step-by-step tutorial for installing and using the pyvider Terraform provider for the first time."
 guide_order: 3
 ---
 
-# Getting Started with pyvider Terraform Provider
+# [02] Getting Started with pyvider Terraform Provider
 
 **Time to Complete:** 10-15 minutes
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
 !!! note "New to Pyvider?"
-    Start with the [Pyvider orientation](./pyvider-orientation.md) and the [provider tour](./provider-tour.md) if you want background on what this proof-of-concept provider includes and why you probably will not ship it to production.
+    Start with [00] [Understand the Pyvider Framework](./pyvider-orientation.md) and [01] [Tour the Example Provider](./provider-tour.md) for the foundational concepts this tutorial builds on.
 
 ---
 

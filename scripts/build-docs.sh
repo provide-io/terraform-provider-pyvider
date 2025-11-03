@@ -103,6 +103,16 @@ print_header "📚 Generating Documentation and Examples with Plating CLI"
 
 print_success "Documentation and examples generated with plating"
 
+# Apply custom index template if it exists
+print_header "📄 Applying Custom Index Template"
+INDEX_TEMPLATE="${PROJECT_ROOT}/guides/index.tmpl.md"
+if [ -f "$INDEX_TEMPLATE" ]; then
+    cp "$INDEX_TEMPLATE" "$DOCS_OUTPUT_DIR/index.md"
+    print_success "Applied custom index.md from guides/index.tmpl.md"
+else
+    print_warning "No custom index template found at guides/index.tmpl.md"
+fi
+
 # Validate generated examples
 print_header "🔍 Validating Generated Examples"
 
@@ -134,42 +144,6 @@ fi
 
 # Note: Not copying docs from pyvider-components as they may be outdated or incorrect
 # Documentation should be generated fresh from the code
-
-# Create index if it doesn't exist
-if [ ! -f "$DOCS_OUTPUT_DIR/index.md" ]; then
-    cat > "$DOCS_OUTPUT_DIR/index.md" << EOF
----
-page_title: "pyvider Provider"
-description: |-
-  The official Pyvider provider for Terraform/OpenTofu
----
-
-# pyvider Provider
-
-The \`pyvider\` provider is the official provider for the Pyvider framework, demonstrating its capabilities and providing utility resources, data sources, and functions for testing and infrastructure tasks.
-
-## Example Usage
-
-\`\`\`hcl
-terraform {
-  required_providers {
-    pyvider = {
-      source  = "provide-io/pyvider"
-      version = "~> 0.0"
-    }
-  }
-}
-
-provider "pyvider" {
-  # Configuration options
-}
-\`\`\`
-
-## Available Resources
-
-See the navigation menu for available resources, data sources, and functions.
-EOF
-fi
 
 print_success "Documentation generated with plating in $DOCS_OUTPUT_DIR"
 
