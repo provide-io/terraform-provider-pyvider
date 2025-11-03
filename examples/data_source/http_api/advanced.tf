@@ -78,12 +78,33 @@ data "pyvider_http_api" "user_profile" {
 
 # Get posts for the user (using data from first call)
 locals {
-  user_data = can(jsondecode(data.pyvider_http_api.user_profile.response_body)) ?
-    jsondecode(data.pyvider_http_api.user_profile.response_body) : { id = 1 }
+  advanced_user_data = try(jsondecode(data.pyvider_http_api.user_profile.response_body), {
+    id       = 1
+    name     = "Unknown"
+    username = "unknown"
+    email    = "unknown@example.com"
+    address = {
+      street  = ""
+      suite   = ""
+      city    = ""
+      zipcode = ""
+      geo = {
+        lat = ""
+        lng = ""
+      }
+    }
+    phone   = ""
+    website = ""
+    company = {
+      name        = ""
+      catchPhrase = ""
+      bs          = ""
+    }
+  })
 }
 
 data "pyvider_http_api" "user_posts" {
-  url = "https://jsonplaceholder.typicode.com/posts?userId=${local.user_data.id}"
+  url = "https://jsonplaceholder.typicode.com/posts?userId=${local.advanced_user_data.id}"
 }
 
 # Example 9: Error status code handling
@@ -102,11 +123,9 @@ data "pyvider_http_api" "unauthorized" {
 # Process responses and handle different scenarios
 locals {
   # Parse successful responses
-  post_response = can(jsondecode(data.pyvider_http_api.post_json.response_body)) ?
-    jsondecode(data.pyvider_http_api.post_json.response_body) : {}
+  advanced_post_response = try(jsondecode(data.pyvider_http_api.post_json.response_body), {})
 
-  user_posts = can(jsondecode(data.pyvider_http_api.user_posts.response_body)) ?
-    jsondecode(data.pyvider_http_api.user_posts.response_body) : []
+  user_posts = try(jsondecode(data.pyvider_http_api.user_posts.response_body), [])
 
   # Analyze response characteristics
   response_analysis = {
@@ -213,7 +232,7 @@ resource "pyvider_file_content" "advanced_api_analysis" {
     performance_metrics = local.performance_metrics
 
     user_data_example = {
-      user_profile = local.user_data
+      user_profile = local.advanced_user_data
       posts_count  = length(local.user_posts)
       first_post_title = length(local.user_posts) > 0 ? local.user_posts[0].title : null
     }
@@ -265,8 +284,8 @@ resource "pyvider_file_content" "advanced_api_report" {
     "Average Response Time: ${local.performance_metrics.average_response_time}ms",
     "",
     "=== User Data Example ===",
-    "User Name: ${lookup(local.user_data, "name", "Unknown")}",
-    "User Email: ${lookup(local.user_data, "email", "Unknown")}",
+    "User Name: ${lookup(local.advanced_user_data, "name", "Unknown")}",
+    "User Email: ${lookup(local.advanced_user_data, "email", "Unknown")}",
     "Posts Count: ${length(local.user_posts)}",
     length(local.user_posts) > 0 ? "First Post: ${local.user_posts[0].title}" : "No posts found",
     "",
@@ -278,7 +297,7 @@ resource "pyvider_file_content" "advanced_api_report" {
   ])
 }
 
-output "advanced_http_api_results" {
+output "advanced_user_data" {
   description = "Results from advanced HTTP API operations"
   value = {
     methods_tested = {
@@ -298,9 +317,9 @@ output "advanced_http_api_results" {
     }
 
     data_processing = {
-      user_profile_parsed = contains(keys(local.user_data), "name")
+      user_profile_parsed = contains(keys(local.advanced_user_data), "name")
       posts_retrieved     = length(local.user_posts)
-      json_parsing_works  = length(local.post_response) > 0
+      json_parsing_works  = length(local.advanced_post_response) > 0
     }
 
     files_created = [

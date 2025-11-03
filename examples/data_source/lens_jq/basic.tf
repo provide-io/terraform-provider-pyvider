@@ -1,54 +1,15 @@
-# Basic JQ data source transformation examples
-
-# Example 1: Simple field extraction
-data "pyvider_lens_jq" "extract_name" {
-  json_input = jsonencode({
-    name  = "John Doe"
-    email = "john@example.com"
-    age   = 30
-  })
-  query = ".name"
-}
-
-# Example 2: Nested field access
-data "pyvider_lens_jq" "extract_city" {
+# Use the lens_jq data source to extract a field from a JSON object.
+data "pyvider_lens_jq" "user_extract" {
   json_input = jsonencode({
     user = {
-      profile = {
-        location = {
-          city  = "San Francisco"
-          state = "CA"
-        }
-      }
+      name  = "John Doe"
+      email = "john@example.com"
     }
   })
-  query = ".user.profile.location.city"
+  query = ".user.name"
 }
 
-# Example 3: Array length
-data "pyvider_lens_jq" "count_items" {
-  json_input = jsonencode({
-    items = ["apple", "banana", "cherry"]
-  })
-  query = ".items | length"
-}
-
-# Example 4: Filter array
-data "pyvider_lens_jq" "filter_active" {
-  json_input = jsonencode([
-    { name = "Alice", active = true },
-    { name = "Bob", active = false },
-    { name = "Carol", active = true }
-  ])
-  query = "[.[] | select(.active == true)]"
-}
-
-output "jq_results" {
-  description = "Results from basic JQ transformations"
-  value = {
-    name         = data.pyvider_lens_jq.extract_name.result
-    city         = data.pyvider_lens_jq.extract_city.result
-    item_count   = data.pyvider_lens_jq.count_items.result
-    active_users = data.pyvider_lens_jq.filter_active.result
-  }
+output "basic_extracted_name" {
+  description = "The name extracted from the JSON input."
+  value       = data.pyvider_lens_jq.user_extract.result
 }

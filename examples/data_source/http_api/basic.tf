@@ -1,39 +1,17 @@
-# Basic HTTP API usage examples
-
-# Example 1: Simple GET request
-data "pyvider_http_api" "simple_get" {
+# Make a simple GET request to a public API.
+data "pyvider_http_api" "example" {
   url = "https://httpbin.org/get"
-}
-
-# Example 2: GET request with custom headers
-data "pyvider_http_api" "with_headers" {
-  url = "https://httpbin.org/headers"
   headers = {
-    "User-Agent" = "Terraform-Pyvider/1.0"
-    "Accept"     = "application/json"
+    "Accept" = "application/json"
   }
 }
 
-# Example 3: Request with custom timeout and method
-data "pyvider_http_api" "head_request" {
-  url     = "https://httpbin.org/status/200"
-  method  = "HEAD"
-  timeout = 10
+output "basic_api_response_status" {
+  description = "The HTTP status code of the API response."
+  value       = data.pyvider_http_api.example.status_code
 }
 
-output "http_api_results" {
-  value = {
-    simple_request = {
-      status_code = data.pyvider_http_api.simple_get.status_code
-      success     = data.pyvider_http_api.simple_get.status_code >= 200 && data.pyvider_http_api.simple_get.status_code < 300
-    }
-    with_headers = {
-      status_code = data.pyvider_http_api.with_headers.status_code
-      header_count = data.pyvider_http_api.with_headers.header_count
-    }
-    head_request = {
-      status_code = data.pyvider_http_api.head_request.status_code
-      success     = data.pyvider_http_api.head_request.status_code == 200
-    }
-  }
+output "basic_api_response_body_preview" {
+  description = "A preview of the response body."
+  value       = substr(data.pyvider_http_api.example.response_body, 0, 100)
 }

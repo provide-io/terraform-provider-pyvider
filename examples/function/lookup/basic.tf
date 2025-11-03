@@ -1,73 +1,17 @@
-# Basic collection function examples
-
-# Example 1: Length function
+# Basic collection operations
 locals {
-  numbers = [1, 2, 3, 4, 5]
-  colors  = ["red", "green", "blue"]
-  message = "Hello World"
-  config  = { host = "localhost", port = 8080 }
+  basic_items = ["apple", "banana", "cherry"]
+  basic_config = { host = "localhost", port = 8080 }
 
-  numbers_length = provider::pyvider::length(local.numbers) # 5
-  colors_length  = provider::pyvider::length(local.colors)  # 3
-  message_length = provider::pyvider::length(local.message) # 11
-  config_length  = provider::pyvider::length(local.config)  # 2
+  basic_count = provider::pyvider::length(local.basic_items)  # 3
+  basic_has_apple = provider::pyvider::contains(local.basic_items, "apple")  # true
+  basic_port = provider::pyvider::lookup(local.basic_config, "port", 3000)  # 8080
 }
 
-# Example 2: Contains function
-locals {
-  fruits = ["apple", "banana", "cherry"]
-  ports  = [80, 443, 8080]
-
-  has_apple  = provider::pyvider::contains(local.fruits, "apple")  # true
-  has_grape  = provider::pyvider::contains(local.fruits, "grape")  # false
-  has_port80 = provider::pyvider::contains(local.ports, 80)        # true
-  has_port22 = provider::pyvider::contains(local.ports, 22)        # false
-}
-
-# Example 3: Lookup function
-locals {
-  settings = {
-    database_host = "db.example.com"
-    database_port = 5432
-    cache_host    = "redis.local"
-  }
-
-  db_host      = provider::pyvider::lookup(local.settings, "database_host", "localhost")
-  db_port      = provider::pyvider::lookup(local.settings, "database_port", 5432)
-  unknown_key  = provider::pyvider::lookup(local.settings, "missing_key", "default")
-}
-
-# Example 4: Practical usage
-locals {
-  servers = ["web1", "web2", "web3"]
-
-  server_count   = provider::pyvider::length(local.servers)
-  has_web1       = provider::pyvider::contains(local.servers, "web1")
-  needs_scaling  = local.server_count < 5
-}
-
-output "collection_examples" {
+output "basic_results" {
   value = {
-    lengths = {
-      numbers = local.numbers_length
-      colors  = local.colors_length
-      message = local.message_length
-      config  = local.config_length
-    }
-    contains_checks = {
-      has_apple  = local.has_apple
-      has_grape  = local.has_grape
-      has_port80 = local.has_port80
-    }
-    lookups = {
-      db_host     = local.db_host
-      db_port     = local.db_port
-      unknown_key = local.unknown_key
-    }
-    practical = {
-      server_count  = local.server_count
-      has_web1      = local.has_web1
-      needs_scaling = local.needs_scaling
-    }
+    count = local.basic_count
+    has_apple = local.basic_has_apple
+    port = local.basic_port
   }
 }
