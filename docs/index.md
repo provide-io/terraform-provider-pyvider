@@ -6,6 +6,8 @@ description: |-
 
 # Pyvider Provider
 
+Yeh bruh. 
+
 Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
 
 ## Example Usage

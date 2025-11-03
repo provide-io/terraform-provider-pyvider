@@ -1,10 +1,10 @@
 ---
-page_title: "[05] Build Your Own Provider with Pyvider"
+page_title: "04) Build Your Own Provider with Pyvider"
 description: "Translate what you learn from this example provider into a custom provider for your infrastructure."
-guide_order: 6
+guide_order: 5
 ---
 
-# [05] Build Your Own Provider with Pyvider
+# Build Your Own Provider with Pyvider
 
 Once you are comfortable experimenting with the `pyvider` Terraform provider, the next step is to build a provider that matches your own APIs and workflows. This guide outlines a pragmatic path from exploration to a working Python-based provider.
 
@@ -66,4 +66,4 @@ Study similar components in [pyvider-components](https://github.com/provide-io/p
 
 ---
 
-Ready to keep exploring here? Jump back to the [provider tour](./provider-tour.md), or dive into [common patterns](./common-patterns.md) and [troubleshooting tips](./troubleshooting.md) as you prototype.
+Ready to keep exploring here? Jump back to the [provider tour](./01-provider-tour.md) or check out [troubleshooting tips](./03-troubleshooting.md) as you prototype.

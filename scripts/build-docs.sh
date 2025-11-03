@@ -103,16 +103,6 @@ print_header "📚 Generating Documentation and Examples with Plating CLI"
 
 print_success "Documentation and examples generated with plating"
 
-# Apply custom index template if it exists
-print_header "📄 Applying Custom Index Template"
-INDEX_TEMPLATE="${PROJECT_ROOT}/guides/index.tmpl.md"
-if [ -f "$INDEX_TEMPLATE" ]; then
-    cp "$INDEX_TEMPLATE" "$DOCS_OUTPUT_DIR/index.md"
-    print_success "Applied custom index.md from guides/index.tmpl.md"
-else
-    print_warning "No custom index template found at guides/index.tmpl.md"
-fi
-
 # Validate generated examples
 print_header "🔍 Validating Generated Examples"
 
