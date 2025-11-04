@@ -48,7 +48,7 @@ terraform {
     pyvider = {
       source  = "local/providers/pyvider"
       version = ">= 0.0.0"  # For development: accepts any version
-      # For production, pin to specific version: version = "0.0.12"
+      # For production, pin to specific version: version = "~> 0.1"
     }
   }
 }
@@ -620,7 +620,7 @@ terraform console
 **Include in bug reports:**
 ```
 - Terraform version: 1.5.0
-- Provider version: 0.1.0
+- Provider version: X.X.X (check VERSION file or releases page)
 - Platform: macOS 13.4 (darwin_arm64)
 - Configuration: [minimal example]
 - Steps to reproduce
