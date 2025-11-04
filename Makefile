@@ -181,6 +181,11 @@ clean-examples: ## Clean example test outputs
 	@rm -rf examples/*/outputs 2>/dev/null || true
 	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
 
+.PHONY: clean-soup
+clean-soup: ## Clean tofusoup test artifacts from examples
+	@echo "$(BLUE)🧹 Cleaning tofusoup test artifacts...$(NC)"
+	@./scripts/clean-test-artifacts.sh
+
 .PHONY: clean-tfstate
 clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
 	@echo "$(BLUE)🧹 Cleaning Terraform state files...$(NC)"
