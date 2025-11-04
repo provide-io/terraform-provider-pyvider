@@ -224,6 +224,7 @@ venv.bak/
 
 # mkdocs documentation
 /site
+site/
 
 # mypy
 .mypy_cache/
@@ -410,6 +411,7 @@ config.json
 
 # Test artifacts
 tests/plating-tests/
+test-logs-*/
 *.pem
 *.key
 *.psp

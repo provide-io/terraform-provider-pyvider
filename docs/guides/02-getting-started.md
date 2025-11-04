@@ -100,7 +100,7 @@ terraform {
     pyvider = {
       source  = "local/providers/pyvider"
       version = ">= 0.0.0"  # For development: accepts any version
-      # For production, pin to specific version: version = "0.0.12"
+      # For production, pin to specific version: version = "~> 0.1"
     }
   }
 }
@@ -113,7 +113,7 @@ provider "pyvider" {
 
 # Create a simple text file
 resource "pyvider_file_content" "greeting" {
-  path = "${path.module}/hello.txt"
+  filename = "${path.module}/hello.txt"
 
   content = <<-EOT
     Hello from pyvider!
@@ -128,7 +128,7 @@ resource "pyvider_file_content" "greeting" {
 
 # Output the file path
 output "greeting_file" {
-  value       = pyvider_file_content.greeting.path
+  value       = pyvider_file_content.greeting.filename
   description = "Path to the created greeting file"
 }
 ```
@@ -149,8 +149,8 @@ Initializing the backend...
 
 Initializing provider plugins...
 - Finding local/providers/pyvider versions...
-- Installing local/providers/pyvider v0.0.12...
-- Installed local/providers/pyvider v0.0.12 (unauthenticated)
+- Installing local/providers/pyvider vX.X.X...
+- Installed local/providers/pyvider vX.X.X (unauthenticated)
 
 Terraform has been successfully initialized!
 ```
@@ -174,7 +174,7 @@ Terraform will perform the following actions:
       + content  = (known after apply)
       + id       = (known after apply)
       + mode     = "0644"
-      + path     = "./hello.txt"
+      + filename = "./hello.txt"
     }
 
 Plan: 1 to add, 0 to change, 0 to destroy.
@@ -226,18 +226,22 @@ Current timestamp: 2025-10-30T15:39:55Z
 
 ## Step 7: Use a Data Source
 
-Now let's read the file content back using a data source. Add to your `main.tf`:
+Now let's read file information using a data source. Add to your `main.tf`:
 
 ```terraform
-# Read the file content back
-data "pyvider_file_content" "read_greeting" {
-  path = pyvider_file_content.greeting.path
+# Read file metadata
+data "pyvider_file_info" "greeting_info" {
+  path = pyvider_file_content.greeting.filename
 }
 
-# Output the content
-output "greeting_content" {
-  value       = data.pyvider_file_content.read_greeting.content
-  description = "Content of the greeting file"
+# Output the file information
+output "greeting_info" {
+  value = {
+    size         = data.pyvider_file_info.greeting_info.size
+    exists       = data.pyvider_file_info.greeting_info.exists
+    is_directory = data.pyvider_file_info.greeting_info.is_directory
+  }
+  description = "Metadata about the greeting file"
 }
 ```
 
@@ -252,13 +256,12 @@ terraform apply
 ...
 Outputs:
 
-greeting_content = <<EOT
-Hello from pyvider!
-
-This file was created by Terraform using the pyvider provider.
-Current timestamp: 2025-10-30T15:39:55Z
-EOT
 greeting_file = "./hello.txt"
+greeting_info = {
+  "exists"       = true
+  "is_directory" = false
+  "size"         = 123
+}
 ```
 
 ---
@@ -269,7 +272,7 @@ Let's update the file content. Modify the `pyvider_file_content.greeting` resour
 
 ```terraform
 resource "pyvider_file_content" "greeting" {
-  path = "${path.module}/hello.txt"
+  filename = "${path.module}/hello.txt"
 
   content = <<-EOT
     Hello from pyvider!
@@ -358,33 +361,16 @@ Congratulations! You've successfully:
 
 ## Next Steps
 
-### Explore More Resources
+### Explore More Components
 
-The pyvider provider includes many resources and data sources:
-
-- **[Environment Variables](resources/env_var.md):** Manage environment variables
-- **[HTTP API](data-sources/http_api.md):** Make HTTP requests in your configs
-- **[Shell Commands](resources/shell_command.md):** Execute shell commands
-- **[Computed Values](functions/):** Use provider functions
-
-### Learn Common Patterns
-
-- **[Environment-Specific Configurations](how-to-guides/environment-configs.md):** Managing multiple environments
-- **[Dynamic Configuration](how-to-guides/dynamic-config.md):** Using templates and loops
-- **[Testing Providers](how-to-guides/testing.md):** How to test your configurations
-
-### Understand the Provider
-
-- **[Architecture Overview](explanation/architecture.md):** How pyvider works
-- **[Comparison with Other Providers](explanation/comparisons.md):** When to use pyvider
-- **[Provider Components](explanation/components.md):** Understanding resources vs data sources
+The pyvider provider includes resources, data sources, and functions. See the [provider documentation](../index.md) for the complete list of available components.
 
 ### Build Your Own Provider
 
 Interested in building Terraform providers with Python?
 
 - **[pyvider Framework](https://docs.provide.io/pyvider/):** Build providers in Python
-- **[pyvider-components](https://docs.provide.io/pyvider-components/):** A catalog of 100+ example components (far more than the subset bundled in this provider)
+- **[pyvider-components](https://docs.provide.io/pyvider-components/):** Example component library for learning and reference
 - **[Building Providers Guide](https://docs.provide.io/pyvider/guides/building-components/):** Complete guide
 
 ---
@@ -440,7 +426,7 @@ provider "pyvider" {
 
 # Create a file with dynamic content
 resource "pyvider_file_content" "greeting" {
-  path = "${path.module}/hello.txt"
+  filename = "${path.module}/hello.txt"
 
   content = <<-EOT
     Hello from pyvider!
@@ -454,20 +440,24 @@ resource "pyvider_file_content" "greeting" {
   mode = "0644"
 }
 
-# Read the file back
-data "pyvider_file_content" "read_greeting" {
-  path = pyvider_file_content.greeting.path
+# Read file metadata
+data "pyvider_file_info" "greeting_info" {
+  path = pyvider_file_content.greeting.filename
 }
 
 # Outputs
 output "greeting_file" {
-  value       = pyvider_file_content.greeting.path
+  value       = pyvider_file_content.greeting.filename
   description = "Path to the greeting file"
 }
 
-output "greeting_content" {
-  value       = data.pyvider_file_content.read_greeting.content
-  description = "Content of the greeting file"
+output "greeting_info" {
+  value = {
+    size         = data.pyvider_file_info.greeting_info.size
+    exists       = data.pyvider_file_info.greeting_info.exists
+    is_directory = data.pyvider_file_info.greeting_info.is_directory
+  }
+  description = "Metadata about the greeting file"
 }
 ```
 
