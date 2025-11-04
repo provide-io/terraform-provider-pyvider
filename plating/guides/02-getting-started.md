@@ -10,7 +10,7 @@ guide_order: 3
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
--> **Note:** New to Pyvider? Start with 00) [Understand the Pyvider Framework](./00-pyvider-orientation.md) and 01) [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
+-> **Note:** New to Pyvider? Start with [Understand the Pyvider Framework](./00-pyvider-orientation.md) and [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
 
 ---
 

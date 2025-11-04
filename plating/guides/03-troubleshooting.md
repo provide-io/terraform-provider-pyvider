@@ -596,7 +596,7 @@ terraform console
 
 ### Documentation Resources
 
-- **[Getting Started Tutorial](./02) getting-started.md)** - Step-by-step first provider usage
+- **[Getting Started Tutorial](./02-getting-started.md)** - Step-by-step first provider usage
 - **[Resource Reference](resources/)** - Complete resource documentation
 - **[Data Sources](data-sources/)** - Available data sources
 - **[FAQ](faq.md)** - Frequently asked questions

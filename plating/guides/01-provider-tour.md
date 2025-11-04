@@ -87,5 +87,5 @@ Because functions run wherever Terraform evaluates expressions, they are perfect
 
 ## Keep exploring
 
-- Follow 02) [Getting Started with Pyvider](./02-getting-started.md) to run a complete example.
-- Ready to build something custom? Visit 04) [Build Your Own Provider with Pyvider](./04-build-your-own-provider.md).
+- Follow [Getting Started with Pyvider](./02-getting-started.md) to run a complete example.
+- Ready to build something custom? Visit [Build Your Own Provider with Pyvider](./04-build-your-own-provider.md).
