@@ -259,7 +259,7 @@ validate-examples: ## Validate all Terraform examples
 .PHONY: lint-examples
 lint-examples: ## Run terraform fmt on examples
 	@echo "$(BLUE)🎨 Formatting examples...$(NC)"
-	@terraform fmt -recursive docs/examples/ examples/ || true
+	@terraform fmt -recursive examples/ || true
 	@echo "$(GREEN)✅ Examples formatted$(NC)"
 
 .PHONY: docs-serve
