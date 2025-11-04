@@ -160,10 +160,13 @@ docs/
 The documentation generation uses the plating API:
 
 ```python
-from plating.api import PlatingAPI
-api = PlatingAPI()
-files = api.generate_function_documentation('docs/functions')
-written = api.write_generated_files(files)
+from plating import Plating, PlatingContext
+
+context = PlatingContext(provider_name="pyvider")
+plating = Plating(context, package_name="pyvider.components")
+
+# Generate documentation
+result = await plating.plate(output_dir="docs")
 ```
 
 ## Dependency Management
@@ -251,8 +254,6 @@ make venv
 
 **Check Environment Status**:
 ```bash
-make info          # Show project information
-make stats         # Show project statistics
 source .venv/bin/activate && python --version
 ```
 
@@ -267,13 +268,26 @@ make dev           # Quick rebuild
 ```
 terraform-provider-pyvider/
 ├── .venv/                 # Virtual environment (created by make venv)
-├── docs/                  # Generated documentation
-│   └── functions/         # Function documentation
-├── examples/              # Example Terraform configurations
+├── plating/               # Documentation source and templates
+│   ├── guides/           # Source for manually-written guides
+│   ├── partials/         # Reusable documentation snippets
+│   └── templates/        # Provider-level templates
+├── docs/                  # Generated documentation (DO NOT EDIT)
+│   ├── data-sources/     # Data source documentation
+│   ├── functions/        # Function documentation
+│   ├── guides/           # Copied from plating/guides/
+│   ├── resources/        # Resource documentation
+│   └── index.md          # Provider overview
+├── examples/              # Generated Terraform example configurations
+│   ├── data_source/      # Data source examples
+│   ├── function/         # Function examples
+│   └── resource/         # Resource examples
 ├── keys/                  # Signing keys (generated)
 ├── scripts/               # Build and utility scripts
+├── .github/               # GitHub Actions workflows
 ├── Makefile              # Development workflow automation
 ├── pyproject.toml        # Project configuration and dependencies
+├── pyvider.toml          # Pyvider provider configuration
 └── README.md             # Project overview
 ```
 

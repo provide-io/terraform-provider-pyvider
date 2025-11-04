@@ -33,21 +33,22 @@ Common issues and solutions for the pyvider Terraform provider.
 
 **If using local development:**
 ```bash
-# 1. Build the provider
+# 1. Build the provider (using make or flavor directly)
 cd terraform-provider-pyvider
-go build -o terraform-provider-pyvider
+make build
 
 # 2. Move to Terraform plugin directory
-# macOS/Linux:
-mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/0.1.0/darwin_amd64
-mv terraform-provider-pyvider ~/.terraform.d/plugins/local/providers/pyvider/0.1.0/darwin_amd64/
+# macOS/Linux (adjust version as needed):
+mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64
+cp dist/darwin_arm64/terraform-provider-pyvider_v* ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64/terraform-provider-pyvider
 
 # 3. Configure Terraform to use local provider
 terraform {
   required_providers {
     pyvider = {
       source  = "local/providers/pyvider"
-      version = "0.1.0"
+      version = ">= 0.0.0"  # For development: accepts any version
+      # For production, pin to specific version: version = "0.0.12"
     }
   }
 }

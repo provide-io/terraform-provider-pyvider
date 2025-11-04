@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pre-process plating templates to inject global partials.
+Pre-process plating templates and provider guides to inject global partials.
 
 This script implements a hybrid approach:
 1. AUTOMATIC INJECTION: Injects global_header after first heading and global_footer at end
@@ -8,8 +8,10 @@ This script implements a hybrid approach:
 2. MANUAL INJECTION: Also processes {{ global('partial_name') }} syntax
 
 Usage:
-    ./scripts/inject_global_partials.py           # Inject partials
-    ./scripts/inject_global_partials.py --dry-run # Preview changes
+    ./scripts/inject_global_partials.py                    # Process provider guides (default)
+    ./scripts/inject_global_partials.py --guides          # Process provider guides only
+    ./scripts/inject_global_partials.py --components      # Process component templates only
+    ./scripts/inject_global_partials.py --dry-run         # Preview changes without writing
 """
 
 import re
@@ -87,9 +89,10 @@ def remove_old_injections(body: str) -> str:
 def inject_global_partials(
     components_dir: Path,
     partials_dir: Path,
-    dry_run: bool = False
+    dry_run: bool = False,
+    file_pattern: str = "*.tmpl.md"
 ) -> int:
-    """Inject global partials into component templates.
+    """Inject global partials into component templates or guide files.
 
     Implements hybrid approach:
     - Auto-inject header after first heading and footer at end
@@ -97,15 +100,16 @@ def inject_global_partials(
     - Still process manual {{ global(...) }} syntax
 
     Args:
-        components_dir: Root directory of pyvider-components
+        components_dir: Root directory of pyvider-components or provider guides
         partials_dir: Directory containing global partials
         dry_run: If True, only print what would be changed
+        file_pattern: Pattern to match files (default: "*.tmpl.md", can also use "*.md")
 
     Returns:
         Number of files processed
     """
-    # Find all template files
-    template_files = list(components_dir.rglob("*.tmpl.md"))
+    # Find all template/guide files
+    template_files = list(components_dir.rglob(file_pattern))
 
     if not template_files:
         print(f"⚠️  No template files found in {components_dir}")
@@ -271,49 +275,89 @@ def main():
     project_root = script_dir.parent
     components_root = project_root.parent / "pyvider-components"
 
-    # Components can be in src/pyvider/components or directly in components/
-    components_dir = components_root / "src" / "pyvider" / "components"
-    if not components_dir.exists():
-        components_dir = components_root / "components"
-
-    partials_dir = components_root / "docs" / "_partials"
-
-    # Check paths exist
-    if not components_dir.exists():
-        print(f"❌ Error: Components directory not found")
-        print(f"   Checked: {components_root / 'src' / 'pyvider' / 'components'}")
-        print(f"   Checked: {components_root / 'components'}")
-        sys.exit(1)
-
-    if not partials_dir.exists():
-        print(f"⚠️  Warning: Global partials directory not found: {partials_dir}")
-        print(f"Creating directory...")
-        try:
-            partials_dir.mkdir(parents=True, exist_ok=True)
-            print(f"✅ Created: {partials_dir}")
-        except Exception as e:
-            print(f"❌ Error creating directory: {e}")
-            sys.exit(1)
-
     # Parse arguments
     dry_run = "--dry-run" in sys.argv
+    process_guides = "--guides" in sys.argv or "--provider-guides" in sys.argv
 
-    # Run injection
-    print(f"🔍 Scanning for templates in: {components_dir}")
-    print(f"📚 Using partials from: {partials_dir}")
-    print()
+    total_files_changed = 0
 
-    files_changed = inject_global_partials(components_dir, partials_dir, dry_run)
+    # Process provider guides if requested or if no target specified
+    if process_guides or not any(arg in sys.argv for arg in ["--components", "--guides", "--provider-guides"]):
+        provider_guides_dir = project_root / "plating" / "guides"
+        provider_partials_dir = project_root / "plating" / "partials"
 
-    print()
+        if provider_guides_dir.exists():
+            print("=" * 60)
+            print("🔧 Processing Provider Guides")
+            print("=" * 60)
+            print(f"🔍 Scanning for guides in: {provider_guides_dir}")
+            print(f"📚 Using partials from: {provider_partials_dir}")
+            print()
+
+            # Create partials dir if it doesn't exist
+            if not provider_partials_dir.exists():
+                print(f"⚠️  Creating partials directory: {provider_partials_dir}")
+                provider_partials_dir.mkdir(parents=True, exist_ok=True)
+
+            files_changed = inject_global_partials(
+                provider_guides_dir,
+                provider_partials_dir,
+                dry_run,
+                file_pattern="*.md"
+            )
+            total_files_changed += files_changed
+            print()
+
+    # Process components if requested
+    if "--components" in sys.argv:
+        # Components can be in src/pyvider/components or directly in components/
+        components_dir = components_root / "src" / "pyvider" / "components"
+        if not components_dir.exists():
+            components_dir = components_root / "components"
+
+        partials_dir = components_root / "docs" / "_partials"
+
+        # Check paths exist
+        if not components_dir.exists():
+            print(f"❌ Error: Components directory not found")
+            print(f"   Checked: {components_root / 'src' / 'pyvider' / 'components'}")
+            print(f"   Checked: {components_root / 'components'}")
+            sys.exit(1)
+
+        if not partials_dir.exists():
+            print(f"⚠️  Warning: Global partials directory not found: {partials_dir}")
+            print(f"Creating directory...")
+            try:
+                partials_dir.mkdir(parents=True, exist_ok=True)
+                print(f"✅ Created: {partials_dir}")
+            except Exception as e:
+                print(f"❌ Error creating directory: {e}")
+                sys.exit(1)
+
+        print("=" * 60)
+        print("🔧 Processing Component Templates")
+        print("=" * 60)
+        print(f"🔍 Scanning for templates in: {components_dir}")
+        print(f"📚 Using partials from: {partials_dir}")
+        print()
+
+        files_changed = inject_global_partials(
+            components_dir,
+            partials_dir,
+            dry_run,
+            file_pattern="*.tmpl.md"
+        )
+        total_files_changed += files_changed
+        print()
+
     if dry_run:
-        print(f"📋 Dry run: {files_changed} files would be updated")
+        print(f"📋 Dry run: {total_files_changed} files would be updated")
         return 0
     else:
-        if files_changed == 0:
+        if total_files_changed == 0:
             print(f"✅ Complete: No files needed updating")
         else:
-            print(f"✅ Complete: {files_changed} files updated")
+            print(f"✅ Complete: {total_files_changed} files updated")
         return 0
 
 

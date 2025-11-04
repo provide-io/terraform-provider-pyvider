@@ -86,7 +86,7 @@ print_header "🔧 Generating Documentation with Plating"
 
 cd "$PROJECT_ROOT"
 
-# Generate documentation using PlatingAPI
+# Generate documentation using Plating
 print_header "📚 Running Plating Documentation Generation"
 
 # Create output directory if it doesn't exist
