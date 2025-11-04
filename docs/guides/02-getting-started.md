@@ -65,14 +65,14 @@ unzip terraform-provider-pyvider_darwin_amd64.zip
 2. **Install to Terraform plugins directory:**
 
 ```bash
-# Create plugins directory
-mkdir -p ~/.terraform.d/plugins/provide.io/pyvider/pyvider/1.0.0/darwin_amd64/
+# Create plugins directory (adjust version as needed)
+mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64/
 
 # Move binary
-mv terraform-provider-pyvider ~/.terraform.d/plugins/provide.io/pyvider/pyvider/1.0.0/darwin_amd64/
+mv terraform-provider-pyvider ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64/
 
 # Make executable
-chmod +x ~/.terraform.d/plugins/provide.io/pyvider/pyvider/1.0.0/darwin_amd64/terraform-provider-pyvider
+chmod +x ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64/terraform-provider-pyvider
 ```
 
 ### Note
@@ -98,8 +98,9 @@ Create a file named `main.tf`:
 terraform {
   required_providers {
     pyvider = {
-      source  = "provide.io/pyvider/pyvider"
-      version = "~> 1.0"
+      source  = "local/providers/pyvider"
+      version = ">= 0.0.0"  # For development: accepts any version
+      # For production, pin to specific version: version = "0.0.12"
     }
   }
 }
@@ -147,9 +148,9 @@ terraform init
 Initializing the backend...
 
 Initializing provider plugins...
-- Finding provide.io/pyvider/pyvider versions matching "~> 1.0"...
-- Installing provide.io/pyvider/pyvider v1.0.0...
-- Installed provide.io/pyvider/pyvider v1.0.0
+- Finding local/providers/pyvider versions...
+- Installing local/providers/pyvider v0.0.12...
+- Installed local/providers/pyvider v0.0.12 (unauthenticated)
 
 Terraform has been successfully initialized!
 ```
@@ -426,8 +427,9 @@ terraform {
 
   required_providers {
     pyvider = {
-      source  = "provide.io/pyvider/pyvider"
-      version = "~> 1.0"
+      source  = "local/providers/pyvider"
+      # For local development, use the installed version
+      # For production, specify: version = "~> 0.0"
     }
   }
 }

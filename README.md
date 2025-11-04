@@ -28,7 +28,7 @@
 
 * **Utility Resources:** Manage local files and directories (`pyvider_file_content`, `pyvider_local_directory`).
 * **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
-* **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_jq`, `pyvider_jq_cty`).
+* **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_lens_jq`).
 * **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
 
 ## Relationship to pyvider-components
@@ -36,7 +36,7 @@
 This provider is built using components from the [pyvider-components](https://github.com/provide-io/pyvider-components) repository, which serves as the reference implementation and example library for the Pyvider framework.
 
 **Key Relationship:**
-- **pyvider-components**: Example library with 100+ component demonstrations for learning (this provider pulls in a curated subset)
+- **pyvider-components**: Example library for learning provider development (this provider uses a curated subset)
 - **terraform-provider-pyvider**: Proof-of-concept provider that packages those components for Terraform testing and learning
 
 ```
@@ -53,7 +53,7 @@ pyvider-components (examples) ──packages──> terraform-provider-pyvider (
 
 **New to the pyvider provider?** Check out our comprehensive tutorial:
 
-**[→ Getting Started Tutorial](docs/getting-started.md)** - Complete walkthrough in 10-15 minutes
+**[→ Getting Started Tutorial](docs/guides/02-getting-started.md)** - Complete walkthrough in 10-15 minutes
 
 The tutorial covers:
 - Installing and configuring the provider
@@ -72,22 +72,21 @@ The tutorial covers:
 
 ## Example Usage
 
-Configure the provider in your Terraform code. The `pyvider` provider itself has a schema composed from capabilities, such as the `api` capability shown below.
+Configure the provider in your Terraform code. Most resources and data sources work without additional provider configuration.
 
 ```hcl
 terraform {
   required_providers {
     pyvider = {
       source  = "local/providers/pyvider"
-      version = "0.1.0"
+      version = ">= 0.0.0"  # For development: accepts any version
+      # For production, pin to specific version: version = "~> 0.1"
     }
   }
 }
 
 provider "pyvider" {
-  # Example configuration from the 'api' capability
-  api_endpoint = "https://api.example.com/v1"
-  api_token    = "my-secret-token"
+  # No configuration needed for most resources/data sources
 }
 
 # Use a data source from the provider
