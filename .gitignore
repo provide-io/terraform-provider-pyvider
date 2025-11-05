@@ -420,3 +420,6 @@ test-logs-*/
 **/tfdata/providers/**
 *-test-*.psp
 .claude
+
+# Extracted provide.io tooling artifacts
+.provide/
