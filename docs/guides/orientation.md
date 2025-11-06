@@ -1,12 +1,12 @@
 ---
-page_title: "00) Understand the Pyvider Framework"
-description: "Get oriented with the ideas behind Pyvider before you dive into the example provider."
+page_title: "Understand the Pyvider Framework"
+description: "Get oriented with the ideas behind Pyvider and how to build Terraform providers in Python."
 guide_order: 1
 ---
 
 # Understand the Pyvider Framework
 
-Pyvider is a Python framework that implements the Terraform Plugin Protocol v6. Instead of writing Go, you describe providers, resources, and data sources with Python classes, type-safe schemas, and async handlers. This guide gives you the mental model you need before exploring the `pyvider` Terraform provider.
+Pyvider is a Python framework that implements the Terraform Plugin Protocol v6. Instead of writing Go, you describe providers, resources, and data sources with Python classes, type-safe schemas, and async handlers. This guide gives you the mental model you need to build Terraform providers with Pyvider.
 
 ## Key ideas in Pyvider
 
@@ -36,15 +36,15 @@ The [pyvider-components](https://github.com/provide-io/pyvider-components) repos
 
 Because Pyvider speaks the same protocol as the official Go SDK, anything you build behaves like a native provider.
 
-## How this repository fits in
+## How the Pyvider ecosystem fits together
 
-- **`terraform-provider-pyvider`** – Prebuilt provider that exposes the example components to Terraform.
-- **`pyvider-components`** – The component library this provider imports. Study it to see how individual resources are implemented.
-- **`pyvider`** – The framework that turns Python classes into a Terraform provider binary.
+- **`pyvider`** – The core framework that turns Python classes into a Terraform provider binary.
+- **`pyvider-components`** – This component library providing example resources, data sources, and functions. Study these to see how components are implemented.
+- **`terraform-provider-pyvider`** – Reference implementation provider that bundles pyvider-components for demonstration purposes.
 
-Use this repository to learn the flow from framework → components → provider. When you are ready to build something custom, use the tutorials in the Pyvider documentation and copy patterns from `pyvider-components`.
+Use the components in this library as templates when building your own providers. Each component demonstrates best practices for schema definition, async handlers, validation, and error handling.
 
 ## Next steps
 
-- Move on to [Tour the Example Provider](./01-provider-tour.md) to understand what is shipped.
-- Dive into [Getting Started with Pyvider](./02-getting-started.md) when you want to run Terraform locally.
+- Continue to [Build Your Own Provider](./build-your-own.md) to create a custom provider for your infrastructure.
+- Explore the component source code in this repository to understand implementation patterns.

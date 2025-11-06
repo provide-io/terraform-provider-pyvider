@@ -1,7 +1,7 @@
 ---
-page_title: "02) Getting Started with Pyvider"
+page_title: "Getting Started with Pyvider"
 description: "Step-by-step tutorial for installing and using the pyvider Terraform provider for the first time."
-guide_order: 3
+guide_order: 2
 ---
 
 # Getting Started with pyvider Terraform Provider
@@ -10,7 +10,7 @@ guide_order: 3
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
--> **Note:** New to Pyvider? Start with 00) [Understand the Pyvider Framework](./00-pyvider-orientation.md) and 01) [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
+-> **Note:** New to Pyvider? Review the [Tour the Example Provider](./provider-tour.md) to understand what's available before diving into this hands-on tutorial.
 
 ---
 
@@ -377,13 +377,13 @@ Interested in building Terraform providers with Python?
 
 ## Troubleshooting
 
-Having issues? See our comprehensive **[Troubleshooting Guide](./03-troubleshooting.md)** for solutions to common problems:
+Having issues? See our comprehensive **[Troubleshooting Guide](./troubleshooting.md)** for solutions to common problems:
 
-- **[Installation Issues](./03-troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
-- **[Configuration Errors](./03-troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
-- **[Runtime Errors](./03-troubleshooting.md#runtime-errors)** - File operations, HTTP/API, state management
-- **[Debug Techniques](./03-troubleshooting.md#debugging-techniques)** - TF_LOG, state inspection, terraform console
-- **[Getting Help](./03-troubleshooting.md#getting-help)** - Community support and issue reporting
+- **[Installation Issues](./troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
+- **[Configuration Errors](./troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
+- **[Runtime Errors](./troubleshooting.md#runtime-errors)** - File operations, HTTP/API, state management
+- **[Debug Techniques](./troubleshooting.md#debugging-techniques)** - TF_LOG, state inspection, terraform console
+- **[Getting Help](./troubleshooting.md#getting-help)** - Community support and issue reporting
 
 ### Quick Fixes
 
@@ -399,7 +399,7 @@ terraform init -upgrade
 ls -la $(dirname /path/to/file)
 ```
 
-**Need More Help?** → **[Full Troubleshooting Guide](./03-troubleshooting.md)**
+**Need More Help?** → **[Full Troubleshooting Guide](./troubleshooting.md)**
 
 ---
 

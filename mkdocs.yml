@@ -55,11 +55,8 @@ theme:
 nav:
 - Overview: index.md
 - Guides:
-    00) Understand the Pyvider Framework: guides/00-pyvider-orientation.md
-    01) Tour the Example Provider: guides/01-provider-tour.md
-    02) Getting Started with Pyvider: guides/02-getting-started.md
-    03) Troubleshooting: guides/03-troubleshooting.md
-    04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
+    Understand the Pyvider Framework: guides/orientation.md
+    Build Your Own Provider with Pyvider: guides/build-your-own.md
 - Resources:
     timed_token: resources/timed_token.md
 - Data Sources:
