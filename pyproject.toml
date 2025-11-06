@@ -70,3 +70,7 @@ pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 name = "pyvider"
 # Component packages to use for this provider
 component_packages = ["pyvider.components"]
+
+[tool.plating]
+merge_content_from = ["pyvider.components"]
+exclude_from_merge = ["templates", "partials"]
