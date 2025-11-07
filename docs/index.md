@@ -2,7 +2,6 @@
 page_title: "Pyvider Provider"
 description: |-
   Terraform provider for pyvider
-template_output: "index.md"
 ---
 
 # Pyvider Provider
@@ -98,3 +97,4 @@ No provider configuration required.
 - [`pyvider_nested_resource_test`](./data-sources/nested_resource_test.md)
 - [`pyvider_simple_map_test`](./data-sources/simple_map_test.md)
 - [`pyvider_structured_object_test`](./data-sources/structured_object_test.md)
+
