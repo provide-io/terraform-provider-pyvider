@@ -160,6 +160,7 @@ clean: ## Clean build artifacts and cache
 clean-docs: ## Clean entire documentation directory
 	@echo "$(BLUE)🧹 Cleaning documentation...$(NC)"
 	@rm -rf docs/*
+	@rm -f docs/.provide
 	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
 
 .PHONY: clean-plating
@@ -262,10 +263,22 @@ lint-examples: ## Run terraform fmt on examples
 	@terraform fmt -recursive examples/ || true
 	@echo "$(GREEN)✅ Examples formatted$(NC)"
 
+.PHONY: docs-setup
+docs-setup: ## Extract theme assets from provide-foundry
+	@echo "$(BLUE)📦 Extracting theme assets from provide-foundry...$(NC)"
+	@python3 -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
+	@if [ ! -L docs/.provide ]; then \
+		echo "$(BLUE)🔗 Creating symlink to .provide in docs/...$(NC)"; \
+		ln -sf ../.provide docs/.provide; \
+	fi
+	@echo "$(GREEN)✅ Theme assets ready$(NC)"
+
 .PHONY: docs-serve
-docs-serve: docs ## Build and serve documentation locally
-	@echo "$(BLUE)🌐 Serving documentation on http://localhost:8000$(NC)"
-	@cd docs && python3 -m http.server 8000
+docs-serve: docs-setup docs ## Build and serve documentation locally
+	@echo "$(BLUE)🌐 Serving documentation at:$(NC)"
+	@echo "$(GREEN)  http://127.0.0.1:8010/providers/provide-io/pyvider/latest/docs/$(NC)"
+	@echo "$(YELLOW)⚠️  Note: Full path required for Terraform Registry compatibility$(NC)"
+	@mkdocs serve
 
 # ==============================================================================
 # 🧪 Testing & Validation
