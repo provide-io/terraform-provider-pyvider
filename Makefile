@@ -229,7 +229,7 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 # ==============================================================================
 
 .PHONY: docs
-docs: venv clean-docs ## Build documentation with plating (cleans first)
+docs: venv clean-docs docs-setup ## Build documentation with plating (cleans first)
 	@echo "$(BLUE)📚 Building documentation...$(NC)"
 	@SKIP_DOCS=$(SKIP_DOCS) bash scripts/build-docs.sh
 	@if [ "$(SKIP_DOCS)" = "true" ]; then \
