@@ -8,6 +8,8 @@ Converts:
 """
 
 import re
+import shutil
+from pathlib import Path
 
 
 def on_page_markdown(markdown, page, config, files):
@@ -48,3 +50,23 @@ def on_page_markdown(markdown, page, config, files):
             result_lines.append(line)
 
     return "\n".join(result_lines)
+
+
+def on_post_build(config):
+    """
+    Copy .provide directory to built site after build completes.
+
+    MkDocs doesn't copy hidden directories by default, so we manually
+    copy .provide/foundry/theme assets to the site directory.
+    """
+    docs_provide = Path(config["docs_dir"]) / ".provide"
+    site_provide = Path(config["site_dir"]) / ".provide"
+
+    if docs_provide.exists():
+        # Remove existing if present
+        if site_provide.exists():
+            shutil.rmtree(site_provide)
+
+        # Copy .provide directory to site
+        shutil.copytree(docs_provide, site_provide)
+        print(f"✅ Copied .provide assets to site")
