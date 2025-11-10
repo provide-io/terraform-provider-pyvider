@@ -1,8 +1,13 @@
-# Pyvider Provider Makefile Helper
-# Provides a fantastic developer experience with simple, memorable commands
+# Terraform Provider Makefile
+# Canonical Makefile for all terraform-provider-* projects in the provide.io ecosystem
+# This file is maintained in provide-foundry and extracted to provider projects
+#
+# Source: provide-foundry/src/provide/foundry/config/Makefile.provider.tmpl
+# Do not edit directly in provider projects - changes will be overwritten
+# To update: run `make update-makefile` or extract from provide-foundry
 
 # Configuration - Auto-discovered
-PROVIDER_NAME := $(shell grep '^name = ' pyproject.toml 2>/dev/null | head -1 | cut -d'"' -f2 || echo "terraform-provider-pyvider")
+PROVIDER_NAME := $(shell grep '^name = ' pyproject.toml 2>/dev/null | head -1 | cut -d'"' -f2 || echo "terraform-provider-unknown")
 VERSION := $(shell cat VERSION 2>/dev/null || echo "0.0.0")
 PROVIDER_SHORT_NAME := $(shell echo $(PROVIDER_NAME) | sed 's/terraform-provider-//')
 PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
@@ -164,7 +169,6 @@ clean: ## Clean build artifacts and cache
 clean-docs: ## Clean entire documentation directory
 	$(call print,$(BLUE)🧹 Cleaning documentation...$(NC))
 	@rm -rf docs/*
-	@rm -f docs/.provide
 	$(call print,$(GREEN)✅ Documentation cleaned$(NC))
 
 .PHONY: clean-plating
@@ -271,10 +275,6 @@ lint-examples: ## Run terraform fmt on examples
 docs-setup: venv ## Extract theme assets from provide-foundry
 	$(call print,$(BLUE)📦 Extracting theme assets from provide-foundry...$(NC))
 	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
-	@if [ ! -L docs/.provide ]; then \
-		printf '%b\n' "$(BLUE)🔗 Creating symlink to .provide in docs/...$(NC)"; \
-		ln -sf ../.provide docs/.provide; \
-	fi
 	$(call print,$(GREEN)✅ Theme assets ready$(NC))
 
 .PHONY: docs-serve
