@@ -1,10 +1,16 @@
-# Terraform Provider Pyvider - Makefile
+# Pyvider Provider Makefile Helper
 # Provides a fantastic developer experience with simple, memorable commands
+
+# Configuration - Auto-discovered
+PROVIDER_NAME := $(shell grep '^name = ' pyproject.toml 2>/dev/null | head -1 | cut -d'"' -f2 || echo "terraform-provider-pyvider")
+VERSION := $(shell cat VERSION 2>/dev/null || echo "0.0.0")
+PROVIDER_SHORT_NAME := $(shell echo $(PROVIDER_NAME) | sed 's/terraform-provider-//')
+PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
 
 .PHONY: help
 help: ## Show this help message
-	@echo "Terraform Provider Pyvider - Development Commands"
-	@echo "================================================="
+	@echo "Pyvider Provider: $(PROVIDER_SHORT_NAME) - Development Commands"
+	@echo "==============================================================="
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
@@ -13,11 +19,6 @@ help: ## Show this help message
 	@echo "  make build          # Build the provider"
 	@echo "  make test           # Run provider locally"
 	@echo "  make release        # Create a new release"
-
-# Configuration
-PROVIDER_NAME := terraform-provider-pyvider
-VERSION ?= $(shell cat VERSION 2>/dev/null || echo "0.0.0")
-PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
 
 # Platform detection
 UNAME_S := $(shell uname -s | tr '[:upper:]' '[:lower:]')
@@ -39,12 +40,15 @@ PSP_FILE := dist/$(PROVIDER_NAME).psp
 ARCH_DIR := dist/$(CURRENT_PLATFORM)
 VERSIONED_BINARY := $(ARCH_DIR)/$(PROVIDER_NAME)_v$(VERSION)
 
-# Colors for output
+# Colors for output (use with $(call print,...))
 BLUE := \033[0;34m
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
 RED := \033[0;31m
 NC := \033[0m # No Color
+
+# Helper for colored output
+print = @printf '%b\n' "$(1)"
 
 # ==============================================================================
 # 🚀 Quick Commands
@@ -63,46 +67,46 @@ dev: venv setup deps install-flavor build install ## Quick development setup and
 .PHONY: venv
 venv: ## Create virtual environment
 	@if [ ! -d .venv ]; then \
-		echo "$(BLUE)🔧 Creating virtual environment...$(NC)"; \
+		printf '%b\n' "$(BLUE)🔧 Creating virtual environment...$(NC)"; \
 		uv venv .venv; \
-		echo "$(GREEN)✅ Virtual environment created$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Virtual environment created$(NC)"; \
 	else \
-		echo "$(GREEN)✅ Virtual environment already exists$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Virtual environment already exists$(NC)"; \
 	fi
 
 .PHONY: activate
 activate: venv ## Show activation command
-	@echo "$(BLUE)To activate the environment, run:$(NC)"
+	$(call print,$(BLUE)To activate the environment, run:$(NC))
 	@echo "source .venv/bin/activate"
 
 .PHONY: setup
 setup: venv ## Set up development environment
-	@echo "$(BLUE)🔧 Setting up development environment...$(NC)"
+	$(call print,$(BLUE)🔧 Setting up development environment...$(NC))
 	@. .venv/bin/activate && \
 		uv add provide-foundation pyvider-components plating flavorpack && \
-		echo "$(GREEN)✅ Environment setup complete$(NC)"
+		printf '%b\n' "$(GREEN)✅ Environment setup complete$(NC)"
 
 .PHONY: install-flavor
 install-flavor: venv ## Install flavorpack tool
-	@echo "$(BLUE)📦 Installing flavorpack...$(NC)"
+	$(call print,$(BLUE)📦 Installing flavorpack...$(NC))
 	@. .venv/bin/activate && \
 		uv tool install flavorpack && \
-		echo "$(GREEN)✅ Flavorpack installed$(NC)"
+		printf '%b\n' "$(GREEN)✅ Flavorpack installed$(NC)"
 
 .PHONY: install-tools
 install-tools: install-flavor ## Install required development tools
-	@echo "$(BLUE)📦 Installing development tools...$(NC)"
+	$(call print,$(BLUE)📦 Installing development tools...$(NC))
 	@command -v uv >/dev/null 2>&1 || (echo "Installing uv..." && curl -LsSf https://astral.sh/uv/install.sh | sh)
 	@uv tool install plating 2>/dev/null || echo "plating install skipped"
 	@uv tool install tofusoup 2>/dev/null || echo "tofusoup install skipped"
-	@echo "$(GREEN)✅ Tools installed$(NC)"
+	$(call print,$(GREEN)✅ Tools installed$(NC))
 
 .PHONY: deps
 deps: venv ## Install Python dependencies
-	@echo "$(BLUE)📦 Installing dependencies...$(NC)"
+	$(call print,$(BLUE)📦 Installing dependencies...$(NC))
 	@. .venv/bin/activate && \
 		uv sync --all-groups --dev && \
-		echo "$(GREEN)✅ Dependencies installed$(NC)"
+		printf '%b\n' "$(GREEN)✅ Dependencies installed$(NC)"
 
 # ==============================================================================
 # 🏗️ Build & Package
@@ -110,69 +114,69 @@ deps: venv ## Install Python dependencies
 
 .PHONY: build
 build: venv deps install-flavor keys ## Build the provider PSP package
-	@echo "$(BLUE)🏗️ Building provider version $(VERSION) for $(CURRENT_PLATFORM)...$(NC)"
+	$(call print,$(BLUE)🏗️ Building provider version $(VERSION) for $(CURRENT_PLATFORM)...$(NC))
 	@. .venv/bin/activate && \
 		flavor pack && \
-		echo "$(GREEN)✅ Provider built: $(PSP_FILE)$(NC)" && \
+		printf '%b\n' "$(GREEN)✅ Provider built: $(PSP_FILE)$(NC)" && \
 		mkdir -p $(ARCH_DIR) && \
 		cp $(PSP_FILE) $(VERSIONED_BINARY) && \
 		chmod +x $(VERSIONED_BINARY) && \
-		echo "$(GREEN)✅ Versioned binary created: $(VERSIONED_BINARY)$(NC)" && \
+		printf '%b\n' "$(GREEN)✅ Versioned binary created: $(VERSIONED_BINARY)$(NC)" && \
 		ls -lh $(PSP_FILE) $(VERSIONED_BINARY)
 
 .PHONY: build-all
 build-all: venv deps install-flavor keys ## Build provider for all platforms (CI/CD reference)
-	@echo "$(BLUE)🏗️ Building provider version $(VERSION) for all platforms...$(NC)"
-	@echo "$(YELLOW)⚠️  Note: This target shows structure for CI/CD. Local builds only support current platform.$(NC)"
+	$(call print,$(BLUE)🏗️ Building provider version $(VERSION) for all platforms...$(NC))
+	$(call print,$(YELLOW)⚠️  Note: This target shows structure for CI/CD. Local builds only support current platform.$(NC))
 	@. .venv/bin/activate && \
 		flavor pack && \
-		echo "$(GREEN)✅ Base PSP built: $(PSP_FILE)$(NC)"
+		printf '%b\n' "$(GREEN)✅ Base PSP built: $(PSP_FILE)$(NC)"
 	@for platform in $(PLATFORMS); do \
-		echo "$(BLUE)Creating structure for $$platform...$(NC)"; \
+		printf '%b\n' "$(BLUE)Creating structure for $$platform...$(NC)"; \
 		mkdir -p dist/$$platform; \
 		cp $(PSP_FILE) dist/$$platform/$(PROVIDER_NAME)_v$(VERSION); \
 		chmod +x dist/$$platform/$(PROVIDER_NAME)_v$(VERSION); \
-		echo "$(GREEN)✅ Created: dist/$$platform/$(PROVIDER_NAME)_v$(VERSION)$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Created: dist/$$platform/$(PROVIDER_NAME)_v$(VERSION)$(NC)"; \
 	done
 
 .PHONY: keys
 keys: ## Generate signing keys if missing
 	@if [ ! -f keys/provider-private.key ]; then \
-		echo "$(BLUE)🔑 Generating signing keys...$(NC)"; \
+		printf '%b\n' "$(BLUE)🔑 Generating signing keys...$(NC)"; \
 		flavor keygen --out-dir keys; \
-		echo "$(GREEN)✅ Keys generated$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Keys generated$(NC)"; \
 	else \
-		echo "$(GREEN)✅ Signing keys already exist$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Signing keys already exist$(NC)"; \
 	fi
 
 .PHONY: clean
 clean: ## Clean build artifacts and cache
-	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning build artifacts...$(NC))
 	@rm -rf dist/
 	@rm -rf build/
 	@rm -rf *.egg-info
 	@rm -rf __pycache__
 	@rm -rf .pytest_cache
 	@rm -rf ~/Library/Caches/flavor/workenv/$(PROVIDER_NAME)
-	@echo "$(GREEN)✅ Cleaned$(NC)"
+	$(call print,$(GREEN)✅ Cleaned$(NC))
 
 .PHONY: clean-docs
 clean-docs: ## Clean entire documentation directory
-	@echo "$(BLUE)🧹 Cleaning documentation...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning documentation...$(NC))
 	@rm -rf docs/*
 	@rm -f docs/.provide
-	@echo "$(GREEN)✅ Documentation cleaned$(NC)"
+	$(call print,$(GREEN)✅ Documentation cleaned$(NC))
 
 .PHONY: clean-plating
 clean-plating: ## Clean plating test outputs
-	@echo "$(BLUE)🧹 Cleaning plating test outputs...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning plating test outputs...$(NC))
 	@rm -rf tests/plating-tests
 	@find ../pyvider-components -name "*.plating" -type d -exec rm -rf {}/test-output \; 2>/dev/null || true
-	@echo "$(GREEN)✅ Plating test outputs cleaned$(NC)"
+	$(call print,$(GREEN)✅ Plating test outputs cleaned$(NC))
 
 .PHONY: clean-examples
 clean-examples: ## Clean example test outputs
-	@echo "$(BLUE)🧹 Cleaning example outputs...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning example outputs...$(NC))
 	@find examples -name "*.tfstate*" -delete 2>/dev/null || true
 	@find examples -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
 	@find examples -name "*.tfplan" -delete 2>/dev/null || true
@@ -180,30 +184,30 @@ clean-examples: ## Clean example test outputs
 	@rm -rf examples/*/generated 2>/dev/null || true
 	@rm -rf examples/*/test_output 2>/dev/null || true
 	@rm -rf examples/*/outputs 2>/dev/null || true
-	@echo "$(GREEN)✅ Example outputs cleaned$(NC)"
+	$(call print,$(GREEN)✅ Example outputs cleaned$(NC))
 
 .PHONY: clean-soup
 clean-soup: ## Clean tofusoup test artifacts from examples
-	@echo "$(BLUE)🧹 Cleaning tofusoup test artifacts...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning tofusoup test artifacts...$(NC))
 	@./scripts/clean-test-artifacts.sh
 
 .PHONY: clean-tfstate
 clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
-	@echo "$(BLUE)🧹 Cleaning Terraform state files...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning Terraform state files...$(NC))
 	@find . -name "*.tfstate" -o -name "*.tfstate.*" -o -name ".terraform.lock.hcl" | xargs rm -f 2>/dev/null || true
 	@find . -name ".terraform" -type d -exec rm -rf {} \; 2>/dev/null || true
-	@echo "$(GREEN)✅ Terraform state files cleaned$(NC)"
+	$(call print,$(GREEN)✅ Terraform state files cleaned$(NC))
 
 .PHONY: clean-tfcache
 clean-tfcache: ## Clean Terraform plugin cache (~/.terraform.d)
-	@echo "$(BLUE)🧹 Cleaning Terraform plugin cache...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning Terraform plugin cache...$(NC))
 	@rm -rf ~/.terraform.d/plugin-cache 2>/dev/null || true
 	@rm -rf ~/.terraform.d/providers 2>/dev/null || true
-	@echo "$(GREEN)✅ Terraform plugin cache cleaned$(NC)"
+	$(call print,$(GREEN)✅ Terraform plugin cache cleaned$(NC))
 
 .PHONY: clean-workenv
 clean-workenv: ## Clean all flavor work environments for this provider
-	@echo "$(BLUE)🧹 Cleaning flavor work environments...$(NC)"
+	$(call print,$(BLUE)🧹 Cleaning flavor work environments...$(NC))
 	@rm -rf ~/Library/Caches/flavor/workenv/$(PROVIDER_NAME)*
 	@rm -rf ~/Library/Caches/flavor/workenv/.$(PROVIDER_NAME)*
 	@if [ -n "$$XDG_CACHE_HOME" ]; then \
@@ -212,17 +216,17 @@ clean-workenv: ## Clean all flavor work environments for this provider
 	fi
 	@rm -rf ~/.cache/flavor/workenv/$(PROVIDER_NAME)* 2>/dev/null || true
 	@rm -rf ~/.cache/flavor/workenv/.$(PROVIDER_NAME)* 2>/dev/null || true
-	@echo "$(GREEN)✅ Flavor work environments cleaned$(NC)"
+	$(call print,$(GREEN)✅ Flavor work environments cleaned$(NC))
 
 .PHONY: clean-all
 clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep clean including venv, workenv and all caches
-	@echo "$(RED)🔥 Deep cleaning everything...$(NC)"
+	$(call print,$(RED)🔥 Deep cleaning everything...$(NC))
 	@rm -rf .venv/
 	@rm -rf workenv/
 	@rm -rf keys/
 	@rm -rf examples/
 	@rm -rf tests/conformance/
-	@echo "$(GREEN)✅ Everything cleaned$(NC)"
+	$(call print,$(GREEN)✅ Everything cleaned$(NC))
 
 # ==============================================================================
 # 📚 Documentation
@@ -230,54 +234,54 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 
 .PHONY: docs
 docs: venv clean-docs docs-setup ## Build documentation with plating (cleans first)
-	@echo "$(BLUE)📚 Building documentation...$(NC)"
+	$(call print,$(BLUE)📚 Building documentation...$(NC))
 	@SKIP_DOCS=$(SKIP_DOCS) bash scripts/build-docs.sh
 	@if [ "$(SKIP_DOCS)" = "true" ]; then \
-		echo "$(YELLOW)⏭️  Documentation generation was skipped (SKIP_DOCS=true)$(NC)"; \
+		printf '%b\n' "$(YELLOW)⏭️  Documentation generation was skipped (SKIP_DOCS=true)$(NC)"; \
 	fi
 
 .PHONY: inject-partials
 inject-partials: ## Inject global partials into component templates
-	@echo "$(BLUE)🔧 Injecting global partials...$(NC)"
+	$(call print,$(BLUE)🔧 Injecting global partials...$(NC))
 	@python3 scripts/inject_global_partials.py
-	@echo "$(GREEN)✅ Global partials injected$(NC)"
+	$(call print,$(GREEN)✅ Global partials injected$(NC))
 
 .PHONY: inject-partials-dry-run
 inject-partials-dry-run: ## Preview global partial injections (dry-run)
-	@echo "$(BLUE)📋 Preview: injecting global partials (dry-run)...$(NC)"
+	$(call print,$(BLUE)📋 Preview: injecting global partials (dry-run)...$(NC))
 	@python3 scripts/inject_global_partials.py --dry-run
 
 .PHONY: generate-docs
 generate-docs: venv deps ## Generate documentation and examples with plating CLI
-	@echo "$(BLUE)📚 Generating docs and examples...$(NC)"
+	$(call print,$(BLUE)📚 Generating docs and examples...$(NC))
 	@bash scripts/generate_docs_and_examples.sh
 
 .PHONY: validate-examples
 validate-examples: ## Validate all Terraform examples
-	@echo "$(BLUE)🔍 Validating examples...$(NC)"
+	$(call print,$(BLUE)🔍 Validating examples...$(NC))
 	@bash scripts/validate_examples.sh
 
 .PHONY: lint-examples
 lint-examples: ## Run terraform fmt on examples
-	@echo "$(BLUE)🎨 Formatting examples...$(NC)"
+	$(call print,$(BLUE)🎨 Formatting examples...$(NC))
 	@terraform fmt -recursive examples/ || true
-	@echo "$(GREEN)✅ Examples formatted$(NC)"
+	$(call print,$(GREEN)✅ Examples formatted$(NC))
 
 .PHONY: docs-setup
-docs-setup: ## Extract theme assets from provide-foundry
-	@echo "$(BLUE)📦 Extracting theme assets from provide-foundry...$(NC)"
-	@python3 -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
+docs-setup: venv ## Extract theme assets from provide-foundry
+	$(call print,$(BLUE)📦 Extracting theme assets from provide-foundry...$(NC))
+	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
 	@if [ ! -L docs/.provide ]; then \
-		echo "$(BLUE)🔗 Creating symlink to .provide in docs/...$(NC)"; \
+		printf '%b\n' "$(BLUE)🔗 Creating symlink to .provide in docs/...$(NC)"; \
 		ln -sf ../.provide docs/.provide; \
 	fi
-	@echo "$(GREEN)✅ Theme assets ready$(NC)"
+	$(call print,$(GREEN)✅ Theme assets ready$(NC))
 
 .PHONY: docs-serve
 docs-serve: docs-setup docs ## Build and serve documentation locally
-	@echo "$(BLUE)🌐 Serving documentation at:$(NC)"
-	@echo "$(GREEN)  http://127.0.0.1:8010/providers/provide-io/pyvider/latest/docs/$(NC)"
-	@echo "$(YELLOW)⚠️  Note: Full path required for Terraform Registry compatibility$(NC)"
+	$(call print,$(BLUE)🌐 Serving documentation at:$(NC))
+	$(call print,$(GREEN)  http://127.0.0.1:8010/providers/provide-io/pyvider/latest/docs/$(NC))
+	$(call print,$(YELLOW)⚠️  Note: Full path required for Terraform Registry compatibility$(NC))
 	@mkdocs serve
 
 # ==============================================================================
@@ -286,7 +290,7 @@ docs-serve: docs-setup docs ## Build and serve documentation locally
 
 .PHONY: test
 test: venv build ## Test the provider binary
-	@echo "$(BLUE)🧪 Testing provider...$(NC)"
+	$(call print,$(BLUE)🧪 Testing provider...$(NC))
 	@echo "Testing PSP file:"
 	@echo "First run (cold start):"
 	@time ./$(PSP_FILE) launch-context || true
@@ -300,35 +304,35 @@ test: venv build ## Test the provider binary
 
 .PHONY: test-local
 test-local: build ## Test provider with local Terraform
-	@echo "$(BLUE)🧪 Testing with Terraform...$(NC)"
+	$(call print,$(BLUE)🧪 Testing with Terraform...$(NC))
 	@mkdir -p examples/test
-	@echo 'terraform {\n  required_providers {\n    pyvider = {\n      source = "local/providers/pyvider"\n      version = "$(VERSION)"\n    }\n  }\n}\n\nprovider "pyvider" {}' > examples/test/main.tf
+	@echo 'terraform {\n  required_providers {\n    $(PROVIDER_SHORT_NAME) = {\n      source = "local/providers/$(PROVIDER_SHORT_NAME)"\n      version = "$(VERSION)"\n    }\n  }\n}\n\nprovider "$(PROVIDER_SHORT_NAME)" {}' > examples/test/main.tf
 	@cd examples/test && terraform init && terraform validate
-	@echo "$(GREEN)✅ Provider works with Terraform$(NC)"
+	$(call print,$(GREEN)✅ Provider works with Terraform$(NC))
 
 .PHONY: test-plating
 test-plating: ## Run plating tests for all components
-	@echo "$(BLUE)🧪 Running plating tests...$(NC)"
+	$(call print,$(BLUE)🧪 Running plating tests...$(NC))
 	@./scripts/test-plating.sh
 
 .PHONY: test-examples
 test-examples: build install ## Test example configurations with soup stir
-	@echo "$(BLUE)🧪 Testing example configurations with soup stir...$(NC)"
+	$(call print,$(BLUE)🧪 Testing example configurations with soup stir...$(NC))
 	@cd examples && soup stir --recursive
-	@echo "$(GREEN)✅ All examples validated$(NC)"
+	$(call print,$(GREEN)✅ All examples validated$(NC))
 
 .PHONY: lint
 lint: ## Run code linting
-	@echo "$(BLUE)🔍 Running linters...$(NC)"
-	@ruff check . 2>/dev/null || echo "$(YELLOW)⚠️  Ruff not available$(NC)"
-	@mypy . 2>/dev/null || echo "$(YELLOW)⚠️  Mypy not available$(NC)"
-	@echo "$(GREEN)✅ Linting complete$(NC)"
+	$(call print,$(BLUE)🔍 Running linters...$(NC))
+	@ruff check . 2>/dev/null || printf '%b\n' "$(YELLOW)⚠️  Ruff not available$(NC)"
+	@mypy . 2>/dev/null || printf '%b\n' "$(YELLOW)⚠️  Mypy not available$(NC)"
+	$(call print,$(GREEN)✅ Linting complete$(NC))
 
 .PHONY: format
 format: ## Format code
-	@echo "$(BLUE)🎨 Formatting code...$(NC)"
-	@ruff format . 2>/dev/null || echo "$(YELLOW)⚠️  Ruff format not available$(NC)"
-	@echo "$(GREEN)✅ Code formatted$(NC)"
+	$(call print,$(BLUE)🎨 Formatting code...$(NC))
+	@ruff format . 2>/dev/null || printf '%b\n' "$(YELLOW)⚠️  Ruff format not available$(NC)"
+	$(call print,$(GREEN)✅ Code formatted$(NC))
 
 # ==============================================================================
 # 🚀 Release & Publishing
@@ -340,31 +344,31 @@ version: ## Show current version
 
 .PHONY: bump-patch
 bump-patch: ## Bump patch version (0.0.3 -> 0.0.4)
-	@echo "$(BLUE)📦 Bumping patch version...$(NC)"
+	$(call print,$(BLUE)📦 Bumping patch version...$(NC))
 	@current=$$(grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2); \
 	new=$$(echo $$current | awk -F. '{print $$1"."$$2"."$$3+1}'); \
 	sed -i.bak "s/version = \"$$current\"/version = \"$$new\"/" pyproject.toml && rm pyproject.toml.bak; \
-	echo "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
+	printf '%b\n' "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
 
 .PHONY: bump-minor
 bump-minor: ## Bump minor version (0.0.3 -> 0.1.0)
-	@echo "$(BLUE)📦 Bumping minor version...$(NC)"
+	$(call print,$(BLUE)📦 Bumping minor version...$(NC))
 	@current=$$(grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2); \
 	new=$$(echo $$current | awk -F. '{print $$1"."$$2+1".0"}'); \
 	sed -i.bak "s/version = \"$$current\"/version = \"$$new\"/" pyproject.toml && rm pyproject.toml.bak; \
-	echo "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
+	printf '%b\n' "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
 
 .PHONY: bump-major
 bump-major: ## Bump major version (0.0.3 -> 1.0.0)
-	@echo "$(BLUE)📦 Bumping major version...$(NC)"
+	$(call print,$(BLUE)📦 Bumping major version...$(NC))
 	@current=$$(grep 'version = ' pyproject.toml | head -1 | cut -d'"' -f2); \
 	new=$$(echo $$current | awk -F. '{print $$1+1".0.0"}'); \
 	sed -i.bak "s/version = \"$$current\"/version = \"$$new\"/" pyproject.toml && rm pyproject.toml.bak; \
-	echo "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
+	printf '%b\n' "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
 
 .PHONY: release
 release: ## Create a new release (prompts for version)
-	@echo "$(BLUE)🚀 Creating new release...$(NC)"
+	$(call print,$(BLUE)🚀 Creating new release...$(NC))
 	@echo "Current version: $(VERSION)"
 	@echo "Enter new version (or press Enter to use current):"
 	@read new_version; \
@@ -374,15 +378,15 @@ release: ## Create a new release (prompts for version)
 		git commit -m "Release v$$new_version"; \
 		git push origin main; \
 		gh workflow run "build-release.yml" -f version=$$new_version -f prerelease=false; \
-		echo "$(GREEN)✅ Release v$$new_version started$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Release v$$new_version started$(NC)"; \
 	else \
 		gh workflow run "build-release.yml" -f version=$(VERSION) -f prerelease=false; \
-		echo "$(GREEN)✅ Release v$(VERSION) started$(NC)"; \
+		printf '%b\n' "$(GREEN)✅ Release v$(VERSION) started$(NC)"; \
 	fi
 
 .PHONY: release-status
 release-status: ## Check release workflow status
-	@echo "$(BLUE)📊 Checking release status...$(NC)"
+	$(call print,$(BLUE)📊 Checking release status...$(NC))
 	@gh run list --workflow "build-release.yml" --limit 1
 	@echo ""
 	@./scripts/check-registry.sh $(VERSION)
@@ -393,12 +397,12 @@ release-status: ## Check release workflow status
 
 .PHONY: registry-check
 registry-check: ## Check Terraform Registry status
-	@echo "$(BLUE)🔍 Checking Terraform Registry...$(NC)"
+	$(call print,$(BLUE)🔍 Checking Terraform Registry...$(NC))
 	@./scripts/check-registry.sh $(VERSION)
 
 .PHONY: registry-sync
 registry-sync: ## Attempt to sync with Terraform Registry
-	@echo "$(BLUE)🔄 Syncing with Terraform Registry...$(NC)"
+	$(call print,$(BLUE)🔄 Syncing with Terraform Registry...$(NC))
 	@./scripts/sync-registry.sh
 
 # ==============================================================================
@@ -407,23 +411,23 @@ registry-sync: ## Attempt to sync with Terraform Registry
 
 .PHONY: shell
 shell: setup ## Enter development shell
-	@echo "$(BLUE)🐚 Entering development shell...$(NC)"
+	$(call print,$(BLUE)🐚 Entering development shell...$(NC))
 	@bash --init-file <(echo "source env.sh; echo 'Development shell activated'")
 
 .PHONY: install
 install: build ## Install provider locally for testing
-	@echo "$(BLUE)📦 Installing provider locally for $(CURRENT_PLATFORM)...$(NC)"
-	@mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/
-	@cp $(VERSIONED_BINARY) ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
-	@chmod +x ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
-	@echo "$(GREEN)✅ Provider installed to ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/$(NC)"
+	$(call print,$(BLUE)📦 Installing provider locally for $(CURRENT_PLATFORM)...$(NC))
+	@mkdir -p ~/.terraform.d/plugins/local/providers/$(PROVIDER_SHORT_NAME)/$(VERSION)/$(CURRENT_PLATFORM)/
+	@cp $(VERSIONED_BINARY) ~/.terraform.d/plugins/local/providers/$(PROVIDER_SHORT_NAME)/$(VERSION)/$(CURRENT_PLATFORM)/$(PROVIDER_NAME)
+	@chmod +x ~/.terraform.d/plugins/local/providers/$(PROVIDER_SHORT_NAME)/$(VERSION)/$(CURRENT_PLATFORM)/$(PROVIDER_NAME)
+	$(call print,$(GREEN)✅ Provider installed to ~/.terraform.d/plugins/local/providers/$(PROVIDER_SHORT_NAME)/$(VERSION)/$(CURRENT_PLATFORM)/$(NC))
 
 .PHONY: watch
 watch: ## Watch for changes and rebuild automatically
-	@echo "$(BLUE)👁️ Watching for changes...$(NC)"
+	$(call print,$(BLUE)👁️ Watching for changes...$(NC))
 	@while true; do \
 		fswatch -o pyproject.toml src/ 2>/dev/null | xargs -n1 -I{} sh -c 'clear; make build' || \
-		(echo "$(YELLOW)⚠️  fswatch not installed. Install with: brew install fswatch$(NC)" && exit 1); \
+		(printf '%b\n' "$(YELLOW)⚠️  fswatch not installed. Install with: brew install fswatch$(NC)" && exit 1); \
 	done
 
 # ==============================================================================
@@ -432,8 +436,10 @@ watch: ## Watch for changes and rebuild automatically
 
 .PHONY: info
 info: ## Show project information
-	@echo "$(BLUE)📊 Terraform Provider Pyvider$(NC)"
-	@echo "================================"
+	$(call print,$(BLUE)📊 Pyvider Provider: $(PROVIDER_SHORT_NAME)$(NC))
+	@echo "========================================"
+	@echo "Provider Name:   $(PROVIDER_NAME)"
+	@echo "Short Name:      $(PROVIDER_SHORT_NAME)"
 	@echo "Version:         $(VERSION)"
 	@echo "Platform:        $(CURRENT_PLATFORM)"
 	@echo "Python:          $$(python --version 2>&1)"
@@ -464,7 +470,7 @@ info: ## Show project information
 
 .PHONY: stats
 stats: ## Show project statistics
-	@echo "$(BLUE)📊 Project Statistics$(NC)"
+	$(call print,$(BLUE)📊 Project Statistics$(NC))
 	@echo "====================="
 	@echo "Lines of Python:    $$(find . -name '*.py' -not -path './workenv/*' -not -path './build/*' | xargs wc -l | tail -1 | awk '{print $$1}')"
 	@echo "Documentation:      $$(find docs -name '*.md' | wc -l) files"
