@@ -191,9 +191,7 @@ clean-examples: ## Clean example test outputs
 	$(call print,$(GREEN)✅ Example outputs cleaned$(NC))
 
 .PHONY: clean-soup
-clean-soup: ## Clean tofusoup test artifacts from examples
-	$(call print,$(BLUE)🧹 Cleaning tofusoup test artifacts...$(NC))
-	@./scripts/clean-test-artifacts.sh
+clean-soup: clean-artifacts ## Clean tofusoup test artifacts from examples (alias for clean-artifacts)
 
 .PHONY: clean-tfstate
 clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
@@ -242,12 +240,40 @@ docs-setup: venv ## Extract theme assets from provide-foundry
 	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
 	$(call print,$(GREEN)✅ Theme assets ready$(NC))
 
-.PHONY: plating
-plating: venv ## Generate documentation with Plating
+.PHONY: extract-scripts
+extract-scripts: venv ## Extract utility scripts from provide-foundry
+	$(call print,$(BLUE)📦 Extracting scripts from provide-foundry...$(NC))
+	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_validate_examples_script, extract_clean_artifacts_script, extract_inject_partials_script; from pathlib import Path; extract_validate_examples_script(Path('.')); extract_clean_artifacts_script(Path('.')); extract_inject_partials_script(Path('.'))"
+	$(call print,$(GREEN)✅ Scripts extracted$(NC))
+
+.PHONY: generate-docs
+generate-docs: venv ## Generate documentation and examples with Plating
 	$(call print,$(BLUE)📚 Generating documentation with Plating...$(NC))
 	@. .venv/bin/activate && \
-		plating plate
+		plating plate \
+			--provider-name $(PROVIDER_SHORT_NAME) \
+			--package-name $(PROVIDER_SHORT_NAME).components \
+			--output-dir docs \
+			--generate-examples \
+			--force \
+			--validate \
+			$$([ -d "plating/guides" ] && echo "--guides-dir plating/guides") \
+			$$([ -d "plating/partials" ] && echo "--global-partials-dir plating/partials")
 	$(call print,$(GREEN)✅ Documentation generated$(NC))
+
+.PHONY: inject-partials
+inject-partials: generate-docs ## Inject global partials into documentation
+	$(call print,$(BLUE)📝 Injecting global partials...$(NC))
+	@if [ -f "scripts/inject_partials.py" ]; then \
+		. .venv/bin/activate && \
+		python scripts/inject_partials.py --guides --components; \
+		printf '%b\n' "$(GREEN)✅ Partials injected$(NC)"; \
+	else \
+		printf '%b\n' "$(YELLOW)⚠️  inject_partials.py not found - skipping$(NC)"; \
+	fi
+
+.PHONY: plating
+plating: generate-docs inject-partials ## Generate documentation with Plating (alias for generate-docs + inject-partials)
 
 .PHONY: docs-build
 docs-build: docs-setup plating ## Build documentation (setup + plating + mkdocs)
@@ -257,6 +283,36 @@ docs-build: docs-setup plating ## Build documentation (setup + plating + mkdocs)
 
 .PHONY: docs
 docs: docs-build ## Build documentation
+
+.PHONY: validate-examples
+validate-examples: ## Validate Terraform examples
+	$(call print,$(BLUE)🔍 Validating Terraform examples...$(NC))
+	@if [ -f "scripts/validate_examples.sh" ]; then \
+		./scripts/validate_examples.sh; \
+	else \
+		printf '%b\n' "$(YELLOW)⚠️  validate_examples.sh not found$(NC)"; \
+		printf '%b\n' "$(YELLOW)   Run: make extract-scripts to get foundry scripts$(NC)"; \
+		exit 1; \
+	fi
+
+.PHONY: clean-artifacts
+clean-artifacts: ## Clean test artifacts from examples
+	$(call print,$(BLUE)🧹 Cleaning test artifacts...$(NC))
+	@if [ -f "scripts/clean_artifacts.sh" ]; then \
+		./scripts/clean_artifacts.sh; \
+	else \
+		printf '%b\n' "$(YELLOW)⚠️  clean_artifacts.sh not found$(NC)"; \
+		printf '%b\n' "$(YELLOW)   Run: make extract-scripts to get foundry scripts$(NC)"; \
+		find examples -name ".soup" -type d -exec rm -rf {} + 2>/dev/null || true; \
+		find examples -name "*.tfstate*" -type f -delete 2>/dev/null || true; \
+		find examples -name ".terraform.lock.hcl" -type f -delete 2>/dev/null || true; \
+		find examples -name ".terraform" -type d -exec rm -rf {} + 2>/dev/null || true; \
+		find docs/examples -name ".soup" -type d -exec rm -rf {} + 2>/dev/null || true; \
+		find docs/examples -name "*.tfstate*" -type f -delete 2>/dev/null || true; \
+		find docs/examples -name ".terraform.lock.hcl" -type f -delete 2>/dev/null || true; \
+		find docs/examples -name ".terraform" -type d -exec rm -rf {} + 2>/dev/null || true; \
+		printf '%b\n' "$(GREEN)✅ Test artifacts cleaned$(NC)"; \
+	fi
 
 .PHONY: docs-serve
 docs-serve: docs-setup ## Serve documentation locally
@@ -298,9 +354,14 @@ test-local: build ## Test provider with local Terraform
 	$(call print,$(GREEN)✅ Provider works with Terraform$(NC))
 
 .PHONY: test-plating
-test-plating: ## Run plating tests for all components
-	$(call print,$(BLUE)🧪 Running plating tests...$(NC))
-	@./scripts/test-plating.sh
+test-plating: generate-docs ## Run plating tests for all components
+	$(call print,$(BLUE)🧪 Testing generated documentation and examples...$(NC))
+	@if command -v soup >/dev/null 2>&1 && [ -d docs/examples ]; then \
+		cd docs/examples && soup stir --recursive && \
+		printf '%b\n' "$(GREEN)✅ All plating tests completed!$(NC)"; \
+	else \
+		printf '%b\n' "$(YELLOW)⚠️  soup not found or no examples directory - skipping tests$(NC)"; \
+	fi
 
 .PHONY: test-examples
 test-examples: build install ## Test example configurations with soup stir

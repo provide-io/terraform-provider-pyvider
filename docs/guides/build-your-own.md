@@ -8,6 +8,9 @@ guide_order: 2
 
 This guide outlines a pragmatic path to building a Terraform provider in Python using the Pyvider framework. You'll learn how to transform your APIs and workflows into a fully functional provider.
 
+
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
 ## 1. Set up your development environment
 
 - Install Python 3.11+ (Pyvider targets modern Python features).
@@ -67,3 +70,7 @@ Study similar components in [pyvider-components](https://github.com/provide-io/p
 ---
 
 Ready to start building? Explore the component source code in this repository for implementation examples, or check the [Pyvider documentation](https://foundry.provide.io/pyvider/) for more detailed guides.
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

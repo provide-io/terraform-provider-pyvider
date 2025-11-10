@@ -8,6 +8,9 @@ description: |-
 
 Terraform resource for pyvider_private_state_verifier
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -35,3 +38,11 @@ output "example_verification" {
 ```bash
 terraform import pyvider_private_state_verifier.example <id>
 ```
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -8,6 +8,9 @@ guide_order: 3
 
 Common issues and solutions for the pyvider Terraform provider.
 
+
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
 ~> **Note:** Remember: this is a proof-of-concept provider. Many rough edges come from the provider's experimental status. If you need production guarantees, plan to build a custom provider with [Pyvider](https://github.com/provide-io/pyvider).
 
 ---
@@ -668,3 +671,7 @@ rm -rf .terraform terraform.tfstate*
 ---
 
 **Still stuck?** Open an issue on [GitHub](https://github.com/provide-io/terraform-provider-pyvider/issues) with details!
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

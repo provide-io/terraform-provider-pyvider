@@ -8,6 +8,9 @@ description: |-
 
 Terraform resource for pyvider_warning_example
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -31,3 +34,11 @@ output "example_name" {
 ```bash
 terraform import pyvider_warning_example.example <id>
 ```
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
