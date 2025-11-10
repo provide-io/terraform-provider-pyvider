@@ -8,6 +8,9 @@ guide_order: 2
 
 **Time to Complete:** 10-15 minutes
 
+
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
 -> **Note:** New to Pyvider? Review the [Tour the Example Provider](./provider-tour.md) to understand what's available before diving into this hands-on tutorial.
@@ -486,3 +489,7 @@ Was this tutorial helpful? Have suggestions for improvement?
 **Last Updated:** October 30, 2025
 **Terraform Version:** 1.0+
 **Provider Version:** 1.0+
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

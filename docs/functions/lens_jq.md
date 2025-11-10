@@ -8,6 +8,9 @@ description: |-
 
 Applies a jq query and returns a native Python object.
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -33,5 +36,10 @@ output "function_result" {
 
 ## Arguments
 
+---
 
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
 
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

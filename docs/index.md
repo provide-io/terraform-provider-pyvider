@@ -2,12 +2,14 @@
 page_title: "Pyvider Provider"
 description: |-
   Terraform provider for pyvider
-template_output: "index.md"
 ---
 
 # Pyvider Provider
 
 Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
+
+
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
 
 ## Example Usage
 
@@ -98,3 +100,7 @@ No provider configuration required.
 - [`pyvider_nested_resource_test`](./data-sources/nested_resource_test.md)
 - [`pyvider_simple_map_test`](./data-sources/simple_map_test.md)
 - [`pyvider_structured_object_test`](./data-sources/structured_object_test.md)
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

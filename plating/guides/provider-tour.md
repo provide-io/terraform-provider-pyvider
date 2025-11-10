@@ -8,6 +8,9 @@ guide_order: 1
 
 The `pyvider` Terraform provider packages a curated subset of the example components from the `pyvider-components` library. This tour highlights the major capability areas so you can decide which examples to try first.
 
+
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
 ## What's inside
 
 - **Resources** for manipulating files, exercising Terraform workflows, and simulating infrastructure objects.
@@ -89,3 +92,7 @@ Because functions run wherever Terraform evaluates expressions, they are perfect
 
 - Follow [Getting Started with Pyvider](./getting-started.md) to run a complete example.
 - Ready to build something custom? Check out the [pyvider-components documentation](https://docs.provide.io/pyvider-components/) for framework guides.
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

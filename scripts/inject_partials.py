@@ -2,22 +2,31 @@
 """
 Pre-process plating templates and provider guides to inject global partials.
 
-This script implements a hybrid approach:
+This script is maintained in provide-foundry and extracted to provider projects.
+
+Implements a hybrid approach:
 1. AUTOMATIC INJECTION: Injects global_header after first heading and global_footer at end
    - Unless opted-out via frontmatter (skip_global_header: true / skip_global_footer: true)
 2. MANUAL INJECTION: Also processes {{ global('partial_name') }} syntax
 
 Usage:
-    ./scripts/inject_global_partials.py                    # Process provider guides (default)
-    ./scripts/inject_global_partials.py --guides          # Process provider guides only
-    ./scripts/inject_global_partials.py --components      # Process component templates only
-    ./scripts/inject_global_partials.py --dry-run         # Preview changes without writing
+    ./scripts/inject_partials.py                    # Process provider guides (default)
+    ./scripts/inject_partials.py --guides          # Process provider guides only
+    ./scripts/inject_partials.py --components      # Process component docs only
+    ./scripts/inject_partials.py --dry-run         # Preview changes without writing
 """
 
+from __future__ import annotations
+
 import re
-from pathlib import Path
 import sys
-import yaml
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("❌ Error: PyYAML not installed. Run: uv pip install pyyaml")
+    sys.exit(1)
 
 
 def parse_frontmatter(content: str) -> tuple[dict, str]:
@@ -87,12 +96,12 @@ def remove_old_injections(body: str) -> str:
 
 
 def inject_global_partials(
-    components_dir: Path,
+    docs_dir: Path,
     partials_dir: Path,
     dry_run: bool = False,
     file_pattern: str = "*.tmpl.md",
 ) -> int:
-    """Inject global partials into component templates or guide files.
+    """Inject global partials into documentation files.
 
     Implements hybrid approach:
     - Auto-inject header after first heading and footer at end
@@ -100,7 +109,7 @@ def inject_global_partials(
     - Still process manual {{ global(...) }} syntax
 
     Args:
-        components_dir: Root directory of pyvider-components or provider guides
+        docs_dir: Directory containing documentation files
         partials_dir: Directory containing global partials
         dry_run: If True, only print what would be changed
         file_pattern: Pattern to match files (default: "*.tmpl.md", can also use "*.md")
@@ -108,11 +117,11 @@ def inject_global_partials(
     Returns:
         Number of files processed
     """
-    # Find all template/guide files
-    template_files = list(components_dir.rglob(file_pattern))
+    # Find all documentation files
+    doc_files = list(docs_dir.rglob(file_pattern))
 
-    if not template_files:
-        print(f"⚠️  No template files found in {components_dir}")
+    if not doc_files:
+        print(f"⚠️  No documentation files found in {docs_dir}")
         return 0
 
     # Load global partials
@@ -132,11 +141,11 @@ def inject_global_partials(
 
     files_changed = 0
 
-    for template_file in template_files:
+    for doc_file in doc_files:
         try:
-            content = template_file.read_text(encoding="utf-8")
+            content = doc_file.read_text(encoding="utf-8")
         except Exception as e:
-            print(f"❌ Error reading {template_file}: {e}")
+            print(f"❌ Error reading {doc_file}: {e}")
             continue
 
         original_content = content
@@ -151,7 +160,6 @@ def inject_global_partials(
         skip_footer = should_skip_footer(frontmatter)
 
         # Check if file already has injected content (to prevent double injection)
-        # Check for both HTML comment markers and actual content
         already_has_header = (
             (
                 "<!-- Injected from global partial: _global_header.md -->" in body
@@ -169,7 +177,6 @@ def inject_global_partials(
         # --- AUTOMATIC INJECTION ---
 
         # Auto-inject header after H1 heading and its description paragraph
-        # (unless opted-out or already present)
         if global_header_content and not skip_header and not already_has_header:
             # Find first # heading
             heading_pattern = re.compile(r"^# .+$", re.MULTILINE)
@@ -180,7 +187,6 @@ def inject_global_partials(
                 insert_pos = heading_match.end()
 
                 # Find the first non-empty line after heading (the description paragraph)
-                # and insert after that paragraph
                 remaining = body[insert_pos:]
                 lines = remaining.split("\n")
 
@@ -233,16 +239,13 @@ def inject_global_partials(
             injection = f"<!-- Injected from global partial: _{partial_name}.md -->\n{partial_content}\n<!-- End global partial -->"
             body = body.replace(match.group(0), injection)
 
-        # Reconstruct full content: original frontmatter + updated body
-        # body includes the closing --- delimiter from parse_frontmatter
+        # Reconstruct full content
         if frontmatter:
-            # Extract original frontmatter section from original content
             if original_content.startswith("---"):
                 close_idx = original_content.find("---", 3)
                 if close_idx != -1:
                     original_fm_section = original_content[: close_idx + 3]
-                    # body starts with "---\n", remove that since we have the fm section
-                    body_lines = body.split("\n", 1)  # Split on first newline only
+                    body_lines = body.split("\n", 1)
                     if body_lines[0].strip() == "---" and len(body_lines) > 1:
                         body_without_delim = body_lines[1]
                     else:
@@ -258,7 +261,7 @@ def inject_global_partials(
         # Write back if changed
         if updated_content != original_content:
             if dry_run:
-                print(f"Would update: {template_file}")
+                print(f"Would update: {doc_file}")
                 changes = []
                 if global_header_content and not skip_header and not already_has_header:
                     changes.append("auto-inject header")
@@ -272,10 +275,10 @@ def inject_global_partials(
                     print(f"  Changes: {', '.join(changes)}")
             else:
                 try:
-                    template_file.write_text(updated_content, encoding="utf-8")
-                    print(f"✅ Updated: {template_file}")
+                    doc_file.write_text(updated_content, encoding="utf-8")
+                    print(f"✅ Updated: {doc_file}")
                 except Exception as e:
-                    print(f"❌ Error writing {template_file}: {e}")
+                    print(f"❌ Error writing {doc_file}: {e}")
                     continue
 
             files_changed += 1
@@ -287,11 +290,11 @@ def main():
     # Paths - relative to script location
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
-    components_root = project_root.parent / "pyvider-components"
 
     # Parse arguments
     dry_run = "--dry-run" in sys.argv
     process_guides = "--guides" in sys.argv or "--provider-guides" in sys.argv
+    process_components = "--components" in sys.argv
 
     total_files_changed = 0
 
@@ -321,44 +324,24 @@ def main():
             total_files_changed += files_changed
             print()
 
-    # Process components if requested
-    if "--components" in sys.argv:
-        # Components can be in src/pyvider/components or directly in components/
-        components_dir = components_root / "src" / "pyvider" / "components"
-        if not components_dir.exists():
-            components_dir = components_root / "components"
+    # Process component documentation if requested
+    if process_components:
+        docs_dir = project_root / "docs"
+        partials_dir = project_root / "plating" / "partials"
 
-        partials_dir = components_root / "docs" / "_partials"
+        if docs_dir.exists() and partials_dir.exists():
+            print("=" * 60)
+            print("🔧 Processing Component Documentation")
+            print("=" * 60)
+            print(f"🔍 Scanning for docs in: {docs_dir}")
+            print(f"📚 Using partials from: {partials_dir}")
+            print()
 
-        # Check paths exist
-        if not components_dir.exists():
-            print("❌ Error: Components directory not found")
-            print(f"   Checked: {components_root / 'src' / 'pyvider' / 'components'}")
-            print(f"   Checked: {components_root / 'components'}")
-            sys.exit(1)
-
-        if not partials_dir.exists():
-            print(f"⚠️  Warning: Global partials directory not found: {partials_dir}")
-            print("Creating directory...")
-            try:
-                partials_dir.mkdir(parents=True, exist_ok=True)
-                print(f"✅ Created: {partials_dir}")
-            except Exception as e:
-                print(f"❌ Error creating directory: {e}")
-                sys.exit(1)
-
-        print("=" * 60)
-        print("🔧 Processing Component Templates")
-        print("=" * 60)
-        print(f"🔍 Scanning for templates in: {components_dir}")
-        print(f"📚 Using partials from: {partials_dir}")
-        print()
-
-        files_changed = inject_global_partials(
-            components_dir, partials_dir, dry_run, file_pattern="*.tmpl.md"
-        )
-        total_files_changed += files_changed
-        print()
+            files_changed = inject_global_partials(
+                docs_dir, partials_dir, dry_run, file_pattern="*.md"
+            )
+            total_files_changed += files_changed
+            print()
 
     if dry_run:
         print(f"📋 Dry run: {total_files_changed} files would be updated")

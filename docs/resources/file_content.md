@@ -8,6 +8,9 @@ description: |-
 
 Terraform resource for pyvider_file_content
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -36,3 +39,11 @@ output "example_file" {
 ```bash
 terraform import pyvider_file_content.example <id>
 ```
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

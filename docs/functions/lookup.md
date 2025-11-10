@@ -7,6 +7,9 @@ description: |-
 
 Fetch a key from a map. Provide a default as the third argument to avoid errors when the key is missing.
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -45,3 +48,11 @@ The matching value, the provided default, or `null` when the map itself is `null
 ## Notes
 
 - Without a default, a missing key raises a `FunctionError`.
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

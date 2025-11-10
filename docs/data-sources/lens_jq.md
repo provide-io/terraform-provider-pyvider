@@ -8,6 +8,9 @@ description: |-
 
 Terraform data source for pyvider_lens_jq
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -33,3 +36,10 @@ output "example_data" {
 
 ## Argument Reference
 
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*

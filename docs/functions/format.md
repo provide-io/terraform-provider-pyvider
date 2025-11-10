@@ -7,6 +7,9 @@ description: |-
 
 Substitute `{}` placeholders in a template with values. Inputs are coerced to strings, letting you mix strings, numbers, and booleans safely.
 
+~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+
+
 ## Example Usage
 
 ```terraform
@@ -37,3 +40,11 @@ A formatted string or `null` when the template is `null`.
 ## Notes
 
 - An error is raised if the number of values does not match the number of placeholders.
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
