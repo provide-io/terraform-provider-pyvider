@@ -8,9 +8,6 @@ guide_order: 1
 
 Pyvider is a Python framework that implements the Terraform Plugin Protocol v6. Instead of writing Go, you describe providers, resources, and data sources with Python classes, type-safe schemas, and async handlers. This guide gives you the mental model you need to build Terraform providers with Pyvider.
 
-
-~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
-
 ## Key ideas in Pyvider
 
 - **Pure Python implementation** – Providers are regular Python packages. Pyvider handles the wire protocol and lifecycle interactions with Terraform.
@@ -51,7 +48,3 @@ Use the components in this library as templates when building your own providers
 
 - Continue to [Build Your Own Provider](./build-your-own.md) to create a custom provider for your infrastructure.
 - Explore the component source code in this repository to understand implementation patterns.
-
----
-
-*Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -235,15 +235,15 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 # ==============================================================================
 
 .PHONY: docs-setup
-docs-setup: venv ## Extract theme assets from provide-foundry
+docs-setup: venv ## Extract theme assets and hooks from provide-foundry
 	$(call print,$(BLUE)📦 Extracting theme assets from provide-foundry...$(NC))
-	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_base_mkdocs; from pathlib import Path; extract_base_mkdocs(Path('.'))"
-	$(call print,$(GREEN)✅ Theme assets ready$(NC))
+	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_base_mkdocs, extract_mkdocs_hooks; from pathlib import Path; extract_base_mkdocs(Path('.')); extract_mkdocs_hooks(Path('.'))"
+	$(call print,$(GREEN)✅ Theme assets and hooks ready$(NC))
 
 .PHONY: extract-scripts
 extract-scripts: venv ## Extract utility scripts from provide-foundry
 	$(call print,$(BLUE)📦 Extracting scripts from provide-foundry...$(NC))
-	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_validate_examples_script, extract_clean_artifacts_script, extract_inject_partials_script; from pathlib import Path; extract_validate_examples_script(Path('.')); extract_clean_artifacts_script(Path('.')); extract_inject_partials_script(Path('.'))"
+	@. .venv/bin/activate && python -c "from provide.foundry.config import extract_validate_examples_script, extract_clean_artifacts_script, extract_inject_partials_script, extract_mkdocs_hooks; from pathlib import Path; extract_validate_examples_script(Path('.')); extract_clean_artifacts_script(Path('.')); extract_inject_partials_script(Path('.')); extract_mkdocs_hooks(Path('.'))"
 	$(call print,$(GREEN)✅ Scripts extracted$(NC))
 
 .PHONY: generate-docs
