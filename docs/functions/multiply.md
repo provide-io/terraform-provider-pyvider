@@ -87,13 +87,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **add** (Function) - Add two numbers together
-- **subtract** (Function) - Subtract one number from another
-- **divide** (Function) - Divide one number by another
-- **sum** (Function) - Calculate the sum of multiple numbers in a list
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -85,13 +85,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **lower** (Function) - Convert strings to lowercase
-- **to_snake_case** (Function) - Convert to snake_case format
-- **to_camel_case** (Function) - Convert to camelCase format
-- **to_kebab_case** (Function) - Convert to kebab-case format
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

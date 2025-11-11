@@ -84,12 +84,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **split** (Function) - Split strings on delimiters
-- **join** (Function) - Join lists into strings
-- **format** (Function) - Format strings with placeholders
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

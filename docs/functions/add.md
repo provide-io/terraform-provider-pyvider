@@ -96,13 +96,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **sum** (Function) - Calculate the sum of multiple numbers in a list
-- **subtract** (Function) - Subtract one number from another
-- **multiply** (Function) - Multiply two numbers together
-- **divide** (Function) - Divide one number by another
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

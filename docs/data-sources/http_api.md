@@ -192,12 +192,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **pyvider_file_content** (Resource) - Save API responses to files
-- **pyvider_env_variables** (Data Source) - Use environment variables for API credentials
-- **pyvider_lens_jq** (Data Source) - Transform API responses with JQ queries
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

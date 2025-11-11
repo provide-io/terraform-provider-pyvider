@@ -137,12 +137,6 @@ output "directory_contents" {
 }
 ```
 
-## Related Components
-
-- **pyvider_file_content** (Resource) - Create files within managed directories
-- **pyvider_file_info** (Data Source) - Check directory existence without managing it
-- **pyvider_env_variables** (Data Source) - Use environment variables in directory paths
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

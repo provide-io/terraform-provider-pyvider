@@ -208,12 +208,6 @@ output "provider_endpoint" {
 }
 ```
 
-## Related Components
-
-- **pyvider_env_variables** (Data Source) - Read environment variables used in provider configuration
-- **pyvider_http_api** (Data Source) - Make requests using the provider's configured endpoint
-- **pyvider_file_content** (Resource) - Create configuration files based on provider settings
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

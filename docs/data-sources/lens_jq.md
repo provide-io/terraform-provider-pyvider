@@ -235,13 +235,6 @@ map(.created_at | strptime("%Y-%m-%d") | strftime("%m/%d/%Y"))
 reduce .[] as $item ({}; . * $item)
 ```
 
-## Related Components
-
-- **pyvider_lens_jq** (Function) - Use JQ transformations in function calls
-- **pyvider_http_api** (Data Source) - Fetch JSON data from APIs for transformation
-- **pyvider_file_content** (Resource) - Write transformed JSON to files
-- **pyvider_env_variables** (Data Source) - Transform environment variable data
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

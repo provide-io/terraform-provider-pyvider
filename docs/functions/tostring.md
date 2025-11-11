@@ -112,12 +112,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **format** (Function) - Format strings with placeholders and automatic type conversion
-- **join** (Function) - Join lists into strings with automatic conversion
-- **pluralize** (Function) - Format text based on numeric values
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

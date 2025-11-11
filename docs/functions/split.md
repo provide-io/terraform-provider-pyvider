@@ -83,12 +83,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **join** (Function) - Join lists into strings using delimiters
-- **contains** (Function) - Check if results contain specific elements
-- **length** (Function) - Get the count of split elements
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

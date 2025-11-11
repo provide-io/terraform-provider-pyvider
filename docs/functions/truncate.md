@@ -82,12 +82,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **length** (Function) - Get string length to check if truncation is needed
-- **format** (Function) - Format strings with placeholders
-- **replace** (Function) - Replace text in strings
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

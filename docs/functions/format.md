@@ -87,12 +87,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **join** (Function) - Join lists with delimiters
-- **tostring** (Function) - Convert values to strings explicitly
-- **concat** (Built-in) - Concatenate strings without formatting
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*
