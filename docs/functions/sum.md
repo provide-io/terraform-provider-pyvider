@@ -90,13 +90,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **add** (Function) - Add two numbers together
-- **max** (Function) - Find the maximum value in a list
-- **min** (Function) - Find the minimum value in a list
-- **length** (Function) - Get the count of elements in a list
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -113,13 +113,6 @@ During import, the resource will:
 
 Note: The `content` attribute in your configuration should match the existing file content to avoid drift detection on the next apply.
 
-## Related Components
-
-- **pyvider_local_directory** (Resource) - Manage directories and permissions before creating files
-- **pyvider_file_info** (Data Source) - Read file metadata without managing content
-- **pyvider_env_variables** (Data Source) - Include environment variables in file content
-- **pyvider_http_api** (Data Source) - Fetch content from APIs to write to files
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

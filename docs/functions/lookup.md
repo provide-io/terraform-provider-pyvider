@@ -134,11 +134,6 @@ For required keys, use variable validation to ensure they exist before attemptin
 ### Chain Lookups for Complex Data
 For nested configurations, perform multiple lookups in sequence rather than trying to access deeply nested paths directly. This provides better error messages and more control over defaults at each level.
 
-## Related Components
-
-- **contains** (Function) - Check if lists contain elements
-- **length** (Function) - Get the size of maps
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

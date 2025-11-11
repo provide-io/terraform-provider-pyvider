@@ -87,12 +87,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **add** (Function) - Add two numbers together
-- **multiply** (Function) - Multiply two numbers together
-- **divide** (Function) - Divide one number by another
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -121,13 +121,6 @@ resource "pyvider_local_directory" "app_dirs" {
 }
 ```
 
-## Related Components
-
-- **contains** (Function) - Check if a list contains an element
-- **lookup** (Function) - Look up values in maps
-- **max** (Function) - Find maximum value
-- **min** (Function) - Find minimum value
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

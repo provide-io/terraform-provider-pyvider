@@ -85,12 +85,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **round** (Function) - Round numeric values for display
-- **format** (Function) - Format strings with placeholders
-- **tostring** (Function) - Convert numbers to strings
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

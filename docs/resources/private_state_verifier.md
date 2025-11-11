@@ -191,12 +191,6 @@ locals {
 terraform import pyvider_private_state_verifier.example <id>
 ```
 
-## Related Components
-
-- **pyvider_timed_token** (Resource) - Time-based token generation for testing
-- **pyvider_simple_resource** (Resource) - Basic resource for comparison testing
-- **pyvider_provider_config** (Resource) - Provider configuration management
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

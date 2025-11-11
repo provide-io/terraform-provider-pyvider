@@ -118,13 +118,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **length** (Function) - Get the size of collections
-- **lookup** (Function) - Look up values in maps for key-value searches
-- **split** (Function) - Split strings to create searchable lists
-- **join** (Function) - Join lists after filtering
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -90,12 +90,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **split** (Function) - Split strings into lists using delimiters
-- **format** (Function) - Format strings with placeholders
-- **concat** (Built-in) - Concatenate multiple lists
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

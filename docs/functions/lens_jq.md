@@ -105,12 +105,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **lookup** (Function) - Simple key-value lookups for basic map access
-- **contains** (Function) - Check array membership for simpler containment tests
-- **length** (Function) - Get collection sizes
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

@@ -87,13 +87,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **add** (Function) - Add two numbers together
-- **subtract** (Function) - Subtract one number from another
-- **multiply** (Function) - Multiply two numbers together
-- **round** (Function) - Round division results to specific precision
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

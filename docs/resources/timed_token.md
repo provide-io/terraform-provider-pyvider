@@ -200,12 +200,6 @@ data "pyvider_http_api" "register_webhook" {
 terraform import pyvider_timed_token.example <id>
 ```
 
-## Related Components
-
-- **pyvider_private_state_verifier** (Resource) - Verify private state encryption for sensitive token storage
-- **pyvider_http_api** (Data Source) - Use tokens for API authentication
-- **pyvider_file_content** (Resource) - Write token configuration to files
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

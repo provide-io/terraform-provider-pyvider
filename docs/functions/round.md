@@ -92,13 +92,6 @@ locals {
 }
 ```
 
-## Related Components
-
-- **add** (Function) - Add numbers that may need rounding
-- **divide** (Function) - Divide numbers and round the results
-- **multiply** (Function) - Multiply numbers and round the results
-- **sum** (Function) - Sum values and round the total
-
 ---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*
