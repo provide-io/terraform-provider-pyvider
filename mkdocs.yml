@@ -1,5 +1,5 @@
 INHERIT: .provide/foundry/base-mkdocs.yml
-site_name: Terraform Provider Pyvider
+site_name: !ENV [PYVIDER_PROVIDER_SITE_NAME, 'Terraform Provider Pyvider']
 site_description: Official Terraform Provider for Pyvider - Infrastructure as Code
   in Python
 site_author: provide.io
