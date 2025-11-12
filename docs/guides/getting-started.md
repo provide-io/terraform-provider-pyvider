@@ -13,7 +13,7 @@ guide_order: 2
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
--> **Note:** New to Pyvider? Review the [Tour the Example Provider](./provider-tour.md) to understand what's available before diving into this hands-on tutorial.
+-> **Note:** New to Pyvider? Review the [Tour the Example Provider](./provider-tour/) to understand what's available before diving into this hands-on tutorial.
 
 ---
 
@@ -366,7 +366,7 @@ Congratulations! You've successfully:
 
 ### Explore More Components
 
-The pyvider provider includes resources, data sources, and functions. See the [provider documentation](../index.md) for the complete list of available components.
+The pyvider provider includes resources, data sources, and functions. See the [provider documentation](../index/) for the complete list of available components.
 
 ### Build Your Own Provider
 
@@ -380,7 +380,7 @@ Interested in building Terraform providers with Python?
 
 ## Troubleshooting
 
-Having issues? See our comprehensive **[Troubleshooting Guide](./troubleshooting.md)** for solutions to common problems:
+Having issues? See our comprehensive **[Troubleshooting Guide](./troubleshooting/)** for solutions to common problems:
 
 - **[Installation Issues](./troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
 - **[Configuration Errors](./troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
@@ -402,7 +402,7 @@ terraform init -upgrade
 ls -la $(dirname /path/to/file)
 ```
 
-**Need More Help?** → **[Full Troubleshooting Guide](./troubleshooting.md)**
+**Need More Help?** → **[Full Troubleshooting Guide](./troubleshooting/)**
 
 ---
 
@@ -468,7 +468,7 @@ output "greeting_info" {
 
 ## Additional Resources
 
-- **[Provider Reference](index.md):** Complete resource and data source reference
+- **[Provider Reference](index/):** Complete resource and data source reference
 - **[pyvider Documentation](https://docs.provide.io/pyvider/):** Provider framework docs
 - **[Terraform Documentation](https://www.terraform.io/docs):** Official Terraform docs
 - **[Community Support](https://github.com/provide-io/terraform-provider-pyvider/discussions):** Get help

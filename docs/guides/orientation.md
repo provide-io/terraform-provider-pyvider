@@ -46,5 +46,5 @@ Use the components in this library as templates when building your own providers
 
 ## Next steps
 
-- Continue to [Build Your Own Provider](./build-your-own.md) to create a custom provider for your infrastructure.
+- Continue to [Build Your Own Provider](./build-your-own/) to create a custom provider for your infrastructure.
 - Explore the component source code in this repository to understand implementation patterns.
