@@ -10,6 +10,7 @@ edit_uri: edit/main/docs/
 copyright: Copyright &copy; 2024-2025 provide.io
 dev_addr: 127.0.0.1:11013
 docs_dir: docs
+site_dir: site/providers/provide-io/pyvider/latest/docs
 hooks:
 - scripts/mkdocs_hooks.py
 plugins:
