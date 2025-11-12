@@ -254,14 +254,14 @@ jobs:
           echo "✅ PASS: Smoke test 1 completed successfully"
           echo "════════════════════════════════════════════════════════════════"
 
-      - name: "🔥 Smoke Test 2: Registry Query"
+      - name: "🔥 Smoke Test 2: Environment Variables"
         run: |
           echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 2: Registry Query (Data Source)"
+          echo "🔥 SMOKE TEST 2: Environment Variables (Data Source)"
           echo "════════════════════════════════════════════════════════════════"
           echo ""
-          echo "This test validates that the provider can query the Terraform"
-          echo "registry for provider information."
+          echo "This test validates that the provider can read environment"
+          echo "variables using the pyvider_env_variables data source."
           echo ""
 
           mkdir -p /tmp/smoke-test-registry
@@ -279,13 +279,12 @@ jobs:
 
           provider "pyvider" {}
 
-          data "pyvider_provider_info" "aws" {
-            namespace = "hashicorp"
-            name      = "aws"
+          data "pyvider_env_variables" "test" {
+            keys = ["HOME", "PATH"]
           }
 
-          output "latest_version" {
-            value = data.pyvider_provider_info.aws.latest_version
+          output "home_path" {
+            value = lookup(data.pyvider_env_variables.test.values, "HOME", "not_set")
           }
           EOF
 
@@ -389,7 +388,7 @@ jobs:
             echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Smoke Test 1:** Provider initialization" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ **Smoke Test 2:** Registry query (pyvider_provider_info)" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Smoke Test 2:** Environment variables (pyvider_env_variables)" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Single Test:** Full cycle on lens_jq" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Full Suite:** All 9 data source examples" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
