@@ -7,7 +7,7 @@ site_url: https://foundry.provide.io/providers/provide-io/pyvider/latest/docs
 repo_url: https://github.com/provide-io/terraform-provider-pyvider
 repo_name: provide-io/terraform-provider-pyvider
 edit_uri: edit/main/docs/
-copyright: Copyright &copy; 2024-2025 provide.io
+copyright: ©2024-2025 provide.io llc<br/>🛠️ with 💚 and 🦝 on 🌎
 dev_addr: 127.0.0.1:11013
 docs_dir: docs
 site_dir: site/providers/provide-io/pyvider/latest/docs
