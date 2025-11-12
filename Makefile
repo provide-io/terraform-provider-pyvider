@@ -316,8 +316,8 @@ clean-artifacts: ## Clean test artifacts from examples
 
 .PHONY: docs-serve
 docs-serve: docs-setup ## Serve documentation locally
-	$(call print,$(BLUE)🌐 Serving documentation at:$(NC))
-	$(call print,$(GREEN)  http://127.0.0.1:8000$(NC))
+	$(call print,$(BLUE)🌐 Serving documentation...$(NC))
+	$(call print,$(GREEN)  Check output above for URL$(NC))
 	@. .venv/bin/activate && \
 		mkdocs serve
 
