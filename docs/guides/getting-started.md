@@ -382,11 +382,11 @@ Interested in building Terraform providers with Python?
 
 Having issues? See our comprehensive **[Troubleshooting Guide](./troubleshooting/)** for solutions to common problems:
 
-- **[Installation Issues](./troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
-- **[Configuration Errors](./troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
-- **[Runtime Errors](./troubleshooting.md#runtime-errors)** - File operations, HTTP/API, state management
-- **[Debug Techniques](./troubleshooting.md#debugging-techniques)** - TF_LOG, state inspection, terraform console
-- **[Getting Help](./troubleshooting.md#getting-help)** - Community support and issue reporting
+- **[Installation Issues](./troubleshooting/#installation-issues)** - Provider not found, permissions, platform-specific
+- **[Configuration Errors](./troubleshooting/#configuration-errors)** - Validation, schema, type mismatches
+- **[Runtime Errors](./troubleshooting/#runtime-errors)** - File operations, HTTP/API, state management
+- **[Debug Techniques](./troubleshooting/#debugging-techniques)** - TF_LOG, state inspection, terraform console
+- **[Getting Help](./troubleshooting/#getting-help)** - Community support and issue reporting
 
 ### Quick Fixes
 
