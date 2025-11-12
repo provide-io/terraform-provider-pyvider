@@ -312,14 +312,14 @@ jobs:
           echo "✅ PASS: Smoke test 2 completed successfully"
           echo "════════════════════════════════════════════════════════════════"
 
-      - name: "🔬 Single Test Verification: provider_versions"
+      - name: "🔬 Single Test Verification: lens_jq"
         id: single_test
         env:
           TF_LOG: DEBUG
           PYVIDER_LOG_LEVEL: debug
         run: |
           chmod +x .github/scripts/single-test-verification.sh
-          .github/scripts/single-test-verification.sh provider_versions "${{ matrix.target }}"
+          .github/scripts/single-test-verification.sh lens_jq "${{ matrix.target }}"
 
       - name: 🧪 Run Full Conformance Tests
         id: full_conformance
@@ -344,9 +344,9 @@ jobs:
             examples/**/.terraform.lock.hcl
             examples/**/terraform.tfstate*
             examples/**/crash.log
-            examples/data-sources/provider_versions/.terraform/
-            examples/data-sources/provider_versions/terraform.tfstate*
-            examples/data-sources/provider_versions/.terraform.lock.hcl
+            examples/data-sources/lens_jq/.terraform/
+            examples/data-sources/lens_jq/terraform.tfstate*
+            examples/data-sources/lens_jq/.terraform.lock.hcl
             /tmp/smoke-test-init/.terraform/
             /tmp/smoke-test-init/terraform.tfstate*
             /tmp/smoke-test-init/.terraform.lock.hcl
@@ -390,7 +390,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Smoke Test 1:** Provider initialization" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Smoke Test 2:** Registry query (pyvider_provider_info)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ **Single Test:** Full cycle on provider_versions" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Single Test:** Full cycle on lens_jq" >> $GITHUB_STEP_SUMMARY
             echo "- ✅ **Full Suite:** All 9 data source examples" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "🎉 All conformance tests passed successfully!" >> $GITHUB_STEP_SUMMARY
