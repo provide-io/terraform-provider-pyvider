@@ -316,6 +316,7 @@ jobs:
         env:
           TF_LOG: DEBUG
           PYVIDER_LOG_LEVEL: debug
+          PYVIDER_TESTMODE: "true"
         run: |
           chmod +x .github/scripts/single-test-verification.sh
           .github/scripts/single-test-verification.sh lens_jq "${{ matrix.target }}"
@@ -327,6 +328,7 @@ jobs:
         env:
           TF_LOG: DEBUG
           PYVIDER_LOG_LEVEL: debug
+          PYVIDER_TESTMODE: "true"
         run: |
           chmod +x .github/scripts/run-conformance-suite.sh
           .github/scripts/run-conformance-suite.sh "${{ matrix.target }}"
