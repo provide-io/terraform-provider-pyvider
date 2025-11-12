@@ -3,7 +3,7 @@ site_name: !ENV [PYVIDER_PROVIDER_SITE_NAME, 'Terraform Provider Pyvider']
 site_description: Official Terraform Provider for Pyvider - Infrastructure as Code
   in Python
 site_author: provide.io
-site_url: https://registry.terraform.io/providers/provide-io/pyvider/latest/docs
+site_url: https://foundry.provide.io/providers/provide-io/pyvider/latest/docs
 repo_url: https://github.com/provide-io/terraform-provider-pyvider
 repo_name: provide-io/terraform-provider-pyvider
 edit_uri: edit/main/docs/
