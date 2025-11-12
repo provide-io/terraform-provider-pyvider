@@ -98,3 +98,33 @@ output "path_env" {
   value = data.pyvider_env_variables.path.values["PATH"]
 }
 ```
+
+## Development
+
+### Quick Start
+
+```bash
+# Set up environment
+uv sync
+
+# Run common tasks
+we test           # Run tests
+we lint           # Check code
+we format         # Format code
+we tasks          # See all available commands
+```
+
+### Available Commands
+
+This project uses `wrknv` for task automation. Run `we tasks` to see all available commands.
+
+**Common tasks:**
+- `we test` - Run all tests
+- `we test coverage` - Run tests with coverage
+- `we test parallel` - Run tests in parallel
+- `we lint` - Check code quality
+- `we lint fix` - Auto-fix linting issues
+- `we format` - Format code
+- `we typecheck` - Run type checker
+
+See [CLAUDE.md](CLAUDE.md) for detailed development instructions and architecture information.
