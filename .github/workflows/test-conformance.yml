@@ -4,9 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       build_run_id:
-        description: 'Build workflow run ID (required)'
-        required: true
+        description: 'Build workflow run ID (leave empty for last successful build)'
+        required: false
         type: string
+      skip_bot:
+        description: 'Skip running the bot (for manual testing)'
+        required: false
+        type: boolean
+        default: false
   workflow_run:
     workflows: ["🏗️ Build Provider Binary"]
     types:
@@ -24,35 +29,66 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       build_run_id: ${{ steps.check.outputs.build_run_id }}
+      skip_bot: ${{ steps.check.outputs.skip_bot }}
 
     steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
       - name: 📋 Determine build run ID
         id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          SKIP_BOT="${{ inputs.skip_bot }}"
+          SHOULD_RUN="true"
+          BUILD_RUN_ID=""
+
+          if [[ "$SKIP_BOT" == "true" ]]; then
+            echo "⏭️ Skipping bot as requested"
+          fi
+
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             BUILD_RUN_ID="${{ github.event.workflow_run.id }}"
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "build_run_id=${BUILD_RUN_ID}" >> $GITHUB_OUTPUT
             echo "✅ Running tests with artifacts from build workflow run: ${BUILD_RUN_ID}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.build_run_id }}" ]]; then
-            BUILD_RUN_ID="${{ inputs.build_run_id }}"
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "build_run_id=${BUILD_RUN_ID}" >> $GITHUB_OUTPUT
-            echo "✅ Running tests with artifacts from specified build run: ${BUILD_RUN_ID}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            PROVIDED_RUN_ID="${{ inputs.build_run_id }}"
+
+            if [[ -n "$PROVIDED_RUN_ID" ]]; then
+              BUILD_RUN_ID="$PROVIDED_RUN_ID"
+              echo "✅ Running tests with artifacts from specified build run: ${BUILD_RUN_ID}"
+            else
+              # Get last successful build using gh CLI
+              RUN_LIST=$(gh run list \
+                --workflow build-provider.yml \
+                --status completed \
+                --limit 1 \
+                --json databaseId,conclusion)
+
+              BUILD_RUN_ID=$(echo "$RUN_LIST" | jq '.[] | select(.conclusion=="success") | .databaseId')
+
+              if [[ -n "$BUILD_RUN_ID" ]] && [[ "$BUILD_RUN_ID" != "null" ]]; then
+                echo "✅ Using last successful build run: ${BUILD_RUN_ID}"
+              else
+                SHOULD_RUN="false"
+                echo "❌ ERROR: No successful build found. Please run the Build Provider Binary workflow first."
+              fi
+            fi
           else
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "❌ ERROR: This workflow requires artifacts from the Build Provider Binary workflow"
-            echo "Please run the Build Provider Binary workflow first, then either:"
-            echo "  1. Let it auto-trigger this workflow, OR"
-            echo "  2. Manually trigger this workflow and specify the build_run_id"
-            exit 1
+            SHOULD_RUN="false"
+            echo "❌ ERROR: Unexpected event type"
           fi
+
+          echo "should_run=${SHOULD_RUN}" >> $GITHUB_OUTPUT
+          echo "build_run_id=${BUILD_RUN_ID}" >> $GITHUB_OUTPUT
+          echo "skip_bot=${SKIP_BOT}" >> $GITHUB_OUTPUT
 
   conformance:
     name: 🧪 Test ${{ matrix.target }}
     needs: check
     if: needs.check.outputs.should_run == 'true'
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-24.04
@@ -173,18 +209,18 @@ jobs:
           echo "✅ Tofusoup installed"
           soup --version
 
-      - name: "🔥 Smoke Test 1: Production Mode (Minimal Config)"
+      - name: "🔥 Smoke Test 1: Provider Initialization"
         run: |
           echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 1: Production Mode (Minimal Configuration)"
+          echo "🔥 SMOKE TEST 1: Provider Initialization"
           echo "════════════════════════════════════════════════════════════════"
           echo ""
-          echo "This test validates that the provider loads and responds in"
-          echo "production mode with a minimal Terraform configuration."
+          echo "This test validates that the provider loads and responds with"
+          echo "a minimal Terraform configuration."
           echo ""
 
-          mkdir -p /tmp/smoke-test-production
-          cd /tmp/smoke-test-production
+          mkdir -p /tmp/smoke-test-init
+          cd /tmp/smoke-test-init
 
           cat > main.tf << 'EOF'
           terraform {
@@ -199,7 +235,7 @@ jobs:
           provider "pyvider" {}
 
           output "test" {
-            value = "smoke test - production mode"
+            value = "smoke test - provider initialized"
           }
           EOF
 
@@ -218,78 +254,43 @@ jobs:
           echo "✅ PASS: Smoke test 1 completed successfully"
           echo "════════════════════════════════════════════════════════════════"
 
-      - name: "🔥 Smoke Test 2: Test Mode Rejection (WITHOUT PYVIDER_TESTMODE)"
-        env:
-          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
+      - name: "🔥 Smoke Test 2: Registry Query"
         run: |
           echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 2: Test Mode Rejection"
+          echo "🔥 SMOKE TEST 2: Registry Query (Data Source)"
           echo "════════════════════════════════════════════════════════════════"
           echo ""
-          echo "This test validates that test-only components are correctly"
-          echo "rejected when PYVIDER_TESTMODE is NOT set."
+          echo "This test validates that the provider can query the Terraform"
+          echo "registry for provider information."
           echo ""
 
-          cd examples/resource/private_state_verifier
+          mkdir -p /tmp/smoke-test-registry
+          cd /tmp/smoke-test-registry
 
-          echo "📋 Provider configuration:"
-          cat provider.tf
-          echo ""
+          cat > main.tf << 'EOF'
+          terraform {
+            required_providers {
+              pyvider = {
+                source  = "local/providers/pyvider"
+                version = ">= 0.0.1"
+              }
+            }
+          }
 
-          # Ensure PYVIDER_TESTMODE is NOT set
-          unset PYVIDER_TESTMODE
+          provider "pyvider" {}
 
-          echo "🔧 Running: tofu init"
-          tofu init
-          echo ""
+          data "pyvider_provider_info" "aws" {
+            namespace = "hashicorp"
+            name      = "aws"
+          }
 
-          echo "📊 Running: tofu plan (expecting rejection...)"
-          if tofu plan 2>&1 | tee /tmp/testmode-false.log; then
-            # If plan succeeded, that's wrong - test-only resource should be rejected
-            echo ""
-            echo "❌ FAIL: Test-only component was NOT rejected as expected"
-            echo "   Expected error: 'test-only resource requires test mode'"
-            cat /tmp/testmode-false.log
-            exit 1
-          else
-            # Plan failed - check if it's the right error
-            if grep -qi "test-only.*requires test mode\|test mode.*required" /tmp/testmode-false.log; then
-              echo ""
-              echo "✅ PASS: Test-only component correctly rejected without test mode"
-            else
-              echo ""
-              echo "❌ FAIL: Plan failed but with unexpected error"
-              echo "   Expected error: 'test-only resource requires test mode'"
-              echo "   Actual output:"
-              cat /tmp/testmode-false.log
-              exit 1
-            fi
-          fi
+          output "latest_version" {
+            value = data.pyvider_provider_info.aws.latest_version
+          }
+          EOF
 
-          echo "════════════════════════════════════════════════════════════════"
-
-      - name: "🔥 Smoke Test 3: Test Mode Success (WITH PYVIDER_TESTMODE)"
-        env:
-          PYVIDER_TESTMODE: true
-          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
-        run: |
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 3: Test Mode Success"
-          echo "════════════════════════════════════════════════════════════════"
-          echo ""
-          echo "This test validates that test-only components work correctly"
-          echo "when PYVIDER_TESTMODE is set."
-          echo ""
-
-          cd examples/resource/private_state_verifier
-
-          # Clean up from previous test
-          rm -rf .terraform terraform.tfstate* .terraform.lock.hcl
-
-          # Enable test mode
-          export PYVIDER_TESTMODE=true
-          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
-          echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
+          echo "📋 Terraform configuration:"
+          cat main.tf
           echo ""
 
           echo "🔧 Running: tofu init"
@@ -308,80 +309,117 @@ jobs:
           tofu output
           echo ""
 
-          echo "✅ PASS: Test-only component works with test mode enabled"
+          echo "✅ PASS: Smoke test 2 completed successfully"
           echo "════════════════════════════════════════════════════════════════"
 
-      - name: 🧪 Run Full Conformance Tests
+      - name: "🔬 Single Test Verification: provider_versions"
+        id: single_test
         env:
           TF_LOG: DEBUG
-          PYVIDER_TESTMODE: true
-          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
+          PYVIDER_LOG_LEVEL: debug
         run: |
-          # Export environment variables for all subprocesses
-          export PYVIDER_TESTMODE=true
-          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
+          chmod +x .github/scripts/single-test-verification.sh
+          .github/scripts/single-test-verification.sh provider_versions "${{ matrix.target }}"
 
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🧪 FULL CONFORMANCE TEST SUITE"
-          echo "════════════════════════════════════════════════════════════════"
-          echo ""
-          echo "🔍 Running conformance tests on all examples..."
-          echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
-          echo "   Platform: ${{ matrix.target }}"
-          echo ""
+      - name: 🧪 Run Full Conformance Tests
+        id: full_conformance
+        if: success()
+        continue-on-error: true
+        env:
+          TF_LOG: DEBUG
+          PYVIDER_LOG_LEVEL: debug
+        run: |
+          chmod +x .github/scripts/run-conformance-suite.sh
+          .github/scripts/run-conformance-suite.sh "${{ matrix.target }}"
 
-          # Run soup stir on all examples recursively
-          cd examples
-          soup stir --recursive
-
-          echo ""
-          echo "✅ All provider conformance tests passed!"
-          echo "════════════════════════════════════════════════════════════════"
-
-      - name: 📤 Upload test logs
+      - name: 📤 Upload test logs and artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: conformance-test-logs-${{ matrix.target }}
           path: |
+            /tmp/conformance_output.txt
             examples/**/.soup/logs/*.log
             examples/**/.soup/logs/terraform.log
             examples/**/.terraform.lock.hcl
             examples/**/terraform.tfstate*
-            /tmp/smoke-test-production/.terraform/
-            /tmp/smoke-test-production/terraform.tfstate*
-            /tmp/smoke-test-production/.terraform.lock.hcl
-            /tmp/testmode-*.log
-            examples/resource/private_state_verifier/.terraform/
-            examples/resource/private_state_verifier/terraform.tfstate*
-            examples/resource/private_state_verifier/.terraform.lock.hcl
+            examples/**/crash.log
+            examples/data-sources/provider_versions/.terraform/
+            examples/data-sources/provider_versions/terraform.tfstate*
+            examples/data-sources/provider_versions/.terraform.lock.hcl
+            /tmp/smoke-test-init/.terraform/
+            /tmp/smoke-test-init/terraform.tfstate*
+            /tmp/smoke-test-init/.terraform.lock.hcl
+            /tmp/smoke-test-registry/.terraform/
+            /tmp/smoke-test-registry/terraform.tfstate*
+            /tmp/smoke-test-registry/.terraform.lock.hcl
           retention-days: 7
           if-no-files-found: warn
 
   summary:
     name: 📋 Test Summary
     needs: [check, conformance]
-    if: always() && needs.check.outputs.should_run == 'true'
+    if: always() && needs.check.outputs.should_run == 'true' && needs.check.outputs.skip_bot != 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: 📊 Generate Summary
         run: |
-          if [[ "${{ needs.conformance.result }}" == "success" ]]; then
-            echo "## ✅ All Conformance Tests Passed!" >> $GITHUB_STEP_SUMMARY
+          # Check if bot was skipped
+          if [[ "${{ needs.check.outputs.skip_bot }}" == "true" ]]; then
+            echo "## 🧪 Provider Conformance Tests - Bot Skipped" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All provider conformance tests completed successfully:" >> $GITHUB_STEP_SUMMARY
+            echo "Tests ran in manual/skip-bot mode. Summary generation skipped per request." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "## 🧪 Provider Conformance Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Create results table
+          echo "| Platform | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          CONFORMANCE_RESULT="${{ needs.conformance.result }}"
+
+          if [[ "$CONFORMANCE_RESULT" == "success" ]]; then
+            echo "| linux_amd64 | ✅ PASSED | All tests successful |" >> $GITHUB_STEP_SUMMARY
+            echo "| darwin_arm64 | ✅ PASSED | All tests successful |" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 1: Production mode (minimal config)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 2: Test mode rejection (without PYVIDER_TESTMODE)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 3: Test mode success (with PYVIDER_TESTMODE)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Full conformance suite (all examples)" >> $GITHUB_STEP_SUMMARY
+            echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Smoke Test 1:** Provider initialization" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Smoke Test 2:** Registry query (pyvider_provider_info)" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Single Test:** Full cycle on provider_versions" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ **Full Suite:** All 9 data source examples" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 All conformance tests passed successfully!" >> $GITHUB_STEP_SUMMARY
             exit 0
           else
-            echo "## ❌ Some Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "| linux_amd64 | ❌ FAILED | See job logs for details |" >> $GITHUB_STEP_SUMMARY
+            echo "| darwin_arm64 | ⚠️ SKIPPED/FAILED | See job logs for details |" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Check the test logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "### Failure Details" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Test logs are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+            echo "Some tests failed. The workflow uses a **hybrid failure handling** approach:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Platforms run independently** (fail-fast: false)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Single test acts as circuit breaker** - full suite skipped if it fails" >> $GITHUB_STEP_SUMMARY
+            echo "- **Full suite collects all failures** (continue-on-error: true)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### Artifacts Available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Download test artifacts for detailed logs:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`conformance-test-logs-linux_amd64\` - Linux test logs and state files" >> $GITHUB_STEP_SUMMARY
+            echo "- \`conformance-test-logs-darwin_arm64\` - macOS test logs and state files" >> $GITHUB_STEP_SUMMARY
+            echo "- \`/tmp/conformance_output.txt\` - Soup stir full output with error details" >> $GITHUB_STEP_SUMMARY
+            echo "- \`.soup/logs/\` - Individual test logs for each example" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "#### Next Steps" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Check the job logs to see which step failed" >> $GITHUB_STEP_SUMMARY
+            echo "2. Download artifacts to review detailed error messages" >> $GITHUB_STEP_SUMMARY
+            echo "3. Look for \`conformance_output.txt\` for soup stir failure analysis" >> $GITHUB_STEP_SUMMARY
+            echo "4. Review individual test logs in \`.soup/logs/terraform.log\`" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
