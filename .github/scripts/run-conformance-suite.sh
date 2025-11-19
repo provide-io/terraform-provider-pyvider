@@ -28,7 +28,7 @@ echo "   Platform: ${PLATFORM}"
 echo ""
 
 # Navigate to examples directory
-cd examples/data-sources
+cd examples
 
 # Run soup stir and capture output
 set +e

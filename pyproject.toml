@@ -12,6 +12,12 @@ dependencies = [
     "pyvider-components>=0.0.0",
 ]
 
+[project.urls]
+Homepage = "https://foundry.provide.io/terraform-provider-pyvider/"
+Documentation = "https://foundry.provide.io/terraform-provider-pyvider/"
+Repository = "https://foundry.provide.io/terraform-provider-pyvider/repo"
+Issues = "https://foundry.provide.io/terraform-provider-pyvider/issues"
+
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]",
@@ -32,6 +38,30 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 py-modules = []
 packages = []
+
+[tool.ruff]
+line-length = 111
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
+ignore = ["ANN401", "E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+pretty = true
+show_error_codes = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["pyvider.*", "flavorpack.*", "plating.*"]
+ignore_missing_imports = true
 
 [tool.flavor]
 entry_point = "pyvider.cli:main"
