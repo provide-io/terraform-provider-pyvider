@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
 # Validate Terraform examples for format and syntax
-# This script is maintained in provide-foundry and extracted to provider projects
 set -euo pipefail
 
 # Get the script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
-# Detect provider name from pyproject.toml or environment variable
-PROVIDER_NAME="${PROVIDER_NAME:-$(grep '^name = ' "$PROJECT_ROOT/pyproject.toml" 2>/dev/null | cut -d'"' -f2 | sed 's/terraform-provider-//')}"
-if [[ -z "$PROVIDER_NAME" ]]; then
-    echo "❌ Could not detect provider name. Set PROVIDER_NAME environment variable."
-    exit 1
-fi
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -79,14 +71,14 @@ validate_tf_file() {
             cat > .provider_temp.tf <<EOF
 terraform {
   required_providers {
-    ${PROVIDER_NAME} = {
-      source = "local/providers/${PROVIDER_NAME}"
+    pyvider = {
+      source = "local/providers/pyvider"
       version = ">= 0.0.1"
     }
   }
 }
 
-provider "${PROVIDER_NAME}" {}
+provider "pyvider" {}
 EOF
             trap "rm -f .provider_temp.tf" EXIT
         fi

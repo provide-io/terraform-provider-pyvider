@@ -36,7 +36,3 @@ output "function_result" {
 ```bash
 terraform import pyvider_nested_resource_test.example <id>
 ```
-
----
-
-*Documentation version: 0.0.19 | Last updated: 2025-11-09*

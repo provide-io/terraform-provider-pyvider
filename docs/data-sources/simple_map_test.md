@@ -29,17 +29,3 @@ output "function_result" {
 
 ## Argument Reference
 
-## Schema
-
-### Optional
-
-- `input_data` (Dynamic) - Simple string map input
-
-### Read-Only
-
-- `processed_data` (Dynamic) - Processed string map
-- `data_hash` (String) - Hash of processed data
-
----
-
-*Documentation version: 0.0.19 | Last updated: 2025-11-09*

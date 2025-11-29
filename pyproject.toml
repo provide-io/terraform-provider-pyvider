@@ -12,12 +12,6 @@ dependencies = [
     "pyvider-components>=0.0.0",
 ]
 
-[project.urls]
-Homepage = "https://foundry.provide.io/terraform-provider-pyvider/"
-Documentation = "https://foundry.provide.io/terraform-provider-pyvider/"
-Repository = "https://foundry.provide.io/terraform-provider-pyvider/repo"
-Issues = "https://foundry.provide.io/terraform-provider-pyvider/issues"
-
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]",
@@ -63,6 +57,8 @@ warn_unused_ignores = true
 module = ["pyvider.*", "flavorpack.*", "plating.*"]
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+addopts = "--dist load"
 [tool.flavor]
 entry_point = "pyvider.cli:main"
 output_path = "dist/terraform-provider-pyvider"
@@ -100,7 +96,3 @@ pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 name = "pyvider"
 # Component packages to use for this provider
 component_packages = ["pyvider.components"]
-
-[tool.plating]
-merge_content_from = ["pyvider.components"]
-exclude_from_merge = ["templates", "partials"]
