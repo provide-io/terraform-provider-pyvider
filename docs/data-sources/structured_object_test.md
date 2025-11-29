@@ -29,21 +29,3 @@ output "function_result" {
 
 ## Argument Reference
 
-## Schema
-
-### Required
-
-- `config_name` (String) - 
-
-### Optional
-
-- `metadata` (Dynamic) - 
-
-### Read-Only
-
-- `generated_config` (Dynamic) - 
-- `summary` (Dynamic) -
-
----
-
-*Documentation version: 0.0.19 | Last updated: 2025-11-09*
