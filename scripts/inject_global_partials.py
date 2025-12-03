@@ -269,7 +269,7 @@ def inject_global_partials(
     return files_changed
 
 
-def main():
+def main() -> int:
     # Paths - relative to script location
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
