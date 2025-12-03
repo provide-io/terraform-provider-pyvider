@@ -7,8 +7,8 @@ site_url: https://registry.terraform.io/providers/provide-io/pyvider/latest/docs
 repo_url: https://github.com/provide-io/terraform-provider-pyvider
 repo_name: provide-io/terraform-provider-pyvider
 edit_uri: edit/main/docs/
-copyright: Copyright &copy; 2024-2025 provide.io
-dev_addr: 127.0.0.1:8010
+copyright: ©2024-2025 provide.io llc<br/>🛠️ with 💚 and 🦝 on 🌎
+dev_addr: 127.0.0.1:11030
 docs_dir: docs
 hooks:
 - scripts/mkdocs_hooks.py
