@@ -154,21 +154,16 @@ jobs:
         with:
           enable-cache: false
 
-      - name: 🧰 Install wrknv
-        run: |
-          uv tool install git+https://github.com/provide-io/wrknv.git
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: 📚 Generate Documentation
         if: inputs.generate_docs == true
         run: |
           echo "📝 Generating documentation and examples with plating..."
 
           # Install project dependencies and dev tools (includes plating and pyvider-components)
-          uv sync --all-groups
+          uv sync --group dev
 
-          # Generate documentation via wrknv task
-          we run docs.build
+          # Run full documentation build (generates docs + examples + validation)
+          ./scripts/build-docs.sh
 
           echo "✅ Documentation and examples generated"
           ls -la docs/
