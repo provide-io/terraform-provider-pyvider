@@ -70,3 +70,6 @@ pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 name = "pyvider"
 # Component packages to use for this provider
 component_packages = ["pyvider.components"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests", "workenv"]
