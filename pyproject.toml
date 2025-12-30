@@ -4,12 +4,28 @@ dynamic = ["version"]
 description = "The official Pyvider provider, built with Pyvider."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+    { name = "Tim Perkins", email = "code@tim.life" }
+]
+maintainers = [
+    { name = "provide.io", email = "code@provide.io" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = [
-    "flavorpack>=0.0.0",
-    "plating>=0.0.0",
-    "provide-foundation>=0.0.0",
-    "pyvider>=0.0.0",
-    "pyvider-components>=0.0.0",
+    "flavorpack",
+    "plating",
+    "provide-foundation",
+    "pyvider",
+    "pyvider-components",
 ]
 
 [dependency-groups]
@@ -42,9 +58,16 @@ target-version = "py311"
 select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
 ignore = ["ANN401", "E501"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["pyvider", "tests"]
+force-sort-within-sections = true
+combine-as-imports = true
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.11"
