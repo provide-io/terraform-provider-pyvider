@@ -6,7 +6,6 @@ Converts:
   ~> **Note:** text     → !!! warning
   !> **Warning:** text  → !!! danger
 """
-
 import re
 
 
@@ -17,7 +16,7 @@ def on_page_markdown(markdown, page, config, files):
     This hook is automatically called by MkDocs for each page.
     """
     # Pattern to match Terraform callouts at start of line
-    pattern = r"^(->|~>|!>)\s+\*\*([^*]+):\*\*\s+(.+)$"
+    pattern = r'^(->|~>|!>)\s+\*\*([^*]+):\*\*\s+(.+)$'
 
     def replace_callout(match):
         sigil = match.group(1)
@@ -26,18 +25,18 @@ def on_page_markdown(markdown, page, config, files):
 
         # Map Terraform sigils to MkDocs admonition types
         sigil_map = {
-            "->": "note",  # Blue
-            "~>": "warning",  # Orange/yellow
-            "!>": "danger",  # Red
+            '->': 'note',      # Blue
+            '~>': 'warning',   # Orange/yellow
+            '!>': 'danger'     # Red
         }
 
-        admonition_type = sigil_map.get(sigil, "note")
+        admonition_type = sigil_map.get(sigil, 'note')
 
         # Build MkDocs admonition with proper indentation
         return f'!!! {admonition_type} "{title_text}"\n\n    {content}'
 
     # Process line by line
-    lines = markdown.split("\n")
+    lines = markdown.split('\n')
     result_lines = []
 
     for line in lines:
@@ -47,4 +46,4 @@ def on_page_markdown(markdown, page, config, files):
         else:
             result_lines.append(line)
 
-    return "\n".join(result_lines)
+    return '\n'.join(result_lines)
