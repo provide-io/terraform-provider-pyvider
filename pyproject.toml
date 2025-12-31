@@ -1,3 +1,13 @@
+#
+# terraform-provider-pyvider/pyproject.toml
+#
+# The official Pyvider provider, built with Pyvider
+#
+
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "terraform-provider-pyvider"
 dynamic = ["version"]
@@ -11,6 +21,7 @@ authors = [
 maintainers = [
     { name = "provide.io", email = "code@provide.io" }
 ]
+keywords = ["terraform", "provider", "pyvider", "opentofu", "infrastructure"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -19,6 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
 dependencies = [
     "flavorpack",
@@ -40,10 +52,6 @@ docs = [
 
 [project.scripts]
 terraform-provider-pyvider = "pyvider.cli:main"
-
-[build-system]
-requires = ["setuptools>=75.0", "wheel"]
-build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 py-modules = []
@@ -81,8 +89,36 @@ module = ["pyvider.*", "flavorpack.*", "plating.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
 addopts = ""
 # Parallel execution: pytest -n <workers> (range: 2-16, recommend: CPU cores or 8, max: 16 to avoid xdist hang)
+
+[tool.coverage.run]
+branch = true
+source = ["."]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+skip_covered = true
+precision = 2
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "def __repr__",
+    "def __str__",
+    "pass",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
 [tool.flavor]
 entry_point = "pyvider.cli:main"
 output_path = "dist/terraform-provider-pyvider"
