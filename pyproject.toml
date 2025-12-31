@@ -57,6 +57,9 @@ terraform-provider-pyvider = "pyvider.cli:main"
 py-modules = []
 packages = []
 
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
+
 [tool.ruff]
 line-length = 111
 indent-width = 4
