@@ -1,5 +1,5 @@
 [tasks]
-typecheck = "mypy src/"
+typecheck = "mypy plating/"
 build = "uv build"
 
 [tasks.test]
