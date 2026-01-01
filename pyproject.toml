@@ -45,6 +45,7 @@ dev = [
     "provide-testkit[standard,build]",
     "flavorpack",
     "plating",
+    "ty>=0.0.8",
 ]
 docs = [
     "provide-testkit[docs]",
