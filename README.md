@@ -8,6 +8,66 @@
 
 **Why it matters:** Proves you can build fully functional Terraform providers in Python instead of Go, and serves as a reference implementation for the [pyvider framework](https://github.com/provide-io/pyvider).
 
+## Features
+
+* **Utility Resources:** Manage local files and directories (`pyvider_file_content`, `pyvider_local_directory`).
+* **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
+* **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_lens_jq`).
+* **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
+
+## Getting Started
+
+**New to the pyvider provider?** Check out our comprehensive tutorial:
+
+**[→ Getting Started Tutorial](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)** - Complete walkthrough in 10-15 minutes
+
+The tutorial covers:
+- Installing and configuring the provider
+- Creating your first resources
+- Using data sources
+- Updating and destroying resources
+
+## Documentation
+- [Documentation index](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/index.md)
+- [Getting started](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)
+- [Examples](https://github.com/provide-io/terraform-provider-pyvider/blob/main/examples/README.md)
+
+## Development
+
+### Quick Start
+
+```bash
+# Set up environment
+uv sync
+
+# Run common tasks
+we test           # Run tests
+we lint           # Check code
+we format         # Format code
+we tasks          # See all available commands
+```
+
+### Available Commands
+
+This project uses `wrknv` for task automation. Run `we tasks` to see all available commands.
+
+**Common tasks:**
+- `we test` - Run all tests
+- `we test coverage` - Run tests with coverage
+- `we test parallel` - Run tests in parallel
+- `we lint` - Check code quality
+- `we lint fix` - Auto-fix linting issues
+- `we format` - Format code
+- `we typecheck` - Run type checker
+
+See [CLAUDE.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/CLAUDE.md) for detailed development instructions and architecture information.
+
+## Contributing
+See [CLAUDE.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/CLAUDE.md) for contribution guidance.
+
+## License
+See [LICENSE](https://github.com/provide-io/terraform-provider-pyvider/blob/main/LICENSE) for license details.
+
 ## When to Use This Provider
 
 **✅ Use this provider for:**
@@ -23,13 +83,6 @@
 - Long-term production configurations
 
 **For production needs:** Build your own custom provider using [pyvider](https://github.com/provide-io/pyvider), or use established providers (AWS, Azure, etc.).
-
-## Features
-
-* **Utility Resources:** Manage local files and directories (`pyvider_file_content`, `pyvider_local_directory`).
-* **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
-* **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_lens_jq`).
-* **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
 
 ## Relationship to pyvider-components
 
@@ -48,18 +101,6 @@ pyvider-components (examples) ──packages──> terraform-provider-pyvider (
 - **terraform-provider-pyvider** is for learning and testing the provider in Terraform (proof-of-concept)
 
 **Building your own provider?** Start with [pyvider-components](https://github.com/provide-io/pyvider-components) to see working examples, then use the [pyvider framework](https://github.com/provide-io/pyvider) to build your custom provider.
-
-## Getting Started
-
-**New to the pyvider provider?** Check out our comprehensive tutorial:
-
-**[→ Getting Started Tutorial](docs/guides/02-getting-started.md)** - Complete walkthrough in 10-15 minutes
-
-The tutorial covers:
-- Installing and configuring the provider
-- Creating your first resources
-- Using data sources
-- Updating and destroying resources
 
 ## Installation
 
@@ -98,3 +139,5 @@ output "path_env" {
   value = data.pyvider_env_variables.path.values["PATH"]
 }
 ```
+
+Copyright (c) Provide.io LLC.
