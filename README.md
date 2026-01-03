@@ -30,7 +30,7 @@ The tutorial covers:
 ## Documentation
 - [Documentation index](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/index.md)
 - [Getting started](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)
-- [Examples](https://github.com/provide-io/terraform-provider-pyvider/blob/main/examples/README.md)
+- [Examples](https://github.com/provide-io/terraform-provider-pyvider/tree/main/examples)
 
 ## Development
 
