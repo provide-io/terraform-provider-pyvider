@@ -1,6 +1,6 @@
 # Terraform Provider: Pyvider
 
-> **⚠️ Proof of Concept:** This is a proof-of-concept Terraform provider demonstrating what's possible when building providers in Python using the pyvider framework. Use it to learn Python-based provider development or to access utility resources for testing and diagnostics—but not for production infrastructure.
+> **Initial release:** This Terraform provider demonstrates what’s possible when building providers in Python using the pyvider framework, and includes a representative set of resources, data sources, and functions.
 
 **What it is:** A working Terraform provider that bundles a representative set of example resources, data sources, and functions—built entirely in Python.
 
@@ -120,8 +120,7 @@ terraform {
   required_providers {
     pyvider = {
       source  = "local/providers/pyvider"
-      version = ">= 0.0.0"  # For development: accepts any version
-      # For production, pin to specific version: version = "~> 0.1"
+      version = ">= 0.0.3"
     }
   }
 }
