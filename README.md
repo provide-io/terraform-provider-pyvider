@@ -139,4 +139,4 @@ output "path_env" {
 }
 ```
 
-Copyright (c) Provide.io LLC.
+Copyright (c) provide.io LLC.
