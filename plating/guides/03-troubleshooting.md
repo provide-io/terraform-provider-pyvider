@@ -409,7 +409,7 @@ variable "port" {
 
 ### Understanding POC Status
 
-**This provider is a proof-of-concept**, not a production-ready infrastructure management tool.
+**This provider is a proof-of-concept**, not recommended for production infrastructure management.
 
 **Current Limitations:**
 
@@ -420,7 +420,7 @@ variable "port" {
 
 2. **Experimental Features:**
    - Some resources are examples, not production-tested
-   - APIs may change in future versions
+   - APIs may change in later versions; timing may change or be removed
    - Not all pyvider framework features implemented
 
 3. **Performance:**
@@ -668,3 +668,7 @@ rm -rf .terraform terraform.tfstate*
 ---
 
 **Still stuck?** Open an issue on [GitHub](https://github.com/provide-io/terraform-provider-pyvider/issues) with details!
+
+---
+
+*Documentation version: 0.0.19 | Last updated: 2025-11-09*
