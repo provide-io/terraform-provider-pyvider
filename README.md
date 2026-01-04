@@ -1,6 +1,12 @@
 # Terraform Provider: Pyvider
 
-> **Initial release:** This Terraform provider demonstrates what’s possible when building providers in Python using the pyvider framework, and includes a representative set of resources, data sources, and functions.
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/badge/uv-package_manager-FF6B35.svg)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![CI](https://github.com/provide-io/terraform-provider-pyvider/actions/workflows/ci.yml/badge.svg)](https://github.com/provide-io/terraform-provider-pyvider/actions)
+
+> **Initial release:** This Terraform provider demonstrates what's possible when building providers in Python using the pyvider framework, and includes a representative set of resources, data sources, and functions.
 
 **What it is:** A working Terraform provider that bundles a representative set of example resources, data sources, and functions—built entirely in Python.
 
