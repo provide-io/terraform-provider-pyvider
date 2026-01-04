@@ -17,6 +17,8 @@
 
 ## Getting Started
 
+> **Note**: terraform-provider-pyvider is in pre-release (v0.x.x). APIs and features may change before 1.0 release.
+
 **New to the pyvider provider?** Check out our comprehensive tutorial:
 
 **[→ Getting Started Tutorial](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)** - Complete walkthrough in 10-15 minutes
