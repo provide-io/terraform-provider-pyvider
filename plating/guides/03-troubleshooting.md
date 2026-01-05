@@ -8,7 +8,7 @@ guide_order: 4
 
 Common issues and solutions for the pyvider Terraform provider.
 
-~> **Note:** Remember: this is a proof-of-concept provider. Many rough edges come from the provider's experimental status. If you need production guarantees, plan to build a custom provider with [Pyvider](https://github.com/provide-io/pyvider).
+~> **Note:** This provider is in pre-release. Expect API changes, and consider building a custom provider with [Pyvider](https://github.com/provide-io/pyvider) for production needs.
 
 ---
 
