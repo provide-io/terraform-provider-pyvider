@@ -33,13 +33,13 @@ Since this provider uses components from `pyvider-components`, tests are primari
 
 ```bash
 # Run all tests
-we test
+we run test
 
 # Run specific test file
 uv run pytest tests/test_specific.py
 
 # Run with coverage
-we test coverage
+we run test.coverage
 ```
 
 ### Building the Provider
@@ -77,13 +77,13 @@ Before submitting a pull request, ensure your code passes all quality checks:
 
 ```bash
 # Format code
-we format
+we run format
 
 # Lint code
-we lint
+we run lint
 
 # Auto-fix linting issues
-we lint fix
+we run lint.fix
 
 # Type check
 we typecheck
@@ -121,7 +121,7 @@ Documentation is generated using Plating:
 plating plate --output-dir docs
 
 # Or using wrknv
-we docs build
+we run docs.build
 ```
 
 ### Updating Documentation
@@ -207,8 +207,8 @@ terraform-provider-pyvider/
 
 3. Ensure all tests pass and code quality checks pass:
    ```bash
-   we test
-   we lint
+   we run test
+   we run lint
    we typecheck
    ```
 

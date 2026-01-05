@@ -42,9 +42,9 @@ After editing any Python file, run these commands:
 
 ```bash
 # If `we` commands available:
-we format
-we lint
-we typecheck
+we run format
+we run lint
+we run typecheck
 
 # Otherwise:
 ruff format <file>

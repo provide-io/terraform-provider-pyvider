@@ -369,9 +369,9 @@ The pyvider provider includes resources, data sources, and functions. See the [p
 
 Interested in building Terraform providers with Python?
 
-- **[pyvider Framework](https://docs.provide.io/pyvider/):** Build providers in Python
-- **[pyvider-components](https://docs.provide.io/pyvider-components/):** Example component library for learning and reference
-- **[Building Providers Guide](https://docs.provide.io/pyvider/guides/building-components/):** Complete guide
+- **[pyvider Framework](https://foundry.provide.io/pyvider/):** Build providers in Python
+- **[pyvider-components](https://foundry.provide.io/pyvider-components/):** Example component library for learning and reference
+- **[Building Providers Guide](https://foundry.provide.io/pyvider/guides/building-components/):** Complete guide
 
 ---
 
@@ -466,7 +466,7 @@ output "greeting_info" {
 ## Additional Resources
 
 - **[Provider Reference](index.md):** Complete resource and data source reference
-- **[pyvider Documentation](https://docs.provide.io/pyvider/):** Provider framework docs
+- **[pyvider Documentation](https://foundry.provide.io/pyvider/):** Provider framework docs
 - **[Terraform Documentation](https://www.terraform.io/docs):** Official Terraform docs
 - **[Community Support](https://github.com/provide-io/terraform-provider-pyvider/discussions):** Get help
 
