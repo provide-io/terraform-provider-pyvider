@@ -264,7 +264,7 @@ lint-examples: ## Run terraform fmt on examples
 
 .PHONY: docs-serve
 docs-serve: docs ## Build and serve documentation locally
-	@echo "$(BLUE)🌐 Serving documentation on http://localhost:8000$(NC)"
+	@echo "$(BLUE)🌐 Serving documentation on http://localhost:11030$(NC)"
 	@cd docs && python3 -m http.server 8000
 
 # ==============================================================================
