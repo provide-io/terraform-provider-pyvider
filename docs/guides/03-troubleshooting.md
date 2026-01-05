@@ -420,7 +420,7 @@ variable "port" {
 
 2. **Experimental Features:**
    - Some resources are examples, not production-tested
-   - APIs may change in later versions; timing may change or be removed
+   - APIs may change in later versions; availability may change or be removed
    - Not all pyvider framework features implemented
 
 3. **Performance:**
@@ -476,7 +476,7 @@ variable "port" {
 **How to Build:**
 - Use [pyvider framework](https://github.com/provide-io/pyvider)
 - Reference pyvider-components for examples
-- Follow [pyvider documentation](https://docs.provide.io/pyvider/)
+- Follow [pyvider documentation](https://foundry.provide.io/pyvider/)
 
 ---
 
