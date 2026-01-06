@@ -8,7 +8,7 @@ template_output: "index.md"
 # Pyvider Provider
 
 !!! warning "Pre-release"
-    This documentation covers a pre-release. APIs and features may change, and some documented items are exploratory and may change or be removed.
+    This documentation covers a pre-release. APIs and features may change during the pre-release series.
 
 
 Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
