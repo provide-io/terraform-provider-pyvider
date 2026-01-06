@@ -465,7 +465,7 @@ output "greeting_info" {
 
 ## Additional Resources
 
-- **[Provider Reference](index.md):** Complete resource and data source reference
+- **[Provider Reference](../index.md):** Complete resource and data source reference
 - **[pyvider Documentation](https://foundry.provide.io/pyvider/):** Provider framework docs
 - **[Terraform Documentation](https://www.terraform.io/docs):** Official Terraform docs
 - **[Community Support](https://github.com/provide-io/terraform-provider-pyvider/discussions):** Get help

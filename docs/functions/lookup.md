@@ -7,7 +7,7 @@ description: |-
 
 Fetch a key from a map. Provide a default as the third argument to avoid errors when the key is missing.
 
-~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+~> **Note:** This provider is in pre-release and under active development. Features and APIs may change without notice and it is not intended for production infrastructure.
 
 
 ## Example Usage

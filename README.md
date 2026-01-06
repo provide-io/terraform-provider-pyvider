@@ -101,12 +101,12 @@ This provider is built using components from the [pyvider-components](https://gi
 - **terraform-provider-pyvider**: Proof-of-concept provider that packages those components for Terraform testing and learning
 
 ```
-pyvider-components (examples) ──packages──> terraform-provider-pyvider (POC/testing)
+pyvider-components (examples) ──packages──> terraform-provider-pyvider (pre-release/testing)
 ```
 
 **Why two repositories?**
 - **pyvider-components** is for developers building their own providers (learning/reference)
-- **terraform-provider-pyvider** is for learning and testing the provider in Terraform (proof-of-concept)
+- **terraform-provider-pyvider** is for learning and testing the provider in Terraform (pre-release)
 
 **Building your own provider?** Start with [pyvider-components](https://github.com/provide-io/pyvider-components) to see working examples, then use the [pyvider framework](https://github.com/provide-io/pyvider) to build your custom provider.
 
