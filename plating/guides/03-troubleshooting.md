@@ -405,11 +405,11 @@ variable "port" {
 
 ---
 
-## Provider Limitations (POC Status)
+## Provider Limitations (Pre-release)
 
-### Understanding POC Status
+### Understanding Pre-release Status
 
-**This provider is a proof-of-concept**, not recommended for production infrastructure management.
+**This provider is in pre-release**, not recommended for production infrastructure management.
 
 **Current Limitations:**
 
@@ -437,7 +437,7 @@ variable "port" {
 
 **Provider vs Framework:**
 
-- **terraform-provider-pyvider:** POC showing what's possible
+- **terraform-provider-pyvider:** Pre-release provider showing what's possible
 - **pyvider framework:** Full framework for building custom providers
 
 **If you need:**

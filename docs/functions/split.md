@@ -7,7 +7,7 @@ description: |-
 
 Split a string by a delimiter.
 
-~> **Note:** This provider is currently in POC (proof-of-concept) status and under active development. Features and APIs may change without notice. Not intended for production infrastructure.
+~> **Note:** This provider is in pre-release and under active development. Features and APIs may change without notice and it is not intended for production infrastructure.
 
 
 ## Example Usage
