@@ -155,6 +155,31 @@ public_key_path = "keys/provider-public.key"
 # Pass through all Terraform, Pyvider, and Foundation environment variables as-is
 pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 
+[tool.bandit]
+exclude_dirs = [".venv", "tests", "workenv"]
+
+################################################################################
+# Security Scanning Allowlist
+################################################################################
+
+[tool.security]
+# Paths to exclude from secret scanning (TruffleHog, GitGuardian, Gitleaks)
+# Run: we security generate (via wrknv) to regenerate tool configs
+description = "Documentation, examples, and build artifacts - intentionally committed"
+allowed_paths = [
+    # Generated documentation with example HCL
+    "docs/**",
+    "docs-old/**",
+    # Terraform examples with test tfplan files
+    "examples/**",
+    # Test signing keys for provider development
+    "keys/**",
+    # FlavorPack workenv build artifacts
+    "workenv/**",
+    # GitHub bot private keys (legacy, in git history)
+    "*.private-key.pem",
+]
+
 [pyvider]
 # Provider metadata
 name = "pyvider"
