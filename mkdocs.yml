@@ -1,0 +1,116 @@
+INHERIT: .provide/foundry/base-mkdocs.yml
+site_name: Terraform Provider Pyvider
+site_description: Official Terraform Provider for Pyvider - Infrastructure as Code
+  in Python
+site_author: provide.io
+site_url: https://registry.terraform.io/providers/provide-io/pyvider/latest/docs
+repo_url: https://github.com/provide-io/terraform-provider-pyvider
+repo_name: provide-io/terraform-provider-pyvider
+edit_uri: edit/main/docs/
+copyright: ©2024-2025 provide.io llc<br/>🛠️ with 💚 and 🦝 on 🌎
+dev_addr: 127.0.0.1:11030
+docs_dir: docs
+hooks:
+- .provide/foundry/theme/hooks/terraform_provider.py
+plugins:
+- search
+theme:
+  features:
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.progress
+  - navigation.tracking
+  - navigation.path
+  - navigation.indexes
+  - navigation.top
+  - navigation.footer
+  - toc.follow
+  - search.suggest
+  - search.highlight
+  - search.share
+  - content.code.copy
+  - content.code.select
+  - content.code.annotate
+  - content.tabs.link
+  - content.tooltips
+  - content.action.edit
+  - content.action.view
+  - header.autohide
+  - announce.dismiss
+  palette:
+  - media: '(prefers-color-scheme: light)'
+    scheme: default
+    primary: deep purple
+    accent: purple
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: '(prefers-color-scheme: dark)'
+    scheme: slate
+    primary: deep purple
+    accent: purple
+    toggle:
+      icon: material/brightness-4
+      name: Switch to light mode
+nav:
+- Overview: index.md
+- Guides:
+  - 00) Understand the Pyvider Framework: guides/00-pyvider-orientation.md
+  - 01) Tour the Example Provider: guides/01-provider-tour.md
+  - 02) Getting Started with Pyvider: guides/02-getting-started.md
+  - 03) Troubleshooting: guides/03-troubleshooting.md
+  - 04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
+- Resources:
+  - timed_token: resources/timed_token.md
+- Data Sources:
+  - env_variables: data-sources/env_variables.md
+  - nested_data_processor: data-sources/nested_data_processor.md
+  - provider_config_reader: data-sources/provider_config_reader.md
+- Functions:
+  - add: functions/add.md
+  - contains: functions/contains.md
+  - divide: functions/divide.md
+  - format: functions/format.md
+  - format_size: functions/format_size.md
+  - join: functions/join.md
+  - length: functions/length.md
+  - lookup: functions/lookup.md
+  - lower: functions/lower.md
+  - max: functions/max.md
+  - min: functions/min.md
+  - multiply: functions/multiply.md
+  - pluralize: functions/pluralize.md
+  - replace: functions/replace.md
+  - round: functions/round.md
+  - split: functions/split.md
+  - subtract: functions/subtract.md
+  - sum: functions/sum.md
+  - to_camel_case: functions/to_camel_case.md
+  - to_kebab_case: functions/to_kebab_case.md
+  - to_snake_case: functions/to_snake_case.md
+  - tostring: functions/tostring.md
+  - truncate: functions/truncate.md
+  - upper: functions/upper.md
+- File Operations:
+  - Resources:
+    - file_content: resources/file_content.md
+    - local_directory: resources/local_directory.md
+  - Data Sources:
+    - file_info: data-sources/file_info.md
+- Lens:
+  - Data Sources:
+    - lens_jq: data-sources/lens_jq.md
+  - Functions:
+    - lens_jq: functions/lens_jq.md
+- Network:
+  - Data Sources:
+    - http_api: data-sources/http_api.md
+- Test Mode:
+  - Resources:
+    - private_state_verifier: resources/private_state_verifier.md
+    - warning_example: resources/warning_example.md
+  - Data Sources:
+    - mixed_map_test: data-sources/mixed_map_test.md
+    - nested_resource_test: data-sources/nested_resource_test.md
+    - simple_map_test: data-sources/simple_map_test.md
+    - structured_object_test: data-sources/structured_object_test.md

@@ -1,0 +1,187 @@
+#
+# terraform-provider-pyvider/pyproject.toml
+#
+# The official Pyvider provider, built with Pyvider
+#
+
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "terraform-provider-pyvider"
+dynamic = ["version"]
+description = "The official Pyvider provider, built with Pyvider."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+    { name = "Tim Perkins", email = "code@tim.life" }
+]
+maintainers = [
+    { name = "provide.io", email = "code@provide.io" }
+]
+keywords = ["terraform", "provider", "pyvider", "opentofu", "infrastructure"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = [
+    "flavorpack",
+    "plating",
+    "provide-foundation",
+    "pyvider",
+    "pyvider-components",
+]
+
+[dependency-groups]
+dev = [
+    "provide-testkit[standard,build]",
+    "flavorpack",
+    "plating",
+    "ty>=0.0.8",
+]
+docs = [
+    "provide-testkit[docs]",
+]
+
+[project.scripts]
+terraform-provider-pyvider = "pyvider.cli:main"
+
+[tool.setuptools]
+py-modules = []
+packages = []
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
+
+[tool.ruff]
+line-length = 111
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
+ignore = ["ANN401", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pyvider", "tests"]
+force-sort-within-sections = true
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+pretty = true
+show_error_codes = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["pyvider.*", "flavorpack.*", "plating.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = ""
+# Parallel execution: pytest -n <workers> (range: 2-16, recommend: CPU cores or 8, max: 16 to avoid xdist hang)
+
+[tool.coverage.run]
+branch = true
+source = ["."]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+skip_covered = true
+precision = 2
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "def __repr__",
+    "def __str__",
+    "pass",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+[tool.flavor]
+entry_point = "pyvider.cli:main"
+output_path = "dist/terraform-provider-pyvider"
+# Ensure the binary is named terraform-provider-pyvider so detection works
+command = "{workenv}/bin/terraform-provider-pyvider"
+
+[tool.flavor.metadata]
+package_name = "terraform-provider-pyvider"
+
+[tool.flavor.build]
+# This meta package just brings together components
+dependencies = []
+exclude = [
+    "**/.terraform/**",
+    "**/.venv/**", 
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/.DS_Store",
+]
+
+[tool.flavor.signing]
+private_key_path = "keys/provider-private.key"
+public_key_path = "keys/provider-public.key"
+
+[tool.flavor.execution]
+# Runtime environment configuration for Terraform provider protocol
+[tool.flavor.execution.runtime]
+[tool.flavor.execution.runtime.env]
+# Pass through all Terraform, Pyvider, and Foundation environment variables as-is
+pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests", "workenv"]
+
+################################################################################
+# Security Scanning Allowlist
+################################################################################
+
+[tool.security]
+# Paths to exclude from secret scanning (TruffleHog, GitGuardian, Gitleaks)
+# Run: we security generate (via wrknv) to regenerate tool configs
+description = "Documentation, examples, and build artifacts - intentionally committed"
+allowed_paths = [
+    # Generated documentation with example HCL
+    "docs/**",
+    "docs-old/**",
+    # Terraform examples with test tfplan files
+    "examples/**",
+    # Test signing keys for provider development
+    "keys/**",
+    # FlavorPack workenv build artifacts
+    "workenv/**",
+    # GitHub bot private keys (legacy, in git history)
+    "*.private-key.pem",
+]
+
+[pyvider]
+# Provider metadata
+name = "pyvider"
+# Component packages to use for this provider
+component_packages = ["pyvider.components"]
