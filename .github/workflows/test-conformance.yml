@@ -244,7 +244,12 @@ jobs:
           echo ""
 
           echo "📊 Running: tofu plan (expecting rejection...)"
-          if tofu plan 2>&1 | tee /tmp/testmode-false.log; then
+          set +e  # Temporarily disable exit on error
+          tofu plan 2>&1 | tee /tmp/testmode-false.log
+          PLAN_EXIT_CODE=${PIPESTATUS[0]}
+          set -e  # Re-enable exit on error
+
+          if [ $PLAN_EXIT_CODE -eq 0 ]; then
             # If plan succeeded, that's wrong - test-only resource should be rejected
             echo ""
             echo "❌ FAIL: Test-only component was NOT rejected as expected"
@@ -258,7 +263,7 @@ jobs:
               echo "✅ PASS: Test-only component correctly rejected without test mode"
             else
               echo ""
-              echo "❌ FAIL: Plan failed but with unexpected error"
+              echo "❌ FAIL: Plan failed but with unexpected error (exit code: $PLAN_EXIT_CODE)"
               echo "   Expected error: 'test-only resource requires test mode'"
               echo "   Actual output:"
               cat /tmp/testmode-false.log
