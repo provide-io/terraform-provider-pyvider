@@ -157,15 +157,16 @@ jobs:
         with:
           tofu_version: 1.10.6
 
-      - name: 🐍 Setup Python (for tofusoup)
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: 📦 Install UV (for tofusoup)
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: 🐍 Setup Python (for tofusoup)
+        if: env.ACT != 'true' && github.actor != 'nektos/act'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: 🍲 Install tofusoup
         run: |
