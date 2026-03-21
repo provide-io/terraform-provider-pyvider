@@ -35,7 +35,7 @@ classifiers = [
 dependencies = [
     "flavorpack",
     "plating",
-    "provide-foundation",
+    "provide-foundation>=0.3.21,<0.4",
     "pyvider",
     "pyvider-components",
 ]
