@@ -148,8 +148,10 @@ private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
 
 [tool.flavor.execution]
-# Use python.exe directly - no wrapper needed
-command = "{workenv}/Scripts/python.exe -m pyvider.cli"
+# Use Python directly with cross-platform path substitution
+# {bin} expands to Scripts on Windows, bin on Unix
+# {python} expands to python.exe on Windows, python3 on Unix
+command = "{workenv}/{bin}/{python} -m pyvider.cli"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
