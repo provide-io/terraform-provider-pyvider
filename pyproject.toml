@@ -127,8 +127,6 @@ output = "coverage.xml"
 [tool.flavor]
 entry_point = "pyvider.cli:main"
 output_path = "dist/terraform-provider-pyvider"
-# Ensure the binary is named terraform-provider-pyvider so detection works
-command = "{workenv}/bin/terraform-provider-pyvider"
 
 [tool.flavor.metadata]
 package_name = "terraform-provider-pyvider"
@@ -150,6 +148,8 @@ private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
 
 [tool.flavor.execution]
+# Use python.exe directly - no wrapper needed
+command = "{workenv}/Scripts/python.exe -m pyvider.cli"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
