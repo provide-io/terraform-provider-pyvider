@@ -288,12 +288,12 @@ jobs:
 
           ## 📦 Installation
 
-          ### Terraform Registry (Coming Soon)
+          ### OpenTofu / Terraform Registry
           \`\`\`hcl
           terraform {
             required_providers {
               pyvider = {
-                source  = "provide-io/pyvider"
+                source  = "registry.opentofu.org/provide-io/pyvider"
                 version = "${{ steps.version.outputs.VERSION }}"
               }
             }
