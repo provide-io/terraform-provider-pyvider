@@ -163,6 +163,8 @@ PLUGIN_SERVER_TRANSPORTS = "tcp"
 [tool.flavor.execution.runtime.env]
 # Pass through all Terraform, Pyvider, and Foundation environment variables as-is
 pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
+# Force TCP transport on Windows (Unix sockets don't work with asyncio on Windows)
+set = ["PLUGIN_SERVER_TRANSPORTS=tcp"]
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests", "workenv"]
