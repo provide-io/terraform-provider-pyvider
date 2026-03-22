@@ -36,8 +36,9 @@ dependencies = [
     "flavorpack",
     "plating",
     "provide-foundation>=0.3.21",
-    "pyvider",
+    "pyvider>=0.3.21",
     "pyvider-components",
+    "jq>=1.9.1,<1.11.0",
 ]
 
 [dependency-groups]
