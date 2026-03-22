@@ -420,3 +420,6 @@ test-logs-*/
 **/tfdata/providers/**
 *-test-*.psp
 .claude
+
+# Local act CI config (machine-specific)
+.actrc
