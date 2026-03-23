@@ -35,7 +35,10 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "provide-foundation>=0.3.21.post1",
+    "pyvider-components>=0.0.1102",
+]
 
 [dependency-groups]
 dev = [
