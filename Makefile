@@ -17,7 +17,7 @@ help: ## Show this help message
 # Configuration
 PROVIDER_NAME := terraform-provider-pyvider
 VERSION ?= $(shell cat VERSION 2>/dev/null || echo "0.0.0")
-PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64
+PLATFORMS := linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64 windows_arm64
 
 # Platform detection
 UNAME_S := $(shell uname -s | tr '[:upper:]' '[:lower:]')
@@ -34,10 +34,23 @@ else
 endif
 CURRENT_PLATFORM := $(UNAME_S)_$(ARCH)
 
+# Add .exe extension on Windows (detects windows, windows_nt, mingw*, msys*, cygwin*, etc.)
+ifeq ($(findstring windows,$(UNAME_S)),windows)
+    EXT := .exe
+else ifeq ($(findstring mingw,$(UNAME_S)),mingw)
+    EXT := .exe
+else ifeq ($(findstring msys,$(UNAME_S)),msys)
+    EXT := .exe
+else ifeq ($(findstring cygwin,$(UNAME_S)),cygwin)
+    EXT := .exe
+else
+    EXT :=
+endif
+
 # File paths
 PSP_FILE := dist/$(PROVIDER_NAME).psp
 ARCH_DIR := dist/$(CURRENT_PLATFORM)
-VERSIONED_BINARY := $(ARCH_DIR)/$(PROVIDER_NAME)_v$(VERSION)
+VERSIONED_BINARY := $(ARCH_DIR)/$(PROVIDER_NAME)_v$(VERSION)$(EXT)
 
 # Colors for output
 BLUE := \033[0;34m
@@ -401,9 +414,9 @@ shell: setup ## Enter development shell
 install: build ## Install provider locally for testing
 	@echo "$(BLUE)📦 Installing provider locally for $(CURRENT_PLATFORM)...$(NC)"
 	@mkdir -p ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/
-	@cp $(VERSIONED_BINARY) ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
-	@chmod +x ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider
-	@echo "$(GREEN)✅ Provider installed to ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/$(NC)"
+	@cp $(VERSIONED_BINARY) ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider$(EXT)
+	@chmod +x ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider$(EXT)
+	@echo "$(GREEN)✅ Provider installed to ~/.terraform.d/plugins/local/providers/pyvider/$(VERSION)/$(CURRENT_PLATFORM)/terraform-provider-pyvider$(EXT)$(NC)"
 
 .PHONY: watch
 watch: ## Watch for changes and rebuild automatically
