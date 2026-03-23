@@ -36,12 +36,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "flavorpack",
-    "plating",
-    "provide-foundation>=0.3.21",
-    "pyvider>=0.3.21",
-    "pyvider-components",
-    "jq>=1.9.1,<1.11.0",
+    "provide-foundation>=0.3.21.post1",
+    "pyvider-components>=0.0.1102",
 ]
 
 [dependency-groups]
