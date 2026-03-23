@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-
 # buildconfig.toml
-# Override Flavorpack default build settings for terraform-provider-pyvider
+# Override FlavorPack default build settings for terraform-provider-pyvider
+#
+# The venv already has all required packages installed.
+# Skip the network-dependent pip-compile step and use what's already there.
 
 [build]
 # Exclude hidden directories and temporary files
@@ -21,6 +21,10 @@ exclude = [
 # Package name metadata
 [build.metadata]
 package_name = "terraform-provider-pyvider"
+
+# Use TCP transport for Windows compatibility (plugin protocol needs this)
+[build.execution.environment]
+PLUGIN_SERVER_TRANSPORTS = "tcp"
 
 # Don't attempt dependency resolution - use venv as-is
 skip_dependency_resolution = true
