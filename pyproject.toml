@@ -32,10 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-dependencies = [
-    "provide-foundation>=0.3.21.post1",
-    "pyvider-components>=0.0.1102",
-]
+dependencies = []
 
 [dependency-groups]
 dev = [
@@ -128,8 +125,11 @@ output_path = "dist/terraform-provider-pyvider"
 package_name = "terraform-provider-pyvider"
 
 [tool.flavor.build]
-# This meta package just brings together components
-dependencies = []
+# Package the pyvider dependencies with the provider
+dependencies = [
+    "pyvider-components>=0.0.1102",
+    "provide-foundation>=0.3.21.post1",
+]
 exclude = [
     "**/.terraform/**",
     "**/.venv/**", 
@@ -154,13 +154,21 @@ command = "{workenv}/{bin}/{python} -m pyvider.cli"
 PYTHONPATH = "{workenv}/{bin}/../Lib/site-packages"
 # Use TCP transport for Terraform plugin protocol (Unix sockets don't work on Windows)
 PLUGIN_SERVER_TRANSPORTS = "tcp"
+# Set UTF-8 encoding to prevent UnicodeEncodeError on Windows with unicode output
+PYTHONIOENCODING = "utf-8"
+PYTHONLEGACYWINDOWSSTDIO = "1"
 # Runtime environment configuration for Terraform provider protocol
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
 # Pass through all Terraform, Pyvider, and Foundation environment variables as-is
 pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
 # Force TCP transport on Windows (Unix sockets don't work with asyncio on Windows)
-set = ["PLUGIN_SERVER_TRANSPORTS=tcp"]
+# Also set UTF-8 encoding to prevent UnicodeEncodeError on Windows with unicode output
+set = [
+    "PLUGIN_SERVER_TRANSPORTS=tcp",
+    "PYTHONIOENCODING=utf-8",
+    "PYTHONLEGACYWINDOWSSTDIO=1",
+]
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests", "workenv"]
