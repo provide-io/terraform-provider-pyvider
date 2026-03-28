@@ -129,10 +129,6 @@ The provider has been optimized to work within Terraform's 60-second plugin star
 
 Key changes:
 
-1. Handler waits for background component discovery (RPC server responds immediately)
-1. Lazy jq import (deferred to runtime, not loaded during discovery)
-1. Venv cleanup (removed dev dependencies: babel, mkdocs, etc.)
-
 ---
 
 ## Related Projects
