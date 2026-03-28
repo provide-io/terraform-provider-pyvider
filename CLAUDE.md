@@ -133,7 +133,7 @@ Key changes:
 1. Lazy jq import (deferred to runtime, not loaded during discovery)
 1. Venv cleanup (removed dev dependencies: babel, mkdocs, etc.)
 
-______________________________________________________________________
+---
 
 ## Related Projects
 
