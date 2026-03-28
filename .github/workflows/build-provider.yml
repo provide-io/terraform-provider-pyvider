@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 📖 Read VERSION
         id: version
@@ -32,7 +32,7 @@ jobs:
           echo "📦 Building version: ${VERSION}"
 
       - name: 📦 Install UV
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         continue-on-error: true
         with:
           enable-cache: false
@@ -130,7 +130,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout (for VERSION file)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 📖 Read VERSION
         id: version
