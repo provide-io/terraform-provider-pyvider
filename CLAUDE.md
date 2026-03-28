@@ -128,8 +128,6 @@ Key changes:
 2. Lazy jq import (deferred to runtime, not loaded during discovery)
 3. Venv cleanup (removed dev dependencies: babel, mkdocs, etc.)
 
-See `/c/code/test_provider/OPTIMIZATION_GUIDE.md` for detailed explanation and testing instructions.
-
 ---
 
 ## Related Projects
