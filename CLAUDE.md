@@ -116,6 +116,20 @@ terraform {
 - Uses provide-foundation for logging
 - Components from pyvider-components
 
+## Windows ARM64 Optimization (March 2026)
+
+The provider has been optimized to work within Terraform's 60-second plugin startup timeout on Windows ARM64:
+
+- **Cold start:** 36 seconds (verified on ARM64 with no cache)
+- **Warm start:** 9.7 seconds (with cached extraction)
+
+Key changes:
+1. Handler waits for background component discovery (RPC server responds immediately)
+2. Lazy jq import (deferred to runtime, not loaded during discovery)
+3. Venv cleanup (removed dev dependencies: babel, mkdocs, etc.)
+
+---
+
 ## Related Projects
 
 Reference implementations and documentation:

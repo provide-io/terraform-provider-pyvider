@@ -1,0 +1,23 @@
+# buildconfig.toml
+# Override FlavorPack default build settings for terraform-provider-pyvider
+
+[build]
+# Exclude hidden directories and temporary files
+exclude = [
+    "**/.terraform/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/.DS_Store",
+    "**/.git/**",
+    "**/.gitignore",
+    "**/*.tmp",
+]
+
+# Package name metadata
+[build.metadata]
+package_name = "terraform-provider-pyvider"
+
+# Don't attempt dependency resolution - use venv as-is
+skip_dependency_resolution = true
