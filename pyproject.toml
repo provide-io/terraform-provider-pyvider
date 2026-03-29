@@ -32,7 +32,12 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "provide-foundation>=0.3.21.post1",
+    "pyvider>=0.3.21",
+    "pyvider-components",
+    "jq>=1.9.1,<1.11.0",
+]
 
 [dependency-groups]
 dev = [
@@ -144,31 +149,15 @@ private_key_path = "keys/provider-private.key"
 public_key_path = "keys/provider-public.key"
 
 [tool.flavor.execution]
-# Use Python directly with cross-platform path substitution
-# {bin} expands to Scripts on Windows, bin on Unix
-# {python} expands to python.exe on Windows, python3 on Unix
-command = "{workenv}/{bin}/{python} -m pyvider.cli"
-# Environment variables for execution
-[tool.flavor.execution.environment]
-# Set PYTHONPATH so Python can find packages in the venv
-PYTHONPATH = "{workenv}/{bin}/../Lib/site-packages"
-# Use TCP transport for Terraform plugin protocol (Unix sockets don't work on Windows)
-PLUGIN_SERVER_TRANSPORTS = "tcp"
-# Set UTF-8 encoding to prevent UnicodeEncodeError on Windows with unicode output
-PYTHONIOENCODING = "utf-8"
-PYTHONLEGACYWINDOWSSTDIO = "1"
-# Runtime environment configuration for Terraform provider protocol
+# {python_bin} expands at runtime: {workenv}/Scripts/python.exe (Windows)
+#                                   {workenv}/bin/python3 (Unix/macOS)
+command = "{python_bin} -m pyvider.cli"
+
 [tool.flavor.execution.runtime]
 [tool.flavor.execution.runtime.env]
 # Pass through all Terraform, Pyvider, and Foundation environment variables as-is
+# TCP transport and encoding are set conditionally by pyvider/cli/__init__.py (Windows-only)
 pass = ["TF_*", "PLUGIN_*", "PYVIDER_*", "PROVIDE_*", "FOUNDATION_*"]
-# Force TCP transport on Windows (Unix sockets don't work with asyncio on Windows)
-# Also set UTF-8 encoding to prevent UnicodeEncodeError on Windows with unicode output
-set = [
-    "PLUGIN_SERVER_TRANSPORTS=tcp",
-    "PYTHONIOENCODING=utf-8",
-    "PYTHONLEGACYWINDOWSSTDIO=1",
-]
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests", "workenv"]
