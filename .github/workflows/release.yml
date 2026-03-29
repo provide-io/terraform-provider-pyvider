@@ -132,7 +132,7 @@ jobs:
           private-key: ${{ secrets.PROVIDE_BOT_PRIVATE_KEY }}
 
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
           token: ${{ steps.app-token.outputs.token }}
@@ -145,7 +145,7 @@ jobs:
           echo "📦 Releasing version: ${VERSION}"
 
       - name: 📦 Install UV
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: false
 
