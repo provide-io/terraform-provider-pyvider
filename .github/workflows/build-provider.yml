@@ -106,9 +106,13 @@ jobs:
           echo "Second run (warm start):"
           time ./"$BINARY_NAME" launch-context || true
 
-          # Create zip archive
+          # Create zip archive (use 7z on Windows where zip isn't available)
           ZIP_NAME="terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip"
-          zip "$ZIP_NAME" "$BINARY_NAME"
+          if command -v zip &>/dev/null; then
+            zip "$ZIP_NAME" "$BINARY_NAME"
+          else
+            7z a "$ZIP_NAME" "$BINARY_NAME"
+          fi
 
           echo "📦 Created Terraform provider package:"
           ls -la "$ZIP_NAME"
