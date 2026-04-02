@@ -66,10 +66,7 @@ jobs:
             platform: windows
             arch: amd64
             target: windows_amd64
-          - os: windows-11-arm
-            platform: windows
-            arch: arm64
-            target: windows_arm64
+          # windows_arm64 excluded: grpcio has no win_arm64 wheel
 
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.platform == 'windows' }}
