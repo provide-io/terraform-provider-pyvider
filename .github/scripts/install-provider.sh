@@ -6,6 +6,7 @@
 #
 # Example:
 #   install-provider.sh 0.0.17 linux_amd64 ./terraform-provider-pyvider_v0.0.17
+#   install-provider.sh 0.0.17 windows_amd64 ./terraform-provider-pyvider_v0.0.17.exe
 
 set -euo pipefail
 
@@ -16,9 +17,6 @@ SOURCE_BINARY="${3:-}"
 if [[ -z "$VERSION" || -z "$PLATFORM" || -z "$SOURCE_BINARY" ]]; then
   echo "❌ ERROR: Missing required arguments"
   echo "Usage: $0 <version> <platform> <source_binary>"
-  echo ""
-  echo "Example:"
-  echo "  $0 0.0.17 linux_amd64 ./terraform-provider-pyvider_v0.0.17"
   exit 1
 fi
 
@@ -34,30 +32,30 @@ echo "   Source: $SOURCE_BINARY"
 
 # Determine plugin directory based on platform
 PLUGIN_DIR="${HOME}/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${PLATFORM}"
-
-# Create plugin directory
 mkdir -p "$PLUGIN_DIR"
 
-# Copy provider binary (Terraform expects binary without version suffix in filename)
-DEST_BINARY="${PLUGIN_DIR}/terraform-provider-pyvider"
+# Windows binaries need .exe extension
+if [[ "$PLATFORM" == windows_* ]]; then
+  DEST_BINARY="${PLUGIN_DIR}/terraform-provider-pyvider.exe"
+else
+  DEST_BINARY="${PLUGIN_DIR}/terraform-provider-pyvider"
+fi
+
 cp "$SOURCE_BINARY" "$DEST_BINARY"
-chmod +x "$DEST_BINARY"
+chmod +x "$DEST_BINARY" 2>/dev/null || true
 
 echo ""
 echo "✅ Provider installed successfully!"
-echo "   Location: $PLUGIN_DIR"
+echo "   Location: $DEST_BINARY"
 echo ""
 
 # Validate installation
 echo "📋 Installation details:"
 ls -lah "$DEST_BINARY"
 
-# Check if binary is executable and can run
-if [[ -x "$DEST_BINARY" ]]; then
+if [[ -x "$DEST_BINARY" ]] || [[ "$PLATFORM" == windows_* ]]; then
   echo ""
   echo "✅ Provider binary is executable"
-
-  # Try to get version or at least confirm it runs
   if "$DEST_BINARY" --version 2>&1 | head -5 || true; then
     echo "✅ Provider binary executed successfully"
   fi
