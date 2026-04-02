@@ -3160,7 +3160,7 @@ wheels = [
 name = "terraform-provider-pyvider"
 source = { editable = "." }
 dependencies = [
-    { name = "jq" },
+    { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'" },
     { name = "provide-foundation" },
     { name = "pyvider" },
     { name = "pyvider-components" },
@@ -3179,7 +3179,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "jq", specifier = ">=1.9.1,<1.11.0" },
+    { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1,<1.11.0" },
     { name = "provide-foundation", specifier = ">=0.3.29" },
     { name = "pyvider", specifier = ">=0.3.22" },
     { name = "pyvider-components", specifier = ">=0.3.22" },

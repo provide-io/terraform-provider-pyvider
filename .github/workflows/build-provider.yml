@@ -11,6 +11,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
+  PYTHONIOENCODING: utf-8
 
 jobs:
   build:
