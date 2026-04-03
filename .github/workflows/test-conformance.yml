@@ -173,6 +173,7 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: 1.10.6
+          tofu_wrapper: false
 
       - name: 🐍 Setup Python
         if: env.ACT != 'true' && github.actor != 'nektos/act'
