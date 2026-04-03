@@ -31,7 +31,11 @@ echo "   Platform: $PLATFORM"
 echo "   Source: $SOURCE_BINARY"
 
 # Determine plugin directory based on platform
-PLUGIN_DIR="${HOME}/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${PLATFORM}"
+if [[ "$PLATFORM" == windows_* ]]; then
+  PLUGIN_DIR="${APPDATA}/terraform.d/plugins/local/providers/pyvider/${VERSION}/${PLATFORM}"
+else
+  PLUGIN_DIR="${HOME}/.terraform.d/plugins/local/providers/pyvider/${VERSION}/${PLATFORM}"
+fi
 mkdir -p "$PLUGIN_DIR"
 
 # Windows binaries need .exe extension
