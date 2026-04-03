@@ -36,7 +36,8 @@ dependencies = [
     "provide-foundation>=0.3.29",
     "pyvider>=0.3.22",
     "pyvider-components>=0.3.22",
-    "jq>=1.9.1,<1.11.0",
+    "jq>=1.9.1,<1.11.0; sys_platform != 'win32' or platform_machine != 'ARM64'",
+    "cryptography>=46.0.0,<=46.0.3; sys_platform == 'win32' and platform_machine == 'ARM64'",
 ]
 
 [dependency-groups]
