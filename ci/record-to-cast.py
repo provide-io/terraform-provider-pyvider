@@ -63,8 +63,8 @@ def main() -> None:
 
     header = {
         "version": 2,
-        "width": 220,
-        "height": 50,
+        "width": 120,
+        "height": 40,
         "timestamp": int(start_time),
         "title": "pyvider conformance suite",
         "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
