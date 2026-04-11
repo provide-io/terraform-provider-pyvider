@@ -6,14 +6,25 @@
 # Re-run the conformance suite under the PTY recorder to produce an asciinema
 # v2 .cast file. Runs from the repo root; output written to conformance.cast.
 # Called by the record-casts CI step (Linux only).
-set -euo pipefail
+set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT="${REPO_ROOT}/conformance.cast"
+RAW="${REPO_ROOT}/conformance.raw.cast"
 
 cd "${REPO_ROOT}/examples"
 
 # record-to-cast.py strips screen-clear and cursor-position sequences in the
 # captured output, so the player scrolls smoothly without flashing.
-exec python3 "${REPO_ROOT}/ci/record-to-cast.py" "${OUTPUT}" \
+# Capture the test exit code so we can retime before propagating it.
+python3 "${REPO_ROOT}/ci/record-to-cast.py" "${RAW}" \
     soup stir --recursive
+RECORD_EXIT=$?
+
+# retime-cast.py spreads the output frames across a human-watchable timeline.
+# soup stir completes in ~1-2 s real time so the raw cast would loop too fast.
+python3 "${REPO_ROOT}/ci/retime-cast.py" "${RAW}" "${OUTPUT}"
+
+rm -f "${RAW}"
+
+exit "${RECORD_EXIT}"
