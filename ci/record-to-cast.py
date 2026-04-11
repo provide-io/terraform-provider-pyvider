@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+#!/usr/bin/env python3
 """
 Record a command's terminal output as an asciinema v2 .cast file.
 
@@ -14,28 +15,12 @@ Usage:
 Example:
     python3 ci/record-to-cast.py conformance.cast soup stir --recursive
 """
-import fcntl
 import json
 import os
 import pty
-import re
-import struct
 import subprocess
 import sys
-import termios
 import time
-
-# Strip only the sequences that cause the player to flash — specifically the
-# alternate screen buffer switch and full-screen clears. Leave everything else
-# (colors, erase-line, cursor movement) intact so the output renders correctly.
-_STRIP_RE = re.compile(
-    r"\x1b\["
-    r"(?:"
-    r"\?(?:1049|1047|47)[hl]"   # alternate screen buffer enter/exit (the flash cause)
-    r"|\?25[lh]"                 # cursor hide/show
-    r"|[23]J"                    # erase entire screen / clear scrollback
-    r")"
-)
 
 
 def main() -> None:
@@ -49,13 +34,7 @@ def main() -> None:
     events: list = []
     start_time = time.time()
 
-    cols, rows = 120, 40
     master_fd, slave_fd = pty.openpty()
-
-    # Set the PTY size so the child process renders at the target dimensions.
-    winsize = struct.pack("HHHH", rows, cols, 0, 0)
-    fcntl.ioctl(slave_fd, termios.TIOCSWINSZ, winsize)
-
     proc = subprocess.Popen(
         command,
         stdout=slave_fd,
@@ -73,9 +52,8 @@ def main() -> None:
         if not chunk:
             break
         elapsed = round(time.time() - start_time, 6)
-        text = _STRIP_RE.sub("", chunk.decode("utf-8", errors="replace"))
-        if text:
-            events.append([elapsed, "o", text])
+        text = chunk.decode("utf-8", errors="replace")
+        events.append([elapsed, "o", text])
         sys.stdout.buffer.write(chunk)
         sys.stdout.flush()
 
@@ -85,8 +63,8 @@ def main() -> None:
 
     header = {
         "version": 2,
-        "width": cols,
-        "height": rows,
+        "width": 220,
+        "height": 50,
         "timestamp": int(start_time),
         "title": "pyvider conformance suite",
         "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
