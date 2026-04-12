@@ -17,9 +17,8 @@ python3 "${REPO_ROOT}/ci/record-to-cast.py" "${RAW}" \
     soup stir --recursive
 RECORD_EXIT=$?
 
-# retime-cast.py spreads the output frames across a human-watchable timeline.
-# soup stir completes in ~1-2 s real time so the raw cast would loop too fast.
-python3 "${REPO_ROOT}/ci/retime-cast.py" "${RAW}" "${OUTPUT}"
+# retime-cast.py proportionally scales to a target duration for the website.
+python3 "${REPO_ROOT}/ci/retime-cast.py" "${RAW}" "${OUTPUT}" 15
 
 rm -f "${RAW}"
 

@@ -11,12 +11,15 @@ Usage:
 Example:
     python3 ci/record-to-cast.py conformance.cast soup stir --recursive
 """
+import fcntl
 import json
 import os
 import pty
 import re
+import struct
 import subprocess
 import sys
+import termios
 import time
 
 # Strip only the sequences that cause the player to flash — specifically the
@@ -43,7 +46,13 @@ def main() -> None:
     events: list = []
     start_time = time.time()
 
+    cols, rows = 120, 40
     master_fd, slave_fd = pty.openpty()
+
+    # Set the PTY size so the child process renders at the target dimensions.
+    winsize = struct.pack("HHHH", rows, cols, 0, 0)
+    fcntl.ioctl(slave_fd, termios.TIOCSWINSZ, winsize)
+
     proc = subprocess.Popen(
         command,
         stdout=slave_fd,
@@ -73,8 +82,8 @@ def main() -> None:
 
     header = {
         "version": 2,
-        "width": 120,
-        "height": 40,
+        "width": cols,
+        "height": rows,
         "timestamp": int(start_time),
         "title": "pyvider conformance suite",
         "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
