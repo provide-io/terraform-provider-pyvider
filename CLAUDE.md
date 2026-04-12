@@ -23,7 +23,7 @@ source .venv/bin/activate
 ### Building and Testing
 
 ```bash
-# Build the provider binary (FlavorPack)
+# Build the provider binary (Flavorpack)
 flavor pack
 
 # Install to local Terraform plugin directory
@@ -77,7 +77,7 @@ This is a meta-package that brings together:
 
 Components are auto-discovered from `pyvider.components` package (configured in `pyproject.toml` under `[pyvider]`).
 
-### FlavorPack Configuration
+### Flavorpack Configuration
 
 Configured in `pyproject.toml`:
 - Entry point: `pyvider.cli:main`
@@ -108,7 +108,7 @@ terraform {
 
 - `pyproject.toml` - Python project configuration, dependencies, tool settings
 - `[pyvider]` section - Provider configuration, component packages
-- `[tool.flavor]` - FlavorPack binary packaging settings
+- `[tool.flavor]` - Flavorpack binary packaging settings
 
 ## Code Quality Standards
 

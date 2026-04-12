@@ -178,7 +178,7 @@ allowed_paths = [
     "examples/**",
     # Test signing keys for provider development
     "keys/**",
-    # FlavorPack workenv build artifacts
+    # Flavorpack workenv build artifacts
     "workenv/**",
     # GitHub bot private keys (legacy, in git history)
     "*.private-key.pem",
