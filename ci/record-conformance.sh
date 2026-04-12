@@ -9,5 +9,7 @@ OUTPUT="${REPO_ROOT}/conformance.cast"
 
 cd "${REPO_ROOT}/examples"
 
-exec python3 "${REPO_ROOT}/ci/record-to-cast.py" "${OUTPUT}" \
+# TERM=dumb disables cursor-movement escape sequences so soup stir produces
+# plain scrolling output instead of in-place TUI redraws, eliminating flicker.
+exec env TERM=dumb python3 "${REPO_ROOT}/ci/record-to-cast.py" "${OUTPUT}" \
     soup stir --recursive
