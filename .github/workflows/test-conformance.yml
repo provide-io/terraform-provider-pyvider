@@ -340,6 +340,26 @@ jobs:
           echo "✅ All provider conformance tests passed!"
           echo "════════════════════════════════════════════════════════════════"
 
+      # Record the conformance suite as an asciinema cast (Linux only).
+      # Uses Python's pty module — no external asciinema binary required.
+      - name: 🎬 Record conformance cast
+        if: matrix.platform == 'linux'
+        shell: bash
+        env:
+          PYVIDER_TESTMODE: true
+          PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
+        run: ci/record-conformance.sh
+
+      # Upload the cast file so site-pyvider-com can fetch it as a build artifact.
+      - name: 📤 Upload conformance cast
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: conformance-cast
+          path: conformance.cast
+          retention-days: 90
+          if-no-files-found: error
+
       - name: 📤 Upload test logs
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
