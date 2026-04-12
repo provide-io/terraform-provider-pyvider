@@ -19,16 +19,15 @@ import subprocess
 import sys
 import time
 
-# Escape sequences that cause the player to flash by clearing/repositioning.
-# Strip these while preserving color codes and all other output.
+# Strip only the sequences that cause the player to flash — specifically the
+# alternate screen buffer switch and full-screen clears. Leave everything else
+# (colors, erase-line, cursor movement) intact so the output renders correctly.
 _STRIP_RE = re.compile(
     r"\x1b\["
     r"(?:"
-    r"\?25[lh]"          # cursor hide/show: ESC[?25l  ESC[?25h
-    r"|[0-9]*;?[0-9]*[Hf]"  # cursor position: ESC[H  ESC[2;1H  ESC[f
-    r"|2J"               # erase entire screen: ESC[2J
-    r"|1J"               # erase from top: ESC[1J
-    r"|3J"               # clear scrollback: ESC[3J
+    r"\?(?:1049|1047|47)[hl]"   # alternate screen buffer enter/exit (the flash cause)
+    r"|\?25[lh]"                 # cursor hide/show
+    r"|[23]J"                    # erase entire screen / clear scrollback
     r")"
 )
 
