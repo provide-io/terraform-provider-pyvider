@@ -14,9 +14,23 @@ Example:
 import json
 import os
 import pty
+import re
 import subprocess
 import sys
 import time
+
+# Escape sequences that cause the player to flash by clearing/repositioning.
+# Strip these while preserving color codes and all other output.
+_STRIP_RE = re.compile(
+    r"\x1b\["
+    r"(?:"
+    r"\?25[lh]"          # cursor hide/show: ESC[?25l  ESC[?25h
+    r"|[0-9]*;?[0-9]*[Hf]"  # cursor position: ESC[H  ESC[2;1H  ESC[f
+    r"|2J"               # erase entire screen: ESC[2J
+    r"|1J"               # erase from top: ESC[1J
+    r"|3J"               # clear scrollback: ESC[3J
+    r")"
+)
 
 
 def main() -> None:
@@ -48,8 +62,9 @@ def main() -> None:
         if not chunk:
             break
         elapsed = round(time.time() - start_time, 6)
-        text = chunk.decode("utf-8", errors="replace")
-        events.append([elapsed, "o", text])
+        text = _STRIP_RE.sub("", chunk.decode("utf-8", errors="replace"))
+        if text:
+            events.append([elapsed, "o", text])
         sys.stdout.buffer.write(chunk)
         sys.stdout.flush()
 
