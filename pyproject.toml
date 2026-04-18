@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 #
 # terraform-provider-pyvider/pyproject.toml
 #
@@ -50,6 +53,12 @@ dev = [
 docs = [
     "provide-testkit[docs]",
 ]
+
+[project.urls]
+Homepage = "https://github.com/provide-io/terraform-provider-pyvider"
+Repository = "https://github.com/provide-io/terraform-provider-pyvider"
+Documentation = "https://foundry.provide.io/terraform-provider-pyvider/"
+Issues = "https://github.com/provide-io/terraform-provider-pyvider/issues"
 
 [project.scripts]
 terraform-provider-pyvider = "pyvider.cli:main"
