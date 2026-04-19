@@ -79,6 +79,10 @@ target-version = "py311"
 select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
 ignore = ["ANN401", "E501"]
 
+[tool.ruff.lint.per-file-ignores]
+# ci/ helper scripts use stdlib open() and dense if-else; relax rule set here.
+"ci/*.py" = ["PTH123", "SIM108"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["pyvider", "tests"]
 force-sort-within-sections = true
@@ -96,6 +100,8 @@ strict = true
 pretty = true
 show_error_codes = true
 warn_unused_ignores = true
+# Don't descend into virtualenvs or build artifacts.
+exclude = ["^(workenv|\\.venv|build|dist)/"]
 
 [[tool.mypy.overrides]]
 module = ["pyvider.*", "flavorpack.*", "plating.*"]

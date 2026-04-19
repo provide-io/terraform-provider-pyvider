@@ -15,6 +15,7 @@ Usage:
 Example:
     python3 ci/record-to-cast.py conformance.cast soup stir --recursive
 """
+
 import fcntl
 import json
 import os
@@ -32,9 +33,9 @@ import time
 _STRIP_RE = re.compile(
     r"\x1b\["
     r"(?:"
-    r"\?(?:1049|1047|47)[hl]"   # alternate screen buffer enter/exit (the flash cause)
-    r"|\?25[lh]"                 # cursor hide/show
-    r"|[23]J"                    # erase entire screen / clear scrollback
+    r"\?(?:1049|1047|47)[hl]"  # alternate screen buffer enter/exit (the flash cause)
+    r"|\?25[lh]"  # cursor hide/show
+    r"|[23]J"  # erase entire screen / clear scrollback
     r")"
 )
 
@@ -47,7 +48,7 @@ def main() -> None:
     output_path = sys.argv[1]
     command = sys.argv[2:]
 
-    events: list = []
+    events: list[list[float | str]] = []
     start_time = time.time()
 
     cols, rows = 120, 40
