@@ -171,6 +171,9 @@ jobs:
           # Install project dependencies and dev tools (includes plating and pyvider-components)
           uv sync --all-groups
 
+          # Extract provide-foundry scripts into .provide/foundry/ (docs.build depends on them)
+          we run docs.setup
+
           # Generate documentation via wrknv task
           we run docs.build
 
