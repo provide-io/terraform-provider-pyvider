@@ -13,12 +13,14 @@ Thank you for your interest in contributing to terraform-provider-pyvider! This 
 ### Development Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/provide-io/terraform-provider-pyvider.git
    cd terraform-provider-pyvider
    ```
 
-2. Set up the development environment:
+1. Set up the development environment:
+
    ```bash
    uv sync
    ```
@@ -56,6 +58,7 @@ we pkg install
 ```
 
 The provider will be installed to:
+
 ```
 ~/.terraform.d/plugins/local/providers/pyvider/<version>/{platform}/
 ```
@@ -129,15 +132,15 @@ we run docs.build
 When adding new features or changing APIs:
 
 1. Update relevant docstrings in component code
-2. Update `README.md` if adding user-facing features
-3. Add examples in `examples/` directory
-4. Run Plating to regenerate documentation
+1. Update `README.md` if adding user-facing features
+1. Add examples in `examples/` directory
+1. Run Plating to regenerate documentation
 
 ### Docstring Format
 
 Use comprehensive docstrings for Terraform documentation generation:
 
-```python
+````python
 """
 Short description of what this data source does.
 
@@ -151,7 +154,7 @@ data "pyvider_env_variables" "shell" {
 output "shell_path" {
   value = data.pyvider_env_variables.shell.values["SHELL"]
 }
-```
+````
 
 ## Argument Reference
 
@@ -159,8 +162,8 @@ output "shell_path" {
 
 ## Attribute Reference
 
-- `values` - Map of environment variable names to their values
-"""
+- `values` - Map of environment variable names to their values """
+
 ```
 
 ## Adding New Components
@@ -175,21 +178,10 @@ This provider uses components from `pyvider-components`. To add new components:
 ## Project Structure
 
 ```
-terraform-provider-pyvider/
-├── src/                         # Source code (minimal wrapper)
-├── examples/                    # Terraform examples
-│   ├── data-sources/           # Data source examples
-│   ├── resources/              # Resource examples
-│   └── functions/              # Function examples
-├── docs/                        # Generated documentation
-│   ├── guides/                 # User guides
-│   ├── data-sources/           # Data source docs
-│   ├── resources/              # Resource docs
-│   └── functions/              # Function docs
-├── tests/                       # Integration tests
-├── pyproject.toml              # Python configuration
-└── soup.toml                   # Provider configuration (if exists)
-```
+
+terraform-provider-pyvider/ ├── src/ # Source code (minimal wrapper) ├── examples/ # Terraform examples │ ├── data-sources/ # Data source examples │ ├── resources/ # Resource examples │ └── functions/ # Function examples ├── docs/ # Generated documentation │ ├── guides/ # User guides │ ├── data-sources/ # Data source docs │ ├── resources/ # Resource docs │ └── functions/ # Function docs ├── tests/ # Integration tests ├── pyproject.toml # Python configuration └── soup.toml # Provider configuration (if exists)
+
+````
 
 ## Submitting Changes
 
@@ -198,21 +190,24 @@ terraform-provider-pyvider/
 1. Create a feature branch from `main`:
    ```bash
    git checkout -b feature/your-feature-name main
-   ```
+````
 
 2. Make your changes and commit with clear messages:
+
    ```bash
    git commit -m "Add feature: description of what was added"
    ```
 
-3. Ensure all tests pass and code quality checks pass:
+1. Ensure all tests pass and code quality checks pass:
+
    ```bash
    we run test
    we run lint
    we typecheck
    ```
 
-4. Build and test the provider with Terraform:
+1. Build and test the provider with Terraform:
+
    ```bash
    we build
    we pkg install
@@ -220,9 +215,10 @@ terraform-provider-pyvider/
    terraform plan
    ```
 
-5. Push your branch and create a pull request
+1. Push your branch and create a pull request
 
-6. Ensure your PR:
+1. Ensure your PR:
+
    - Has a clear title and description
    - References any related issues
    - Includes examples for new functionality
@@ -237,6 +233,7 @@ terraform-provider-pyvider/
 - Reference issues and pull requests when relevant
 
 Examples:
+
 - `Add new data source for file metadata`
 - `Fix provider configuration validation`
 - `Update documentation for lens_jq data source`

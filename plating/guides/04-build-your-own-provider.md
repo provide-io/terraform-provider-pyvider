@@ -1,6 +1,6 @@
 ---
-page_title: "04) Build Your Own Provider with Pyvider"
-description: "Translate what you learn from this example provider into a custom provider for your infrastructure."
+page_title: 04) Build Your Own Provider with Pyvider
+description: Translate what you learn from this example provider into a custom provider for your infrastructure.
 guide_order: 5
 ---
 
@@ -64,6 +64,6 @@ Study similar components in [pyvider-components](https://github.com/provide-io/p
 - Explore more sophisticated examples in `pyvider-components` (streaming updates, structured logging, jq usage).
 - Share what you build! Opening discussions or PRs in the Pyvider ecosystem helps the framework grow.
 
----
+______________________________________________________________________
 
 Ready to keep exploring here? Jump back to the [provider tour](./01-provider-tour.md) or check out [troubleshooting tips](./03-troubleshooting.md) as you prototype.
