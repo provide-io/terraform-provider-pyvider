@@ -15,6 +15,7 @@ Usage:
 
 TARGET_SECONDS defaults to 15.
 """
+
 import json
 import sys
 
@@ -39,7 +40,7 @@ def retime(input_path: str, output_path: str, target_duration: float) -> None:
     # Small lead-in so it doesn't start at t=0
     offset = 0.5
 
-    new_events: list = []
+    new_events: list[list[float | str]] = []
     for event in events:
         new_ts = round(offset + (event[0] - first_ts) * scale, 3)
         new_events.append([new_ts, event[1], event[2]])
@@ -51,9 +52,7 @@ def retime(input_path: str, output_path: str, target_duration: float) -> None:
 
     final_duration = new_events[-1][0]
     print(
-        f"Retimed {len(events)} events: "
-        f"{original_duration:.1f}s → {final_duration:.1f}s "
-        f"(scale {scale:.2f}x)",
+        f"Retimed {len(events)} events: {original_duration:.1f}s → {final_duration:.1f}s (scale {scale:.2f}x)",
         file=sys.stderr,
     )
 
