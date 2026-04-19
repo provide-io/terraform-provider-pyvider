@@ -1,6 +1,6 @@
 ---
-page_title: "02) Getting Started with Pyvider"
-description: "Step-by-step tutorial for installing and using the pyvider Terraform provider for the first time."
+page_title: 02) Getting Started with Pyvider
+description: Step-by-step tutorial for installing and using the pyvider Terraform provider for the first time.
 guide_order: 3
 ---
 
@@ -12,7 +12,7 @@ This tutorial will guide you through your first use of the pyvider Terraform pro
 
 -> **Note:** New to Pyvider? Start with [Understand the Pyvider Framework](./00-pyvider-orientation.md) and [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
 
----
+______________________________________________________________________
 
 ## What You'll Learn
 
@@ -24,7 +24,7 @@ By the end of this tutorial, you will:
 - ✅ Understand basic provider workflows
 - ✅ Know where to go next
 
----
+______________________________________________________________________
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ terraform version
 # Should output: Terraform v1.x.x
 ```
 
----
+______________________________________________________________________
 
 ## Step 1: Install the Provider
 
@@ -79,7 +79,7 @@ chmod +x ~/.terraform.d/plugins/local/providers/pyvider/0.0.12/darwin_amd64/terr
 
 Adjust paths for your platform (linux_amd64, windows_amd64, etc.)
 
----
+______________________________________________________________________
 
 ## Step 2: Create Your First Configuration
 
@@ -133,7 +133,7 @@ output "greeting_file" {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Step 3: Initialize Terraform
 
@@ -144,6 +144,7 @@ terraform init
 ```
 
 **Expected Output:**
+
 ```
 Initializing the backend...
 
@@ -155,7 +156,7 @@ Initializing provider plugins...
 Terraform has been successfully initialized!
 ```
 
----
+______________________________________________________________________
 
 ## Step 4: Preview Changes
 
@@ -166,6 +167,7 @@ terraform plan
 ```
 
 **Expected Output:**
+
 ```
 Terraform will perform the following actions:
 
@@ -180,7 +182,7 @@ Terraform will perform the following actions:
 Plan: 1 to add, 0 to change, 0 to destroy.
 ```
 
----
+______________________________________________________________________
 
 ## Step 5: Apply Configuration
 
@@ -193,6 +195,7 @@ terraform apply
 **Terraform will prompt for confirmation. Type `yes` and press Enter.**
 
 **Expected Output:**
+
 ```
 pyvider_file_content.greeting: Creating...
 pyvider_file_content.greeting: Creation complete after 0s [id=hello.txt]
@@ -204,7 +207,7 @@ Outputs:
 greeting_file = "./hello.txt"
 ```
 
----
+______________________________________________________________________
 
 ## Step 6: Verify the Resource
 
@@ -215,6 +218,7 @@ cat hello.txt
 ```
 
 **Expected Output:**
+
 ```
 Hello from pyvider!
 
@@ -222,7 +226,7 @@ This file was created by Terraform using the pyvider provider.
 Current timestamp: 2025-10-30T15:39:55Z
 ```
 
----
+______________________________________________________________________
 
 ## Step 7: Use a Data Source
 
@@ -252,6 +256,7 @@ terraform apply
 ```
 
 **Expected Output:**
+
 ```
 ...
 Outputs:
@@ -264,7 +269,7 @@ greeting_info = {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Step 8: Update a Resource
 
@@ -318,7 +323,7 @@ Terraform will perform the following actions:
 Plan: 0 to add, 1 to change, 0 to destroy.
 ```
 
----
+______________________________________________________________________
 
 ## Step 9: Clean Up
 
@@ -331,6 +336,7 @@ terraform destroy
 Type `yes` when prompted.
 
 **Expected Output:**
+
 ```
 pyvider_file_content.greeting: Destroying... [id=hello.txt]
 pyvider_file_content.greeting: Destruction complete after 0s
@@ -345,19 +351,15 @@ ls hello.txt
 # Should output: No such file or directory
 ```
 
----
+______________________________________________________________________
 
 ## What You've Learned
 
 Congratulations! You've successfully:
 
-✅ Installed and configured the pyvider provider
-✅ Created a resource with Terraform
-✅ Used a data source to read data
-✅ Updated a resource in-place
-✅ Destroyed resources with Terraform
+✅ Installed and configured the pyvider provider ✅ Created a resource with Terraform ✅ Used a data source to read data ✅ Updated a resource in-place ✅ Destroyed resources with Terraform
 
----
+______________________________________________________________________
 
 ## Next Steps
 
@@ -373,7 +375,7 @@ Interested in building Terraform providers with Python?
 - **[pyvider-components](https://foundry.provide.io/pyvider-components/):** Example component library for learning and reference
 - **[Building Providers Guide](https://foundry.provide.io/pyvider/guides/building-components/):** Complete guide
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -388,12 +390,14 @@ Having issues? See our comprehensive **[Troubleshooting Guide](./03-troubleshoot
 ### Quick Fixes
 
 **Provider Not Found:**
+
 ```bash
 # Verify installation and re-initialize
 terraform init -upgrade
 ```
 
 **Permission Denied:**
+
 ```bash
 # Check directory permissions
 ls -la $(dirname /path/to/file)
@@ -401,7 +405,7 @@ ls -la $(dirname /path/to/file)
 
 **Need More Help?** → **[Full Troubleshooting Guide](./03-troubleshooting.md)**
 
----
+______________________________________________________________________
 
 ## Complete Example
 
@@ -461,7 +465,7 @@ output "greeting_info" {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Additional Resources
 
@@ -470,7 +474,7 @@ output "greeting_info" {
 - **[Terraform Documentation](https://www.terraform.io/docs):** Official Terraform docs
 - **[Community Support](https://github.com/provide-io/terraform-provider-pyvider/discussions):** Get help
 
----
+______________________________________________________________________
 
 ## Feedback
 
@@ -480,9 +484,6 @@ Was this tutorial helpful? Have suggestions for improvement?
 - 💬 [Join the discussion](https://github.com/provide-io/terraform-provider-pyvider/discussions)
 - ⭐ [Star the project](https://github.com/provide-io/terraform-provider-pyvider)
 
----
+______________________________________________________________________
 
-**Tutorial Version:** 1.0
-**Last Updated:** October 30, 2025
-**Terraform Version:** 1.0+
-**Provider Version:** 1.0+
+**Tutorial Version:** 1.0 **Last Updated:** October 30, 2025 **Terraform Version:** 1.0+ **Provider Version:** 1.0+

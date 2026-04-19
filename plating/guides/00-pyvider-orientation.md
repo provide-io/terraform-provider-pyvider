@@ -1,6 +1,6 @@
 ---
-page_title: "00) Understand the Pyvider Framework"
-description: "Get oriented with the ideas behind Pyvider before you dive into the example provider."
+page_title: 00) Understand the Pyvider Framework
+description: Get oriented with the ideas behind Pyvider before you dive into the example provider.
 guide_order: 1
 ---
 
@@ -17,22 +17,22 @@ Pyvider is a Python framework that implements the Terraform Plugin Protocol v6. 
 
 ## Components that make up a provider
 
-| Concept | Pyvider term | Terraform equivalent | Purpose |
-| --- | --- | --- | --- |
-| Provider | `BaseProvider` subclass | Provider plugin entrypoint | Handles configuration and wires capabilities |
-| Capability | Module of components | Logical feature area (e.g. file operations) | Groups related resources/data sources |
-| Resource | `BaseResource` subclass | `resource "…" "…" {}` | Manages infrastructure objects or local effects |
-| Data Source | `BaseDataSource` subclass | `data "…" "…" {}` | Reads or calculates information for configurations |
-| Function | Decorated Python callable | `provider::pyvider::upper()` | Adds reusable helpers directly to Terraform |
+| Concept     | Pyvider term              | Terraform equivalent                        | Purpose                                            |
+| ----------- | ------------------------- | ------------------------------------------- | -------------------------------------------------- |
+| Provider    | `BaseProvider` subclass   | Provider plugin entrypoint                  | Handles configuration and wires capabilities       |
+| Capability  | Module of components      | Logical feature area (e.g. file operations) | Groups related resources/data sources              |
+| Resource    | `BaseResource` subclass   | `resource "…" "…" {}`                       | Manages infrastructure objects or local effects    |
+| Data Source | `BaseDataSource` subclass | `data "…" "…" {}`                           | Reads or calculates information for configurations |
+| Function    | Decorated Python callable | `provider::pyvider::upper()`                | Adds reusable helpers directly to Terraform        |
 
 The [pyvider-components](https://github.com/provide-io/pyvider-components) repository supplies a rich library of these building blocks. This provider bundles them so you can experiment from Terraform without writing any Python.
 
 ## What happens when Terraform calls the provider
 
 1. Terraform launches the compiled provider binary.
-2. The binary loads your Python package and registers all Pyvider components.
-3. When Terraform evaluates configuration blocks, Pyvider calls your async handlers.
-4. Python code returns structured objects (`State`, `Diagnostics`), and Pyvider translates them back to Terraform's protocol messages.
+1. The binary loads your Python package and registers all Pyvider components.
+1. When Terraform evaluates configuration blocks, Pyvider calls your async handlers.
+1. Python code returns structured objects (`State`, `Diagnostics`), and Pyvider translates them back to Terraform's protocol messages.
 
 Because Pyvider speaks the same protocol as the official Go SDK, anything you build behaves like a native provider.
 
