@@ -48,6 +48,8 @@ dev = [
     "provide-testkit[standard,build]",
     "flavorpack",
     "plating",
+    # provide-foundry isn't on PyPI; docs.setup needs it for extract_base_mkdocs
+    "provide-foundry @ git+https://github.com/provide-io/provide-foundry.git@main",
     "ty>=0.0.8",
 ]
 docs = [
