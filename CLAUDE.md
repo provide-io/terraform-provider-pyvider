@@ -129,7 +129,7 @@ The provider has been optimized to work within Terraform's 60-second plugin star
 
 Key changes:
 
----
+______________________________________________________________________
 
 ## Related Projects
 
