@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-
-#!/usr/bin/env python3
 """
 Retime an asciinema v2 .cast file to a target duration.
 
@@ -18,6 +14,7 @@ TARGET_SECONDS defaults to 15.
 
 import json
 import sys
+from typing import Any
 
 
 def retime(input_path: str, output_path: str, target_duration: float) -> None:
@@ -40,7 +37,7 @@ def retime(input_path: str, output_path: str, target_duration: float) -> None:
     # Small lead-in so it doesn't start at t=0
     offset = 0.5
 
-    new_events: list[list[float | str]] = []
+    new_events: list[Any] = []
     for event in events:
         new_ts = round(offset + (event[0] - first_ts) * scale, 3)
         new_events.append([new_ts, event[1], event[2]])

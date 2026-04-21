@@ -1,5 +1,5 @@
 # buildconfig.toml
-# Override FlavorPack default build settings for terraform-provider-pyvider
+# Override Flavorpack default build settings for terraform-provider-pyvider
 
 [build]
 # Exclude hidden directories and temporary files

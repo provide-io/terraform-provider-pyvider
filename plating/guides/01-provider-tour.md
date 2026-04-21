@@ -1,6 +1,6 @@
 ---
-page_title: 01) Tour the Example Provider
-description: See what ships with the pyvider provider so you know which examples to explore.
+page_title: "01) Tour the Example Provider"
+description: "See what ships with the pyvider provider so you know which examples to explore."
 guide_order: 2
 ---
 

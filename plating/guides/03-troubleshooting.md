@@ -1,6 +1,6 @@
 ---
-page_title: 03) Troubleshooting
-description: Diagnose and resolve common issues you might hit while experimenting with the pyvider provider.
+page_title: "03) Troubleshooting"
+description: "Diagnose and resolve common issues you might hit while experimenting with the pyvider provider."
 guide_order: 4
 ---
 
@@ -10,7 +10,7 @@ Common issues and solutions for the pyvider Terraform provider.
 
 ~> **Note:** This provider is in pre-release. Expect API changes, and consider building a custom provider with [Pyvider](https://github.com/provide-io/pyvider) for production needs.
 
-______________________________________________________________________
+---
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ ______________________________________________________________________
 - [Debug Techniques](#debug-techniques)
 - [Getting Help](#getting-help)
 
-______________________________________________________________________
+---
 
 ## Installation Issues
 
@@ -32,7 +32,6 @@ ______________________________________________________________________
 **Solutions:**
 
 **If using local development:**
-
 ```bash
 # 1. Build the provider (using make or flavor directly)
 cd terraform-provider-pyvider
@@ -56,12 +55,11 @@ terraform {
 ```
 
 **If provider binary exists but isn't found:**
-
 - Check file permissions: `chmod +x terraform-provider-pyvider`
 - Verify plugin directory matches your platform (darwin_amd64, linux_amd64, etc.)
 - Ensure version in configuration matches directory structure
 
-______________________________________________________________________
+---
 
 ### Terraform Version Incompatibility
 
@@ -70,20 +68,17 @@ ______________________________________________________________________
 **Solution:**
 
 Check Terraform version compatibility:
-
 ```bash
 terraform version
 # Required: Terraform 1.0+ or OpenTofu 1.0+
 ```
 
 **Terraform Protocol 6 Required:**
-
 - This provider uses Terraform Plugin Protocol 6
 - Requires Terraform 1.0 or later
 - Older versions (0.x) are not supported
 
 **Upgrade Terraform:**
-
 ```bash
 # macOS with Homebrew
 brew upgrade terraform
@@ -91,7 +86,7 @@ brew upgrade terraform
 # Or download from terraform.io
 ```
 
-______________________________________________________________________
+---
 
 ### Permission Denied Errors
 
@@ -100,47 +95,41 @@ ______________________________________________________________________
 **Solutions:**
 
 **Make provider executable:**
-
 ```bash
 chmod +x ~/.terraform.d/plugins/local/providers/pyvider/*/*/terraform-provider-pyvider
 ```
 
 **Check file ownership:**
-
 ```bash
 ls -la ~/.terraform.d/plugins/
 # Should be owned by your user, not root
 ```
 
 **Fix ownership if needed:**
-
 ```bash
 sudo chown -R $USER:$USER ~/.terraform.d/
 ```
 
-______________________________________________________________________
+---
 
 ### Platform-Specific Installation
 
 **macOS:**
-
 - Use `darwin_amd64` or `darwin_arm64` (Apple Silicon)
 - Gatekeeper may block unsigned binaries
 - Solution: `xattr -d com.apple.quarantine terraform-provider-pyvider`
 
 **Linux:**
-
 - Use `linux_amd64` or `linux_arm64`
 - Ensure executable bit set
 - Check SELinux/AppArmor policies if applicable
 
 **Windows:**
-
 - Use `windows_amd64`
 - Use backslashes in paths or forward slashes with quotes
 - Provider support is experimental on Windows
 
-______________________________________________________________________
+---
 
 ## Configuration Errors
 
@@ -167,19 +156,17 @@ resource "pyvider_file_content" "bad" {
 ```
 
 **Common issues:**
-
 - Missing required attributes
 - Typos in attribute names
 - Wrong attribute types (string vs number vs bool)
 
 **Debug:**
-
 ```bash
 terraform validate
 # Shows configuration errors before apply
 ```
 
-______________________________________________________________________
+---
 
 ### Schema Validation Failures
 
@@ -188,7 +175,6 @@ ______________________________________________________________________
 **Solutions:**
 
 **String vs Number:**
-
 ```terraform
 # Correct
 resource "pyvider_example" "test" {
@@ -203,7 +189,6 @@ resource "pyvider_example" "bad" {
 ```
 
 **Boolean values:**
-
 ```terraform
 # Correct
 enabled = true       # Boolean (no quotes)
@@ -213,7 +198,6 @@ enabled = "true"     # ERROR: Expected bool, got string
 ```
 
 **Lists and Maps:**
-
 ```terraform
 # Correct
 tags = {
@@ -228,7 +212,7 @@ tags = ["key=value"]              # ERROR: Expected map
 files = {file = "file1.txt"}      # ERROR: Expected list
 ```
 
-______________________________________________________________________
+---
 
 ### Attribute Type Mismatches
 
@@ -237,7 +221,6 @@ ______________________________________________________________________
 **Common Causes:**
 
 1. **Passing computed value where static required:**
-
    ```terraform
    # May fail if provider expects literal string
    path = data.pyvider_env_variables.vars.value["HOME"]
@@ -246,21 +229,19 @@ ______________________________________________________________________
    path = "${data.pyvider_env_variables.vars.value["HOME"]}/myfile"
    ```
 
-1. **Wrong collection type:**
-
+2. **Wrong collection type:**
    ```terraform
    # Check if attribute expects list, set, or map
    # Consult resource documentation
    ```
 
-1. **Null/undefined values:**
-
+3. **Null/undefined values:**
    ```terraform
    # Use 'try()' for potentially undefined values
    value = try(var.optional_value, "default")
    ```
 
-______________________________________________________________________
+---
 
 ## Runtime Errors
 
@@ -271,7 +252,6 @@ ______________________________________________________________________
 **Common Causes and Solutions:**
 
 **1. Permission Denied:**
-
 ```terraform
 resource "pyvider_file_content" "test" {
   path    = "/etc/protected.txt"  # ERROR: No write permission
@@ -286,7 +266,6 @@ resource "pyvider_file_content" "test" {
 ```
 
 **2. Directory Doesn't Exist:**
-
 ```terraform
 resource "pyvider_file_content" "test" {
   path    = "/nonexistent/dir/file.txt"  # ERROR: Parent directory missing
@@ -305,14 +284,12 @@ resource "pyvider_file_content" "test" {
 ```
 
 **3. File Already Exists:**
-
 ```terraform
 # If file exists and content differs, update will fail
 # Solution: Remove file first or use different path
 ```
 
 **4. Invalid Path Characters:**
-
 ```terraform
 # Windows: Avoid reserved characters < > : " | ? *
 # All platforms: Avoid trailing spaces, special characters
@@ -320,7 +297,7 @@ path = "/tmp/valid-file-name.txt"  # Good
 path = "/tmp/file:name.txt"        # May fail on Windows
 ```
 
-______________________________________________________________________
+---
 
 ### HTTP/API Errors
 
@@ -329,7 +306,6 @@ ______________________________________________________________________
 **Common Causes:**
 
 **1. Network Connectivity:**
-
 ```terraform
 data "pyvider_http_api" "test" {
   url = "https://api.example.com/data"
@@ -343,7 +319,6 @@ data "pyvider_http_api" "test" {
 ```
 
 **2. SSL/TLS Certificate Issues:**
-
 ```terraform
 # Self-signed certificates may fail validation
 # Solution: Use http:// for local testing (not production!)
@@ -353,7 +328,6 @@ data "pyvider_http_api" "local" {
 ```
 
 **3. Authentication Required:**
-
 ```terraform
 # Some APIs require authentication
 # Check if data source supports headers/auth
@@ -361,13 +335,12 @@ data "pyvider_http_api" "local" {
 ```
 
 **4. Rate Limiting:**
-
 ```terraform
 # API returns 429 Too Many Requests
 # Solution: Add delays between applies or reduce refresh frequency
 ```
 
-______________________________________________________________________
+---
 
 ### State Management Problems
 
@@ -376,7 +349,6 @@ ______________________________________________________________________
 **Solutions:**
 
 **1. State file corrupted:**
-
 ```bash
 # Backup state
 cp terraform.tfstate terraform.tfstate.backup
@@ -389,7 +361,6 @@ mv terraform.tfstate.backup terraform.tfstate
 ```
 
 **2. State drift (resource modified outside Terraform):**
-
 ```bash
 # Detect drift
 terraform plan
@@ -402,21 +373,19 @@ terraform import pyvider_file_content.example /path/to/file
 ```
 
 **3. State locking issues:**
-
 ```bash
 # If state is locked and process died:
 # Manually unlock (use with caution)
 terraform force-unlock <lock-id>
 ```
 
-______________________________________________________________________
+---
 
 ### Validation Errors
 
 **Problem:** Custom validation fails
 
 **Example:**
-
 ```terraform
 variable "port" {
   type = number
@@ -430,12 +399,11 @@ variable "port" {
 ```
 
 **Solution:**
-
 - Read the validation error message carefully
 - Adjust input values to meet validation constraints
 - Check provider-specific validation rules in documentation
 
-______________________________________________________________________
+---
 
 ## Provider Limitations (Pre-release)
 
@@ -446,28 +414,24 @@ ______________________________________________________________________
 **Current Limitations:**
 
 1. **Limited Resource Types:**
-
    - Mostly file operations, HTTP calls, and utilities
    - No cloud infrastructure resources (AWS, Azure, GCP)
    - Not suitable for managing production infrastructure
 
-1. **Experimental Features:**
-
+2. **Experimental Features:**
    - Some resources are examples, not production-tested
    - APIs may change in later versions; availability may change or be removed
    - Not all pyvider framework features implemented
 
-1. **Performance:**
-
+3. **Performance:**
    - Not optimized for large-scale deployments
    - May be slower than native providers
 
-1. **Testing:**
-
+4. **Testing:**
    - Test coverage varies by resource
    - Edge cases may not be handled
 
-______________________________________________________________________
+---
 
 ### Known Limitations vs Pyvider Framework
 
@@ -477,50 +441,44 @@ ______________________________________________________________________
 - **pyvider framework:** Full framework for building custom providers
 
 **If you need:**
-
 - ✅ Learning pyvider → Use this provider
 - ✅ Testing concepts → Use this provider
 - ❌ Production infrastructure → Build custom provider with pyvider
 
 **Missing from provider but available in framework:**
-
 - Advanced state management features
 - Custom validation logic
 - Provider-specific configuration
 - Performance optimizations
 - Production-grade error handling
 
-______________________________________________________________________
+---
 
 ### When to Build a Custom Provider
 
 **Build your own provider when:**
 
 1. **Production Use Required:**
-
    - Managing critical infrastructure
    - Need SLAs and support
    - Require specific compliance/security
 
-1. **Custom Logic Needed:**
-
+2. **Custom Logic Needed:**
    - Business-specific resources
    - Custom validation rules
    - Integration with internal APIs
 
-1. **Performance Critical:**
-
+3. **Performance Critical:**
    - Managing 100s+ resources
    - High-frequency updates
    - Large state files
 
 **How to Build:**
-
 - Use [pyvider framework](https://github.com/provide-io/pyvider)
 - Reference pyvider-components for examples
 - Follow [pyvider documentation](https://foundry.provide.io/pyvider/)
 
-______________________________________________________________________
+---
 
 ## Debug Techniques
 
@@ -543,18 +501,16 @@ cat terraform.log
 ```
 
 **What to look for in logs:**
-
 - Provider initialization messages
 - Resource creation/update/delete attempts
 - Error messages with stack traces
 - API request/response details
 
-______________________________________________________________________
+---
 
 ### State Inspection
 
 **View current state:**
-
 ```bash
 # Show all resources
 terraform show
@@ -567,7 +523,6 @@ terraform state list
 ```
 
 **Check state for issues:**
-
 ```bash
 # Validate state file
 terraform validate
@@ -579,41 +534,36 @@ terraform plan
 terraform refresh
 ```
 
-______________________________________________________________________
+---
 
 ### Common Debugging Workflow
 
 1. **Isolate the problem:**
-
    ```bash
    # Test with minimal configuration
    # Comment out unrelated resources
    # Apply one resource at a time
    ```
 
-1. **Enable logging:**
-
+2. **Enable logging:**
    ```bash
    export TF_LOG=DEBUG
    terraform apply 2>&1 | tee debug.log
    ```
 
-1. **Check provider logs:**
-
+3. **Check provider logs:**
    - Look for provider initialization errors
    - Check resource-specific error messages
    - Note any warnings
 
-1. **Verify configuration:**
-
+4. **Verify configuration:**
    ```bash
    terraform validate      # Syntax and schema
    terraform fmt -check    # Formatting
    terraform plan         # What will change
    ```
 
-1. **Test manually:**
-
+5. **Test manually:**
    ```bash
    # If creating file, try manually:
    touch /tmp/test.txt
@@ -622,12 +572,11 @@ ______________________________________________________________________
    curl https://api.example.com/endpoint
    ```
 
-______________________________________________________________________
+---
 
 ### Using terraform console
 
 **Interactive testing:**
-
 ```bash
 terraform console
 
@@ -641,7 +590,7 @@ terraform console
 > jsondecode("{\"key\": \"value\"}")
 ```
 
-______________________________________________________________________
+---
 
 ## Getting Help
 
@@ -655,23 +604,20 @@ ______________________________________________________________________
 ### Community Support
 
 **GitHub Issues:**
-
 - [terraform-provider-pyvider issues](https://github.com/provide-io/terraform-provider-pyvider/issues)
 - [pyvider framework issues](https://github.com/provide-io/pyvider/issues)
 
 **Before Opening an Issue:**
-
 1. Search existing issues for similar problems
-1. Include Terraform version (`terraform version`)
-1. Include provider version
-1. Provide minimal reproduction configuration
-1. Include relevant log output (TF_LOG=DEBUG)
-1. Describe expected vs actual behavior
+2. Include Terraform version (`terraform version`)
+3. Include provider version
+4. Provide minimal reproduction configuration
+5. Include relevant log output (TF_LOG=DEBUG)
+6. Describe expected vs actual behavior
 
 ### Reporting Bugs
 
 **Include in bug reports:**
-
 ```
 - Terraform version: 1.5.0
 - Provider version: X.X.X (check VERSION file or releases page)
@@ -682,20 +628,20 @@ ______________________________________________________________________
 - Expected behavior
 ```
 
-______________________________________________________________________
+---
 
 ## Quick Reference
 
 ### Most Common Issues
 
-| Problem             | Quick Fix                                 |
-| ------------------- | ----------------------------------------- |
-| Provider not found  | Check `~/.terraform.d/plugins/` structure |
-| Permission denied   | `chmod +x terraform-provider-pyvider`     |
-| Invalid attribute   | Check resource documentation for schema   |
+| Problem | Quick Fix |
+|---------|-----------|
+| Provider not found | Check `~/.terraform.d/plugins/` structure |
+| Permission denied | `chmod +x terraform-provider-pyvider` |
+| Invalid attribute | Check resource documentation for schema |
 | File creation fails | Verify path is writable, directory exists |
-| HTTP error          | Test URL with `curl` first                |
-| State locked        | `terraform force-unlock <ID>` (caution!)  |
+| HTTP error | Test URL with `curl` first |
+| State locked | `terraform force-unlock <ID>` (caution!) |
 
 ### Useful Commands
 
@@ -719,10 +665,10 @@ terraform destroy
 rm -rf .terraform terraform.tfstate*
 ```
 
-______________________________________________________________________
+---
 
 **Still stuck?** Open an issue on [GitHub](https://github.com/provide-io/terraform-provider-pyvider/issues) with details!
 
-______________________________________________________________________
+---
 
 *Documentation version: 0.0.19 | Last updated: 2025-11-09*

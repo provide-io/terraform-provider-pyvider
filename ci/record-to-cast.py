@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-
-#!/usr/bin/env python3
 """
 Record a command's terminal output as an asciinema v2 .cast file.
 
@@ -22,10 +18,11 @@ import os
 import pty
 import re
 import struct
-import subprocess
+import subprocess  # nosec
 import sys
 import termios
 import time
+from typing import Any
 
 # Strip only the sequences that cause the player to flash — specifically the
 # alternate screen buffer switch and full-screen clears. Leave everything else
@@ -48,7 +45,7 @@ def main() -> None:
     output_path = sys.argv[1]
     command = sys.argv[2:]
 
-    events: list[list[float | str]] = []
+    events: list[Any] = []
     start_time = time.time()
 
     cols, rows = 120, 40

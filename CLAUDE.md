@@ -67,7 +67,6 @@ terraform apply
 ### Package Structure
 
 This is a meta-package that brings together:
-
 - **pyvider** - Core provider framework
 - **pyvider-components** - Standard components (data sources, resources, functions)
 - **flavorpack** - Binary packaging
@@ -81,7 +80,6 @@ Components are auto-discovered from `pyvider.components` package (configured in 
 ### Flavorpack Configuration
 
 Configured in `pyproject.toml`:
-
 - Entry point: `pyvider.cli:main`
 - Output: `dist/terraform-provider-pyvider`
 - Command name: `terraform-provider-pyvider`
@@ -89,14 +87,12 @@ Configured in `pyproject.toml`:
 ### Local Installation Path
 
 Provider installs to:
-
 ```
 ~/.terraform.d/plugins/local/providers/pyvider/<version>/{platform}/
 └── terraform-provider-pyvider
 ```
 
 Use in Terraform with:
-
 ```hcl
 terraform {
   required_providers {
@@ -128,13 +124,15 @@ The provider has been optimized to work within Terraform's 60-second plugin star
 - **Warm start:** 9.7 seconds (with cached extraction)
 
 Key changes:
+1. Handler waits for background component discovery (RPC server responds immediately)
+2. Lazy jq import (deferred to runtime, not loaded during discovery)
+3. Venv cleanup (removed dev dependencies: babel, mkdocs, etc.)
 
-______________________________________________________________________
+---
 
 ## Related Projects
 
 Reference implementations and documentation:
-
 - `pyvider` - Provider framework documentation
 - `pyvider-components` - Component implementations
 - `terraform-provider-tofusoup` - Another provider example
