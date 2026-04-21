@@ -157,7 +157,7 @@ jobs:
 
       - name: 🧰 Install wrknv
         run: |
-          uv tool install git+https://github.com/provide-io/wrknv.git
+          uv tool install git+https://github.com/provide-io/wrknv.git@v0.4.0
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 📚 Generate Documentation
@@ -169,7 +169,7 @@ jobs:
           uv sync --all-groups
 
           # Generate documentation via wrknv task
-          we run docs.build
+          uvx wrknv run docs.build
 
           echo "✅ Documentation and examples generated"
           ls -la docs/
