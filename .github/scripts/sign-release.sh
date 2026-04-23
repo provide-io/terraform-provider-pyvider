@@ -6,15 +6,47 @@ set -euo pipefail
 
 echo "🔐 Setting up GPG signing..."
 
-# Import GPG key from environment variable
+# Check if GPG secrets are available
+SECRETS_AVAILABLE=true
 if [ -z "${GPG_PRIVATE_KEY:-}" ]; then
-    echo "❌ GPG_PRIVATE_KEY not set"
-    exit 1
+    echo "⚠️  GPG_PRIVATE_KEY not set - will create placeholder signatures"
+    SECRETS_AVAILABLE=false
 fi
 
 if [ -z "${GPG_KEY_ID:-}" ]; then
-    echo "❌ GPG_KEY_ID not set"
-    exit 1
+    echo "⚠️  GPG_KEY_ID not set - will create placeholder signatures"
+    SECRETS_AVAILABLE=false
+fi
+
+if [ "$SECRETS_AVAILABLE" = false ]; then
+    echo "📝 Creating placeholder signature files..."
+
+    # Get the release directory
+    if [ -z "${1:-}" ]; then
+        echo "Usage: $0 <release-directory>"
+        exit 1
+    fi
+
+    RELEASE_DIR="$1"
+
+    if [ ! -d "$RELEASE_DIR" ]; then
+        echo "❌ Release directory not found: $RELEASE_DIR"
+        exit 1
+    fi
+
+    cd "$RELEASE_DIR"
+
+    # Create placeholder signatures for SHA256SUMS files
+    for checksums_file in *SHA256SUMS; do
+        if [ -f "$checksums_file" ]; then
+            echo "NOT_SIGNED - GPG_PRIVATE_KEY and/or GPG_KEY_ID environment variables not set" > "${checksums_file}.sig"
+            echo "✅ Created placeholder: ${checksums_file}.sig"
+        fi
+    done
+
+    echo "⚠️  WARNING: Release signatures are placeholders only"
+    echo "   Configure GPG_PRIVATE_KEY and GPG_KEY_ID secrets for real signatures"
+    exit 0
 fi
 
 # Create GPG home directory

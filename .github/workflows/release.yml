@@ -1,4 +1,4 @@
-name: 🏷️ GitHub Release
+name: 🚀 Release Provider
 
 on:
   workflow_dispatch:
@@ -8,13 +8,8 @@ on:
         required: false
         type: boolean
         default: false
-      generate_docs:
-        description: 'Generate and commit documentation'
-        required: false
-        type: boolean
-        default: true
       build_run_id:
-        description: 'Build workflow run ID (leave empty to trigger new build)'
+        description: 'Build workflow run ID (leave empty for last successful build or to trigger new build)'
         required: false
         type: string
 
@@ -22,120 +17,165 @@ env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-  # Optionally trigger a new build if no build_run_id provided
+  # Optionally trigger a new build or find last successful build
   trigger_build:
-    name: 🏗️ Trigger Build
-    runs-on: ubuntu-24.04
+    name: 🏗️ Trigger/Find Build
+    runs-on: ubuntu-latest
     if: inputs.build_run_id == ''
+    permissions:
+      actions: write
+      contents: read
     outputs:
-      run_id: ${{ steps.trigger.outputs.run_id }}
+      run_id: ${{ steps.determine.outputs.run_id }}
+      use_existing: ${{ steps.determine.outputs.use_existing }}
 
     steps:
-      - name: 🔨 Trigger build workflow
-        id: trigger
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const response = await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'build-provider.yml',
-              ref: context.ref
-            });
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
 
-            // Wait a bit for the workflow to start
-            await new Promise(resolve => setTimeout(resolve, 5000));
+      - name: 🔧 Ensure gh CLI available
+        shell: bash
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq gh
+          fi
 
-            // Get the latest run
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'build-provider.yml',
-              per_page: 1
-            });
+      - name: 🔍 Check for last successful build
+        id: determine
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to find last successful build first
+          RUN_LIST=$(gh run list \
+            --workflow build-provider.yml \
+            --status completed \
+            --limit 1 \
+            --json databaseId,conclusion)
 
-            const runId = runs.data.workflow_runs[0].id;
-            core.setOutput('run_id', runId);
-            console.log(`Build workflow triggered: ${runId}`);
+          RUN_ID=$(echo "$RUN_LIST" | jq '.[] | select(.conclusion=="success") | .databaseId')
+
+          if [[ -n "$RUN_ID" ]] && [[ "$RUN_ID" != "null" ]]; then
+            echo "✅ Using last successful build: ${RUN_ID}"
+            echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
+            echo "use_existing=true" >> $GITHUB_OUTPUT
+          else
+            # No successful build found, trigger a new one
+            echo "⏳ No successful build found, triggering new build..."
+            gh workflow run build-provider.yml
+
+            # Wait a bit for the workflow to start
+            sleep 5
+
+            # Get the latest run
+            RUN_ID=$(gh run list \
+              --workflow build-provider.yml \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId')
+
+            echo "🚀 Build workflow triggered: ${RUN_ID}"
+            echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
+            echo "use_existing=false" >> $GITHUB_OUTPUT
+          fi
 
   # Wait for build to complete
   wait_for_build:
     name: ⏳ Wait for Build
     needs: trigger_build
-    if: always() && (inputs.build_run_id != '' || needs.trigger_build.outputs.run_id != '')
-    runs-on: ubuntu-24.04
+    if: always()
+    runs-on: ubuntu-latest
     outputs:
       build_run_id: ${{ steps.wait.outputs.build_run_id }}
 
     steps:
+      - name: 🔧 Ensure gh CLI available
+        shell: bash
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq gh
+          fi
+
       - name: ⏳ Wait for build completion
         id: wait
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const runId = '${{ inputs.build_run_id }}' || '${{ needs.trigger_build.outputs.run_id }}';
-            core.setOutput('build_run_id', runId);
+        run: |
+          if [[ -n "${{ inputs.build_run_id }}" ]]; then
+            RUN_ID="${{ inputs.build_run_id }}"
+          else
+            RUN_ID="${{ needs.trigger_build.outputs.run_id }}"
+          fi
+          echo "build_run_id=${RUN_ID}" >> $GITHUB_OUTPUT
 
-            if ('${{ inputs.build_run_id }}' !== '') {
-              console.log('Using provided build_run_id:', runId);
-              return;
-            }
+          # If provided or using existing successful build, skip waiting
+          if [[ -n "${{ inputs.build_run_id }}" ]]; then
+            echo "✅ Using provided build_run_id: ${RUN_ID}"
+            exit 0
+          fi
 
-            console.log('Waiting for build workflow to complete:', runId);
+          if [[ "${{ needs.trigger_build.outputs.use_existing }}" == "true" ]]; then
+            echo "✅ Using existing successful build: ${RUN_ID}"
+            exit 0
+          fi
 
-            let status = 'in_progress';
-            let attempts = 0;
-            const maxAttempts = 60; // 30 minutes max wait
+          echo "⏳ Waiting for build workflow to complete: ${RUN_ID}"
 
-            while (status === 'in_progress' && attempts < maxAttempts) {
-              const run = await github.rest.actions.getWorkflowRun({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: runId
-              });
+          ATTEMPTS=0
+          MAX_ATTEMPTS=60  # 30 minutes max wait
 
-              status = run.data.status;
-              const conclusion = run.data.conclusion;
+          while [[ $ATTEMPTS -lt $MAX_ATTEMPTS ]]; do
+            STATUS=$(gh run view $RUN_ID --json status --jq '.status')
+            CONCLUSION=$(gh run view $RUN_ID --json conclusion --jq '.conclusion')
 
-              console.log(`Build status: ${status}, conclusion: ${conclusion}`);
+            echo "Build status: ${STATUS}, conclusion: ${CONCLUSION}"
 
-              if (status === 'completed') {
-                if (conclusion !== 'success') {
-                  core.setFailed(`Build workflow failed with conclusion: ${conclusion}`);
-                  return;
-                }
-                break;
-              }
+            if [[ "$STATUS" == "completed" ]]; then
+              if [[ "$CONCLUSION" != "success" ]]; then
+                echo "❌ Build workflow failed with conclusion: ${CONCLUSION}"
+                exit 1
+              fi
+              echo "✅ Build workflow completed successfully"
+              exit 0
+            fi
 
-              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30s
-              attempts++;
-            }
+            sleep 30  # Wait 30 seconds
+            ((ATTEMPTS++))
+          done
 
-            if (attempts >= maxAttempts) {
-              core.setFailed('Timeout waiting for build workflow');
-            }
+          echo "❌ Timeout waiting for build workflow"
+          exit 1
 
   release:
     name: 🎉 Create Release
     needs: wait_for_build
     if: always() && needs.wait_for_build.result == 'success'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
       - name: 🤖 Generate App Token
         id: app-token
+        continue-on-error: true
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.PROVIDE_BOT_APP_ID }}
           private-key: ${{ secrets.PROVIDE_BOT_PRIVATE_KEY }}
 
+      - name: 🔐 Determine checkout token
+        id: checkout-token
+        run: |
+          if [[ -n "${{ steps.app-token.outputs.token }}" ]]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.checkout-token.outputs.token }}
 
       - name: 📖 Read VERSION
         id: version
@@ -145,7 +185,7 @@ jobs:
           echo "📦 Releasing version: ${VERSION}"
 
       - name: 📦 Install UV
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v4
         with:
           enable-cache: false
 
@@ -154,44 +194,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 🧰 Install wrknv
-        run: |
-          uv tool install git+https://github.com/provide-io/wrknv.git@v0.4.0
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: 📚 Generate Documentation
-        if: inputs.generate_docs == true
-        run: |
-          echo "📝 Generating documentation and examples with plating..."
-
-          # Install project dependencies and dev tools (includes plating and pyvider-components)
-          uv sync --all-groups
-
-          # Generate documentation via wrknv task
-          uvx wrknv run docs.build
-
-          echo "✅ Documentation and examples generated"
-          ls -la docs/
-
-      - name: 💾 Commit Documentation
-        if: inputs.generate_docs == true
-        run: |
-          # Configure git with providebot[bot] identity
-          git config user.name "providebot[bot]"
-          git config user.email "178697328+providebot[bot]@users.noreply.github.com"
-
-          # Add generated documentation
-          git add docs/
-
-          # Commit if there are changes
-          if git diff --staged --quiet; then
-            echo "📝 No documentation changes to commit"
-          else
-            git commit -m "Generate documentation for v${{ steps.version.outputs.VERSION }}"
-            git push origin main
-            echo "✅ Documentation committed and pushed"
-          fi
 
       - name: 📥 Download all build artifacts
         uses: actions/download-artifact@v4
@@ -281,73 +283,12 @@ jobs:
 
           echo -e "\n✅ All release artifacts verified!"
 
-      - name: 📝 Generate release notes
-        run: |
-          cat > release-notes.md << EOF
-          # Terraform Provider Pyvider v${{ steps.version.outputs.VERSION }}
-
-          ## 📦 Installation
-
-          ### OpenTofu / Terraform Registry
-          \`\`\`hcl
-          terraform {
-            required_providers {
-              pyvider = {
-                source  = "registry.opentofu.org/provide-io/pyvider"
-                version = "${{ steps.version.outputs.VERSION }}"
-              }
-            }
-          }
-          \`\`\`
-
-          ### Manual Installation
-          1. Download the appropriate package for your platform from the assets below
-          2. Extract the archive to get the provider binary
-          3. Place it in your Terraform plugins directory
-
-          ## 🔒 Verification
-
-          Verify your download with:
-          \`\`\`bash
-          # Download the SHA256SUMS and signature files
-          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ steps.version.outputs.VERSION }}/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS
-          curl -LO https://github.com/provide-io/terraform-provider-pyvider/releases/download/v${{ steps.version.outputs.VERSION }}/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig
-
-          # Verify the signature
-          gpg --verify terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS
-
-          # Verify the checksum
-          sha256sum -c terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS 2>&1 | grep OK
-          \`\`\`
-
-          ## 📋 Supported Platforms
-
-          - Linux AMD64
-          - Linux ARM64
-          - macOS ARM64 (Apple Silicon)
-          - macOS AMD64 (Intel)
-
-          ## 🚀 What's New
-
-          Built with Pyvider framework - Python-based Terraform provider development.
-          EOF
-
       - name: 🏷️ Create Git tag
         run: |
           # Configure git with providebot[bot] identity
           git config user.name "providebot[bot]"
           git config user.email "178697328+providebot[bot]@users.noreply.github.com"
 
-          # Create and push tag (ensure it exists before release)
+          # Create and push tag for the verified build artifacts.
           git tag -a "v${{ steps.version.outputs.VERSION }}" -m "Release v${{ steps.version.outputs.VERSION }}" || echo "Tag might already exist"
           git push origin "v${{ steps.version.outputs.VERSION }}" || echo "Tag already exists on remote"
-
-      - name: 🚀 Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: "v${{ steps.version.outputs.VERSION }}"
-          name: "v${{ steps.version.outputs.VERSION }}"
-          bodyFile: "release-notes.md"
-          artifacts: "release/*"
-          prerelease: ${{ inputs.prerelease }}
-          token: ${{ secrets.GITHUB_TOKEN }}
