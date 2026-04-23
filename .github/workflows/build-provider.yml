@@ -35,8 +35,6 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
           echo "📦 Building version: ${VERSION}"
 
-      # setup-python MUST come before setup-uv on Windows ARM64
-      # (uv's python-build-standalone lacks Python 3.11 ARM64 Windows builds)
       - name: 🐍 Setup Python
         if: env.ACT != 'true' && github.actor != 'nektos/act'
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
@@ -53,6 +51,22 @@ jobs:
         shell: bash
         run: uv sync --group dev
 
+      - name: 📥 Checkout Flavorpack Helpers
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          repository: provide-io/flavorpack
+          ref: v0.4.0
+          path: .deps/flavorpack
+
+      - name: 🔨 Build Flavor Helpers
+        shell: bash
+        run: |
+          cd .deps/flavorpack
+          uv sync --group dev
+          uv run flavor helpers build --lang go
+          echo "FLAVOR_BUILDER_BIN=$PWD/dist/bin/flavor-go-builder-${{ matrix.target }}" >> "$GITHUB_ENV"
+          echo "FLAVOR_LAUNCHER_BIN=$PWD/dist/bin/flavor-go-launcher-${{ matrix.target }}" >> "$GITHUB_ENV"
+
       - name: 🔑 Generate temporary signing keys
         shell: bash
         run: |
@@ -63,10 +77,8 @@ jobs:
       - name: 🧹 Clear package caches
         shell: bash
         run: |
-          echo "🧹 Clearing pip and uv caches to ensure fresh PyPI index..."
           pip cache purge 2>/dev/null || echo "No pip cache to clear"
           uv cache clean 2>/dev/null || echo "No uv cache to clear"
-          echo "✅ Caches cleared"
 
       - name: 🏗️ Build PSP package
         shell: bash
@@ -88,7 +100,6 @@ jobs:
       - name: 📦 Package for Terraform
         shell: bash
         run: |
-          # Determine binary name (Windows needs .exe)
           if [[ "${{ matrix.platform }}" == "windows" ]]; then
             BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}.exe"
           else
@@ -98,15 +109,9 @@ jobs:
           cp terraform-provider-pyvider.psp "$BINARY_NAME"
           chmod +x "$BINARY_NAME" 2>/dev/null || true
 
-          # Test execution
           echo "🧪 Testing provider binary execution..."
-          echo "First run (cold start):"
-          time ./"$BINARY_NAME" launch-context || true
-          echo ""
-          echo "Second run (warm start):"
           time ./"$BINARY_NAME" launch-context || true
 
-          # Create zip archive (use 7z on Windows where zip isn't available)
           ZIP_NAME="terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip"
           if command -v zip &>/dev/null; then
             zip "$ZIP_NAME" "$BINARY_NAME"
@@ -116,7 +121,7 @@ jobs:
 
           echo "📦 Created Terraform provider package:"
           ls -la "$ZIP_NAME"
-          unzip -l "$ZIP_NAME"
+          unzip -l "$ZIP_NAME" 2>/dev/null || 7z l "$ZIP_NAME" 2>/dev/null || true
 
       - name: 📤 Upload artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
@@ -149,14 +154,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Built Packages" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [[ "${ACT:-}" == "true" || "${{ github.actor }}" == "nektos/act" ]]; then
-            echo "- ✅ linux_amd64 (local act mode)" >> $GITHUB_STEP_SUMMARY
-          else
-            for target in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64 windows_arm64; do
-              echo "- ✅ $target" >> $GITHUB_STEP_SUMMARY
-            done
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ⏭️ Next Steps" >> $GITHUB_STEP_SUMMARY
+          for target in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do
+            echo "- ✅ $target" >> $GITHUB_STEP_SUMMARY
+          done
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Conformance tests will automatically run on these artifacts." >> $GITHUB_STEP_SUMMARY
