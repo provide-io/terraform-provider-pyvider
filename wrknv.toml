@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [tasks]
-typecheck = "mypy plating/"
+typecheck = "mypy ci/"
 build = "uv build"
 
 [tasks.test]
