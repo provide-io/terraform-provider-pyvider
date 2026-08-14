@@ -55,7 +55,7 @@ def main() -> None:
     winsize = struct.pack("HHHH", rows, cols, 0, 0)
     fcntl.ioctl(slave_fd, termios.TIOCSWINSZ, winsize)
 
-    proc = subprocess.Popen(
+    proc = subprocess.Popen(  # nosec B603 - command is this script's own CLI args, not untrusted input
         command,
         stdout=slave_fd,
         stderr=slave_fd,
