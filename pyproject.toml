@@ -156,11 +156,12 @@ output_path = "dist/terraform-provider-pyvider"
 package_name = "terraform-provider-pyvider"
 
 [tool.flavor.build]
-# Package the pyvider dependencies with the provider
-dependencies = [
-    "pyvider-components>=0.4.0",
-    "provide-foundation>=0.4.0",
-]
+# No `dependencies` key. flavorpack joins each entry onto the manifest
+# directory and builds a wheel from it, so it takes filesystem paths and
+# nothing else -- requirement strings like "pyvider-components>=0.5.0" have
+# only ever produced `⚠️ Local dependency not found` at every build since
+# 602ebab. The runtime tree comes from `build_and_resolve_project`, which reads
+# the lock, so there was nothing for these to add.
 exclude = [
     "**/.terraform/**",
     "**/.venv/**", 
