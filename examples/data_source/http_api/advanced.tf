@@ -190,30 +190,44 @@ locals {
     }
   }
 
-  # Performance metrics
+  # Every response time we actually measured. Computed once instead of four
+  # times, and named so the guards below can test it.
+  #
+  # This list can legitimately be empty. `pyvider_http_api` reports a request it
+  # could not complete as a null response_time rather than failing the data
+  # source, so a runner that cannot reach the endpoint produces no measurements
+  # at all -- and in Terraform `min()` and `max()` with no arguments are errors,
+  # `sum([])` is an error, and dividing by `length([])` is a division by zero.
+  #
+  # All four fired at once as a bare "Operation failed" on local.response_analysis,
+  # with nothing to say the network was the cause. It cost this example a
+  # conformance failure on the macOS runner while linux and windows passed.
+  measured_response_times = [
+    for analysis in values(local.response_analysis) :
+    analysis.response_time if analysis.response_time != null
+  ]
+
+  # Performance metrics. Null rather than a fabricated zero when nothing was
+  # measured: no successful request is not the same as a 0 ms one.
   performance_metrics = {
-    fastest_response = min([
-      for analysis in values(local.response_analysis) :
-      analysis.response_time if analysis.response_time != null
-    ]...)
+    fastest_response = length(local.measured_response_times) > 0 ? min(local.measured_response_times...) : null
+    slowest_response = length(local.measured_response_times) > 0 ? max(local.measured_response_times...) : null
 
-    slowest_response = max([
-      for analysis in values(local.response_analysis) :
-      analysis.response_time if analysis.response_time != null
-    ]...)
+    average_response_time = (
+      length(local.measured_response_times) > 0
+      ? sum(local.measured_response_times) / length(local.measured_response_times)
+      : null
+    )
 
-    average_response_time = sum([
-      for analysis in values(local.response_analysis) :
-      analysis.response_time if analysis.response_time != null
-    ]) / length([
-      for analysis in values(local.response_analysis) :
-      analysis.response_time if analysis.response_time != null
-    ])
-
-    success_rate = (length([
-      for analysis in values(local.response_analysis) :
-      analysis if analysis.success
-    ]) / length(values(local.response_analysis))) * 100
+    # A rate over zero requests is undefined, not 0%.
+    success_rate = (
+      length(values(local.response_analysis)) > 0
+      ? (length([
+        for analysis in values(local.response_analysis) :
+        analysis if analysis.success
+      ]) / length(values(local.response_analysis))) * 100
+      : null
+    )
   }
 }
 
@@ -227,22 +241,22 @@ resource "pyvider_file_content" "advanced_api_analysis" {
       "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
     ]
 
-    response_analysis = local.response_analysis
-    error_scenarios   = local.error_scenarios
+    response_analysis   = local.response_analysis
+    error_scenarios     = local.error_scenarios
     performance_metrics = local.performance_metrics
 
     user_data_example = {
-      user_profile = local.advanced_user_data
-      posts_count  = length(local.user_posts)
+      user_profile     = local.advanced_user_data
+      posts_count      = length(local.user_posts)
       first_post_title = length(local.user_posts) > 0 ? local.user_posts[0].title : null
     }
 
     api_patterns = {
-      authentication_tested = true
-      error_handling_tested = true
+      authentication_tested   = true
+      error_handling_tested   = true
       timeout_handling_tested = true
       multiple_methods_tested = true
-      json_responses_parsed = true
+      json_responses_parsed   = true
     }
 
     recommendations = [
