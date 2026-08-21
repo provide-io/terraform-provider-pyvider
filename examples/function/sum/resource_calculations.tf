@@ -25,7 +25,7 @@ locals {
     )
   ]
 
-  total_monthly_cost = provider::pyvider::sum(local.monthly_costs)
+  total_monthly_cost    = provider::pyvider::sum(local.monthly_costs)
   average_instance_cost = provider::pyvider::divide(local.total_monthly_cost, length(local.instances))
 }
 
@@ -33,8 +33,8 @@ locals {
 locals {
   resource_calculations_volume_sizes_gb = [100, 250, 500, 1000]
 
-  resource_calculations_total_storage = provider::pyvider::sum(local.resource_calculations_volume_sizes_gb)
-  resource_calculations_largest_volume = provider::pyvider::max(local.resource_calculations_volume_sizes_gb)
+  resource_calculations_total_storage   = provider::pyvider::sum(local.resource_calculations_volume_sizes_gb)
+  resource_calculations_largest_volume  = provider::pyvider::max(local.resource_calculations_volume_sizes_gb)
   resource_calculations_smallest_volume = provider::pyvider::min(local.resource_calculations_volume_sizes_gb)
 
   # Calculate percentage of total
@@ -46,8 +46,8 @@ locals {
 
 # Auto-scaling calculations
 locals {
-  resource_calculations_current_instances = 3
-  resource_calculations_target_cpu_percent = 70
+  resource_calculations_current_instances   = 3
+  resource_calculations_target_cpu_percent  = 70
   resource_calculations_current_cpu_percent = 85
 
   # Calculate scaling factor
@@ -72,20 +72,20 @@ locals {
 output "resource_calculations_min_instances" {
   value = {
     cost_analysis = {
-      total_monthly = local.total_monthly_cost
+      total_monthly        = local.total_monthly_cost
       average_per_instance = local.average_instance_cost
-      individual_costs = local.monthly_costs
+      individual_costs     = local.monthly_costs
     }
     storage_analysis = {
-      total_gb = local.resource_calculations_total_storage
-      largest_volume = local.resource_calculations_largest_volume
-      smallest_volume = local.resource_calculations_smallest_volume
+      total_gb           = local.resource_calculations_total_storage
+      largest_volume     = local.resource_calculations_largest_volume
+      smallest_volume    = local.resource_calculations_smallest_volume
       largest_percentage = local.resource_calculations_largest_percentage
     }
     autoscaling = {
-      current = local.resource_calculations_current_instances
-      desired = local.resource_calculations_desired_instances
-      final = local.resource_calculations_final_instance_count
+      current      = local.resource_calculations_current_instances
+      desired      = local.resource_calculations_desired_instances
+      final        = local.resource_calculations_final_instance_count
       scale_factor = local.resource_calculations_scale_factor
     }
   }

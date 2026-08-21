@@ -27,5 +27,13 @@ output "function_result" {
 
 ```
 
-## Argument Reference
+## Schema
 
+### Optional
+
+- `input_data` (Map of String) - Simple string map input
+
+### Read-Only
+
+- `processed_data` (Map of String) - Processed string map
+- `data_hash` (String) - Hash of processed data

@@ -59,10 +59,10 @@ resource "pyvider_file_content" "verification_report" {
     test_results = local.comprehensive_verification_results
 
     security_validation = {
-      private_state_encryption    = "verified"
-      secret_generation_pattern   = "SECRET_FOR_{UPPER_INPUT}"
-      state_file_protection       = "enabled"
-      decryption_mechanism        = "terraform_native"
+      private_state_encryption  = "verified"
+      secret_generation_pattern = "SECRET_FOR_{UPPER_INPUT}"
+      state_file_protection     = "enabled"
+      decryption_mechanism      = "terraform_native"
     }
   })
 }

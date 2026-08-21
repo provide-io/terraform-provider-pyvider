@@ -27,5 +27,13 @@ output "function_result" {
 
 ```
 
-## Argument Reference
+## Schema
 
+### Optional
+
+- `input_data` (Dynamic) - Mixed type map input
+
+### Read-Only
+
+- `processed_data` (Dynamic) - Processed mixed map
+- `data_hash` (String) - Hash of processed data

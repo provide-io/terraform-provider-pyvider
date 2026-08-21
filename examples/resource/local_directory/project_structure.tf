@@ -2,7 +2,7 @@
 
 locals {
   project_structure_project_name = "my-app"
-  project_structure_base_path = "/tmp/${local.project_structure_project_name}"
+  project_structure_base_path    = "/tmp/${local.project_structure_project_name}"
 
   directories = [
     "src",
@@ -40,8 +40,8 @@ resource "pyvider_file_content" "readme_src" {
 
 output "project_structure_project_name" {
   value = {
-    base_path = local.project_structure_base_path
+    base_path           = local.project_structure_base_path
     directories_created = length(local.directories)
-    directory_list = [for d in local.directories : "${local.project_structure_base_path}/${d}"]
+    directory_list      = [for d in local.directories : "${local.project_structure_base_path}/${d}"]
   }
 }

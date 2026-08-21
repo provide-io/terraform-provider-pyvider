@@ -27,5 +27,17 @@ output "function_result" {
 
 ```
 
-## Argument Reference
+## Schema
 
+### Required
+
+- `config_name` (String)
+
+### Optional
+
+- `metadata` (Map of String)
+
+### Read-Only
+
+- `generated_config` (Object)
+- `summary` (Object)

@@ -1,5 +1,5 @@
 locals {
-  join_words = ["apple", "banana", "cherry"]
+  join_words  = ["apple", "banana", "cherry"]
   join_joined = provider::pyvider::join(", ", local.join_words)
   # "apple, banana, cherry"
 }

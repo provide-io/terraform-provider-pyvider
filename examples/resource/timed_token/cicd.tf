@@ -23,8 +23,8 @@ resource "pyvider_file_content" "ci_config" {
 output "cicd_ci_tokens" {
   value = {
     deploy_token_expires = pyvider_timed_token.ci_deploy_token.expires_at
-    test_token_expires = pyvider_timed_token.test_runner_token.expires_at
-    config_file = pyvider_file_content.ci_config.filename
+    test_token_expires   = pyvider_timed_token.test_runner_token.expires_at
+    config_file          = pyvider_file_content.ci_config.filename
   }
   sensitive = true
 }

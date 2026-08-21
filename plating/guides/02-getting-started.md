@@ -382,7 +382,7 @@ Having issues? See our comprehensive **[Troubleshooting Guide](./03-troubleshoot
 - **[Installation Issues](./03-troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
 - **[Configuration Errors](./03-troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
 - **[Runtime Errors](./03-troubleshooting.md#runtime-errors)** - File operations, HTTP/API, state management
-- **[Debug Techniques](./03-troubleshooting.md#debugging-techniques)** - TF_LOG, state inspection, terraform console
+- **[Debug Techniques](./03-troubleshooting.md#debug-techniques)** - TF_LOG, state inspection, terraform console
 - **[Getting Help](./03-troubleshooting.md#getting-help)** - Community support and issue reporting
 
 ### Quick Fixes
@@ -465,7 +465,7 @@ output "greeting_info" {
 
 ## Additional Resources
 
-- **[Provider Reference](index.md):** Complete resource and data source reference
+- **[Provider Reference](../index.md):** Complete resource and data source reference
 - **[pyvider Documentation](https://foundry.provide.io/pyvider/):** Provider framework docs
 - **[Terraform Documentation](https://www.terraform.io/docs):** Official Terraform docs
 - **[Community Support](https://github.com/provide-io/terraform-provider-pyvider/discussions):** Get help

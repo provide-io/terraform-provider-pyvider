@@ -1,5 +1,5 @@
 locals {
-  round_to_int = provider::pyvider::round(3.7, 0)         # 4
+  round_to_int     = provider::pyvider::round(3.7, 0)     # 4
   round_to_decimal = provider::pyvider::round(3.14159, 2) # 3.14
 }
 

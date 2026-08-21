@@ -2,10 +2,11 @@
 page_title: "Pyvider Provider"
 description: |-
   Terraform provider for pyvider
-template_output: "index.md"
 ---
 
-# Pyvider ProviderTerraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
+# Pyvider Provider
+
+Terraform provider for pyvider - A Python-based Terraform provider built with the Pyvider framework.
 
 ## Example Usage
 
@@ -26,7 +27,6 @@ No provider configuration required.
 ### Data Sources
 
 - [`pyvider_env_variables`](./data-sources/env_variables.md)
-- [`pyvider_nested_data_processor`](./data-sources/nested_data_processor.md)
 - [`pyvider_provider_config_reader`](./data-sources/provider_config_reader.md)
 
 ### Functions
@@ -87,12 +87,37 @@ No provider configuration required.
 
 ### Test Resources
 
+- [`pyvider_nested_resource_test`](./resources/nested_resource_test.md)
 - [`pyvider_private_state_verifier`](./resources/private_state_verifier.md)
+- [`pyvider_secret_note`](./resources/secret_note.md)
 - [`pyvider_warning_example`](./resources/warning_example.md)
 
 ### Test Data Sources
 
 - [`pyvider_mixed_map_test`](./data-sources/mixed_map_test.md)
-- [`pyvider_nested_resource_test`](./data-sources/nested_resource_test.md)
 - [`pyvider_simple_map_test`](./data-sources/simple_map_test.md)
 - [`pyvider_structured_object_test`](./data-sources/structured_object_test.md)
+
+### Test Functions
+
+- [`pyvider_nested_data_processor`](./functions/pyvider_nested_data_processor.md)
+
+### Test Ephemeral Resources
+
+- [`pyvider_lease`](./ephemeral-resources/lease.md)
+
+### Test List Resources
+
+- [`pyvider_directory_entry`](./list-resources/directory_entry.md)
+- [`pyvider_secret_note`](./list-resources/secret_note.md)
+
+### Test Actions
+
+- [`pyvider_echo`](./actions/echo.md)
+- [`pyvider_failing_action`](./actions/failing_action.md)
+- [`pyvider_wait_for_file`](./actions/wait_for_file.md)
+
+### Test State Stores
+
+- [`pyvider_fs`](./state-stores/fs.md)
+

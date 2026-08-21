@@ -5,8 +5,8 @@ locals {
     lens_jq_email = "alice@example.com"
   }
 
-  lens_jq_user_name  = provider::pyvider::lens_jq(local.lens_jq_user_data, ".name")    # "Alice Johnson"
-  lens_jq_user_email = provider::pyvider::lens_jq(local.lens_jq_user_data, ".email")   # "alice@example.com"
+  lens_jq_user_name  = provider::pyvider::lens_jq(local.lens_jq_user_data, ".name")  # "Alice Johnson"
+  lens_jq_user_email = provider::pyvider::lens_jq(local.lens_jq_user_data, ".email") # "alice@example.com"
 }
 
 output "lens_jq_user_data" {

@@ -1,6 +1,6 @@
 locals {
   example_data = {
-    name = "example"
+    name  = "example"
     value = 42
   }
 

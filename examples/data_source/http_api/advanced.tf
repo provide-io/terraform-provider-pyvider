@@ -128,42 +128,31 @@ locals {
   user_posts = try(jsondecode(data.pyvider_http_api.user_posts.response_body), [])
 
   # Analyze response characteristics
-  # A failed request reports a null status_code, and comparing null with >= or <
-  # is an error in Terraform -- "Operation failed: argument must not be null" --
-  # not false. Each range check therefore tests for null first; `&&`
-  # short-circuits, so the comparison is never reached for a null.
-  #
-  # This is what failed conformance on the macOS runner while linux and windows
-  # passed: six requests to a third-party endpoint, and a single unanswered one
-  # took down the whole configuration with an error naming no cause.
-  #
-  # The `== 200` checks below need no guard: equality against null is false, not
-  # an error.
   response_analysis = {
     post_request = {
       status_code   = data.pyvider_http_api.post_json.status_code
       response_time = data.pyvider_http_api.post_json.response_time_ms
       content_type  = data.pyvider_http_api.post_json.content_type
       headers_count = data.pyvider_http_api.post_json.header_count
-      success       = data.pyvider_http_api.post_json.status_code != null && data.pyvider_http_api.post_json.status_code >= 200 && data.pyvider_http_api.post_json.status_code < 300
+      success       = data.pyvider_http_api.post_json.status_code >= 200 && data.pyvider_http_api.post_json.status_code < 300
     }
 
     put_request = {
       status_code   = data.pyvider_http_api.put_request.status_code
       response_time = data.pyvider_http_api.put_request.response_time_ms
-      success       = data.pyvider_http_api.put_request.status_code != null && data.pyvider_http_api.put_request.status_code >= 200 && data.pyvider_http_api.put_request.status_code < 300
+      success       = data.pyvider_http_api.put_request.status_code >= 200 && data.pyvider_http_api.put_request.status_code < 300
     }
 
     delete_request = {
       status_code   = data.pyvider_http_api.delete_request.status_code
       response_time = data.pyvider_http_api.delete_request.response_time_ms
-      success       = data.pyvider_http_api.delete_request.status_code != null && data.pyvider_http_api.delete_request.status_code >= 200 && data.pyvider_http_api.delete_request.status_code < 300
+      success       = data.pyvider_http_api.delete_request.status_code >= 200 && data.pyvider_http_api.delete_request.status_code < 300
     }
 
     patch_request = {
       status_code   = data.pyvider_http_api.patch_request.status_code
       response_time = data.pyvider_http_api.patch_request.response_time_ms
-      success       = data.pyvider_http_api.patch_request.status_code != null && data.pyvider_http_api.patch_request.status_code >= 200 && data.pyvider_http_api.patch_request.status_code < 300
+      success       = data.pyvider_http_api.patch_request.status_code >= 200 && data.pyvider_http_api.patch_request.status_code < 300
     }
 
     options_request = {
@@ -175,7 +164,7 @@ locals {
     slow_api = {
       status_code   = data.pyvider_http_api.slow_api.status_code
       response_time = data.pyvider_http_api.slow_api.response_time_ms
-      timeout_ok    = data.pyvider_http_api.slow_api.response_time_ms != null && data.pyvider_http_api.slow_api.response_time_ms <= 10000
+      timeout_ok    = data.pyvider_http_api.slow_api.response_time_ms <= 10000
       success       = data.pyvider_http_api.slow_api.status_code == 200
     }
   }
@@ -190,7 +179,7 @@ locals {
 
     server_error = {
       status_code = data.pyvider_http_api.server_error.status_code
-      is_5xx      = data.pyvider_http_api.server_error.status_code != null && data.pyvider_http_api.server_error.status_code >= 500
+      is_5xx      = data.pyvider_http_api.server_error.status_code >= 500
       has_error   = data.pyvider_http_api.server_error.error_message != null
     }
 
@@ -201,44 +190,30 @@ locals {
     }
   }
 
-  # Every response time we actually measured. Computed once instead of four
-  # times, and named so the guards below can test it.
-  #
-  # This list can legitimately be empty. `pyvider_http_api` reports a request it
-  # could not complete as a null response_time rather than failing the data
-  # source, so a runner that cannot reach the endpoint produces no measurements
-  # at all -- and in Terraform `min()` and `max()` with no arguments are errors,
-  # `sum([])` is an error, and dividing by `length([])` is a division by zero.
-  #
-  # All four fired at once as a bare "Operation failed" on local.response_analysis,
-  # with nothing to say the network was the cause. It cost this example a
-  # conformance failure on the macOS runner while linux and windows passed.
-  measured_response_times = [
-    for analysis in values(local.response_analysis) :
-    analysis.response_time if analysis.response_time != null
-  ]
-
-  # Performance metrics. Null rather than a fabricated zero when nothing was
-  # measured: no successful request is not the same as a 0 ms one.
+  # Performance metrics
   performance_metrics = {
-    fastest_response = length(local.measured_response_times) > 0 ? min(local.measured_response_times...) : null
-    slowest_response = length(local.measured_response_times) > 0 ? max(local.measured_response_times...) : null
+    fastest_response = min([
+      for analysis in values(local.response_analysis) :
+      analysis.response_time if analysis.response_time != null
+    ]...)
 
-    average_response_time = (
-      length(local.measured_response_times) > 0
-      ? sum(local.measured_response_times) / length(local.measured_response_times)
-      : null
-    )
+    slowest_response = max([
+      for analysis in values(local.response_analysis) :
+      analysis.response_time if analysis.response_time != null
+    ]...)
 
-    # A rate over zero requests is undefined, not 0%.
-    success_rate = (
-      length(values(local.response_analysis)) > 0
-      ? (length([
-        for analysis in values(local.response_analysis) :
-        analysis if analysis.success
-      ]) / length(values(local.response_analysis))) * 100
-      : null
-    )
+    average_response_time = sum([
+      for analysis in values(local.response_analysis) :
+      analysis.response_time if analysis.response_time != null
+      ]) / length([
+      for analysis in values(local.response_analysis) :
+      analysis.response_time if analysis.response_time != null
+    ])
+
+    success_rate = (length([
+      for analysis in values(local.response_analysis) :
+      analysis if analysis.success
+    ]) / length(values(local.response_analysis))) * 100
   }
 }
 
@@ -287,26 +262,26 @@ resource "pyvider_file_content" "advanced_api_report" {
     "=== Advanced HTTP API Examples Report ===",
     "",
     "=== HTTP Methods Test Results ===",
-    "POST Request: ${local.response_analysis.post_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.post_request.status_code == null ? "n/a" : tostring(local.response_analysis.post_request.status_code)}) - ${local.response_analysis.post_request.response_time == null ? "n/a" : tostring(local.response_analysis.post_request.response_time)}ms",
-    "PUT Request: ${local.response_analysis.put_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.put_request.status_code == null ? "n/a" : tostring(local.response_analysis.put_request.status_code)}) - ${local.response_analysis.put_request.response_time == null ? "n/a" : tostring(local.response_analysis.put_request.response_time)}ms",
-    "DELETE Request: ${local.response_analysis.delete_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.delete_request.status_code == null ? "n/a" : tostring(local.response_analysis.delete_request.status_code)}) - ${local.response_analysis.delete_request.response_time == null ? "n/a" : tostring(local.response_analysis.delete_request.response_time)}ms",
-    "PATCH Request: ${local.response_analysis.patch_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.patch_request.status_code == null ? "n/a" : tostring(local.response_analysis.patch_request.status_code)}) - ${local.response_analysis.patch_request.response_time == null ? "n/a" : tostring(local.response_analysis.patch_request.response_time)}ms",
-    "OPTIONS Request: ${local.response_analysis.options_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.options_request.status_code == null ? "n/a" : tostring(local.response_analysis.options_request.status_code)}) - ${local.response_analysis.options_request.response_time == null ? "n/a" : tostring(local.response_analysis.options_request.response_time)}ms",
+    "POST Request: ${local.response_analysis.post_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.post_request.status_code}) - ${local.response_analysis.post_request.response_time}ms",
+    "PUT Request: ${local.response_analysis.put_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.put_request.status_code}) - ${local.response_analysis.put_request.response_time}ms",
+    "DELETE Request: ${local.response_analysis.delete_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.delete_request.status_code}) - ${local.response_analysis.delete_request.response_time}ms",
+    "PATCH Request: ${local.response_analysis.patch_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.patch_request.status_code}) - ${local.response_analysis.patch_request.response_time}ms",
+    "OPTIONS Request: ${local.response_analysis.options_request.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.options_request.status_code}) - ${local.response_analysis.options_request.response_time}ms",
     "",
     "=== Timeout and Performance ===",
-    "Slow API (3s delay): ${local.response_analysis.slow_api.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.slow_api.status_code == null ? "n/a" : tostring(local.response_analysis.slow_api.status_code)}) - ${local.response_analysis.slow_api.response_time == null ? "n/a" : tostring(local.response_analysis.slow_api.response_time)}ms",
+    "Slow API (3s delay): ${local.response_analysis.slow_api.success ? "SUCCESS" : "FAILED"} (${local.response_analysis.slow_api.status_code}) - ${local.response_analysis.slow_api.response_time}ms",
     "Timeout handled correctly: ${local.response_analysis.slow_api.timeout_ok ? "YES" : "NO"}",
     "",
     "=== Error Handling Tests ===",
-    "404 Not Found: Status ${local.error_scenarios.not_found.status_code == null ? "n/a" : tostring(local.error_scenarios.not_found.status_code)} - Is 404: ${local.error_scenarios.not_found.is_404}",
-    "500 Server Error: Status ${local.error_scenarios.server_error.status_code == null ? "n/a" : tostring(local.error_scenarios.server_error.status_code)} - Is 5xx: ${local.error_scenarios.server_error.is_5xx}",
-    "401 Unauthorized: Status ${local.error_scenarios.unauthorized.status_code == null ? "n/a" : tostring(local.error_scenarios.unauthorized.status_code)} - Is 401: ${local.error_scenarios.unauthorized.is_401}",
+    "404 Not Found: Status ${local.error_scenarios.not_found.status_code} - Is 404: ${local.error_scenarios.not_found.is_404}",
+    "500 Server Error: Status ${local.error_scenarios.server_error.status_code} - Is 5xx: ${local.error_scenarios.server_error.is_5xx}",
+    "401 Unauthorized: Status ${local.error_scenarios.unauthorized.status_code} - Is 401: ${local.error_scenarios.unauthorized.is_401}",
     "",
     "=== Performance Summary ===",
-    "Success Rate: ${local.performance_metrics.success_rate == null ? "n/a" : tostring(local.performance_metrics.success_rate)}%",
-    "Fastest Response: ${local.performance_metrics.fastest_response == null ? "n/a" : tostring(local.performance_metrics.fastest_response)}ms",
-    "Slowest Response: ${local.performance_metrics.slowest_response == null ? "n/a" : tostring(local.performance_metrics.slowest_response)}ms",
-    "Average Response Time: ${local.performance_metrics.average_response_time == null ? "n/a" : tostring(local.performance_metrics.average_response_time)}ms",
+    "Success Rate: ${local.performance_metrics.success_rate}%",
+    "Fastest Response: ${local.performance_metrics.fastest_response}ms",
+    "Slowest Response: ${local.performance_metrics.slowest_response}ms",
+    "Average Response Time: ${local.performance_metrics.average_response_time}ms",
     "",
     "=== User Data Example ===",
     "User Name: ${lookup(local.advanced_user_data, "name", "Unknown")}",
@@ -315,8 +290,8 @@ resource "pyvider_file_content" "advanced_api_report" {
     length(local.user_posts) > 0 ? "First Post: ${local.user_posts[0].title}" : "No posts found",
     "",
     "=== Content Types Observed ===",
-    "POST Response: ${local.response_analysis.post_request.content_type == null ? "n/a" : tostring(local.response_analysis.post_request.content_type)}",
-    "Headers Count (POST): ${local.response_analysis.post_request.headers_count == null ? "n/a" : tostring(local.response_analysis.post_request.headers_count)}",
+    "POST Response: ${local.response_analysis.post_request.content_type}",
+    "Headers Count (POST): ${local.response_analysis.post_request.headers_count}",
     "",
     "Report generated at: ${timestamp()}"
   ])
