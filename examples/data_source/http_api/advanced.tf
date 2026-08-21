@@ -128,31 +128,42 @@ locals {
   user_posts = try(jsondecode(data.pyvider_http_api.user_posts.response_body), [])
 
   # Analyze response characteristics
+  # A failed request reports a null status_code, and comparing null with >= or <
+  # is an error in Terraform -- "Operation failed: argument must not be null" --
+  # not false. Each range check therefore tests for null first; `&&`
+  # short-circuits, so the comparison is never reached for a null.
+  #
+  # This is what failed conformance on the macOS runner while linux and windows
+  # passed: six requests to a third-party endpoint, and a single unanswered one
+  # took down the whole configuration with an error naming no cause.
+  #
+  # The `== 200` checks below need no guard: equality against null is false, not
+  # an error.
   response_analysis = {
     post_request = {
       status_code   = data.pyvider_http_api.post_json.status_code
       response_time = data.pyvider_http_api.post_json.response_time_ms
       content_type  = data.pyvider_http_api.post_json.content_type
       headers_count = data.pyvider_http_api.post_json.header_count
-      success       = data.pyvider_http_api.post_json.status_code >= 200 && data.pyvider_http_api.post_json.status_code < 300
+      success       = data.pyvider_http_api.post_json.status_code != null && data.pyvider_http_api.post_json.status_code >= 200 && data.pyvider_http_api.post_json.status_code < 300
     }
 
     put_request = {
       status_code   = data.pyvider_http_api.put_request.status_code
       response_time = data.pyvider_http_api.put_request.response_time_ms
-      success       = data.pyvider_http_api.put_request.status_code >= 200 && data.pyvider_http_api.put_request.status_code < 300
+      success       = data.pyvider_http_api.put_request.status_code != null && data.pyvider_http_api.put_request.status_code >= 200 && data.pyvider_http_api.put_request.status_code < 300
     }
 
     delete_request = {
       status_code   = data.pyvider_http_api.delete_request.status_code
       response_time = data.pyvider_http_api.delete_request.response_time_ms
-      success       = data.pyvider_http_api.delete_request.status_code >= 200 && data.pyvider_http_api.delete_request.status_code < 300
+      success       = data.pyvider_http_api.delete_request.status_code != null && data.pyvider_http_api.delete_request.status_code >= 200 && data.pyvider_http_api.delete_request.status_code < 300
     }
 
     patch_request = {
       status_code   = data.pyvider_http_api.patch_request.status_code
       response_time = data.pyvider_http_api.patch_request.response_time_ms
-      success       = data.pyvider_http_api.patch_request.status_code >= 200 && data.pyvider_http_api.patch_request.status_code < 300
+      success       = data.pyvider_http_api.patch_request.status_code != null && data.pyvider_http_api.patch_request.status_code >= 200 && data.pyvider_http_api.patch_request.status_code < 300
     }
 
     options_request = {
@@ -164,7 +175,7 @@ locals {
     slow_api = {
       status_code   = data.pyvider_http_api.slow_api.status_code
       response_time = data.pyvider_http_api.slow_api.response_time_ms
-      timeout_ok    = data.pyvider_http_api.slow_api.response_time_ms <= 10000
+      timeout_ok    = data.pyvider_http_api.slow_api.response_time_ms != null && data.pyvider_http_api.slow_api.response_time_ms <= 10000
       success       = data.pyvider_http_api.slow_api.status_code == 200
     }
   }
@@ -179,7 +190,7 @@ locals {
 
     server_error = {
       status_code = data.pyvider_http_api.server_error.status_code
-      is_5xx      = data.pyvider_http_api.server_error.status_code >= 500
+      is_5xx      = data.pyvider_http_api.server_error.status_code != null && data.pyvider_http_api.server_error.status_code >= 500
       has_error   = data.pyvider_http_api.server_error.error_message != null
     }
 
