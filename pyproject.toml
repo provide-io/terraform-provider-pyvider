@@ -46,10 +46,12 @@ dependencies = [
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.0",
-    "flavorpack>=0.4.0",
+    "flavorpack>=0.4.5",
     "plating>=0.4.0",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
+    # Drives the packaged provider over tfplugin6 for the conformance suite.
+    "tofusoup>=0.5.0",
     "ty>=0.0.8",
 ]
 docs = [
@@ -76,6 +78,9 @@ version = {file = "VERSION"}
 line-length = 111
 indent-width = 4
 target-version = "py311"
+# ruff >=0.16 formats Python code blocks embedded in Markdown; exclude docs so
+# `ruff format` doesn't churn them.
+extend-exclude = ["**/*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
@@ -113,6 +118,9 @@ ignore_missing_imports = true
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "--strict-markers --strict-config"
+markers = [
+    "conformance: drives the packaged provider binary over tfplugin6",
+]
 # Parallel execution: pytest -n <workers> (range: 2-16, recommend: CPU cores or 8, max: 16 to avoid xdist hang)
 
 [tool.coverage.run]

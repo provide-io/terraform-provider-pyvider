@@ -429,6 +429,8 @@ lazy-packages.zip
 *-venv.zip
 wheels/
 workenv/
+# flavorpack stages the package's dependencies here during a build
+.pack_venv/
 *.rlib
 *.rmeta
 
