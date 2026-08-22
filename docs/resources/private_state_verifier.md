@@ -6,6 +6,14 @@ description: |-
 ---
 # pyvider_private_state_verifier (Resource)
 
+> **Test-mode only.** This component is registered `test_only`, so a provider
+> started normally does not publish it: it is absent from
+> `terraform providers schema` and cannot be referenced from a configuration.
+> It is served only when the provider process is launched with
+> `PYVIDER_TESTMODE=true`, which is how the conformance suite exercises it.
+> Documented here so the behaviour it demonstrates is discoverable, not
+> because it is available to a published provider's users.
+
 The `pyvider_private_state_verifier` resource is designed for testing and verifying the private state encryption functionality of Terraform providers. It demonstrates how sensitive data can be securely stored in private state, encrypted by Terraform, and properly decrypted when needed.
 
 ~> **Note:** This provider is in pre-release and under active development. Features and APIs may change without notice and it is not intended for production infrastructure.
@@ -24,6 +32,20 @@ This resource enables you to:
 - **Educational purposes**: Learn and demonstrate how Terraform private state encryption works
 - **Integration testing**: Verify private state works correctly with other Terraform resources
 - **Encryption lifecycle**: Demonstrate the complete create, store, retrieve, and decrypt workflow
+
+## Prerequisites
+
+This resource keeps encrypted private state, which the provider will not do
+without a shared secret. Supply one before applying, or the first apply fails
+with `Private state shared secret not configured`:
+
+```bash
+export PYVIDER_PRIVATE_STATE_SHARED_SECRET="a-long-random-value"
+```
+
+`private_state_shared_secret` in `pyvider.toml` does the same thing. Keep the
+value stable across runs -- private state written under one secret cannot be
+read back under another.
 
 ## Example Usage
 

@@ -27,7 +27,7 @@ pytestmark = pytest.mark.asyncio(loop_scope="session")
 #: registered for each. Discovery must surface all of them.
 EXPECTED_ACTIONS = {"pyvider_echo", "pyvider_failing_action", "pyvider_wait_for_file"}
 EXPECTED_LIST_RESOURCES = {"pyvider_secret_note", "pyvider_directory_entry"}
-EXPECTED_STATE_STORES = {"pyvider_fs"}
+EXPECTED_STATE_STORES = {"pyvider_filesystem_store"}
 
 
 async def test_negotiates_protocol_six(provider: TfPluginProvider) -> None:

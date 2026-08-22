@@ -1,6 +1,5 @@
 ---
 page_title: "Resource: pyvider_warning_example"
-subcategory: "Test Mode"
 description: |-
   Demonstrates Terraform warning mechanisms for deprecated attributes and validation
 ---

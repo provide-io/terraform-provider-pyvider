@@ -2463,7 +2463,7 @@ wheels = [
 
 [[package]]
 name = "plating"
-version = "0.5.0"
+version = "0.5.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
@@ -2473,9 +2473,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/87/551dcfa189e534af2e628cef69226634ff03df844249e28129f9dc46e046/plating-0.5.0.tar.gz", hash = "sha256:5d789fc46b8e178b5da3b303ce3bbddeda350b1d05cdf1a98b6d011466bade1c", size = 115200, upload-time = "2026-08-20T22:28:39.239Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/f7/3a5539dc8da56a10fbdfa781fc31c46301c90b2844990324f14f968ead56/plating-0.5.4.tar.gz", hash = "sha256:cacd277f530ec190cbe5b86f4b00402475207afbed891812c4cc5faf8bd8c42a", size = 123650, upload-time = "2026-08-21T23:50:44.592Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/14/ea3dc74b09b44707501d85d3e4a2d4a4df017c5916650e702bb7bb395b44/plating-0.5.0-py3-none-any.whl", hash = "sha256:0572a95cd27ce8586ab4301c99afee9bea024216313acf9ae31186f25d0514a1", size = 109628, upload-time = "2026-08-20T22:28:37.772Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/65/831d1c422ff4829a27fb894989ec5977ad80e11eb34bc743e4914c7a3050/plating-0.5.4-py3-none-any.whl", hash = "sha256:f8d1bc842f80fad08ba4c3fcce1b3496469d35d093465443115cb398d03d1309", size = 113063, upload-time = "2026-08-21T23:50:43.222Z" },
 ]
 
 [[package]]
@@ -3061,7 +3061,7 @@ wheels = [
 
 [[package]]
 name = "pyvider"
-version = "0.5.2"
+version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -3075,14 +3075,14 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d2/fa/194b30fdc1f71e07da7066b73133963e427e82abf5566c8c9c52873d2b9b/pyvider-0.5.2.tar.gz", hash = "sha256:f53d27753bc16d61b2203f8293dfb5dec0c206827d94a34233525fc6504cd1b9", size = 178535, upload-time = "2026-08-21T07:59:09.331Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/f3/0e6885779b726e8195862598f2c9d6079ac32fb7e0ccaadc608bf5257d87/pyvider-0.5.3.tar.gz", hash = "sha256:5f70dba99fd78904a7644ff31d54c09552ad42f589bc38cece4eb2d0b9c43844", size = 179215, upload-time = "2026-08-22T17:09:30.882Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/ef/c6c69e556562796f8c233633dd980e37b41dadcc4d28e184b0ca92b64b9b/pyvider-0.5.2-py3-none-any.whl", hash = "sha256:adfe653241093fc5e05bd8fb8c0ea3ce9d4c032e1008d9d516c85f5d1f4b4c89", size = 247023, upload-time = "2026-08-21T07:59:07.93Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/6b/e6968808830e9c6113b719bf7f5528112aae76d5ce41190c2946d30c9c89/pyvider-0.5.3-py3-none-any.whl", hash = "sha256:835af255a24c189822873040113dfa2ff27bca15c8e724fc603ae380e3e20181", size = 247668, upload-time = "2026-08-22T17:09:29.617Z" },
 ]
 
 [[package]]
 name = "pyvider-components"
-version = "0.4.0"
+version = "0.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3094,9 +3094,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/d9/aadbc143f0f6bf92954714be3c403466cae285bb1922129740e3d92de795/pyvider_components-0.4.0.tar.gz", hash = "sha256:a46fef39ca3e7024787948ef5d2052d715f0f6d69611a7e39fcd8a874ddc5aea", size = 99330, upload-time = "2026-04-22T02:44:25.609Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/5e/6bdeab48f6a842c6c4c3afeaf1cb9b763d43cb5298af9dfeb1cc910dc21a/pyvider_components-0.5.2.tar.gz", hash = "sha256:290fa9176b7f4333ee80d7ac3c889ecdd9847fb3fc640de4b030dcb89ee703c1", size = 150816, upload-time = "2026-08-21T23:51:02.475Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/ef/87f7327ff4deb78677aa9ecfdc273cdacf7c4706a947bf9d38de94d60a3c/pyvider_components-0.4.0-py3-none-any.whl", hash = "sha256:10122a6b54dfe310fb2167c35b1ee2858d7c1aa3a6fdabc0f00e1a44431ee80e", size = 150886, upload-time = "2026-04-22T02:44:23.307Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/6d/bd542381b87104af33b921cb84bbff73428768f3f5d96e6b1a55864e3661/pyvider_components-0.5.2-py3-none-any.whl", hash = "sha256:98370a0d10c96f79ef2dbce445e8b9a1952af49107b68c17d225fe50e6c2df1b", size = 191976, upload-time = "2026-08-21T23:51:00.793Z" },
 ]
 
 [[package]]
@@ -3115,7 +3115,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-rpcplugin"
-version = "0.4.1"
+version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -3126,9 +3126,9 @@ dependencies = [
     { name = "protobuf" },
     { name = "provide-foundation" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/ca/32587d435d20df73a738d2f54f9af5458e9d1e10ccb2910419a4c343570d/pyvider_rpcplugin-0.4.1.tar.gz", hash = "sha256:89ff4581ce9e01cf5865bfe7d853c777ff7ecc8457a558c6c2015dccccd17176", size = 78395, upload-time = "2026-08-20T22:30:01.716Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/01/3d/dbddd353050c5e1dbf5ba283703925c1fb0e6e8431abbeeaf855cc6e7aaf/pyvider_rpcplugin-0.4.2.tar.gz", hash = "sha256:0dfe86e63ebe7140d1d01ec03ddd42c82a7523e35bcdf06494fa1bb40397345b", size = 78748, upload-time = "2026-08-22T16:44:52.549Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6b/f9/925701f81f7e2f945ccd4445645e83a3fc73bd8c7ea4d66fd62f50fe2a20/pyvider_rpcplugin-0.4.1-py3-none-any.whl", hash = "sha256:2d134ddb068e80383cfbad962f88c0608c1757899fda462055aa9871f3d94e1b", size = 99790, upload-time = "2026-08-20T22:30:00.407Z" },
+    { url = "https://files.pythonhosted.org/packages/39/3e/dc5e95c4a137fb084ed8ca07ce481228864ae1c82245a0d6df1514733d30/pyvider_rpcplugin-0.4.2-py3-none-any.whl", hash = "sha256:3162e8b34d74a83d1b80039969605195e1fc50d1cb4a13e9b285b4cc00271da1", size = 100207, upload-time = "2026-08-22T16:44:51.353Z" },
 ]
 
 [[package]]
@@ -3565,17 +3565,17 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cryptography", marker = "platform_machine == 'ARM64' and sys_platform == 'win32'", specifier = ">=46.0.0,<=46.0.3" },
-    { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1,<1.11.0" },
+    { name = "cryptography", marker = "platform_machine == 'ARM64' and sys_platform == 'win32'", specifier = ">=46.0.0" },
+    { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1" },
     { name = "provide-foundation", specifier = ">=0.4.0" },
-    { name = "pyvider", specifier = ">=0.4.0" },
-    { name = "pyvider-components", specifier = ">=0.4.0" },
+    { name = "pyvider", specifier = ">=0.5.3" },
+    { name = "pyvider-components", specifier = ">=0.5.2" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "flavorpack", specifier = ">=0.4.5" },
-    { name = "plating", specifier = ">=0.4.0" },
+    { name = "plating", specifier = ">=0.5.4" },
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.0" },
     { name = "tofusoup", specifier = ">=0.5.0" },

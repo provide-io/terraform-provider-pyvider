@@ -27,7 +27,7 @@ from pyvider.protocols.tfprotov6.protobuf import tfplugin6_pb2 as pb
 #: loop-per-test hands each test a channel bound to an already-closed loop.
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-STORE = "pyvider_fs"
+STORE = "pyvider_filesystem_store"
 
 #: Small enough that a modest payload spans several chunks, so the chunking
 #: path is genuinely exercised rather than degenerating to a single write.

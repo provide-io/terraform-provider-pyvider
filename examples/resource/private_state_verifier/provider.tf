@@ -8,6 +8,8 @@ terraform {
 }
 
 provider "pyvider" {
-  provider_testmode = true
+  # This component is registered `test_only`. Start the
+  # provider with PYVIDER_TESTMODE=true in its environment,
+  # or it will not publish the component at all.
   # Add your configuration options here
 }

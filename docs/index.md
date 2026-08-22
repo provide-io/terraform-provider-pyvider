@@ -23,6 +23,7 @@ No provider configuration required.
 ### Resources
 
 - [`pyvider_timed_token`](./resources/timed_token.md)
+- [`pyvider_warning_example`](./resources/warning_example.md)
 
 ### Data Sources
 
@@ -90,7 +91,6 @@ No provider configuration required.
 - [`pyvider_nested_resource_test`](./resources/nested_resource_test.md)
 - [`pyvider_private_state_verifier`](./resources/private_state_verifier.md)
 - [`pyvider_secret_note`](./resources/secret_note.md)
-- [`pyvider_warning_example`](./resources/warning_example.md)
 
 ### Test Data Sources
 
@@ -119,5 +119,5 @@ No provider configuration required.
 
 ### Test State Stores
 
-- [`pyvider_fs`](./state-stores/fs.md)
+- [`pyvider_filesystem_store`](./state-stores/filesystem_store.md)
 

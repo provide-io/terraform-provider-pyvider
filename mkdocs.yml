@@ -62,6 +62,7 @@ nav:
   - 04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
 - Resources:
   - timed_token: resources/timed_token.md
+  - warning_example: resources/warning_example.md
 - Data Sources:
   - env_variables: data-sources/env_variables.md
   - provider_config_reader: data-sources/provider_config_reader.md
@@ -109,7 +110,6 @@ nav:
     - nested_resource_test: resources/nested_resource_test.md
     - private_state_verifier: resources/private_state_verifier.md
     - secret_note: resources/secret_note.md
-    - warning_example: resources/warning_example.md
   - Data Sources:
     - mixed_map_test: data-sources/mixed_map_test.md
     - simple_map_test: data-sources/simple_map_test.md
@@ -126,4 +126,4 @@ nav:
     - failing_action: actions/failing_action.md
     - wait_for_file: actions/wait_for_file.md
   - State Stores:
-    - fs: state-stores/fs.md
+    - filesystem_store: state-stores/filesystem_store.md
