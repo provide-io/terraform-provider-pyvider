@@ -62,9 +62,9 @@ nav:
   - 04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
 - Resources:
   - timed_token: resources/timed_token.md
+  - warning_example: resources/warning_example.md
 - Data Sources:
   - env_variables: data-sources/env_variables.md
-  - nested_data_processor: data-sources/nested_data_processor.md
   - provider_config_reader: data-sources/provider_config_reader.md
 - Functions:
   - add: functions/add.md
@@ -107,10 +107,23 @@ nav:
     - http_api: data-sources/http_api.md
 - Test Mode:
   - Resources:
+    - nested_resource_test: resources/nested_resource_test.md
     - private_state_verifier: resources/private_state_verifier.md
-    - warning_example: resources/warning_example.md
+    - secret_note: resources/secret_note.md
   - Data Sources:
     - mixed_map_test: data-sources/mixed_map_test.md
-    - nested_resource_test: data-sources/nested_resource_test.md
     - simple_map_test: data-sources/simple_map_test.md
     - structured_object_test: data-sources/structured_object_test.md
+  - Functions:
+    - pyvider_nested_data_processor: functions/pyvider_nested_data_processor.md
+  - Ephemeral Resources:
+    - lease: ephemeral-resources/lease.md
+  - List Resources:
+    - directory_entry: list-resources/directory_entry.md
+    - secret_note: list-resources/secret_note.md
+  - Actions:
+    - echo: actions/echo.md
+    - failing_action: actions/failing_action.md
+    - wait_for_file: actions/wait_for_file.md
+  - State Stores:
+    - filesystem_store: state-stores/filesystem_store.md

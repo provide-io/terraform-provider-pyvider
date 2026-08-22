@@ -17,7 +17,7 @@ Common issues and solutions for the pyvider Terraform provider.
 - [Installation Issues](#installation-issues)
 - [Configuration Errors](#configuration-errors)
 - [Runtime Errors](#runtime-errors)
-- [Provider Limitations](#provider-limitations-poc-status)
+- [Provider Limitations](#provider-limitations-pre-release)
 - [Debug Techniques](#debug-techniques)
 - [Getting Help](#getting-help)
 
@@ -596,9 +596,8 @@ terraform console
 
 ### Documentation Resources
 
-- **[Getting Started Tutorial](02-getting-started.md)** - Step-by-step first provider usage
-- **[Resource Reference](../index.md#resources)** - Complete resource documentation
-- **[Data Sources](../index.md#data-sources)** - Available data sources
+- **[Getting Started Tutorial](./02-getting-started.md)** - Step-by-step first provider usage
+- **[Provider Reference](../index.md)** - Every resource, data source, function and action
 
 ### Community Support
 

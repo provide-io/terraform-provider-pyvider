@@ -46,5 +46,5 @@ Use this repository to learn the flow from framework → components → provider
 
 ## Next steps
 
-- Move on to 01) [Tour the Example Provider](./01-provider-tour.md) to understand what is shipped.
-- Dive into 02) [Getting Started with Pyvider](./02-getting-started.md) when you want to run Terraform locally.
+- Move on to [Tour the Example Provider](./01-provider-tour.md) to understand what is shipped.
+- Dive into [Getting Started with Pyvider](./02-getting-started.md) when you want to run Terraform locally.

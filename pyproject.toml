@@ -37,19 +37,27 @@ classifiers = [
 ]
 dependencies = [
     "provide-foundation>=0.4.0",
-    "pyvider>=0.4.0",
-    "pyvider-components>=0.4.0",
-    "jq>=1.9.1,<1.11.0; sys_platform != 'win32' or platform_machine != 'ARM64'",
-    "cryptography>=46.0.0,<=46.0.3; sys_platform == 'win32' and platform_machine == 'ARM64'",
+    "pyvider>=0.5.3",
+    "pyvider-components>=0.5.2",
+    "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
+    # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
+    # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
+    # ships win_amd64/win32 only, grpc/grpc#39064; cryptography 50.0.0 ships
+    # win_amd64 only). Since pyvider requires grpcio>=1.83.0 that platform cannot
+    # install the suite at all, so the cap constrained a resolution that never
+    # happens. windows_arm64 is unsupported suite-wide for the same reason.
+    "cryptography>=46.0.0; sys_platform == 'win32' and platform_machine == 'ARM64'",
 ]
 
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.0",
-    "flavorpack>=0.4.0",
-    "plating>=0.4.0",
+    "flavorpack>=0.4.5",
+    "plating>=0.5.4",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
+    # Drives the packaged provider over tfplugin6 for the conformance suite.
+    "tofusoup>=0.5.0",
     "ty>=0.0.8",
 ]
 docs = [
@@ -76,6 +84,9 @@ version = {file = "VERSION"}
 line-length = 111
 indent-width = 4
 target-version = "py311"
+# ruff >=0.16 formats Python code blocks embedded in Markdown; exclude docs so
+# `ruff format` doesn't churn them.
+extend-exclude = ["**/*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
@@ -113,6 +124,9 @@ ignore_missing_imports = true
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "--strict-markers --strict-config"
+markers = [
+    "conformance: drives the packaged provider binary over tfplugin6",
+]
 # Parallel execution: pytest -n <workers> (range: 2-16, recommend: CPU cores or 8, max: 16 to avoid xdist hang)
 
 [tool.coverage.run]
@@ -148,11 +162,12 @@ output_path = "dist/terraform-provider-pyvider"
 package_name = "terraform-provider-pyvider"
 
 [tool.flavor.build]
-# Package the pyvider dependencies with the provider
-dependencies = [
-    "pyvider-components>=0.4.0",
-    "provide-foundation>=0.4.0",
-]
+# No `dependencies` key. flavorpack joins each entry onto the manifest
+# directory and builds a wheel from it, so it takes filesystem paths and
+# nothing else -- requirement strings like "pyvider-components>=0.5.2" have
+# only ever produced `⚠️ Local dependency not found` at every build since
+# 602ebab. The runtime tree comes from `build_and_resolve_project`, which reads
+# the lock, so there was nothing for these to add.
 exclude = [
     "**/.terraform/**",
     "**/.venv/**", 

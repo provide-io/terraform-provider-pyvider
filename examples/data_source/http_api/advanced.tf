@@ -205,7 +205,7 @@ locals {
     average_response_time = sum([
       for analysis in values(local.response_analysis) :
       analysis.response_time if analysis.response_time != null
-    ]) / length([
+      ]) / length([
       for analysis in values(local.response_analysis) :
       analysis.response_time if analysis.response_time != null
     ])
@@ -227,22 +227,22 @@ resource "pyvider_file_content" "advanced_api_analysis" {
       "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
     ]
 
-    response_analysis = local.response_analysis
-    error_scenarios   = local.error_scenarios
+    response_analysis   = local.response_analysis
+    error_scenarios     = local.error_scenarios
     performance_metrics = local.performance_metrics
 
     user_data_example = {
-      user_profile = local.advanced_user_data
-      posts_count  = length(local.user_posts)
+      user_profile     = local.advanced_user_data
+      posts_count      = length(local.user_posts)
       first_post_title = length(local.user_posts) > 0 ? local.user_posts[0].title : null
     }
 
     api_patterns = {
-      authentication_tested = true
-      error_handling_tested = true
+      authentication_tested   = true
+      error_handling_tested   = true
       timeout_handling_tested = true
       multiple_methods_tested = true
-      json_responses_parsed = true
+      json_responses_parsed   = true
     }
 
     recommendations = [

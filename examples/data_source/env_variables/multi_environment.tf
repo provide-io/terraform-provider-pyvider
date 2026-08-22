@@ -42,10 +42,10 @@ locals {
 
 output "multi_environment_database_url" {
   value = {
-    environment = var.environment
+    environment  = var.environment
     database_url = local.multi_environment_database_url
-    api_url = local.api_url
-    log_level = local.log_level
+    api_url      = local.api_url
+    log_level    = local.log_level
   }
   sensitive = true
 }
