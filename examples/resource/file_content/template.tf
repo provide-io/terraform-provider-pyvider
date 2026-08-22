@@ -2,9 +2,9 @@
 
 locals {
   template_app_config = {
-    name = "my-application"
+    name    = "my-application"
     version = "1.0.0"
-    port = 8080
+    port    = 8080
     database = {
       host = "localhost"
       port = 5432

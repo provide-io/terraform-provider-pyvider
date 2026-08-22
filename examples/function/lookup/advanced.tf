@@ -3,14 +3,14 @@
 # Cascading defaults with lookup
 locals {
   advanced_user_config = {
-    theme = "dark"
+    theme    = "dark"
     language = "en"
   }
 
   advanced_default_config = {
-    theme = "light"
-    language = "en"
-    timezone = "UTC"
+    theme         = "light"
+    language      = "en"
+    timezone      = "UTC"
     notifications = true
   }
 
@@ -34,7 +34,7 @@ locals {
 
   # Check if features are enabled
   advanced_api_v2_enabled = provider::pyvider::contains(local.advanced_enabled_features, "api_v2")
-  advanced_beta_enabled = provider::pyvider::contains(local.advanced_enabled_features, "beta_features")
+  advanced_beta_enabled   = provider::pyvider::contains(local.advanced_enabled_features, "beta_features")
 
   # Conditional logic based on contains
   advanced_api_endpoint = local.advanced_api_v2_enabled ? "/api/v2" : "/api/v1"
@@ -42,9 +42,9 @@ locals {
 
 # Length-based conditional logic
 locals {
-  advanced_validation_errors = []  # Would be populated by validation
+  advanced_validation_errors = [] # Would be populated by validation
 
-  advanced_has_errors = provider::pyvider::length(local.advanced_validation_errors) > 0
+  advanced_has_errors  = provider::pyvider::length(local.advanced_validation_errors) > 0
   advanced_error_count = provider::pyvider::length(local.advanced_validation_errors)
 
   advanced_status = local.advanced_has_errors ? "invalid" : "valid"
@@ -72,9 +72,9 @@ locals {
   }
 
   # Safe nested lookups
-  advanced_db_config = provider::pyvider::lookup(local.advanced_config_tree, "database", {})
+  advanced_db_config  = provider::pyvider::lookup(local.advanced_config_tree, "database", {})
   advanced_primary_db = provider::pyvider::lookup(local.advanced_db_config, "primary", {})
-  advanced_db_host = provider::pyvider::lookup(local.advanced_primary_db, "host", "localhost")
+  advanced_db_host    = provider::pyvider::lookup(local.advanced_primary_db, "host", "localhost")
 }
 
 # Collection size validation
@@ -91,18 +91,18 @@ locals {
 output "advanced_results" {
   value = {
     configuration = {
-      theme = local.advanced_final_theme
+      theme    = local.advanced_final_theme
       timezone = local.advanced_final_timezone
     }
     features = {
-      api_v2 = local.advanced_api_v2_enabled
-      beta = local.advanced_beta_enabled
+      api_v2   = local.advanced_api_v2_enabled
+      beta     = local.advanced_beta_enabled
       endpoint = local.advanced_api_endpoint
     }
     validation = {
-      has_errors = local.advanced_has_errors
-      error_count = local.advanced_error_count
-      status = local.advanced_status
+      has_errors   = local.advanced_has_errors
+      error_count  = local.advanced_error_count
+      status       = local.advanced_status
       all_required = local.advanced_all_required_present
     }
     nested_config = {

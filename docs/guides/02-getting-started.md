@@ -10,7 +10,7 @@ guide_order: 3
 
 This tutorial will guide you through your first use of the pyvider Terraform provider, from installation to creating your first resources.
 
--> **Note:** New to Pyvider? Start with 00) [Understand the Pyvider Framework](./00-pyvider-orientation.md) and 01) [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
+-> **Note:** New to Pyvider? Start with [Understand the Pyvider Framework](./00-pyvider-orientation.md) and [Tour the Example Provider](./01-provider-tour.md) for the foundational concepts this tutorial builds on.
 
 ---
 
@@ -382,7 +382,7 @@ Having issues? See our comprehensive **[Troubleshooting Guide](./03-troubleshoot
 - **[Installation Issues](./03-troubleshooting.md#installation-issues)** - Provider not found, permissions, platform-specific
 - **[Configuration Errors](./03-troubleshooting.md#configuration-errors)** - Validation, schema, type mismatches
 - **[Runtime Errors](./03-troubleshooting.md#runtime-errors)** - File operations, HTTP/API, state management
-- **[Debug Techniques](./03-troubleshooting.md#debugging-techniques)** - TF_LOG, state inspection, terraform console
+- **[Debug Techniques](./03-troubleshooting.md#debug-techniques)** - TF_LOG, state inspection, terraform console
 - **[Getting Help](./03-troubleshooting.md#getting-help)** - Community support and issue reporting
 
 ### Quick Fixes

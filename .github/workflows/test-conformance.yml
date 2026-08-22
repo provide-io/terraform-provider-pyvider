@@ -263,7 +263,23 @@ jobs:
             cat /tmp/testmode-false.log
             exit 1
           else
-            if grep -qi "test-only.*requires test mode\|test mode.*required" /tmp/testmode-false.log; then
+            # Two rejections are both correct, and which one Terraform reports
+            # depends on whether it already knows the type.
+            #
+            # A fresh plan has no state, so Terraform validates the config
+            # against the advertised schema. pyvider filters test-only
+            # components out of that schema in production mode
+            # (handlers/utils.py:180), so the type is simply not offered and
+            # Terraform answers "Invalid resource type".
+            #
+            # The friendlier "requires test mode" diagnostic
+            # (handlers/utils.py:253) guards read_resource and
+            # import_resource_state, which are reached only when the type is
+            # already in state -- a plan cannot get there.
+            #
+            # Accepting only the second made this step fail for a provider that
+            # was refusing exactly as intended.
+            if grep -qi "test-only.*requires test mode\|test mode.*required\|does not support resource type" /tmp/testmode-false.log; then
               echo ""
               echo "✅ PASS: Test-only component correctly rejected without test mode"
             else

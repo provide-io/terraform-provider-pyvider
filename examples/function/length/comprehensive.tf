@@ -18,10 +18,10 @@ locals {
   comprehensive_fruits = ["apple", "banana", "cherry"]
   comprehensive_ports  = [80, 443, 8080]
 
-  comprehensive_has_apple  = provider::pyvider::contains(local.comprehensive_fruits, "apple")  # true
-  comprehensive_has_grape  = provider::pyvider::contains(local.comprehensive_fruits, "grape")  # false
-  comprehensive_has_port80 = provider::pyvider::contains(local.comprehensive_ports, 80)        # true
-  comprehensive_has_port22 = provider::pyvider::contains(local.comprehensive_ports, 22)        # false
+  comprehensive_has_apple  = provider::pyvider::contains(local.comprehensive_fruits, "apple") # true
+  comprehensive_has_grape  = provider::pyvider::contains(local.comprehensive_fruits, "grape") # false
+  comprehensive_has_port80 = provider::pyvider::contains(local.comprehensive_ports, 80)       # true
+  comprehensive_has_port22 = provider::pyvider::contains(local.comprehensive_ports, 22)       # false
 }
 
 # Example 3: Lookup function
@@ -32,18 +32,18 @@ locals {
     cache_host    = "redis.local"
   }
 
-  comprehensive_db_host      = provider::pyvider::lookup(local.comprehensive_settings, "database_host", "localhost")
-  comprehensive_db_port      = provider::pyvider::lookup(local.comprehensive_settings, "database_port", 5432)
-  comprehensive_unknown_key  = provider::pyvider::lookup(local.comprehensive_settings, "missing_key", "default")
+  comprehensive_db_host     = provider::pyvider::lookup(local.comprehensive_settings, "database_host", "localhost")
+  comprehensive_db_port     = provider::pyvider::lookup(local.comprehensive_settings, "database_port", 5432)
+  comprehensive_unknown_key = provider::pyvider::lookup(local.comprehensive_settings, "missing_key", "default")
 }
 
 # Example 4: Practical usage
 locals {
   comprehensive_servers = ["web1", "web2", "web3"]
 
-  comprehensive_server_count   = provider::pyvider::length(local.comprehensive_servers)
-  comprehensive_has_web1       = provider::pyvider::contains(local.comprehensive_servers, "web1")
-  comprehensive_needs_scaling  = local.comprehensive_server_count < 5
+  comprehensive_server_count  = provider::pyvider::length(local.comprehensive_servers)
+  comprehensive_has_web1      = provider::pyvider::contains(local.comprehensive_servers, "web1")
+  comprehensive_needs_scaling = local.comprehensive_server_count < 5
 }
 
 output "comprehensive_results" {

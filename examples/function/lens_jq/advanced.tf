@@ -3,8 +3,8 @@
 # Example 1: Basic JSON data extraction
 locals {
   advanced_user_data = {
-    advanced_name = "John Doe"
-    advanced_age  = 30
+    advanced_name  = "John Doe"
+    advanced_age   = 30
     advanced_email = "john.doe@example.com"
     advanced_address = {
       advanced_street = "123 Main St"
@@ -16,8 +16,8 @@ locals {
   }
 
   # Extract specific fields
-  advanced_user_name = provider::pyvider::lens_jq(local.advanced_user_data, ".name")
-  advanced_user_city = provider::pyvider::lens_jq(local.advanced_user_data, ".address.city")
+  advanced_user_name   = provider::pyvider::lens_jq(local.advanced_user_data, ".name")
+  advanced_user_city   = provider::pyvider::lens_jq(local.advanced_user_data, ".address.city")
   advanced_hobby_count = provider::pyvider::lens_jq(local.advanced_user_data, ".hobbies | length")
 }
 
@@ -25,25 +25,25 @@ locals {
 locals {
   advanced_employees = [
     {
-      id = 1
-      name = "Alice Smith"
+      id         = 1
+      name       = "Alice Smith"
       department = "Engineering"
-      salary = 95000
-      skills = ["Python", "Go", "Docker"]
+      salary     = 95000
+      skills     = ["Python", "Go", "Docker"]
     },
     {
-      id = 2
-      name = "Bob Johnson"
+      id         = 2
+      name       = "Bob Johnson"
       department = "Marketing"
-      salary = 75000
-      skills = ["SEO", "Analytics", "Content"]
+      salary     = 75000
+      skills     = ["SEO", "Analytics", "Content"]
     },
     {
-      id = 3
-      name = "Carol Davis"
+      id         = 3
+      name       = "Carol Davis"
       department = "Engineering"
-      salary = 105000
-      skills = ["JavaScript", "React", "Node.js"]
+      salary     = 105000
+      skills     = ["JavaScript", "React", "Node.js"]
     }
   ]
 
@@ -79,9 +79,9 @@ locals {
           advanced_id = "user1"
           advanced_profile = {
             advanced_firstName = "John"
-            advanced_lastName = "Doe"
+            advanced_lastName  = "Doe"
             advanced_settings = {
-              advanced_theme = "dark"
+              advanced_theme         = "dark"
               advanced_notifications = true
             }
           }
@@ -94,9 +94,9 @@ locals {
           advanced_id = "user2"
           advanced_profile = {
             advanced_firstName = "Jane"
-            advanced_lastName = "Smith"
+            advanced_lastName  = "Smith"
             advanced_settings = {
-              advanced_theme = "light"
+              advanced_theme         = "light"
               advanced_notifications = false
             }
           }
@@ -130,22 +130,22 @@ output "advanced_user_data" {
   description = "Results from various JQ transformation examples"
   value = {
     basic_operations = {
-      user_name = local.advanced_user_name
-      user_city = local.advanced_user_city
+      user_name   = local.advanced_user_name
+      user_city   = local.advanced_user_city
       hobby_count = local.advanced_hobby_count
     }
 
     array_processing = {
-      engineers_found = length(local.engineers)
-      high_earners_found = length(local.high_earners)
+      engineers_found     = length(local.engineers)
+      high_earners_found  = length(local.high_earners)
       unique_skills_count = length(local.all_skills)
-      average_salary = local.avg_salary
+      average_salary      = local.avg_salary
     }
 
     complex_data = {
       user_summaries_count = length(local.user_summaries)
-      dark_theme_users = local.dark_theme_users
-      popular_posts_found = length(local.popular_posts)
+      dark_theme_users     = local.dark_theme_users
+      popular_posts_found  = length(local.popular_posts)
     }
   }
 }

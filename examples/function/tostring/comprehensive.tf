@@ -18,16 +18,19 @@ locals {
   comprehensive_debug_str   = provider::pyvider::tostring(local.comprehensive_is_debug)   # "false"
 }
 
-# Example 3: List to string conversions
+# Example 3: Lists have no string representation
+# `tostring` refuses a collection, the same way Terraform's built-in does, so
+# render the elements instead of the container.
 locals {
   comprehensive_numbers = [1, 2, 3, 4, 5]
   comprehensive_colors  = ["red", "green", "blue"]
 
-  comprehensive_numbers_str = provider::pyvider::tostring(local.comprehensive_numbers) # "[1, 2, 3, 4, 5]"
-  comprehensive_colors_str  = provider::pyvider::tostring(local.comprehensive_colors)  # '["red", "green", "blue"]'
+  comprehensive_numbers_str = provider::pyvider::join(", ", local.comprehensive_numbers) # "1, 2, 3, 4, 5"
+  comprehensive_colors_str  = provider::pyvider::join(", ", local.comprehensive_colors)  # "red, green, blue"
 }
 
-# Example 4: Map to string conversions
+# Example 4: Maps have no string representation either
+# Use `jsonencode` when the container itself has to reach a string.
 locals {
   comprehensive_config = {
     comprehensive_host = "localhost"
@@ -35,7 +38,7 @@ locals {
     comprehensive_ssl  = true
   }
 
-  config_str = provider::pyvider::tostring(local.comprehensive_config) # '{"host": "localhost", "port": 8080, "ssl": true}'
+  config_str = jsonencode(local.comprehensive_config) # '{"comprehensive_host":"localhost",...}'
 }
 
 # Example 5: Practical use in string interpolation

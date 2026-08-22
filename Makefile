@@ -197,7 +197,10 @@ clean-examples: ## Clean example test outputs
 .PHONY: clean-soup
 clean-soup: ## Clean tofusoup test artifacts from examples
 	@echo "$(BLUE)🧹 Cleaning tofusoup test artifacts...$(NC)"
-	@./scripts/clean-test-artifacts.sh
+	@find examples -name ".soup" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find examples -name "*.tfstate*" -type f -delete 2>/dev/null || true
+	@find examples -name ".terraform.lock.hcl" -type f -delete 2>/dev/null || true
+	@echo "$(GREEN)✅ Test artifacts cleaned$(NC)"
 
 .PHONY: clean-tfstate
 clean-tfstate: ## Clean all Terraform state and lock files in current directory tree
@@ -242,32 +245,13 @@ clean-all: clean clean-docs clean-plating clean-examples clean-workenv ## Deep c
 
 .PHONY: docs
 docs: venv clean-docs ## Build documentation with plating (cleans first)
-	@echo "$(BLUE)📚 Building documentation...$(NC)"
-	@SKIP_DOCS=$(SKIP_DOCS) bash scripts/build-docs.sh
+	@# One plating call renders the bundles, copies the guides, injects the
+	@# global partials, writes the examples and rewrites mkdocs.yml's nav.
 	@if [ "$(SKIP_DOCS)" = "true" ]; then \
-		echo "$(YELLOW)⏭️  Documentation generation was skipped (SKIP_DOCS=true)$(NC)"; \
+		echo "$(YELLOW)⏭️  Documentation generation skipped (SKIP_DOCS=true)$(NC)"; \
+	else \
+		ci/build-docs.sh; \
 	fi
-
-.PHONY: inject-partials
-inject-partials: ## Inject global partials into component templates
-	@echo "$(BLUE)🔧 Injecting global partials...$(NC)"
-	@python3 scripts/inject_global_partials.py
-	@echo "$(GREEN)✅ Global partials injected$(NC)"
-
-.PHONY: inject-partials-dry-run
-inject-partials-dry-run: ## Preview global partial injections (dry-run)
-	@echo "$(BLUE)📋 Preview: injecting global partials (dry-run)...$(NC)"
-	@python3 scripts/inject_global_partials.py --dry-run
-
-.PHONY: generate-docs
-generate-docs: venv deps ## Generate documentation and examples with plating CLI
-	@echo "$(BLUE)📚 Generating docs and examples...$(NC)"
-	@bash scripts/generate_docs_and_examples.sh
-
-.PHONY: validate-examples
-validate-examples: ## Validate all Terraform examples
-	@echo "$(BLUE)🔍 Validating examples...$(NC)"
-	@bash scripts/validate_examples.sh
 
 .PHONY: lint-examples
 lint-examples: ## Run terraform fmt on examples
@@ -285,7 +269,7 @@ docs-serve: docs ## Build and serve documentation locally
 # ==============================================================================
 
 .PHONY: test
-test: venv build ## Test the provider binary
+test: venv build test-conformance ## Test the provider binary
 	@echo "$(BLUE)🧪 Testing provider...$(NC)"
 	@echo "Testing PSP file:"
 	@echo "First run (cold start):"
@@ -298,6 +282,27 @@ test: venv build ## Test the provider binary
 	@echo "\nSecond run (warm start):"
 	@time ./$(VERSIONED_BINARY) launch-context || true
 
+.PHONY: warm-workenv
+warm-workenv: ## Extract the work environment ahead of time
+	@# The first launch after a build unpacks ~270MB. Left to happen inside a test,
+	@# it overruns the plugin handshake timeout and the run hangs on a provider that
+	@# is still unpacking. Pay that cost here instead, where nothing is waiting on it.
+	@echo "$(BLUE)📦 Warming the work environment...$(NC)"
+	@ci/warm-workenv.sh $(VERSIONED_BINARY)
+
+.PHONY: test-conformance
+test-conformance: build clean-workenv warm-workenv ## Drive the packaged provider over tfplugin6
+	@# clean-workenv first: flavorpack keys the extracted work environment on the
+	@# package checksum and refuses to launch a rebuilt package of the same
+	@# version ("package checksum mismatch", exit 107). The checksum lives in a
+	@# hidden sibling of the visible directory, which is why clean-workenv globs
+	@# both `$(PROVIDER_NAME)*` and `.$(PROVIDER_NAME)*`.
+	@echo "$(BLUE)🧪 Running protocol conformance against the packaged provider...$(NC)"
+	@# PYVIDER_CONFORMANCE_REQUIRED makes a missing build a failure rather than a
+	@# skip, so a green run cannot mean "tested nothing".
+	@. .venv/bin/activate && \
+		PYVIDER_CONFORMANCE_REQUIRED=1 python -m pytest tests/conformance -q
+
 .PHONY: test-local
 test-local: build ## Test provider with local Terraform
 	@echo "$(BLUE)🧪 Testing with Terraform...$(NC)"
@@ -305,11 +310,6 @@ test-local: build ## Test provider with local Terraform
 	@echo 'terraform {\n  required_providers {\n    pyvider = {\n      source = "local/providers/pyvider"\n      version = "$(VERSION)"\n    }\n  }\n}\n\nprovider "pyvider" {}' > examples/test/main.tf
 	@cd examples/test && terraform init && terraform validate
 	@echo "$(GREEN)✅ Provider works with Terraform$(NC)"
-
-.PHONY: test-plating
-test-plating: ## Run plating tests for all components
-	@echo "$(BLUE)🧪 Running plating tests...$(NC)"
-	@./scripts/test-plating.sh
 
 .PHONY: test-examples
 test-examples: build install ## Test example configurations with soup stir
@@ -363,43 +363,19 @@ bump-major: ## Bump major version (0.0.3 -> 1.0.0)
 	echo "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
 
 .PHONY: release
-release: ## Create a new release (prompts for version)
-	@echo "$(BLUE)🚀 Creating new release...$(NC)"
-	@echo "Current version: $(VERSION)"
-	@echo "Enter new version (or press Enter to use current):"
-	@read new_version; \
-	if [ -n "$$new_version" ]; then \
-		sed -i.bak "s/version = \"$(VERSION)\"/version = \"$$new_version\"/" pyproject.toml && rm pyproject.toml.bak; \
-		git add pyproject.toml; \
-		git commit -m "Release v$$new_version"; \
-		git push origin main; \
-		gh workflow run "build-release.yml" -f version=$$new_version -f prerelease=false; \
-		echo "$(GREEN)✅ Release v$$new_version started$(NC)"; \
-	else \
-		gh workflow run "build-release.yml" -f version=$(VERSION) -f prerelease=false; \
-		echo "$(GREEN)✅ Release v$(VERSION) started$(NC)"; \
-	fi
+release: ## Dispatch the release workflow for the version in VERSION
+	@# The version comes from the VERSION file, which pyproject reads through
+	@# `version = {file = "VERSION"}`. Bump and commit it first; this only
+	@# dispatches. The workflow is release.yml -- build-release.yml has not
+	@# existed for as long as the scripts/ directory has not.
+	@echo "$(BLUE)🚀 Releasing v$(VERSION)...$(NC)"
+	@gh workflow run "release.yml" -f prerelease=false
+	@echo "$(GREEN)✅ Release v$(VERSION) dispatched$(NC)"
 
 .PHONY: release-status
 release-status: ## Check release workflow status
 	@echo "$(BLUE)📊 Checking release status...$(NC)"
-	@gh run list --workflow "build-release.yml" --limit 1
-	@echo ""
-	@./scripts/check-registry.sh $(VERSION)
-
-# ==============================================================================
-# 🔍 Registry & Provider Info
-# ==============================================================================
-
-.PHONY: registry-check
-registry-check: ## Check Terraform Registry status
-	@echo "$(BLUE)🔍 Checking Terraform Registry...$(NC)"
-	@./scripts/check-registry.sh $(VERSION)
-
-.PHONY: registry-sync
-registry-sync: ## Attempt to sync with Terraform Registry
-	@echo "$(BLUE)🔄 Syncing with Terraform Registry...$(NC)"
-	@./scripts/sync-registry.sh
+	@gh run list --workflow "release.yml" --limit 1
 
 # ==============================================================================
 # 🐚 Development Shell & Utilities
