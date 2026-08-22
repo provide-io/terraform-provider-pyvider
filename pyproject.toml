@@ -84,9 +84,15 @@ version = {file = "VERSION"}
 line-length = 111
 indent-width = 4
 target-version = "py311"
-# ruff >=0.16 formats Python code blocks embedded in Markdown; exclude docs so
-# `ruff format` doesn't churn them.
-extend-exclude = ["**/*.md"]
+# ruff >=0.16 formats Python code blocks embedded in Markdown, so the generated
+# documentation would be restyled on every run.
+#
+# `.ci-tooling` is another repository, checked out into the workspace by CI. Its
+# docs are not ours to restyle either, and `ruff format .` -- which is what the
+# wrknv `format.check` task runs, unlike the scoped invocation used locally --
+# walks into it and fails the Code Quality job on files this repository does not
+# own.
+extend-exclude = ["**/*.md", ".ci-tooling"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "ANN", "B", "C90", "SIM", "PTH", "RUF"]
