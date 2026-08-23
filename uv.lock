@@ -3011,6 +3011,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-timeout"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ac/82/4c9ecabab13363e72d880f2fb504c5f750433b2b6f16e99f4ec21ada284c/pytest_timeout-2.4.0.tar.gz", hash = "sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a", size = 17973, upload-time = "2025-05-05T19:44:34.99Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/b6/3127540ecdf1464a00e5a01ee60a1b09175f6913f0644ac748494d9c4b21/pytest_timeout-2.4.0-py3-none-any.whl", hash = "sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2", size = 14382, upload-time = "2025-05-05T19:44:33.502Z" },
+]
+
+[[package]]
 name = "pytest-xdist"
 version = "3.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3082,7 +3094,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-components"
-version = "0.5.2"
+version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3094,9 +3106,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/5e/6bdeab48f6a842c6c4c3afeaf1cb9b763d43cb5298af9dfeb1cc910dc21a/pyvider_components-0.5.2.tar.gz", hash = "sha256:290fa9176b7f4333ee80d7ac3c889ecdd9847fb3fc640de4b030dcb89ee703c1", size = 150816, upload-time = "2026-08-21T23:51:02.475Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/81/13/7f71908dd72e154eb384487e2b54f611044491730aebc0caaae0a3897887/pyvider_components-0.5.3.tar.gz", hash = "sha256:1fafab547f1fac6fcdcdff46d5b2abf7ce87011b4efcbf3b34111e6437757f79", size = 152420, upload-time = "2026-08-23T17:14:18.243Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/6d/bd542381b87104af33b921cb84bbff73428768f3f5d96e6b1a55864e3661/pyvider_components-0.5.2-py3-none-any.whl", hash = "sha256:98370a0d10c96f79ef2dbce445e8b9a1952af49107b68c17d225fe50e6c2df1b", size = 191976, upload-time = "2026-08-21T23:51:00.793Z" },
+    { url = "https://files.pythonhosted.org/packages/52/0c/becad8c59266f007cca8f115eb1ae7ca16d16a9210614ff56e7ed5e9b49b/pyvider_components-0.5.3-py3-none-any.whl", hash = "sha256:52904b92c94d0420e4aafd63a8c8667d8b33ffe0beb778cf09715c8766c7f4c4", size = 192408, upload-time = "2026-08-23T17:14:16.845Z" },
 ]
 
 [[package]]
@@ -3556,6 +3568,7 @@ dev = [
     { name = "plating" },
     { name = "provide-foundry" },
     { name = "provide-testkit", extra = ["build", "standard"] },
+    { name = "pytest-timeout" },
     { name = "tofusoup" },
     { name = "ty" },
 ]
@@ -3569,7 +3582,7 @@ requires-dist = [
     { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1" },
     { name = "provide-foundation", specifier = ">=0.4.0" },
     { name = "pyvider", specifier = ">=0.5.3" },
-    { name = "pyvider-components", specifier = ">=0.5.2" },
+    { name = "pyvider-components", specifier = ">=0.5.3" },
 ]
 
 [package.metadata.requires-dev]
@@ -3578,6 +3591,7 @@ dev = [
     { name = "plating", specifier = ">=0.5.4" },
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.0" },
+    { name = "pytest-timeout", specifier = ">=2.3.1" },
     { name = "tofusoup", specifier = ">=0.5.0" },
     { name = "ty", specifier = ">=0.0.8" },
 ]

@@ -38,7 +38,7 @@ classifiers = [
 dependencies = [
     "provide-foundation>=0.4.0",
     "pyvider>=0.5.3",
-    "pyvider-components>=0.5.2",
+    "pyvider-components>=0.5.3",
     "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
     # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
@@ -58,6 +58,8 @@ dev = [
     "provide-foundry>=0.4.0",
     # Drives the packaged provider over tfplugin6 for the conformance suite.
     "tofusoup>=0.5.0",
+    # Bounds the conformance suite: see timeout_method in [tool.pytest.ini_options].
+    "pytest-timeout>=2.3.1",
     "ty>=0.0.8",
 ]
 docs = [
@@ -133,6 +135,19 @@ addopts = "--strict-markers --strict-config"
 markers = [
     "conformance: drives the packaged provider binary over tfplugin6",
 ]
+# A healthy conformance run is ~6s for 87 tests, so 300s only ever fires on a
+# genuine hang -- and one has been seen: the suite stalled 22 minutes at ~0% CPU
+# with the main thread blocked in a synchronous read-to-EOF inside the asyncio
+# event loop, waiting on a provider that never accepted a connection.
+#
+# timeout_method is "thread" rather than the default "signal" on purpose. Signal
+# does interrupt a blocking read on the main thread (checked), but it only ever
+# interrupts the main thread, and in that stall two further threads were parked
+# reading the provider's stdout and stderr. The watchdog thread fires wherever
+# the process is stuck and dumps every thread's stack on the way out, which is
+# what identified the blocking read in the first place.
+timeout = 300
+timeout_method = "thread"
 # Parallel execution: pytest -n <workers> (range: 2-16, recommend: CPU cores or 8, max: 16 to avoid xdist hang)
 
 [tool.coverage.run]
