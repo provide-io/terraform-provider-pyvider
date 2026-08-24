@@ -1,0 +1,7 @@
+# Applies to every example of this component: it keeps encrypted private state,
+# and the provider refuses to without a shared secret. Without it an example
+# fails with "Private state shared secret not configured", which reads like a
+# bug rather than a missing prerequisite.
+[requirements]
+env = ["PYVIDER_PRIVATE_STATE_SHARED_SECRET"]
+reason = "encrypted private state needs a configured shared secret"

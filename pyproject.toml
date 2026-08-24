@@ -38,7 +38,7 @@ classifiers = [
 dependencies = [
     "provide-foundation>=0.4.0",
     "pyvider>=0.5.3",
-    "pyvider-components>=0.5.3",
+    "pyvider-components>=0.6.0",
     "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
     # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
@@ -52,12 +52,12 @@ dependencies = [
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.0",
-    "flavorpack>=0.4.5",
-    "plating>=0.5.4",
+    "flavorpack>=0.4.6",
+    "plating>=0.6.0",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
     # Drives the packaged provider over tfplugin6 for the conformance suite.
-    "tofusoup>=0.5.0",
+    "tofusoup>=0.6.0",
     # Bounds the conformance suite: see timeout_method in [tool.pytest.ini_options].
     "pytest-timeout>=2.3.1",
     "ty>=0.0.8",

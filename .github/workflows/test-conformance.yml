@@ -279,7 +279,7 @@ jobs:
             #
             # Accepting only the second made this step fail for a provider that
             # was refusing exactly as intended.
-            if grep -qi "test-only.*requires test mode\|test mode.*required\|does not support resource type" /tmp/testmode-false.log; then
+            if grep -qi "invalid resource type\|test-only.*requires test mode\|test mode.*required\|does not support resource type" /tmp/testmode-false.log; then
               echo ""
               echo "✅ PASS: Test-only component correctly rejected without test mode"
             else

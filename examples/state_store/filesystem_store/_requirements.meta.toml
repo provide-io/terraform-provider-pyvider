@@ -1,0 +1,12 @@
+# Applies to every example of this component. Pluggable state storage is behind
+# an experiment flag in Terraform and absent from OpenTofu 1.12.5, which rejects
+# the block with "Unsupported block type".
+#
+# The examples also cannot interpolate: Terraform decodes a `state_store` block
+# with a nil HCL evaluation context, exactly as it does a `backend` block, so
+# `path.module` and every other traversal fail with "Variables may not be used
+# here". State storage is resolved during init, before there is a module graph.
+[requirements]
+opentofu = false
+init_flags = ["-enable-pluggable-state-storage-experiment"]
+reason = "state_store is experimental in Terraform and unsupported in OpenTofu"

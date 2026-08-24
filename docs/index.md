@@ -57,6 +57,12 @@ No provider configuration required.
 - [`truncate`](./functions/truncate.md)
 - [`upper`](./functions/upper.md)
 
+## Coordination
+
+### Ephemeral Resources
+
+- [`pyvider_lease`](./ephemeral-resources/lease.md)
+
 ## File Operations
 
 ### Resources
@@ -67,6 +73,14 @@ No provider configuration required.
 ### Data Sources
 
 - [`pyvider_file_info`](./data-sources/file_info.md)
+
+### List Resources
+
+- [`pyvider_directory_entry`](./list-resources/directory_entry.md)
+
+### Actions
+
+- [`pyvider_wait_for_file`](./actions/wait_for_file.md)
 
 ## Lens
 
@@ -83,6 +97,18 @@ No provider configuration required.
 ### Data Sources
 
 - [`pyvider_http_api`](./data-sources/http_api.md)
+
+## State Storage
+
+### State Stores
+
+- [`pyvider_filesystem_store`](./state-stores/filesystem_store.md)
+
+## Utility
+
+### Actions
+
+- [`pyvider_echo`](./actions/echo.md)
 
 ## Test Mode
 
@@ -102,22 +128,11 @@ No provider configuration required.
 
 - [`pyvider_nested_data_processor`](./functions/pyvider_nested_data_processor.md)
 
-### Test Ephemeral Resources
-
-- [`pyvider_lease`](./ephemeral-resources/lease.md)
-
 ### Test List Resources
 
-- [`pyvider_directory_entry`](./list-resources/directory_entry.md)
 - [`pyvider_secret_note`](./list-resources/secret_note.md)
 
 ### Test Actions
 
-- [`pyvider_echo`](./actions/echo.md)
 - [`pyvider_failing_action`](./actions/failing_action.md)
-- [`pyvider_wait_for_file`](./actions/wait_for_file.md)
-
-### Test State Stores
-
-- [`pyvider_filesystem_store`](./state-stores/filesystem_store.md)
 

@@ -1,0 +1,8 @@
+# Applies to every example of this component. Actions are a tfprotov6.11
+# feature and OpenTofu 1.12.5 rejects the block outright with "Unsupported block
+# type" -- not a version floor it will eventually clear, a block type it does not
+# have. Measured, not assumed: the ephemeral and resource examples get only
+# "Missing required provider" from the same binary.
+[requirements]
+opentofu = false
+reason = "OpenTofu rejects `action` blocks: Unsupported block type"

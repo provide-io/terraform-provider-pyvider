@@ -1,6 +1,6 @@
 ---
 page_title: "Action: pyvider_echo"
-subcategory: "Test Mode"
+subcategory: "Utility"
 description: |-
   Appends a timestamped message to a file, reporting progress per line.
 ---

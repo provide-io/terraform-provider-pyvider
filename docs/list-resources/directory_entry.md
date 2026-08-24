@@ -1,18 +1,10 @@
 ---
 page_title: "List Resource: pyvider_directory_entry"
-subcategory: "Test Mode"
+subcategory: "File Operations"
 description: |-
   Lists files in a directory.
 ---
 # pyvider_directory_entry (List Resource)
-
-> **Test-mode only.** This component is registered `test_only`, so a provider
-> started normally does not publish it: it is absent from
-> `terraform providers schema` and cannot be referenced from a configuration.
-> It is served only when the provider process is launched with
-> `PYVIDER_TESTMODE=true`, which is how the conformance suite exercises it.
-> Documented here so the behaviour it demonstrates is discoverable, not
-> because it is available to a published provider's users.
 
 Lists files in a directory.
 

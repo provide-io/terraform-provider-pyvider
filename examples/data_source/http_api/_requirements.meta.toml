@@ -1,0 +1,7 @@
+# Applies to every example of this component: each one calls the live
+# httpbin.org, so they fail closed on an air-gapped runner and are at the mercy
+# of a third party's uptime. A failure here is not necessarily a defect in the
+# provider.
+[requirements]
+network = ["httpbin.org"]
+reason = "the examples call the live httpbin.org service"

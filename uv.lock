@@ -814,7 +814,7 @@ wheels = [
 
 [[package]]
 name = "flavorpack"
-version = "0.4.5"
+version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pip" },
@@ -826,12 +826,12 @@ dependencies = [
     { name = "wheel" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/19/c7f7eafedfd0831c8b3fcd866269e7af54dc43442380bd382a41032fcec5/flavorpack-0.4.5-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:faa494b620ee7dd092ce555dfc4feba2cd9e7c21c2712435d1bbeb50ed374c7a", size = 8852124, upload-time = "2026-08-16T20:12:41.69Z" },
-    { url = "https://files.pythonhosted.org/packages/57/eb/13637dc3effce1c83642dd29fe9aa625efbbf9365ff64f1efa6e84f55e11/flavorpack-0.4.5-py3-none-macosx_11_0_arm64.whl", hash = "sha256:b9e923221942fdf446d1b0cf778a0f1ce4a850cc17cdf010cdaeaf98d3cf01cf", size = 8245286, upload-time = "2026-08-16T20:12:44.818Z" },
-    { url = "https://files.pythonhosted.org/packages/c7/cc/75f8092c057487a79b96d76d109f5fff065c9d35ef45e373570c076c4a8c/flavorpack-0.4.5-py3-none-manylinux2014_aarch64.whl", hash = "sha256:b8b56df0671dd033632c71066645e953769f7ccd5e1bc1fe1c9bc71ea6bdb11e", size = 8133830, upload-time = "2026-08-16T20:12:47.224Z" },
-    { url = "https://files.pythonhosted.org/packages/9a/50/2c7639e6d31b7b000b549cb82dd654fedca758bec489875b5e57acb027ec/flavorpack-0.4.5-py3-none-manylinux2014_x86_64.whl", hash = "sha256:7b64de6d71d311cef8bed36b0d0390f462e641e04138524de17743fe59b3578d", size = 8879272, upload-time = "2026-08-16T20:12:49.801Z" },
-    { url = "https://files.pythonhosted.org/packages/04/26/31fca575117e6ee6d5763610313df9303c66b2e3631be5a20d36b9467f1b/flavorpack-0.4.5-py3-none-win_amd64.whl", hash = "sha256:fa8aab170c911ee7faa28a536912189975cb9ec9bd5b7bb9b4adf42ae8d0c859", size = 9415626, upload-time = "2026-08-16T20:12:52.652Z" },
-    { url = "https://files.pythonhosted.org/packages/2b/ff/2b7de2a500fe394871e8ea74d2fc7b0df7272b49e36318dad33afe4c6ba6/flavorpack-0.4.5-py3-none-win_arm64.whl", hash = "sha256:721330e3ad73dd2f26126643a67728adb9298b34268c1fb1bb7c7f52752c3ff5", size = 8601805, upload-time = "2026-08-16T20:12:55.601Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/7d/a440345287131f7211091d579944264bb052167e1067c41551d4dc5607d2/flavorpack-0.4.6-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:c92f0382453fcfbc938fb26eb718d5147f3b4ab9641cd2bc1276e1dc2baecffb", size = 8852264, upload-time = "2026-08-24T06:02:47.37Z" },
+    { url = "https://files.pythonhosted.org/packages/43/1a/867f794d83563655bc24b1c06fc3a9b6056ea47e9a331310442c1ab75085/flavorpack-0.4.6-py3-none-macosx_11_0_arm64.whl", hash = "sha256:4abd72ee74049c7d73c1de352cd0001db600cf6f72398158646dc93a69adb249", size = 8245464, upload-time = "2026-08-24T06:02:49.768Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/81/9afb3f0bc27d25828c06c39a8744d960a80b67f2c4f304f91caa65780167/flavorpack-0.4.6-py3-none-manylinux2014_aarch64.whl", hash = "sha256:743d9c5a4316e7d09e7132fbe051bef0fcf7d4595f8370802c768fdf43460758", size = 8133753, upload-time = "2026-08-24T06:02:51.753Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/02/38de76082ab923be69676ad9e4f1553f7761953f453a7e5c277ece0a62dc/flavorpack-0.4.6-py3-none-manylinux2014_x86_64.whl", hash = "sha256:faa760d07eeabb8552341bae2281a7d9b94b55e211874bf23d00401e078a829b", size = 8879859, upload-time = "2026-08-24T06:02:53.789Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/2b/786b516b920be5158190692041d40ce06e5a2e9dc1263253d0fdd4bb594e/flavorpack-0.4.6-py3-none-win_amd64.whl", hash = "sha256:7716fc1fc5bd3ec632ce6ea468a43e2eacbf6128c63eba6c683373ae47d8368b", size = 9415872, upload-time = "2026-08-24T06:02:56.007Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/9f/d8eae91ab96ba04aeab36ceec34c09e01afc9fd099beeacc266fa2e1c59f/flavorpack-0.4.6-py3-none-win_arm64.whl", hash = "sha256:21660f2fb8e51acf512cdfa2e24e12a7f3a9d0626f6d94b25c2fb39311e8b115", size = 8602202, upload-time = "2026-08-24T06:02:58.056Z" },
 ]
 
 [[package]]
@@ -2463,7 +2463,7 @@ wheels = [
 
 [[package]]
 name = "plating"
-version = "0.5.4"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
@@ -2473,9 +2473,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0d/f7/3a5539dc8da56a10fbdfa781fc31c46301c90b2844990324f14f968ead56/plating-0.5.4.tar.gz", hash = "sha256:cacd277f530ec190cbe5b86f4b00402475207afbed891812c4cc5faf8bd8c42a", size = 123650, upload-time = "2026-08-21T23:50:44.592Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/db/72ad6f87268dc8918508071faaa4c2b4760b70c9c3f37fd0762d194c9a37/plating-0.6.0.tar.gz", hash = "sha256:8a56ce4835df2f0dd04548a2df82d0039706f2594dca5da4f51c8a30c386f3d4", size = 127126, upload-time = "2026-08-24T17:32:56.62Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/65/831d1c422ff4829a27fb894989ec5977ad80e11eb34bc743e4914c7a3050/plating-0.5.4-py3-none-any.whl", hash = "sha256:f8d1bc842f80fad08ba4c3fcce1b3496469d35d093465443115cb398d03d1309", size = 113063, upload-time = "2026-08-21T23:50:43.222Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/f8/05514b9fad5b3209182f8e1fc5ea20b0ed9ff15a77e690ab1bcd64ab6052/plating-0.6.0-py3-none-any.whl", hash = "sha256:cd85b1c9f3253ba85170654c5d1e31ca7260e1ce0f981eae4185a92097b9b055", size = 114742, upload-time = "2026-08-24T17:32:55.193Z" },
 ]
 
 [[package]]
@@ -3094,7 +3094,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-components"
-version = "0.5.3"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3106,9 +3106,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/13/7f71908dd72e154eb384487e2b54f611044491730aebc0caaae0a3897887/pyvider_components-0.5.3.tar.gz", hash = "sha256:1fafab547f1fac6fcdcdff46d5b2abf7ce87011b4efcbf3b34111e6437757f79", size = 152420, upload-time = "2026-08-23T17:14:18.243Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/29/43e9c865160912a04a2d5110d37d529f639de78eb611f4b3f83fcc6f5079/pyvider_components-0.6.0.tar.gz", hash = "sha256:193b25b0e2329d026e789648d686ec90f1bbc14dd0a7b68e1f30b0ffb7c7b834", size = 153861, upload-time = "2026-08-24T17:32:25.261Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/0c/becad8c59266f007cca8f115eb1ae7ca16d16a9210614ff56e7ed5e9b49b/pyvider_components-0.5.3-py3-none-any.whl", hash = "sha256:52904b92c94d0420e4aafd63a8c8667d8b33ffe0beb778cf09715c8766c7f4c4", size = 192408, upload-time = "2026-08-23T17:14:16.845Z" },
+    { url = "https://files.pythonhosted.org/packages/84/fe/2a25e3fda58ded6f88835aa370365c2029c458fcd3dcd4b2856c0fa34691/pyvider_components-0.6.0-py3-none-any.whl", hash = "sha256:68618bc7b99da9ef08952342d8d77145db8d3cc04157e944b42e3ae3f5002569", size = 195759, upload-time = "2026-08-24T17:32:24.008Z" },
 ]
 
 [[package]]
@@ -3582,17 +3582,17 @@ requires-dist = [
     { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1" },
     { name = "provide-foundation", specifier = ">=0.4.0" },
     { name = "pyvider", specifier = ">=0.5.3" },
-    { name = "pyvider-components", specifier = ">=0.5.3" },
+    { name = "pyvider-components", specifier = ">=0.6.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "flavorpack", specifier = ">=0.4.5" },
-    { name = "plating", specifier = ">=0.5.4" },
+    { name = "flavorpack", specifier = ">=0.4.6" },
+    { name = "plating", specifier = ">=0.6.0" },
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.0" },
     { name = "pytest-timeout", specifier = ">=2.3.1" },
-    { name = "tofusoup", specifier = ">=0.5.0" },
+    { name = "tofusoup", specifier = ">=0.6.0" },
     { name = "ty", specifier = ">=0.0.8" },
 ]
 docs = [{ name = "provide-testkit", extras = ["docs"], specifier = ">=0.4.0" }]
@@ -3625,7 +3625,7 @@ wheels = [
 
 [[package]]
 name = "tofusoup"
-version = "0.5.0"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiosqlite" },
@@ -3641,9 +3641,9 @@ dependencies = [
     { name = "semver" },
     { name = "textual" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/f8/fa233877a0b59a7a4f817b9eb37101129d9a36dddd13a0f202c37ca49af2/tofusoup-0.5.0.tar.gz", hash = "sha256:9c5b817fcbd209e49a454669dfa09bcbabc9ca7717c4d2810164cf56e903736c", size = 109184, upload-time = "2026-08-20T19:14:21.567Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/78/0ba9931164428109fd40503d374a63b4097190303f4ff64abdfde53521f7/tofusoup-0.6.0.tar.gz", hash = "sha256:f0a836da58588a09092484d59fd5535015a1fb6463cb749fa36c32fc4b56ca15", size = 111979, upload-time = "2026-08-24T17:31:29.512Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/cd/49b6e250ffa997ae1dc5c90a9a3ba6fb4f2b854a6b11ceb4c2608158597e/tofusoup-0.5.0-py3-none-any.whl", hash = "sha256:ad9db90e9c947fc0f3c070f965ffda9b076421c9b5f7e195a7a58a6c4caea3d2", size = 137029, upload-time = "2026-08-20T19:14:20.166Z" },
+    { url = "https://files.pythonhosted.org/packages/87/f7/388137f6bf7fbefb28562f31c70994978252231c266d1c87ce6b80a31a87/tofusoup-0.6.0-py3-none-any.whl", hash = "sha256:56f8c399346999a4ef15c71a13a3a12d44e451004cb0ee00f22c38212c642367", size = 140411, upload-time = "2026-08-24T17:31:28.059Z" },
 ]
 
 [[package]]

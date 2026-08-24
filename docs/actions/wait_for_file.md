@@ -1,18 +1,10 @@
 ---
 page_title: "Action: pyvider_wait_for_file"
-subcategory: "Test Mode"
+subcategory: "File Operations"
 description: |-
   Blocks until a path exists, reporting progress while it waits.
 ---
 # pyvider_wait_for_file (Action)
-
-> **Test-mode only.** This component is registered `test_only`, so a provider
-> started normally does not publish it: it is absent from
-> `terraform providers schema` and cannot be referenced from a configuration.
-> It is served only when the provider process is launched with
-> `PYVIDER_TESTMODE=true`, which is how the conformance suite exercises it.
-> Documented here so the behaviour it demonstrates is discoverable, not
-> because it is available to a published provider's users.
 
 Blocks until a path exists, reporting progress while it waits.
 
