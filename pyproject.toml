@@ -244,7 +244,11 @@ allowed_paths = [
 ]
 
 [tool.pyvider]
-# Provider metadata
-name = "pyvider"
+# Provider metadata. The name selects the plugin directory Terraform searches,
+# local/providers/<name>/. `provider_name` is the spelling pyvider 0.6.0 reads;
+# `name` was inert, and this happened to be the one project in the world where
+# that did not show, because the fallback is also "pyvider". Later versions
+# accept `name` as well and prefer it; switch once the pin moves.
+provider_name = "pyvider"
 # Component packages to use for this provider
 component_packages = ["pyvider.components"]
