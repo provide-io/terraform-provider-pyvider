@@ -48,7 +48,14 @@ dependencies = [
     "provide-foundation>=0.4.3",
     "pyvider>=0.6.2",
     "pyvider-components>=0.6.1",
-    "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
+    # Capped below 1.11 for the packaged build, not for this package's own use.
+    # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
+    # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
+    # wheels after 1.10.0 -- 1.11 and 1.12 ship manylinux_2_26/2_28 only. With
+    # jq 1.12.0 in the lock, pip on the Linux runners reports "from versions:
+    # ... 1.10.0" and the PSP build fails outright. Lift this once flavorpack
+    # asks for a newer tag.
+    "jq>=1.9.1,<1.11; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
     # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
     # ships win_amd64/win32 only, grpc/grpc#39064; cryptography 50.0.0 ships
