@@ -36,9 +36,14 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "provide-foundation>=0.4.0",
-    "pyvider>=0.5.3",
-    "pyvider-components>=0.6.0",
+    # Floors track the suite releases this provider is built and tested against.
+    # pyvider 0.6.0 changed the wire schema (a_obj sends nested_type) and made
+    # several previously-inert declarations hard errors, so a resolution that
+    # picked 0.5.3 would not merely be older -- it would talk to Terraform
+    # differently than anything here has been tested doing.
+    "provide-foundation>=0.4.3",
+    "pyvider>=0.6.0",
+    "pyvider-components>=0.6.1",
     "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
     # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
