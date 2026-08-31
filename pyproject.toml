@@ -56,12 +56,32 @@ dependencies = [
     # ... 1.10.0" and the PSP build fails outright. Lift this once flavorpack
     # asks for a newer tag.
     "jq>=1.9.1,<1.11; sys_platform != 'win32' or platform_machine != 'ARM64'",
-    # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
-    # cryptography nor grpcio publishes a wheel (checked 2026-08-16: grpcio 1.83.0
-    # ships win_amd64/win32 only, grpc/grpc#39064; cryptography 50.0.0 ships
-    # win_amd64 only). Since pyvider requires grpcio>=1.83.0 that platform cannot
-    # install the suite at all, so the cap constrained a resolution that never
-    # happens. windows_arm64 is unsupported suite-wide for the same reason.
+    # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, a platform
+    # the suite cannot install on at all, so it constrained a resolution that
+    # never happens.
+    #
+    # Measured 2026-08-31 against PyPI, over all 61 pinned runtime requirements
+    # at CPython 3.11: 50 are pure Python and 7 of the 11 compiled ones publish
+    # win_arm64 wheels (cffi, markupsafe, msgpack, psutil via cp37-abi3,
+    # pyjson5, zstandard). These four do not:
+    #
+    #   grpcio 1.83.1        no win_arm64 wheel in any release; win_amd64 and
+    #                        win32 only. grpc/grpc#39064.
+    #   cryptography 50.0.1  no win_arm64 -- and this is a regression, not a
+    #                        gap: 46.0.0 through 46.0.3 shipped
+    #                        cp311-abi3-win_arm64 and 46.0.4 dropped it.
+    #   setproctitle 1.3.7   no win_arm64 wheel in any release (via
+    #                        provide-foundation).
+    #   jq 1.10.0            no win_arm64 wheel in any release, which is what
+    #                        the marker on the requirement above is for.
+    #
+    # pyyaml is a fifth constraint of a different kind: 6.0.3 is its first
+    # release with win_arm64 wheels and they are cp312 and up, so win_arm64
+    # would also mean moving the packaged interpreter off 3.11.
+    #
+    # grpcio is the binding one. pyvider requires it unconditionally, so no
+    # marker or floor routes around it: every other blocker could be fixed and
+    # windows_arm64 would still be unsupported suite-wide.
     "cryptography>=46.0.0; sys_platform == 'win32' and platform_machine == 'ARM64'",
 ]
 
