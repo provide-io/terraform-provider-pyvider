@@ -40,9 +40,13 @@ dependencies = [
     # pyvider 0.6.0 changed the wire schema (a_obj sends nested_type) and made
     # several previously-inert declarations hard errors, so a resolution that
     # picked 0.5.3 would not merely be older -- it would talk to Terraform
-    # differently than anything here has been tested doing.
+    # differently than anything here has been tested doing. The floor sits at
+    # 0.6.2 because that is where the generated dev-mode wrapper stopped cd'ing
+    # into the install directory: under 0.6.1 and earlier every relative path an
+    # example passed, and the filesystem state store's default root, resolved
+    # against this checkout rather than the caller's working directory.
     "provide-foundation>=0.4.3",
-    "pyvider>=0.6.1",
+    "pyvider>=0.6.2",
     "pyvider-components>=0.6.1",
     "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
@@ -251,7 +255,7 @@ allowed_paths = [
 [tool.pyvider]
 # Provider metadata. The name selects the plugin directory Terraform searches,
 # local/providers/<name>/. `name` is the documented key as of pyvider 0.6.1,
-# which the floor above requires -- 0.6.0 read only `provider_name`, so a
+# which the floor above clears -- 0.6.0 read only `provider_name`, so a
 # resolution at that version would find no name here and fall back to the
 # default. `provider_name` is still accepted as an alias.
 name = "pyvider"
