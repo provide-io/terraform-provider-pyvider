@@ -42,7 +42,7 @@ dependencies = [
     # picked 0.5.3 would not merely be older -- it would talk to Terraform
     # differently than anything here has been tested doing.
     "provide-foundation>=0.4.3",
-    "pyvider>=0.6.0",
+    "pyvider>=0.6.1",
     "pyvider-components>=0.6.1",
     "jq>=1.9.1; sys_platform != 'win32' or platform_machine != 'ARM64'",
     # Floor only. The previous <=46.0.3 cap applied to win32/ARM64, where neither
@@ -58,7 +58,7 @@ dependencies = [
 dev = [
     "provide-testkit[standard,build]>=0.4.0",
     "flavorpack>=0.4.6",
-    "plating>=0.6.0",
+    "plating>=0.6.1",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
     # Drives the packaged provider over tfplugin6 for the conformance suite.
@@ -250,10 +250,10 @@ allowed_paths = [
 
 [tool.pyvider]
 # Provider metadata. The name selects the plugin directory Terraform searches,
-# local/providers/<name>/. `provider_name` is the spelling pyvider 0.6.0 reads;
-# `name` was inert, and this happened to be the one project in the world where
-# that did not show, because the fallback is also "pyvider". Later versions
-# accept `name` as well and prefer it; switch once the pin moves.
-provider_name = "pyvider"
+# local/providers/<name>/. `name` is the documented key as of pyvider 0.6.1,
+# which the floor above requires -- 0.6.0 read only `provider_name`, so a
+# resolution at that version would find no name here and fall back to the
+# default. `provider_name` is still accepted as an alias.
+name = "pyvider"
 # Component packages to use for this provider
 component_packages = ["pyvider.components"]
