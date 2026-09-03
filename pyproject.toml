@@ -87,7 +87,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "provide-testkit[standard,build]>=0.4.0",
+    "provide-testkit[standard,build]>=0.4.5",
     "flavorpack>=0.4.6",
     "plating>=0.6.1",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
@@ -99,7 +99,7 @@ dev = [
     "ty>=0.0.8",
 ]
 docs = [
-    "provide-testkit[docs]>=0.4.0",
+    "provide-testkit[docs]>=0.4.5",
 ]
 
 [project.urls]
