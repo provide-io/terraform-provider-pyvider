@@ -19,8 +19,6 @@ resource "pyvider_file_content" "config_summary" {
     "Endpoint: ${local.has_endpoint ? "Configured" : "Not configured"}",
     "Authentication: ${local.has_auth ? "Configured" : "Not configured"}",
     "TLS Verification: ${local.is_secure ? "Enabled" : "Disabled"}",
-    "",
-    "Generated at: ${timestamp()}"
   ])
 }
 
