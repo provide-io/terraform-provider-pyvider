@@ -18,7 +18,7 @@ data "pyvider_http_api" "put_request" {
   headers = {
     "Content-Type"  = "application/json"
     "Authorization" = "Bearer fake-token-for-example"
-    "X-Request-ID"  = "req-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+    "X-Request-ID"  = "req-example-put"
   }
 }
 
@@ -221,8 +221,6 @@ locals {
 resource "pyvider_file_content" "advanced_api_analysis" {
   filename = "/tmp/http_api_advanced_analysis.json"
   content = jsonencode({
-    timestamp = timestamp()
-
     http_methods_tested = [
       "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
     ]
@@ -292,8 +290,6 @@ resource "pyvider_file_content" "advanced_api_report" {
     "=== Content Types Observed ===",
     "POST Response: ${local.response_analysis.post_request.content_type}",
     "Headers Count (POST): ${local.response_analysis.post_request.headers_count}",
-    "",
-    "Report generated at: ${timestamp()}"
   ])
 }
 

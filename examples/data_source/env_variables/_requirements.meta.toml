@@ -1,0 +1,10 @@
+# Applies to every example of this component. The data source reports the
+# environment the provider process was launched with, and Terraform gives each
+# launch its own: PLUGIN_CLIENT_CERT is the automatic-mTLS certificate
+# go-plugin mints per run, and PLUGIN_MIN_PORT, PLUGIN_MAX_PORT and
+# TF_PLUGIN_MAGIC_COOKIE travel with it. So the outputs differ between one plan
+# and the next however little has changed, and the re-plan after a successful
+# apply shows a diff that is a true reading rather than a defect.
+[requirements]
+converges = false
+reason = "the provider environment carries per-launch values, so the outputs never repeat"

@@ -26,7 +26,7 @@ pytestmark = pytest.mark.asyncio(loop_scope="session")
 #: The v6.11 features this branch exists to deliver, and the demo components
 #: registered for each. Discovery must surface all of them.
 EXPECTED_ACTIONS = {"pyvider_echo", "pyvider_failing_action", "pyvider_wait_for_file"}
-EXPECTED_LIST_RESOURCES = {"pyvider_secret_note", "pyvider_directory_entry"}
+EXPECTED_LIST_RESOURCES = {"pyvider_secret_note", "pyvider_file_content"}
 EXPECTED_STATE_STORES = {"pyvider_filesystem_store"}
 
 
