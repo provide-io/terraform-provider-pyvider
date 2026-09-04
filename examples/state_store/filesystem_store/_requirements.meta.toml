@@ -2,11 +2,19 @@
 # an experiment flag in Terraform and absent from OpenTofu 1.12.5, which rejects
 # the block with "Unsupported block type".
 #
+# The flag is only half of what Terraform needs. Experiments are compiled into
+# alpha and dev builds, and a stable release refuses the opt-in outright --
+# "Cannot use -enable-pluggable-state-storage-experiment flag without
+# experiments enabled" -- so these examples run on an alpha or not at all.
+# `experiments = true` is what says so; without it the run failed at `init`
+# with no error stir could attribute.
+#
 # The examples also cannot interpolate: Terraform decodes a `state_store` block
 # with a nil HCL evaluation context, exactly as it does a `backend` block, so
 # `path.module` and every other traversal fail with "Variables may not be used
 # here". State storage is resolved during init, before there is a module graph.
 [requirements]
 opentofu = false
+experiments = true
 init_flags = ["-enable-pluggable-state-storage-experiment"]
 reason = "state_store is experimental in Terraform and unsupported in OpenTofu"
