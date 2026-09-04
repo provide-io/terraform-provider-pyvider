@@ -26,7 +26,7 @@ from pyvider.protocols.tfprotov6.protobuf import tfplugin6_pb2 as pb
 #: loop-per-test hands each test a channel bound to an already-closed loop.
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-DIRECTORY_ENTRY = "pyvider_directory_entry"
+DIRECTORY_ENTRY = "pyvider_file_content"
 
 
 def directory_config(path: Path, suffix: str | None = None, include_hidden: bool | None = None) -> Any:
@@ -197,7 +197,7 @@ async def test_a_list_resource_type_should_match_a_managed_resource_type(
     provider publishes. Measured on Terraform 1.17.0-alpha20260812.
 
     `pyvider_secret_note` satisfies this (its list resource borrows the managed
-    resource's schemas via `resource_type=`); `pyvider_directory_entry` does
+    resource's schemas via `resource_type=`); `pyvider_file_content` does
     not, and is usable at the protocol level only.
     """
     assert provider.schema is not None

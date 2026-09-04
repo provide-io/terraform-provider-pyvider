@@ -1,10 +1,10 @@
 ---
-page_title: "List Resource: pyvider_directory_entry"
+page_title: "List Resource: pyvider_file_content"
 subcategory: "File Operations"
 description: |-
   Lists files in a directory.
 ---
-# pyvider_directory_entry (List Resource)
+# pyvider_file_content (List Resource)
 
 Lists files in a directory.
 
@@ -19,7 +19,7 @@ rather than planned or applied. The schema below is the `config` block of the
 
 ```terraform
 # Save as example.tfquery.hcl and run `tofu query`.
-list "pyvider_directory_entry" "example" {
+list "pyvider_file_content" "example" {
   provider = pyvider
 
   config {

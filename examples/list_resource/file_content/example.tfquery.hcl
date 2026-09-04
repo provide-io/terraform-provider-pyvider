@@ -1,5 +1,5 @@
 # Save as example.tfquery.hcl and run `tofu query`.
-list "pyvider_directory_entry" "example" {
+list "pyvider_file_content" "example" {
   provider = pyvider
 
   config {

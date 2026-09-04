@@ -76,7 +76,7 @@ No provider configuration required.
 
 ### List Resources
 
-- [`pyvider_directory_entry`](./list-resources/directory_entry.md)
+- [`pyvider_file_content`](./list-resources/file_content.md)
 
 ### Actions
 
