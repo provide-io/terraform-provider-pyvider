@@ -48,8 +48,11 @@ locals {
 # Create verification report (without self-reference)
 resource "pyvider_file_content" "verification_report" {
   filename = "/tmp/private_state_verification_report.json"
+  # No `timestamp()` here. It is re-evaluated on every plan, so a resource
+  # argument carrying one never matches the state it just wrote: the example
+  # would show a diff for ever, teaching the reader to write a resource that is
+  # permanently about to change.
   content = jsonencode({
-    timestamp = timestamp()
     test_summary = {
       total_tests      = length(local.comprehensive_verification_results)
       passed_tests     = length([for result in local.comprehensive_verification_results : result if result.passed])
