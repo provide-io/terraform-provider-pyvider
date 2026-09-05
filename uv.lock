@@ -3104,7 +3104,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-components"
-version = "0.7.0"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3116,9 +3116,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/15/9e/28a3ded3bc8a00a2e38f8169b36fef883e06309f99258201db7c4e428c5b/pyvider_components-0.7.0.tar.gz", hash = "sha256:d044ffbbf6c256178b8fa76bfb69bafedec660850cf3e125746f4d08c9e9d358", size = 158022, upload-time = "2026-09-04T22:34:07.312Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/f5/20bb89b734f145f1171635445728d58c08d828fa38a007aebbbddd512780/pyvider_components-0.7.1.tar.gz", hash = "sha256:2ed8bab78cf5dc89b59c674678df647ad8702efade68b3d3d265002784752c3e", size = 158747, upload-time = "2026-09-05T19:41:44.551Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/e2/d18dc6dfe3e31d5974a24b434c12c909169df7c132e59f0ba5b016252ba7/pyvider_components-0.7.0-py3-none-any.whl", hash = "sha256:57f0fbd254cf8f8a4992f3dd1d053f7e415c5144a49688515943170e105ee13e", size = 199445, upload-time = "2026-09-04T22:34:05.882Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/52/a4ee79209ee96317bf7d845223eb3856dfc28589c3cee4ee0ce678905a9f/pyvider_components-0.7.1-py3-none-any.whl", hash = "sha256:e41b95ee67c1d0945560b8d04f7ff0b2f896020d52068355b975a42145facc98", size = 199795, upload-time = "2026-09-05T19:41:43.256Z" },
 ]
 
 [[package]]
@@ -3592,7 +3592,7 @@ requires-dist = [
     { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1,<1.11" },
     { name = "provide-foundation", specifier = ">=0.4.4" },
     { name = "pyvider", specifier = ">=0.7.0" },
-    { name = "pyvider-components", specifier = ">=0.7.0" },
+    { name = "pyvider-components", specifier = ">=0.7.1" },
 ]
 
 [package.metadata.requires-dev]

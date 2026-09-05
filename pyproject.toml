@@ -45,13 +45,15 @@ dependencies = [
     # the filesystem state store's default root -- resolves against the caller
     # rather than this checkout.
     #
-    # pyvider-components 0.7.0 names the file-content resource and its list
-    # resource `pyvider_file_content`. tests/conformance asserts that name, so
-    # an older resolution publishes `pyvider_directory_entry` and fails the
-    # list-resource suite.
+    # pyvider-components 0.7.1 names the file-content resource and its list
+    # resource `pyvider_file_content`, which tests/conformance asserts: an older
+    # resolution publishes `pyvider_directory_entry` and fails the list-resource
+    # suite. 0.7.1 is also where both actions defer only for the reason
+    # Terraform accepts, so 0.7.0 paired with pyvider 0.7.0 answers PlanAction
+    # with an error diagnostic instead of a plan.
     "provide-foundation>=0.4.4",
     "pyvider>=0.7.0",
-    "pyvider-components>=0.7.0",
+    "pyvider-components>=0.7.1",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
