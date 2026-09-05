@@ -1,8 +1,10 @@
 # Applies to every example of this component. Actions are a tfprotov6.11
-# feature and OpenTofu 1.12.5 rejects the block outright with "Unsupported block
-# type" -- not a version floor it will eventually clear, a block type it does not
+# feature and OpenTofu rejects the block outright with "Unsupported block type"
+# -- not a version floor it will eventually clear, a block type it does not
 # have. Measured, not assumed: the ephemeral and resource examples get only
-# "Missing required provider" from the same binary.
+# "Missing required provider" from the same binary, and 1.13.0-beta1, the
+# newest prerelease, still rejects it. `opentofu = false` rather than an
+# `opentofu_min` because there is no version to name.
 #
 # Terraform's floor is 1.13.0, measured the same way against every minor from
 # 1.9.0 up: 1.12.0 and below answer "Unsupported block type", 1.13.0 accepts the
