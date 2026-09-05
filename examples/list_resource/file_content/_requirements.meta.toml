@@ -1,0 +1,15 @@
+# Applies to every example of this component. The configuration here is a
+# `*.tfquery.hcl` file, and the only thing that reads one is `terraform query`
+# -- no other phase evaluates a `list` block, so init, apply, plan and destroy
+# will all pass over a list resource the engine could not serve.
+#
+# Measured against every minor from 1.9.0 up: `query` is absent through 1.13.0
+# and present from 1.14.0. OpenTofu has no `query` command at any version --
+# 1.8.0 through 1.12.6 and 1.13.0-beta1 were checked -- but that is
+# deliberately not declared as
+# `opentofu = false`: the `provider.tf` here is ordinary configuration and is
+# worth running there. What OpenTofu cannot do is exercise the query, and no
+# sidecar key describes "runs, but proves less".
+[requirements]
+terraform_min = "1.14.0"
+reason = "`terraform query` reads *.tfquery.hcl and first exists in Terraform 1.14"

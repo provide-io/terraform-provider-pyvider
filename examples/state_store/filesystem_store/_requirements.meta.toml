@@ -1,6 +1,7 @@
 # Applies to every example of this component. Pluggable state storage is behind
-# an experiment flag in Terraform and absent from OpenTofu 1.12.5, which rejects
-# the block with "Unsupported block type".
+# an experiment flag in Terraform and absent from OpenTofu, which rejects the
+# block with "Unsupported block type" -- 1.12.6 and 1.13.0-beta1 alike, so
+# there is no version to name here either.
 #
 # The flag is only half of what Terraform needs. Experiments are compiled into
 # alpha and dev builds, and a stable release refuses the opt-in outright --
