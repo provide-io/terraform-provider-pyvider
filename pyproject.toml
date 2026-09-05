@@ -89,6 +89,38 @@ dependencies = [
     # marker or floor routes around it: every other blocker could be fixed and
     # windows_arm64 would still be unsupported suite-wide.
     "cryptography>=46.0.0; sys_platform == 'win32' and platform_machine == 'ARM64'",
+    # Capped for the packaged darwin_amd64 build. cryptography shipped
+    # macosx_10_9_universal2 -- which covers x86_64 -- through 48.0.1, and from
+    # 49.0.0 publishes macosx_11_0_arm64 only. flavorpack downloads wheels for
+    # the target platform, so above the cap there is nothing to download: the
+    # PSP is assembled without pyvider in it and the binary exits with
+    # "ModuleNotFoundError: No module named 'pyvider'" the first time Terraform
+    # launches it.
+    #
+    # Unmarked, deliberately. A marker-scoped cap forks the resolution, and a
+    # lock holding two versions of one package exports two requirement lines
+    # for it -- which pip-audit refuses outright ("package cryptography has
+    # duplicate requirements"), so the vulnerability gate stops running rather
+    # than reporting. 48.0.1 has a wheel for every platform this provider
+    # builds, so one version serves them all.
+    #
+    # The cost is three advisories against 48.0.1 whose fixes land in exactly
+    # the releases that drop the wheel: PYSEC-2026-3553 and -3554 in 49.0.0,
+    # PYSEC-2026-3552 in 50.0.0. No version has both the wheel and the fixes.
+    #
+    # They are accepted because nothing here reaches them, checked across the
+    # whole packaged closure rather than this project alone. -3552 needs
+    # `pkcs7_decrypt_der/pem/smime`; -3553 and -3554 need the X.509 path
+    # verifier (`PolicyBuilder`, `ServerVerifier`, `ClientVerifier`,
+    # `verify_directly_issued_by`). None appears in pyvider, pyvider-components,
+    # pyvider-rpcplugin, provide-foundation, or any bundled dependency:
+    # pyvider uses AESGCM, HKDF and hashes; provide-foundation builds and parses
+    # certificates and verifies single signatures, and never builds a chain;
+    # TLS verification is OpenSSL's through `ssl`, not this library's verifier.
+    #
+    # The IDs are listed in ci.yml so the audit gate keeps failing on anything
+    # else. Re-check this if a chain ever gets verified in Python here.
+    "cryptography<49",
 ]
 
 [dependency-groups]

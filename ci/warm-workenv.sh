@@ -60,4 +60,13 @@ done
 
 kill "${pid}" 2>/dev/null || true
 wait "${pid}" 2>/dev/null || true
+
+# The launcher spawns the interpreter as a separate process and does not pass
+# the signal on, so killing the launcher leaves the provider itself serving.
+# One survivor per warm is enough to collide with the suite that follows: the
+# next launch finds the port taken and the handshake never completes.
+#
+# Best-effort. Git Bash on the Windows runner has no pkill, and there the job's
+# own container is what reclaims the process.
+pkill -f "workenv/.*/bin/terraform-provider" 2>/dev/null || true
 exit 0
