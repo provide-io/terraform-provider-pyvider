@@ -37,17 +37,23 @@ classifiers = [
 ]
 dependencies = [
     # Floors track the suite releases this provider is built and tested against.
-    # pyvider 0.6.0 changed the wire schema (a_obj sends nested_type) and made
-    # several previously-inert declarations hard errors, so a resolution that
-    # picked 0.5.3 would not merely be older -- it would talk to Terraform
-    # differently than anything here has been tested doing. The floor sits at
-    # 0.6.2 because that is where the generated dev-mode wrapper stopped cd'ing
-    # into the install directory: under 0.6.1 and earlier every relative path an
-    # example passed, and the filesystem state store's default root, resolved
-    # against this checkout rather than the caller's working directory.
-    "provide-foundation>=0.4.3",
-    "pyvider>=0.6.2",
-    "pyvider-components>=0.6.1",
+    #
+    # pyvider 0.7.0 is the wire contract these examples and the conformance
+    # suite assert against: the a_obj nested_type encoding, the declarations
+    # that are hard errors rather than inert, and a dev-mode wrapper that leaves
+    # the working directory alone, so a relative path an example passes -- and
+    # the filesystem state store's default root -- resolves against the caller
+    # rather than this checkout.
+    #
+    # pyvider-components 0.7.1 names the file-content resource and its list
+    # resource `pyvider_file_content`, which tests/conformance asserts: an older
+    # resolution publishes `pyvider_directory_entry` and fails the list-resource
+    # suite. 0.7.1 is also where both actions defer only for the reason
+    # Terraform accepts, so 0.7.0 paired with pyvider 0.7.0 answers PlanAction
+    # with an error diagnostic instead of a plan.
+    "provide-foundation>=0.4.4",
+    "pyvider>=0.7.0",
+    "pyvider-components>=0.7.1",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014

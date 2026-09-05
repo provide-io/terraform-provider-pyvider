@@ -302,39 +302,108 @@ jobs:
             /tmp/testmode-*.log
             examples/resource/private_state_verifier/.terraform/
             examples/resource/private_state_verifier/terraform.tfstate*
+            examples/resource/private_state_verifier/.terraform.lock.hcl
           # Every path above is a dot-path -- .soup, .terraform,
           # .terraform.lock.hcl -- and upload-artifact skips hidden files
-          # unless told otherwise, so this artifact has always been empty of
+          # unless told otherwise, so without this the artifact carries none of
           # the logs it exists to carry.
           include-hidden-files: true
-            examples/resource/private_state_verifier/.terraform.lock.hcl
           retention-days: 7
           if-no-files-found: warn
 
+  # tests/conformance drives the packaged binary over tfplugin6 directly. It
+  # existed, fully written, and nothing ran it: 87 tests covering the RPCs no
+  # example reaches -- state-store locking across two provider processes,
+  # chunked writes reassembled byte-for-byte, identity round-trips, action
+  # deferral. Its conftest already carries PYVIDER_CONFORMANCE_REQUIRED for
+  # exactly this job.
+  #
+  # No engine is involved, so this is one leg per platform rather than per
+  # (platform, engine) pair.
+  protocol:
+    name: 🔬 Protocol ${{ matrix.target }}
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux_amd64, linux_arm64, darwin_arm64, darwin_amd64, windows_amd64]
+        include:
+          - target: linux_amd64
+            os: ubuntu-24.04
+            platform: linux
+          - target: linux_arm64
+            os: ubuntu-24.04-arm
+            platform: linux
+          - target: darwin_arm64
+            os: macos-15
+            platform: darwin
+          - target: darwin_amd64
+            os: macos-15-intel
+            platform: darwin
+          - target: windows_amd64
+            os: windows-2025
+            platform: windows
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      # The binary is named for the version, so the tests need it too.
+      - name: 📖 Read VERSION
+        id: version
+        shell: bash
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+      # Same artifact the conformance job consumes, from the build that
+      # triggered this run.
+      - name: 📥 Download provider artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: provider-${{ matrix.target }}
+          path: provider-binary
+          run-id: ${{ needs.check.outputs.build_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+
+      # Unpack and mark executable; the zip carries no permission bits on
+      # Windows runners.
+      - name: 📦 Extract provider binary
+        shell: bash
+        run: ci/extract-provider.sh "${{ steps.version.outputs.VERSION }}" "${{ matrix.target }}" "${{ matrix.platform }}"
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Set up uv
+        uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57  # v8.0.0
+
+      # The suite imports tofusoup.tfplugin as its driver and pyvider for the
+      # protobuf definitions, both of which are already dev dependencies.
+      - name: 📦 Install test dependencies
+        shell: bash
+        run: uv sync --extra dev
+
+      - name: 🔬 Run protocol conformance tests
+        shell: bash
+        run: ci/protocol-tests.sh "$(cat provider-binary/BINARY_PATH)"
+
   summary:
     name: 📋 Test Summary
-    needs: [check, conformance]
+    needs: [check, conformance, protocol]
     if: always() && needs.check.outputs.should_run == 'true'
     runs-on: ubuntu-24.04
 
     steps:
+      # Both jobs are reported and both gate the result. Reading only one of
+      # them would let the other fail silently, which is the whole reason this
+      # summary exists.
       - name: 📊 Generate Summary
-        run: |
-          if [[ "${{ needs.conformance.result }}" == "success" ]]; then
-            echo "## ✅ All Conformance Tests Passed!" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All provider conformance tests completed successfully:" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 1: Production mode (minimal config)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 2: Test mode rejection (without PYVIDER_TESTMODE)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Smoke Test 3: Test mode success (with PYVIDER_TESTMODE)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Full conformance suite (all examples)" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          else
-            echo "## ❌ Some Tests Failed" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Check the test logs for details." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Test logs are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+        env:
+          CONFORMANCE_RESULT: ${{ needs.conformance.result }}
+          PROTOCOL_RESULT: ${{ needs.protocol.result }}
+        run: ci/conformance-summary.sh
