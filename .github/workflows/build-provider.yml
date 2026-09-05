@@ -1,13 +1,14 @@
 name: 🏗️ Build Provider Binary
 
-# Runs on its own now. Every run in this workflow's history until today was
-# `workflow_dispatch` -- a human remembering to click -- and the conformance
-# suite chains off it, so nothing built or exercised this provider except on
-# request. The last such build before this change was two weeks old.
-#
 # `pull_request` catches a break before it lands; `push` to main catches what a
-# merge produced. Both repositories are public, so the runners are free and the
-# only real cost is wall-clock on the pull request.
+# merge produced. Neither waits on a human to click. Both repositories are
+# public, so the runners are free and the only real cost is wall-clock on the
+# pull request.
+#
+# This workflow also runs the conformance suite, as a called workflow rather
+# than a separate one chained off it -- see the note at the top of
+# test-conformance.yml for why that placement is what lets a pull request
+# validate a conformance change.
 on:
   push:
     branches: [main]
@@ -167,6 +168,18 @@ jobs:
             terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
           retention-days: ${{ inputs.upload_retention_days || 7 }}
 
+  # In this run, so the suite reads the artifacts the job above just uploaded
+  # and both workflow files come from the commit under test.
+  conformance:
+    name: 🧪 Conformance
+    needs: build
+    uses: ./.github/workflows/test-conformance.yml
+    permissions:
+      contents: read
+      # download-artifact reads another job's artifact through the API.
+      actions: read
+    secrets: inherit
+
   summary:
     name: 📋 Build Summary
     needs: build
@@ -194,4 +207,4 @@ jobs:
             echo "- ✅ $target" >> $GITHUB_STEP_SUMMARY
           done
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Conformance tests will automatically run on these artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "The conformance suite runs on these artifacts in this same run." >> $GITHUB_STEP_SUMMARY
