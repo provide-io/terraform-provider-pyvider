@@ -805,7 +805,7 @@ wheels = [
 
 [[package]]
 name = "flavorpack"
-version = "0.4.6"
+version = "0.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pip" },
@@ -817,12 +817,12 @@ dependencies = [
     { name = "wheel" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/7d/a440345287131f7211091d579944264bb052167e1067c41551d4dc5607d2/flavorpack-0.4.6-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:c92f0382453fcfbc938fb26eb718d5147f3b4ab9641cd2bc1276e1dc2baecffb", size = 8852264, upload-time = "2026-08-24T06:02:47.37Z" },
-    { url = "https://files.pythonhosted.org/packages/43/1a/867f794d83563655bc24b1c06fc3a9b6056ea47e9a331310442c1ab75085/flavorpack-0.4.6-py3-none-macosx_11_0_arm64.whl", hash = "sha256:4abd72ee74049c7d73c1de352cd0001db600cf6f72398158646dc93a69adb249", size = 8245464, upload-time = "2026-08-24T06:02:49.768Z" },
-    { url = "https://files.pythonhosted.org/packages/2b/81/9afb3f0bc27d25828c06c39a8744d960a80b67f2c4f304f91caa65780167/flavorpack-0.4.6-py3-none-manylinux2014_aarch64.whl", hash = "sha256:743d9c5a4316e7d09e7132fbe051bef0fcf7d4595f8370802c768fdf43460758", size = 8133753, upload-time = "2026-08-24T06:02:51.753Z" },
-    { url = "https://files.pythonhosted.org/packages/6d/02/38de76082ab923be69676ad9e4f1553f7761953f453a7e5c277ece0a62dc/flavorpack-0.4.6-py3-none-manylinux2014_x86_64.whl", hash = "sha256:faa760d07eeabb8552341bae2281a7d9b94b55e211874bf23d00401e078a829b", size = 8879859, upload-time = "2026-08-24T06:02:53.789Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/2b/786b516b920be5158190692041d40ce06e5a2e9dc1263253d0fdd4bb594e/flavorpack-0.4.6-py3-none-win_amd64.whl", hash = "sha256:7716fc1fc5bd3ec632ce6ea468a43e2eacbf6128c63eba6c683373ae47d8368b", size = 9415872, upload-time = "2026-08-24T06:02:56.007Z" },
-    { url = "https://files.pythonhosted.org/packages/4e/9f/d8eae91ab96ba04aeab36ceec34c09e01afc9fd099beeacc266fa2e1c59f/flavorpack-0.4.6-py3-none-win_arm64.whl", hash = "sha256:21660f2fb8e51acf512cdfa2e24e12a7f3a9d0626f6d94b25c2fb39311e8b115", size = 8602202, upload-time = "2026-08-24T06:02:58.056Z" },
+    { url = "https://files.pythonhosted.org/packages/f9/48/42ce0909e9c063dd493c41cf76e35ff688189d9880ab60edc11bc57c16c7/flavorpack-0.5.2-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:7a056bd574b0c2a666af1299bacd15e97349a8e17132f8b76f25d49d08efad67", size = 11779490, upload-time = "2026-09-05T18:57:51.796Z" },
+    { url = "https://files.pythonhosted.org/packages/42/d4/dd7e6973d2584803dd5bc3fa2d369e82782974fa284121dff933da08a427/flavorpack-0.5.2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:f1cb212a2b8bb6ae8f6dfbda36776fa31c64a143e05094891dcf1b9e9f692b45", size = 10903159, upload-time = "2026-09-05T18:57:54.156Z" },
+    { url = "https://files.pythonhosted.org/packages/24/7b/643b3ae8622ac34a80f8dc2cf504c9fd1fe493106f08fb4f258468a72c75/flavorpack-0.5.2-py3-none-manylinux2014_aarch64.whl", hash = "sha256:c8c524c4f78fbc22598efeaf93bb15f8ed8756c770c4132be23b7f740e49da2f", size = 10773541, upload-time = "2026-09-05T18:57:56.408Z" },
+    { url = "https://files.pythonhosted.org/packages/03/9a/7307c98a742909be276c5f27678ef00f78129b63250f28bec9a0f71a959a/flavorpack-0.5.2-py3-none-manylinux2014_x86_64.whl", hash = "sha256:d9bd78121673c3d743e97ae3cdb3843078e3f95dcf38e71d1b52320f9eebed8f", size = 11832929, upload-time = "2026-09-05T18:57:58.658Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/a2/380253ed841214c61723ed379c214519ce7071e7a08770b21c98de995aca/flavorpack-0.5.2-py3-none-win_amd64.whl", hash = "sha256:f9e5106c24da13cc4e46a01cc90b08f69fabc88185ff24e0e989672c64f338e5", size = 12293803, upload-time = "2026-09-05T18:58:00.769Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/d6/a5e31f05339e616281c97384bbf99061ad7d88d9f43a306103c864797a77/flavorpack-0.5.2-py3-none-win_arm64.whl", hash = "sha256:d8d9ac7e98264a93b28a02a59313a49c55be34f2e5ba611139d7730dc10b5748", size = 11227486, upload-time = "2026-09-05T18:58:02.726Z" },
 ]
 
 [[package]]
@@ -3461,11 +3461,11 @@ wheels = [
 
 [[package]]
 name = "setuptools"
-version = "82.0.1"
+version = "83.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4f/db/cfac1baf10650ab4d1c111714410d2fbb77ac5a616db26775db562c8fab2/setuptools-82.0.1.tar.gz", hash = "sha256:7d872682c5d01cfde07da7bccc7b65469d3dca203318515ada1de5eda35efbf9", size = 1152316, upload-time = "2026-03-09T12:47:17.221Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef", size = 1154254, upload-time = "2026-07-04T15:31:22.699Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl", hash = "sha256:a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb", size = 1006223, upload-time = "2026-03-09T12:47:15.026Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3", size = 1008090, upload-time = "2026-07-04T15:31:20.885Z" },
 ]
 
 [[package]]
@@ -3597,7 +3597,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "flavorpack", specifier = ">=0.4.6" },
+    { name = "flavorpack", specifier = ">=0.5.2" },
     { name = "plating", specifier = ">=0.6.1" },
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.5" },

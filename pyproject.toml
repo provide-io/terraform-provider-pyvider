@@ -94,7 +94,10 @@ dependencies = [
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.5",
-    "flavorpack>=0.4.6",
+    # Floor set by a security fix in a pin, not by an API need. flavorpack
+    # requires setuptools at an exact version, so its floor is the lock's
+    # setuptools floor: 0.4.6 forces 82.0.1, which carries PYSEC-2026-3447.
+    "flavorpack>=0.5.2",
     "plating>=0.6.1",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
