@@ -47,29 +47,57 @@ jobs:
           fi
 
   conformance:
-    name: 🧪 Test ${{ matrix.target }}
+    name: 🧪 Test ${{ matrix.target }} (${{ matrix.engine }})
     needs: check
     if: needs.check.outputs.should_run == 'true'
     strategy:
       fail-fast: false
       matrix:
+        # Both engines, every platform the build produces.
+        #
+        # Only Terraform has a `query` command, and it is the only path that
+        # reaches a list resource; OpenTofu has no `action` or `state_store`
+        # block at any version, 1.13.0-beta1 included. Running one engine could
+        # not see what the other refuses, and this suite ran OpenTofu alone.
+        #
+        # linux_arm64 and darwin_amd64 were built, zipped and released without
+        # ever being tested. They are here now.
+        #
+        # windows_arm64 is still absent, and correctly: grpcio publishes no
+        # win_arm64 wheel (grpc/grpc#39064, still true at 1.83.1), so the
+        # provider cannot be built for it in the first place.
+        engine: [tofu, terraform]
+        target: [linux_amd64, linux_arm64, darwin_arm64, darwin_amd64, windows_amd64]
         include:
-          - os: ubuntu-24.04
+          - target: linux_amd64
+            os: ubuntu-24.04
             platform: linux
             arch: amd64
-            target: linux_amd64
-          - os: macos-15
+          - target: linux_arm64
+            os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+          - target: darwin_arm64
+            os: macos-15
             platform: darwin
             arch: arm64
-            target: darwin_arm64
-          - os: windows-2025
+          - target: darwin_amd64
+            os: macos-15-intel
+            platform: darwin
+            arch: amd64
+          - target: windows_amd64
+            os: windows-2025
             platform: windows
             arch: amd64
-            target: windows_amd64
-          # windows_arm64 excluded: grpcio has no win_arm64 wheel
 
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.platform == 'windows' }}
+    # No continue-on-error. Windows ran non-gating on both this job and the
+    # build, so a Windows-only regression reported success and shipped. It
+    # passes today -- every step of the last run, checked individually rather
+    # than read off the job's own (meaningless, under continue-on-error)
+    # conclusion -- so there is nothing to suppress.
+    env:
+      TF_BIN: ${{ matrix.engine }}
 
     steps:
       - name: 📥 Checkout
@@ -169,17 +197,27 @@ jobs:
             "${{ matrix.target }}" \
             "$SOURCE"
 
+      # `latest` for both, deliberately. An undated pin rots: 1.10.6 predated
+      # write-only attributes and failed pyvider_secret_note with "Provider
+      # produced invalid plan" for a provider behaving exactly as write-only
+      # requires. Examples that need a particular version say so themselves, in
+      # their requirements sidecar, which is where a version floor belongs.
+      #
+      # The wrapper is off in both cases: it intercepts stdout, which stir
+      # parses.
       - name: 📝 Install OpenTofu
+        if: matrix.engine == 'tofu'
         uses: opentofu/setup-opentofu@v2
         with:
-          # `latest` is this action's own default; 1.10.6 was an undated pin that
-          # simply rotted. It predates write-only attributes, so it failed
-          # pyvider_secret_note with "Provider produced invalid plan" for a
-          # provider behaving exactly as write-only requires. Examples that need a
-          # particular version now say so themselves, in their requirements
-          # sidecar, which is a better place for it than a runner-wide pin.
           tofu_version: latest
           tofu_wrapper: false
+
+      - name: 📝 Install Terraform
+        if: matrix.engine == 'terraform'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+          terraform_wrapper: false
 
       - name: 🐍 Setup Python
         if: env.ACT != 'true' && github.actor != 'nektos/act'
@@ -197,144 +235,26 @@ jobs:
           echo "✅ Tofusoup installed"
           soup --version
 
+      # The four steps below were 150 lines of inline bash with `tofu` hard
+      # coded throughout. They live in ci/conformance.sh now, which takes the
+      # engine from TF_BIN -- one subcommand per step, so the CI UI still shows
+      # which one failed.
       - name: "🔥 Smoke Test 1: Production Mode (Minimal Config)"
         shell: bash
-        run: |
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 1: Production Mode (Minimal Configuration)"
-          echo "════════════════════════════════════════════════════════════════"
-
-          mkdir -p /tmp/smoke-test-production
-          cd /tmp/smoke-test-production
-
-          cat > main.tf << 'EOF'
-          terraform {
-            required_providers {
-              pyvider = {
-                source  = "local/providers/pyvider"
-                version = ">= 0.0.1"
-              }
-            }
-          }
-
-          provider "pyvider" {}
-
-          output "test" {
-            value = "smoke test - production mode"
-          }
-          EOF
-
-          echo "📋 Terraform configuration:"
-          cat main.tf
-          echo ""
-
-          echo "🔧 Running: tofu init"
-          tofu init
-          echo ""
-
-          echo "📊 Running: tofu plan"
-          tofu plan
-          echo ""
-
-          echo "✅ PASS: Smoke test 1 completed successfully"
-          echo "════════════════════════════════════════════════════════════════"
+        run: ci/conformance.sh smoke-production
 
       - name: "🔥 Smoke Test 2: Test Mode Rejection (WITHOUT PYVIDER_TESTMODE)"
         shell: bash
         env:
           PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
-        run: |
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 2: Test Mode Rejection"
-          echo "════════════════════════════════════════════════════════════════"
-
-          cd examples/resource/private_state_verifier
-
-          # Ensure PYVIDER_TESTMODE is NOT set
-          unset PYVIDER_TESTMODE
-
-          echo "🔧 Running: tofu init"
-          tofu init
-          echo ""
-
-          echo "📊 Running: tofu plan (expecting rejection...)"
-          set +e
-          tofu plan 2>&1 | tee /tmp/testmode-false.log
-          PLAN_EXIT_CODE=${PIPESTATUS[0]}
-          set -e
-
-          if [ $PLAN_EXIT_CODE -eq 0 ]; then
-            echo ""
-            echo "❌ FAIL: Test-only component was NOT rejected as expected"
-            cat /tmp/testmode-false.log
-            exit 1
-          else
-            # Two rejections are both correct, and which one Terraform reports
-            # depends on whether it already knows the type.
-            #
-            # A fresh plan has no state, so Terraform validates the config
-            # against the advertised schema. pyvider filters test-only
-            # components out of that schema in production mode
-            # (handlers/utils.py:180), so the type is simply not offered and
-            # Terraform answers "Invalid resource type".
-            #
-            # The friendlier "requires test mode" diagnostic
-            # (handlers/utils.py:253) guards read_resource and
-            # import_resource_state, which are reached only when the type is
-            # already in state -- a plan cannot get there.
-            #
-            # Accepting only the second made this step fail for a provider that
-            # was refusing exactly as intended.
-            if grep -qi "invalid resource type\|test-only.*requires test mode\|test mode.*required\|does not support resource type" /tmp/testmode-false.log; then
-              echo ""
-              echo "✅ PASS: Test-only component correctly rejected without test mode"
-            else
-              echo ""
-              echo "❌ FAIL: Plan failed but with unexpected error (exit code: $PLAN_EXIT_CODE)"
-              cat /tmp/testmode-false.log
-              exit 1
-            fi
-          fi
-          echo "════════════════════════════════════════════════════════════════"
+        run: ci/conformance.sh smoke-testmode-rejected
 
       - name: "🔥 Smoke Test 3: Test Mode Success (WITH PYVIDER_TESTMODE)"
         shell: bash
         env:
           PYVIDER_TESTMODE: true
           PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
-        run: |
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🔥 SMOKE TEST 3: Test Mode Success"
-          echo "════════════════════════════════════════════════════════════════"
-
-          cd examples/resource/private_state_verifier
-
-          # Clean up from previous test
-          rm -rf .terraform terraform.tfstate* .terraform.lock.hcl
-
-          export PYVIDER_TESTMODE=true
-          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
-          echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
-          echo ""
-
-          echo "🔧 Running: tofu init"
-          tofu init
-          echo ""
-
-          echo "📊 Running: tofu plan"
-          tofu plan
-          echo ""
-
-          echo "🚀 Running: tofu apply -auto-approve"
-          tofu apply -auto-approve
-          echo ""
-
-          echo "📤 Running: tofu output"
-          tofu output
-          echo ""
-
-          echo "✅ PASS: Test-only component works with test mode enabled"
-          echo "════════════════════════════════════════════════════════════════"
+        run: ci/conformance.sh smoke-testmode-ok
 
       - name: 🧪 Run Full Conformance Tests
         shell: bash
@@ -342,30 +262,14 @@ jobs:
           TF_LOG: DEBUG
           PYVIDER_TESTMODE: true
           PYVIDER_PRIVATE_STATE_SHARED_SECRET: "test-secret-for-ci-only-not-production"
-        run: |
-          export PYVIDER_TESTMODE=true
-          export PYVIDER_PRIVATE_STATE_SHARED_SECRET="${PYVIDER_PRIVATE_STATE_SHARED_SECRET}"
-
-          echo "════════════════════════════════════════════════════════════════"
-          echo "🧪 FULL CONFORMANCE TEST SUITE"
-          echo "════════════════════════════════════════════════════════════════"
-          echo ""
-          echo "🔍 Running conformance tests on all examples..."
-          echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
-          echo "   Platform: ${{ matrix.target }}"
-          echo ""
-
-          cd examples
-          soup stir --recursive
-
-          echo ""
-          echo "✅ All provider conformance tests passed!"
-          echo "════════════════════════════════════════════════════════════════"
+        run: ci/conformance.sh full
 
       # Record the conformance suite as an asciinema cast (Linux only).
       # Uses Python's pty module — no external asciinema binary required.
+      # One leg records it: the artifact name is fixed, and four linux legs
+      # (two targets x two engines) would race for it.
       - name: 🎬 Record conformance cast
-        if: matrix.platform == 'linux'
+        if: matrix.target == 'linux_amd64' && matrix.engine == 'tofu'
         shell: bash
         env:
           PYVIDER_TESTMODE: true
@@ -374,7 +278,7 @@ jobs:
 
       # Upload the cast file so site-pyvider-com can fetch it as a build artifact.
       - name: 📤 Upload conformance cast
-        if: matrix.platform == 'linux'
+        if: matrix.target == 'linux_amd64' && matrix.engine == 'tofu'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: conformance-cast
@@ -386,7 +290,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: conformance-test-logs-${{ matrix.target }}
+          name: conformance-test-logs-${{ matrix.target }}-${{ matrix.engine }}
           path: |
             examples/**/.soup/logs/*.log
             examples/**/.soup/logs/terraform.log
@@ -398,6 +302,11 @@ jobs:
             /tmp/testmode-*.log
             examples/resource/private_state_verifier/.terraform/
             examples/resource/private_state_verifier/terraform.tfstate*
+          # Every path above is a dot-path -- .soup, .terraform,
+          # .terraform.lock.hcl -- and upload-artifact skips hidden files
+          # unless told otherwise, so this artifact has always been empty of
+          # the logs it exists to carry.
+          include-hidden-files: true
             examples/resource/private_state_verifier/.terraform.lock.hcl
           retention-days: 7
           if-no-files-found: warn
