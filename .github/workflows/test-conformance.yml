@@ -342,6 +342,14 @@ jobs:
         # empty set.
         run: uv sync --group dev
 
+      # The suite opens the provider directly, with no engine in front of it
+      # to absorb a slow first launch, so a cold PSP loses its first handshake
+      # to the ~270MB unpack. The conformance job primes inside
+      # ci/verify-provider.sh; this job has no such step and needs its own.
+      - name: 🔥 Prime the packaged work environment
+        shell: bash
+        run: ci/warm-workenv.sh "$(cat provider-binary/BINARY_PATH)"
+
       - name: 🔬 Run protocol conformance tests
         shell: bash
         run: ci/protocol-tests.sh "$(cat provider-binary/BINARY_PATH)"
