@@ -3,6 +3,11 @@
 # type" -- not a version floor it will eventually clear, a block type it does not
 # have. Measured, not assumed: the ephemeral and resource examples get only
 # "Missing required provider" from the same binary.
+#
+# Terraform's floor is 1.13.0, measured the same way against every minor from
+# 1.9.0 up: 1.12.0 and below answer "Unsupported block type", 1.13.0 accepts the
+# block and gets as far as failing to install the provider.
 [requirements]
 opentofu = false
-reason = "OpenTofu rejects `action` blocks: Unsupported block type"
+terraform_min = "1.13.0"
+reason = "`action` blocks need Terraform 1.13+, and OpenTofu has no `action` block at any version"

@@ -1,0 +1,14 @@
+# Applies to every example of this component. `ephemeral` blocks are not
+# universal: both engines added them, at different times, and below those
+# versions the block is not a feature that misbehaves but a block type the
+# parser does not know -- "Unsupported block type", which reads as a broken
+# example rather than an unsuitable runner.
+#
+# Measured against every minor rather than read off a changelog. Terraform 1.9.0
+# rejects the block and 1.10.0 accepts it, getting as far as failing to install
+# the provider. OpenTofu holds out longer: 1.8.0, 1.9.0 and 1.10.0 all reject
+# it, and 1.11.0 is the first that does not.
+[requirements]
+terraform_min = "1.10.0"
+opentofu_min = "1.11.0"
+reason = "`ephemeral` blocks need Terraform 1.10+ or OpenTofu 1.11+"
