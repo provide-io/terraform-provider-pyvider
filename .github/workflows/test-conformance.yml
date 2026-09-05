@@ -337,7 +337,10 @@ jobs:
       # protobuf definitions, both of which are already dev dependencies.
       - name: 📦 Install test dependencies
         shell: bash
-        run: uv sync --extra dev
+        # `--group`, not `--extra`: this project declares no
+        # [project.optional-dependencies], so `--extra dev` is an error, not an
+        # empty set.
+        run: uv sync --group dev
 
       - name: 🔬 Run protocol conformance tests
         shell: bash

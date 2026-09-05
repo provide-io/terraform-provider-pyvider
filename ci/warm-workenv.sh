@@ -17,19 +17,24 @@
 #
 # The provider serves until killed and stops writing once it has printed the
 # handshake line, so it never sees SIGPIPE and has to be stopped explicitly.
-# Failing to warm is not fatal: the tests that follow report the real problem
-# with far more context than this script has.
+#
+# A provider that exits instead of serving has already failed, and its stderr
+# is the only account of why -- the engine that launches it next reports no
+# more than "failed to read any lines from plugin's stdout". So stderr is kept
+# and printed here, where the launch that produced it is the only thing going
+# on. Warming is still not fatal: the tests that follow decide that.
 set -uo pipefail
 
 BINARY="${1:?usage: warm-workenv.sh <provider-binary>}"
 TIMEOUT="${WARM_TIMEOUT:-300}"
 
 handshake="$(mktemp "${TMPDIR:-/tmp}/warm-workenv.XXXXXX")"
-trap 'rm -f "${handshake}"' EXIT
+errors="$(mktemp "${TMPDIR:-/tmp}/warm-workenv-err.XXXXXX")"
+trap 'rm -f "${handshake}" "${errors}"' EXIT
 
 TF_PLUGIN_MAGIC_COOKIE=d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2 \
 PLUGIN_PROTOCOL_VERSIONS=6 \
-    "${BINARY}" >"${handshake}" 2>/dev/null &
+    "${BINARY}" >"${handshake}" 2>"${errors}" &
 pid=$!
 
 waited=0
@@ -40,8 +45,12 @@ while [ "${waited}" -lt "${TIMEOUT}" ]; do
     fi
     # Exited on its own, which means it failed rather than finished.
     if ! kill -0 "${pid}" 2>/dev/null; then
-        echo "⚠️  Provider exited before it began serving; leaving the work environment cold"
-        break
+        wait "${pid}" 2>/dev/null
+        echo "⚠️  Provider exited (status $?) before it began serving, after ${waited}s"
+        echo "--- provider stderr ---"
+        tail -n 40 "${errors}"
+        echo "--- end provider stderr ---"
+        exit 0
     fi
     sleep 1
     waited=$((waited + 1))
