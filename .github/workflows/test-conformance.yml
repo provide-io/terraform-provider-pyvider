@@ -76,6 +76,13 @@ jobs:
     # ships.
     env:
       TF_BIN: ${{ matrix.engine }}
+      # stir writes each engine invocation's stdout and stderr under its cache
+      # directory, which defaults outside the workspace -- on Windows to
+      # %LOCALAPPDATA% -- where the artifact upload cannot reach it. The
+      # provider's stderr is the only place a crash traceback appears, so a
+      # failing leg is unreadable without it. Pinning the cache into the
+      # workspace puts those logs in the artifact.
+      TOFUSOUP_CACHE_DIR: ${{ github.workspace }}/.soup-cache
 
     steps:
       - name: 📥 Checkout
@@ -248,6 +255,7 @@ jobs:
             examples/resource/private_state_verifier/.terraform/
             examples/resource/private_state_verifier/terraform.tfstate*
             examples/resource/private_state_verifier/.terraform.lock.hcl
+            .soup-cache/logs/**
           # Every path above is a dot-path -- .soup, .terraform,
           # .terraform.lock.hcl -- and upload-artifact skips hidden files
           # unless told otherwise, so without this the artifact carries none of
