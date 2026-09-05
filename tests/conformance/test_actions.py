@@ -106,7 +106,13 @@ async def test_plan_reports_the_intended_side_effect(provider: TfPluginProvider,
 
 
 async def test_plan_defers_when_the_client_allows_it(provider: TfPluginProvider, tmp_path: Path) -> None:
-    """A deferral is only legal when the client offered to accept one."""
+    """A deferral is only legal when the client offered to accept one.
+
+    And only for one reason. Terraform refuses any other from PlanAction --
+    "An action can only be deferred due to an unknown provider configuration"
+    (internal/plugin6/grpc_provider.go:1951-1957) -- and the error branch there
+    does not return, so a wrong reason both defers and fails the run.
+    """
     response = await provider.stub.PlanAction(
         pb.PlanAction.Request(
             action_type=ECHO,
@@ -115,8 +121,9 @@ async def test_plan_defers_when_the_client_allows_it(provider: TfPluginProvider,
         )
     )
 
+    assert not errors(response.diagnostics), diagnostic_text(response.diagnostics)
     assert response.HasField("deferred")
-    assert response.deferred.reason == pb.Deferred.ABSENT_PREREQ
+    assert response.deferred.reason == pb.Deferred.PROVIDER_CONFIG_UNKNOWN
 
 
 async def test_plan_refuses_to_defer_when_the_client_did_not_offer(

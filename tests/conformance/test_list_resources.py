@@ -26,7 +26,7 @@ from pyvider.protocols.tfprotov6.protobuf import tfplugin6_pb2 as pb
 #: loop-per-test hands each test a channel bound to an already-closed loop.
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-DIRECTORY_ENTRY = "pyvider_file_content"
+FILE_CONTENT = "pyvider_file_content"
 
 
 def directory_config(path: Path, suffix: str | None = None, include_hidden: bool | None = None) -> Any:
@@ -52,7 +52,7 @@ def populated_dir(root: Path) -> Path:
 
 async def test_validate_accepts_a_well_formed_config(provider: TfPluginProvider, tmp_path: Path) -> None:
     response = await provider.stub.ValidateListResourceConfig(
-        pb.ValidateListResourceConfig.Request(type_name=DIRECTORY_ENTRY, config=directory_config(tmp_path))
+        pb.ValidateListResourceConfig.Request(type_name=FILE_CONTENT, config=directory_config(tmp_path))
     )
 
     assert not errors(response.diagnostics), diagnostic_text(response.diagnostics)
@@ -61,7 +61,7 @@ async def test_validate_accepts_a_well_formed_config(provider: TfPluginProvider,
 async def test_validate_rejects_a_missing_required_attribute(provider: TfPluginProvider) -> None:
     response = await provider.stub.ValidateListResourceConfig(
         pb.ValidateListResourceConfig.Request(
-            type_name=DIRECTORY_ENTRY,
+            type_name=FILE_CONTENT,
             config=pack({"path": None, "suffix": None, "include_hidden": None}),
         )
     )
@@ -75,7 +75,7 @@ async def test_validate_rejects_a_non_directory(provider: TfPluginProvider, tmp_
     target.write_text("not a directory", encoding="utf-8")
 
     response = await provider.stub.ValidateListResourceConfig(
-        pb.ValidateListResourceConfig.Request(type_name=DIRECTORY_ENTRY, config=directory_config(target))
+        pb.ValidateListResourceConfig.Request(type_name=FILE_CONTENT, config=directory_config(target))
     )
 
     assert errors(response.diagnostics)
@@ -96,10 +96,10 @@ async def test_streams_one_event_per_matching_entry(provider: TfPluginProvider, 
     root = populated_dir(tmp_path / "listing")
 
     events = await collect(
-        provider, pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root))
+        provider, pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root))
     )
 
-    names = [Path(i["path"]).name for i in identities(events)]
+    names = [Path(i["filename"]).name for i in identities(events)]
     assert names == ["alpha.txt", "beta.txt", "gamma.log"]
 
 
@@ -108,13 +108,13 @@ async def test_identity_is_attached_to_every_result(provider: TfPluginProvider, 
     root = populated_dir(tmp_path / "identity")
 
     events = await collect(
-        provider, pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root))
+        provider, pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root))
     )
 
     assert events
     for event in events:
         assert event.HasField("identity")
-        assert unpack(event.identity.identity_data)["path"]
+        assert unpack(event.identity.identity_data)["filename"]
         assert event.display_name
 
 
@@ -123,10 +123,10 @@ async def test_suffix_filter_is_applied(provider: TfPluginProvider, tmp_path: Pa
 
     events = await collect(
         provider,
-        pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root, suffix=".log")),
+        pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root, suffix=".log")),
     )
 
-    names = [Path(i["path"]).name for i in identities(events)]
+    names = [Path(i["filename"]).name for i in identities(events)]
     assert names == ["gamma.log"]
 
 
@@ -135,10 +135,10 @@ async def test_include_hidden_widens_the_listing(provider: TfPluginProvider, tmp
 
     events = await collect(
         provider,
-        pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root, include_hidden=True)),
+        pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root, include_hidden=True)),
     )
 
-    names = [Path(i["path"]).name for i in identities(events)]
+    names = [Path(i["filename"]).name for i in identities(events)]
     assert ".hidden.txt" in names
 
 
@@ -148,7 +148,7 @@ async def test_limit_stops_the_stream(provider: TfPluginProvider, tmp_path: Path
 
     events = await collect(
         provider,
-        pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root), limit=2),
+        pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root), limit=2),
     )
 
     assert len(events) == 2
@@ -159,7 +159,7 @@ async def test_resource_object_is_omitted_unless_requested(provider: TfPluginPro
     root = populated_dir(tmp_path / "no-object")
 
     events = await collect(
-        provider, pb.ListResource.Request(type_name=DIRECTORY_ENTRY, config=directory_config(root))
+        provider, pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(root))
     )
 
     assert events
@@ -172,7 +172,7 @@ async def test_resource_object_is_included_when_requested(provider: TfPluginProv
     events = await collect(
         provider,
         pb.ListResource.Request(
-            type_name=DIRECTORY_ENTRY, config=directory_config(root), include_resource_object=True
+            type_name=FILE_CONTENT, config=directory_config(root), include_resource_object=True
         ),
     )
 
@@ -180,8 +180,12 @@ async def test_resource_object_is_included_when_requested(provider: TfPluginProv
     for event in events:
         assert event.HasField("resource_object")
         obj = unpack(event.resource_object)
-        assert obj["name"]
-        assert obj["size_bytes"] is not None
+        # Terraform decodes a listed resource object against the *managed*
+        # resource's schema, so this is shaped as `pyvider_file_content`.
+        assert obj["filename"]
+        assert obj["content"] is not None
+        assert obj["content_hash"]
+        assert obj["exists"] is True
 
 
 async def test_a_list_resource_type_should_match_a_managed_resource_type(
@@ -196,21 +200,19 @@ async def test_a_list_resource_type_should_match_a_managed_resource_type(
     "Identity schema not found for resource type ...", no matter what the
     provider publishes. Measured on Terraform 1.17.0-alpha20260812.
 
-    `pyvider_secret_note` satisfies this (its list resource borrows the managed
-    resource's schemas via `resource_type=`); `pyvider_file_content` does
-    not, and is usable at the protocol level only.
+    Every list resource this provider publishes must therefore share its name
+    with a managed resource. Both do, each borrowing the managed resource's
+    schemas via `resource_type=`.
     """
     assert provider.schema is not None
 
-    borrowed = "pyvider_secret_note"
-    assert borrowed in provider.schema.list_resource_schemas
-    assert borrowed in provider.schema.resource_schemas, (
-        "a list resource Terraform can query must share its name with a managed resource"
-    )
+    for name in sorted(provider.schema.list_resource_schemas):
+        assert name in provider.schema.resource_schemas, (
+            f"list resource {name} has no managed resource of the same name, so "
+            "`terraform query` cannot resolve its identity schema"
+        )
 
-    # Pinned as the known CLI-level gap rather than silently tolerated.
-    assert DIRECTORY_ENTRY in provider.schema.list_resource_schemas
-    assert DIRECTORY_ENTRY not in provider.schema.resource_schemas
+    assert FILE_CONTENT in provider.schema.list_resource_schemas
 
 
 async def test_absent_directory_lists_nothing_without_erroring(
@@ -219,9 +221,7 @@ async def test_absent_directory_lists_nothing_without_erroring(
     """A directory that does not exist yet is an empty result, not a failure."""
     events = await collect(
         provider,
-        pb.ListResource.Request(
-            type_name=DIRECTORY_ENTRY, config=directory_config(tmp_path / "never-created")
-        ),
+        pb.ListResource.Request(type_name=FILE_CONTENT, config=directory_config(tmp_path / "never-created")),
     )
 
     assert events == []
