@@ -306,6 +306,15 @@ jobs:
     # darwin_amd64 at 2.3. Without a cap a stalled provider handshake holds the
     # runner until GitHub's six-hour default, which has happened on Windows.
     timeout-minutes: 20
+    env:
+      # This suite drives the rpcplugin client in-process, and the client logs
+      # emoji: core.py:144 debug-logs "🚀 Starting RPCPluginClient..." before it
+      # does anything else. structlog prints that through colorama to a stdout
+      # Windows defaults to cp1252, which has no mapping for U+1F680, so the
+      # write raises UnicodeEncodeError and start() dies -- taking every test in
+      # the suite with it, 87 setup errors deep. UTF-8 mode gives the stream an
+      # encoding that can carry what the library writes.
+      PYTHONUTF8: '1'
 
     steps:
       - name: 📥 Checkout
