@@ -51,9 +51,15 @@ dependencies = [
     # suite. 0.7.1 is also where both actions defer only for the reason
     # Terraform accepts, so 0.7.0 paired with pyvider 0.7.0 answers PlanAction
     # with an error diagnostic instead of a plan.
+    #
+    # 0.7.2 is the floor because pyvider_local_directory reads `permissions`
+    # back from the filesystem, and below it that read invents 0o777 on
+    # Windows, where there are no POSIX mode bits to read. The conformance
+    # suite's local_directory example applies and then fails its convergence
+    # plan on windows_amd64 against anything older.
     "provide-foundation>=0.4.4",
     "pyvider>=0.7.0",
-    "pyvider-components>=0.7.1",
+    "pyvider-components>=0.7.2",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
@@ -126,10 +132,17 @@ dependencies = [
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.5",
-    # Floor set by a security fix in a pin, not by an API need. flavorpack
-    # requires setuptools at an exact version, so its floor is the lock's
-    # setuptools floor: 0.4.6 forces 82.0.1, which carries PYSEC-2026-3447.
-    "flavorpack>=0.5.2",
+    # Two floors in one. flavorpack requires setuptools at an exact version, so
+    # its floor is the lock's setuptools floor -- 0.4.6 forces 82.0.1, which
+    # carries PYSEC-2026-3447.
+    #
+    # 0.5.3 is where the packaged launcher stopped defaulting to trace. Below
+    # it, one launch writes ~193KB to stderr against a 64KB pipe, and a plugin
+    # host that waits for the stdout handshake without draining stderr
+    # deadlocks the provider before it prints one. 0.5.3 also fails the build
+    # when no wheel exists for the platform being packaged, instead of
+    # assembling a package without this project's own dependencies in it.
+    "flavorpack>=0.5.3",
     "plating>=0.6.1",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",

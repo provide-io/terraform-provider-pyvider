@@ -808,7 +808,7 @@ wheels = [
 
 [[package]]
 name = "flavorpack"
-version = "0.5.2"
+version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pip" },
@@ -820,12 +820,12 @@ dependencies = [
     { name = "wheel" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/48/42ce0909e9c063dd493c41cf76e35ff688189d9880ab60edc11bc57c16c7/flavorpack-0.5.2-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:7a056bd574b0c2a666af1299bacd15e97349a8e17132f8b76f25d49d08efad67", size = 11779490, upload-time = "2026-09-05T18:57:51.796Z" },
-    { url = "https://files.pythonhosted.org/packages/42/d4/dd7e6973d2584803dd5bc3fa2d369e82782974fa284121dff933da08a427/flavorpack-0.5.2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:f1cb212a2b8bb6ae8f6dfbda36776fa31c64a143e05094891dcf1b9e9f692b45", size = 10903159, upload-time = "2026-09-05T18:57:54.156Z" },
-    { url = "https://files.pythonhosted.org/packages/24/7b/643b3ae8622ac34a80f8dc2cf504c9fd1fe493106f08fb4f258468a72c75/flavorpack-0.5.2-py3-none-manylinux2014_aarch64.whl", hash = "sha256:c8c524c4f78fbc22598efeaf93bb15f8ed8756c770c4132be23b7f740e49da2f", size = 10773541, upload-time = "2026-09-05T18:57:56.408Z" },
-    { url = "https://files.pythonhosted.org/packages/03/9a/7307c98a742909be276c5f27678ef00f78129b63250f28bec9a0f71a959a/flavorpack-0.5.2-py3-none-manylinux2014_x86_64.whl", hash = "sha256:d9bd78121673c3d743e97ae3cdb3843078e3f95dcf38e71d1b52320f9eebed8f", size = 11832929, upload-time = "2026-09-05T18:57:58.658Z" },
-    { url = "https://files.pythonhosted.org/packages/b4/a2/380253ed841214c61723ed379c214519ce7071e7a08770b21c98de995aca/flavorpack-0.5.2-py3-none-win_amd64.whl", hash = "sha256:f9e5106c24da13cc4e46a01cc90b08f69fabc88185ff24e0e989672c64f338e5", size = 12293803, upload-time = "2026-09-05T18:58:00.769Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/d6/a5e31f05339e616281c97384bbf99061ad7d88d9f43a306103c864797a77/flavorpack-0.5.2-py3-none-win_arm64.whl", hash = "sha256:d8d9ac7e98264a93b28a02a59313a49c55be34f2e5ba611139d7730dc10b5748", size = 11227486, upload-time = "2026-09-05T18:58:02.726Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/37/37072c880d51e3066bac2ddadd29a0f44f9b13ce2c5e537cf118f872e4de/flavorpack-0.5.3-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:9b4e1c87009172d3907c520a3a6fd899d6283566ee030cfc8bccd0210f8ebbb5", size = 11775528, upload-time = "2026-09-06T03:00:07.313Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/38/795eb2a556c9268fcd7f8eaa43a60b0c1f2d097c05d98e7ddc88e4fe94b5/flavorpack-0.5.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:40b798045e0131760295698e43210b91f07766621c8784c9a96926262220d384", size = 10898753, upload-time = "2026-09-06T03:00:09.867Z" },
+    { url = "https://files.pythonhosted.org/packages/58/d0/0406dde09992b36368e5c1722e87fc3f80055f729695dca5c3ad11e822d4/flavorpack-0.5.3-py3-none-manylinux2014_aarch64.whl", hash = "sha256:dda77549f913123b30780a0153eaa4c6230ea24d7928903305022bbd9849276d", size = 10771229, upload-time = "2026-09-06T03:00:11.976Z" },
+    { url = "https://files.pythonhosted.org/packages/90/df/ac26f9d5fce326182e01a6b4e30098ace3991a34033d859bd5fe08790faa/flavorpack-0.5.3-py3-none-manylinux2014_x86_64.whl", hash = "sha256:10c23f9a92e36456c4bc2f419b6c1b73028fea9eb16f870fe547cdc1eb7adeaf", size = 11828719, upload-time = "2026-09-06T03:00:14.099Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/9e/ef60b612b65e14ee3abe5670e8d4d0e5f8d07da55e9e93de3336de00170e/flavorpack-0.5.3-py3-none-win_amd64.whl", hash = "sha256:07db0dc3a5ff52b79fcb3b4cfe898d5140aee4b1a7447e12afee6e93b7053965", size = 12289109, upload-time = "2026-09-06T03:00:16.191Z" },
+    { url = "https://files.pythonhosted.org/packages/e2/d7/19fb7a822395b3679cba70e2e95f2a52aaf9393049dce94e53aa6c4cf3da/flavorpack-0.5.3-py3-none-win_arm64.whl", hash = "sha256:27afa6b0e1f3b6552a97596d41bbd492196dd793b0e0d0ca1fa707aacec78b40", size = 11223934, upload-time = "2026-09-06T03:00:18.512Z" },
 ]
 
 [[package]]
@@ -3107,7 +3107,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-components"
-version = "0.7.1"
+version = "0.7.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -3119,9 +3119,9 @@ dependencies = [
     { name = "pyvider-cty" },
     { name = "pyvider-rpcplugin" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e7/f5/20bb89b734f145f1171635445728d58c08d828fa38a007aebbbddd512780/pyvider_components-0.7.1.tar.gz", hash = "sha256:2ed8bab78cf5dc89b59c674678df647ad8702efade68b3d3d265002784752c3e", size = 158747, upload-time = "2026-09-05T19:41:44.551Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/13/f7/cd487bcdc2f01fbee82b5b05243fae240cad950279705079d11eba910916/pyvider_components-0.7.2.tar.gz", hash = "sha256:395db809e49e2eac423be5afb2432259254fda9d3f2732694aaebeb353461701", size = 159927, upload-time = "2026-09-05T23:50:51.315Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/52/a4ee79209ee96317bf7d845223eb3856dfc28589c3cee4ee0ce678905a9f/pyvider_components-0.7.1-py3-none-any.whl", hash = "sha256:e41b95ee67c1d0945560b8d04f7ff0b2f896020d52068355b975a42145facc98", size = 199795, upload-time = "2026-09-05T19:41:43.256Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/38/a2b43d85eb2d6049448059d4713805a9be62300dc48a3bb8485cf7abbe9d/pyvider_components-0.7.2-py3-none-any.whl", hash = "sha256:02145da16fb65979352d894b0d0dafd5eced2b7908446c85579c21e66ab30b53", size = 200160, upload-time = "2026-09-05T23:50:49.698Z" },
 ]
 
 [[package]]
@@ -3596,12 +3596,12 @@ requires-dist = [
     { name = "jq", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=1.9.1,<1.11" },
     { name = "provide-foundation", specifier = ">=0.4.4" },
     { name = "pyvider", specifier = ">=0.7.0" },
-    { name = "pyvider-components", specifier = ">=0.7.1" },
+    { name = "pyvider-components", specifier = ">=0.7.2" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "flavorpack", specifier = ">=0.5.2" },
+    { name = "flavorpack", specifier = ">=0.5.3" },
     { name = "plating", specifier = ">=0.6.1" },
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.5" },

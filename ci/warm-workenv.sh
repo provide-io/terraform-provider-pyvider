@@ -6,9 +6,17 @@
 #
 # Usage: warm-workenv.sh <provider-binary>
 #
-# The first launch after a build unpacks ~270MB. Left to happen inside a test,
-# it overruns the plugin handshake window and the engine reports a provider
-# that failed to start, so pay the cost here where nothing is waiting on it.
+# The first launch after a build unpacks ~270MB, and paying that here means the
+# first test to launch the provider finds it done. That is all this buys.
+#
+# It is worth saying what it does not buy, because this script was written
+# believing otherwise: a provider that fails to hand shake is not, in general,
+# a provider that was still unpacking. flavorpack's launcher defaulted to trace
+# and wrote ~193KB to stderr per launch against a 64KB pipe, so a host that
+# waits for stdout without draining stderr deadlocked it -- and this script
+# could not see that, because it redirects stderr to a file, which has no
+# buffer to fill. Fixed in flavorpack 0.5.3; the floor in pyproject.toml is
+# what keeps it fixed.
 #
 # Readiness is the handshake line on stdout: the provider prints it once it is
 # serving, which is after extraction. Polling a file for that line uses only

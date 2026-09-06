@@ -12,10 +12,11 @@
 # failed rather than in a re-run with extra echoes added.
 #
 # Priming is not diagnostic. The packaged provider unpacks ~270MB of work
-# environment on its first launch; a plugin still unpacking does not answer the
-# go-plugin handshake inside Terraform's window, and the engine reports it as a
-# provider that failed to start. Paying that cost here means the first test to
-# launch the provider finds the work environment already extracted.
+# environment on its first launch, and paying that here means the first test to
+# launch it finds the work environment already extracted.
+#
+# It is not, on its own, why a provider fails to start -- see the note in
+# warm-workenv.sh, which was written on that assumption and was wrong.
 set -uo pipefail
 
 VERSION="${1:?usage: verify-provider.sh <version> <platform>}"
