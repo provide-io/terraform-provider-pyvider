@@ -3140,7 +3140,7 @@ wheels = [
 
 [[package]]
 name = "pyvider-rpcplugin"
-version = "0.5.0"
+version = "0.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -3151,9 +3151,9 @@ dependencies = [
     { name = "protobuf" },
     { name = "provide-foundation" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/91/866de0d31b1702ada85d1d8e308c281a88fd7ad12733494bb309326918e5/pyvider_rpcplugin-0.5.0.tar.gz", hash = "sha256:a26d6740f1b1d664e80f7348c4cd330260172613cf13e74c750a04273f508cc0", size = 84010, upload-time = "2026-09-04T23:08:55.108Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/aa/94bef7fba22739b31112f346c46caed54a75bd2b1a40ee9e3d359cfc1ada/pyvider_rpcplugin-0.5.1.tar.gz", hash = "sha256:7b7d2690ba22abe43a2517e854c46f2ee709cb37f7eeeec2d343c0ffb0bd79da", size = 84685, upload-time = "2026-09-06T06:10:52.321Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/5b/0c0f154943314b19343cd0a5798d2b1cea2f8650a9ef61c60141f99e629d/pyvider_rpcplugin-0.5.0-py3-none-any.whl", hash = "sha256:86375eb90c10ba699fd2556c0d6ccb5b2a1c2bcfd0462ec758ed7f4557cbc87f", size = 105817, upload-time = "2026-09-04T23:08:53.604Z" },
+    { url = "https://files.pythonhosted.org/packages/68/42/df5aa7cdff3a95bd931cc2b189ac54963da8062cac68d50f3ff7fb6178d7/pyvider_rpcplugin-0.5.1-py3-none-any.whl", hash = "sha256:c2256c92632efe285dcd4f8a7e7793b2405e3b3dd56b215ca7663417329154c2", size = 106523, upload-time = "2026-09-06T06:10:50.739Z" },
 ]
 
 [[package]]
@@ -3573,6 +3573,7 @@ dependencies = [
     { name = "provide-foundation" },
     { name = "pyvider" },
     { name = "pyvider-components" },
+    { name = "pyvider-rpcplugin" },
 ]
 
 [package.dev-dependencies]
@@ -3597,6 +3598,7 @@ requires-dist = [
     { name = "provide-foundation", specifier = ">=0.4.4" },
     { name = "pyvider", specifier = ">=0.7.0" },
     { name = "pyvider-components", specifier = ">=0.7.2" },
+    { name = "pyvider-rpcplugin", specifier = ">=0.5.1" },
 ]
 
 [package.metadata.requires-dev]
