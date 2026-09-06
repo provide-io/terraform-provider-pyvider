@@ -379,6 +379,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      # The summary is a script in ci/, so the repository has to be on disk for
+      # it to run at all. Without this the step dies with "No such file or
+      # directory" and reports a failed summary for a run whose jobs passed.
+      - name: 📥 Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
       # Both jobs are reported and both gate the result. Reading only one of
       # them would let the other fail silently, which is the whole reason this
       # summary exists.

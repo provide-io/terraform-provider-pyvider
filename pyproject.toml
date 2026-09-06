@@ -64,10 +64,22 @@ dependencies = [
     # runs inside the event loop, so the loop stops with it and no timeout
     # fires. It is named here rather than left to pyvider, which asks only for
     # >=0.5.0 and so admits the blocking read.
+    #
+    # 0.5.2 holds the stdout readline across handshake retries. Below it each
+    # retry starts a second executor read on the same pipe while the first is
+    # still blocked, and a plugin slower than one attempt loses the handshake
+    # line to whichever read wakes first.
+    #
+    # 0.5.3 overrides the TLS target name on TCP as well as unix. The server's
+    # certificate carries DNS:localhost and no IP SAN, and a TCP endpoint is
+    # dialled by literal address, so below it gRPC cannot verify the server and
+    # the channel never becomes ready -- reported as a handshake timeout for a
+    # handshake that succeeded. Windows is the only platform that defaults to
+    # TCP, so it is the only one that sees it.
     "provide-foundation>=0.4.4",
     "pyvider>=0.7.0",
     "pyvider-components>=0.7.2",
-    "pyvider-rpcplugin>=0.5.1",
+    "pyvider-rpcplugin>=0.5.3",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
@@ -155,7 +167,15 @@ dev = [
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
     # Drives the packaged provider over tfplugin6 for the conformance suite.
-    "tofusoup>=0.6.0",
+    #
+    # 0.7.5 is the floor because its base_env gives the child an environment
+    # Windows can start a process in. Below it the provider exits ~300ms into
+    # launch and every conformance test on windows_amd64 fails on one cached
+    # HandshakeError: without SYSTEMROOT the child cannot initialise Winsock
+    # (WinError 10106), and without USERPROFILE pathlib cannot resolve a home
+    # directory. 0.7.4 also closes the client on a failed start, so a launch
+    # that fails no longer leaves a plugin process nobody can stop.
+    "tofusoup>=0.7.5",
     # Bounds the conformance suite: see timeout_method in [tool.pytest.ini_options].
     "pytest-timeout>=2.3.1",
     "ty>=0.0.8",
