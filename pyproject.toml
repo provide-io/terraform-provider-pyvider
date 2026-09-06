@@ -51,9 +51,15 @@ dependencies = [
     # suite. 0.7.1 is also where both actions defer only for the reason
     # Terraform accepts, so 0.7.0 paired with pyvider 0.7.0 answers PlanAction
     # with an error diagnostic instead of a plan.
+    #
+    # 0.7.2 is the floor because pyvider_local_directory reads `permissions`
+    # back from the filesystem, and below it that read invents 0o777 on
+    # Windows, where there are no POSIX mode bits to read. The conformance
+    # suite's local_directory example applies and then fails its convergence
+    # plan on windows_amd64 against anything older.
     "provide-foundation>=0.4.4",
     "pyvider>=0.7.0",
-    "pyvider-components>=0.7.1",
+    "pyvider-components>=0.7.2",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
@@ -89,15 +95,54 @@ dependencies = [
     # marker or floor routes around it: every other blocker could be fixed and
     # windows_arm64 would still be unsupported suite-wide.
     "cryptography>=46.0.0; sys_platform == 'win32' and platform_machine == 'ARM64'",
+    # Capped for the packaged darwin_amd64 build. cryptography shipped
+    # macosx_10_9_universal2 -- which covers x86_64 -- through 48.0.1, and from
+    # 49.0.0 publishes macosx_11_0_arm64 only. flavorpack downloads wheels for
+    # the target platform, so above the cap there is nothing to download: the
+    # PSP is assembled without pyvider in it and the binary exits with
+    # "ModuleNotFoundError: No module named 'pyvider'" the first time Terraform
+    # launches it.
+    #
+    # Unmarked, deliberately. A marker-scoped cap forks the resolution, and a
+    # lock holding two versions of one package exports two requirement lines
+    # for it -- which pip-audit refuses outright ("package cryptography has
+    # duplicate requirements"), so the vulnerability gate stops running rather
+    # than reporting. 48.0.1 has a wheel for every platform this provider
+    # builds, so one version serves them all.
+    #
+    # The cost is three advisories against 48.0.1 whose fixes land in exactly
+    # the releases that drop the wheel: PYSEC-2026-3553 and -3554 in 49.0.0,
+    # PYSEC-2026-3552 in 50.0.0. No version has both the wheel and the fixes.
+    #
+    # They are accepted because nothing here reaches them, checked across the
+    # whole packaged closure rather than this project alone. -3552 needs
+    # `pkcs7_decrypt_der/pem/smime`; -3553 and -3554 need the X.509 path
+    # verifier (`PolicyBuilder`, `ServerVerifier`, `ClientVerifier`,
+    # `verify_directly_issued_by`). None appears in pyvider, pyvider-components,
+    # pyvider-rpcplugin, provide-foundation, or any bundled dependency:
+    # pyvider uses AESGCM, HKDF and hashes; provide-foundation builds and parses
+    # certificates and verifies single signatures, and never builds a chain;
+    # TLS verification is OpenSSL's through `ssl`, not this library's verifier.
+    #
+    # The IDs are listed in ci.yml so the audit gate keeps failing on anything
+    # else. Re-check this if a chain ever gets verified in Python here.
+    "cryptography<49",
 ]
 
 [dependency-groups]
 dev = [
     "provide-testkit[standard,build]>=0.4.5",
-    # Floor set by a security fix in a pin, not by an API need. flavorpack
-    # requires setuptools at an exact version, so its floor is the lock's
-    # setuptools floor: 0.4.6 forces 82.0.1, which carries PYSEC-2026-3447.
-    "flavorpack>=0.5.2",
+    # Two floors in one. flavorpack requires setuptools at an exact version, so
+    # its floor is the lock's setuptools floor -- 0.4.6 forces 82.0.1, which
+    # carries PYSEC-2026-3447.
+    #
+    # 0.5.3 is where the packaged launcher stopped defaulting to trace. Below
+    # it, one launch writes ~193KB to stderr against a 64KB pipe, and a plugin
+    # host that waits for the stdout handshake without draining stderr
+    # deadlocks the provider before it prints one. 0.5.3 also fails the build
+    # when no wheel exists for the platform being packaged, instead of
+    # assembling a package without this project's own dependencies in it.
+    "flavorpack>=0.5.3",
     "plating>=0.6.1",
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
