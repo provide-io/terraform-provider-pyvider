@@ -3608,7 +3608,7 @@ dev = [
     { name = "provide-foundry", specifier = ">=0.4.0" },
     { name = "provide-testkit", extras = ["standard", "build"], specifier = ">=0.4.5" },
     { name = "pytest-timeout", specifier = ">=2.3.1" },
-    { name = "tofusoup", specifier = ">=0.6.0" },
+    { name = "tofusoup", specifier = ">=0.7.4" },
     { name = "ty", specifier = ">=0.0.8" },
 ]
 docs = [{ name = "provide-testkit", extras = ["docs"], specifier = ">=0.4.5" }]
@@ -3641,7 +3641,7 @@ wheels = [
 
 [[package]]
 name = "tofusoup"
-version = "0.6.1"
+version = "0.7.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiosqlite" },
@@ -3657,9 +3657,9 @@ dependencies = [
     { name = "semver" },
     { name = "textual" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/41/1aabc02c0383a051505deda735e28b6d4f523929685215b0c5be2e2260f7/tofusoup-0.6.1.tar.gz", hash = "sha256:a9efdc1801e2b011e84f7d80872e7b57c7e779a8f29851165543ea927a18dc82", size = 113113, upload-time = "2026-08-25T15:13:11.407Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c0/ad/5a538e057706a899545c0500c1da561bbd17808fb3446749b7cdb188b97a/tofusoup-0.7.4.tar.gz", hash = "sha256:ac4f1dcd77818eb37f5d8f01c76de65ea351a0e7c70184e0e9e31de211505387", size = 117136, upload-time = "2026-09-06T08:41:01.569Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/80/4debed99a3a6ebfcb39c6fdc9f0612f5e8cf7d10e8630a420458dc372e84/tofusoup-0.6.1-py3-none-any.whl", hash = "sha256:ff1a512e392cf807826a9b3cdaa49ff941ed73036b69c8e571bd0984b09fdb63", size = 141501, upload-time = "2026-08-25T15:13:09.998Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/17/479af388ca479d4721355824759df6e44df57c8a6248fa896a4b8d299cbf/tofusoup-0.7.4-py3-none-any.whl", hash = "sha256:e40376786ae0a0775fdaed76817c936922732332d9087ed34322fb751e8a0d97", size = 145825, upload-time = "2026-09-06T08:41:00.113Z" },
 ]
 
 [[package]]

@@ -155,7 +155,15 @@ dev = [
     # provide-foundry>=0.4.0 isn't on PyPI; docs.setup needs it for extract_base_mkdocs
     "provide-foundry>=0.4.0",
     # Drives the packaged provider over tfplugin6 for the conformance suite.
-    "tofusoup>=0.6.0",
+    #
+    # 0.7.4 closes the client when a launch fails. Below it, a handshake failure
+    # propagates out of start_provider before the client is returned, so the
+    # plugin process it already spawned has nobody able to stop it. The orphan
+    # holds its stderr pipe open and the threads reading that pipe are not
+    # daemons, so the session cannot finish shutting down -- windows_amd64 ran
+    # to its cap with no summary, no pytest-timeout banner and an empty
+    # faulthandler dump, because the process was no longer running Python.
+    "tofusoup>=0.7.4",
     # Bounds the conformance suite: see timeout_method in [tool.pytest.ini_options].
     "pytest-timeout>=2.3.1",
     "ty>=0.0.8",
