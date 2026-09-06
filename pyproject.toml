@@ -57,9 +57,17 @@ dependencies = [
     # Windows, where there are no POSIX mode bits to read. The conformance
     # suite's local_directory example applies and then fails its convergence
     # plan on windows_amd64 against anything older.
+    #
+    # pyvider-rpcplugin 0.5.1 keeps the handshake-timeout report off the
+    # plugin's stderr pipe. Below it that report reads the pipe to EOF, which
+    # never arrives while the plugin is still up -- the read is blocking and
+    # runs inside the event loop, so the loop stops with it and no timeout
+    # fires. It is named here rather than left to pyvider, which asks only for
+    # >=0.5.0 and so admits the blocking read.
     "provide-foundation>=0.4.4",
     "pyvider>=0.7.0",
     "pyvider-components>=0.7.2",
+    "pyvider-rpcplugin>=0.5.1",
     # Capped below 1.11 for the packaged build, not for this package's own use.
     # flavorpack downloads wheels with --platform manylinux2014_<arch> (its
     # MANYLINUX_TAG is hardcoded), and jq stopped publishing manylinux2014
