@@ -71,6 +71,10 @@ jobs:
             arch: amd64
 
     runs-on: ${{ matrix.os }}
+    # The slowest measured leg is linux_amd64 (tofu) at 8 minutes, so this caps
+    # a stall at roughly three times a healthy run rather than letting it hold
+    # the runner until GitHub's six-hour default.
+    timeout-minutes: 30
     # No continue-on-error anywhere in this job. It launders a failure into
     # a green conclusion, so a Windows-only regression reports success and
     # ships.
@@ -298,6 +302,10 @@ jobs:
             platform: windows
 
     runs-on: ${{ matrix.os }}
+    # A healthy leg is under three minutes end to end; the slowest measured is
+    # darwin_amd64 at 2.3. Without a cap a stalled provider handshake holds the
+    # runner until GitHub's six-hour default, which has happened on Windows.
+    timeout-minutes: 20
 
     steps:
       - name: 📥 Checkout
