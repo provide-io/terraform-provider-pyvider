@@ -28,5 +28,8 @@ export PYVIDER_CONFORMANCE_REQUIRED=1
 echo "🧪 Driving ${PSP} over tfplugin6"
 
 # -p no:randomly: the suite shares one provider process across the session, so
-# a shuffled order changes what state each test sees.
-uv run --no-sync pytest tests/conformance -v -p no:randomly
+# a shuffled order changes what state each test sees. Provider-linting
+# conformance is intentionally reserved for test-conformance-binary: it needs
+# the exact coordinated Pyvider/components build and its provenance, while this
+# cross-platform suite drives ordinary release artifacts.
+uv run --no-sync pytest tests/conformance -v -p no:randomly --ignore=tests/conformance/test_provider_linting.py
