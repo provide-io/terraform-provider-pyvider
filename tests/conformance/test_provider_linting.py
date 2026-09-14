@@ -156,6 +156,7 @@ def test_rpc_driver_cli_documents_the_proof_interface() -> None:
     completed = subprocess.run(
         [str(DRIVER), "--help"],
         check=True,
+        close_fds=False,
         capture_output=True,
         text=True,
     )
@@ -166,7 +167,7 @@ def test_rpc_driver_cli_documents_the_proof_interface() -> None:
 
 
 def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
-    packaged_provider_path: Path, tmp_path: Path
+    packaged_provider_path: Path,
 ) -> None:
     completed = subprocess.run(
         [
@@ -178,8 +179,8 @@ def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
             "--format",
             "json-lines",
         ],
-        cwd=tmp_path,
         check=True,
+        close_fds=False,
         capture_output=True,
         text=True,
     )
@@ -214,6 +215,7 @@ def test_rpc_driver_cli_rejects_a_missing_binary_without_traceback(tmp_path: Pat
             "--format",
             "json-lines",
         ],
+        close_fds=False,
         capture_output=True,
         text=True,
     )
@@ -224,7 +226,7 @@ def test_rpc_driver_cli_rejects_a_missing_binary_without_traceback(tmp_path: Pat
     assert "Traceback" not in completed.stderr
 
 
-def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: Path, tmp_path: Path) -> None:
+def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: Path) -> None:
     completed = subprocess.run(
         [
             str(DRIVER),
@@ -235,7 +237,7 @@ def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: P
             "--format",
             "json-lines",
         ],
-        cwd=tmp_path,
+        close_fds=False,
         capture_output=True,
         text=True,
     )
