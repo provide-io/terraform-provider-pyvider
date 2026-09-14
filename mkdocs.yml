@@ -60,6 +60,7 @@ nav:
   - 02) Getting Started with Pyvider: guides/02-getting-started.md
   - 03) Troubleshooting: guides/03-troubleshooting.md
   - 04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
+  - Provider linting proof: guides/provider-linting-proof.md
 - Resources:
   - timed_token: resources/timed_token.md
   - warning_example: resources/warning_example.md
@@ -101,7 +102,7 @@ nav:
   - Data Sources:
     - file_info: data-sources/file_info.md
   - List Resources:
-    - directory_entry: list-resources/directory_entry.md
+    - directory_entry: list-resources/file_content.md
   - Actions:
     - wait_for_file: actions/wait_for_file.md
 - Lens:
