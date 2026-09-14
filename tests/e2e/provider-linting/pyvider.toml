@@ -1,0 +1,2 @@
+[lint]
+rules = ["provide-io/pyvider:insecure-http"]

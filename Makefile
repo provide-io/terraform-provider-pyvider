@@ -313,6 +313,9 @@ test-conformance: build clean-workenv warm-workenv ## Drive the packaged provide
 		PYVIDER_CONFORMANCE_REQUIRED=1 python -m pytest tests/conformance -q
 
 PYVIDER_CONFORMANCE_TESTS ?= tests/conformance
+PYVIDER_LINTING_PROVENANCE ?= dist/provider-linting-build-provenance.json
+OPENTOFU_LINTING_CACHE_DIR ?= $(CURDIR)/.cache/opentofu-beta
+OPENTOFU_LINTING_BINARY := $(OPENTOFU_LINTING_CACHE_DIR)/1.13.0-beta1/$(CURRENT_PLATFORM)/tofu
 
 .PHONY: test-conformance-binary
 test-conformance-binary:
@@ -321,6 +324,21 @@ test-conformance-binary:
 	@$(MAKE) clean-workenv
 	@ci/warm-workenv.sh "$(PYVIDER_CONFORMANCE_PSP)"
 	@PYVIDER_CONFORMANCE_REQUIRED=1 PYVIDER_CONFORMANCE_PSP="$(PYVIDER_CONFORMANCE_PSP)" uv run pytest $(PYVIDER_CONFORMANCE_TESTS) -q
+
+.PHONY: test-linting-opentofu-binary
+test-linting-opentofu-binary:
+	@test -n "$(PYVIDER_CONFORMANCE_PSP)" || (echo "PYVIDER_CONFORMANCE_PSP is required" >&2; exit 2)
+	@test -f "$(PYVIDER_CONFORMANCE_PSP)" || (echo "missing provider binary: $(PYVIDER_CONFORMANCE_PSP)" >&2; exit 2)
+	@test -f "$(PYVIDER_LINTING_PROVENANCE)" || (echo "missing build provenance: $(PYVIDER_LINTING_PROVENANCE)" >&2; exit 2)
+	@expected_sha=$$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["artifacts"]["binary"]["sha256"])' "$(PYVIDER_LINTING_PROVENANCE)"); \
+	actual_sha=$$(uv run python -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$(PYVIDER_CONFORMANCE_PSP)"); \
+	test "$$actual_sha" = "$$expected_sha" || (echo "provider binary checksum does not match build provenance" >&2; exit 2)
+	@ci/install-opentofu-beta.sh --cache-dir "$(OPENTOFU_LINTING_CACHE_DIR)" >/dev/null
+	@"$(OPENTOFU_LINTING_BINARY)" version | grep 'OpenTofu v1.13.0-beta1'
+	@PYVIDER_CONFORMANCE_REQUIRED=1 PYVIDER_CONFORMANCE_PSP="$(PYVIDER_CONFORMANCE_PSP)" uv run pytest tests/e2e/test_provider_linting_opentofu.py -q
+	@expected_sha=$$(uv run python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["artifacts"]["binary"]["sha256"])' "$(PYVIDER_LINTING_PROVENANCE)"); \
+	actual_sha=$$(uv run python -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$(PYVIDER_CONFORMANCE_PSP)"); \
+	test "$$actual_sha" = "$$expected_sha" || (echo "provider binary checksum changed during OpenTofu proof" >&2; exit 2)
 
 .PHONY: test-local
 test-local: build ## Test provider with local Terraform
