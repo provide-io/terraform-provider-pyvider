@@ -19,6 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 GENERATOR = ROOT / "ci" / "generate-provider-linting-proof.py"
 VERIFIER = ROOT / "ci" / "verify-provider-linting-proof.py"
+RETIMER = ROOT / "ci" / "retime-cast.py"
 
 COMMANDS = [
     "tofu version",
@@ -109,6 +110,13 @@ def write_cast(path: Path, text: str | None = None) -> None:
         json.dumps(header) + "\n" + json.dumps([0.5, "o", text or cast_text()]) + "\n",
         encoding="utf-8",
     )
+
+
+def rewrite_cast_header(path: Path, **updates: Any) -> None:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    header = json.loads(lines[0])
+    header.update(updates)
+    path.write_text("\n".join([json.dumps(header), *lines[1:]]) + "\n", encoding="utf-8")
 
 
 def manifest_for(cast: Path) -> dict[str, Any]:
@@ -212,6 +220,29 @@ def test_proof_rejects_cast_checksum_mismatch(tmp_path: Path) -> None:
         verify(verifier, manifest, cast)
 
 
+def test_proof_rejects_secret_like_cast_header_key(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_header_secret")
+    manifest, cast = write_valid_proof(tmp_path)
+    rewrite_cast_header(
+        cast,
+        env={"TERM": "xterm-256color", "SHELL": "/bin/bash", "API_TOKEN": "very-secret"},
+    )
+    manifest.write_text(json.dumps(manifest_for(cast)), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="secret-like key"):
+        verify(verifier, manifest, cast)
+
+
+def test_proof_rejects_machine_local_cast_header_cwd(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_header_cwd")
+    manifest, cast = write_valid_proof(tmp_path)
+    rewrite_cast_header(cast, cwd="/opt/runner/private/repo")
+    manifest.write_text(json.dumps(manifest_for(cast)), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="cast header"):
+        verify(verifier, manifest, cast)
+
+
 def test_proof_rejects_provider_checksum_mismatch(tmp_path: Path) -> None:
     verifier = load_script(VERIFIER, "provider_linting_verifier_provider_hash")
     manifest, cast = write_valid_proof(tmp_path)
@@ -268,6 +299,16 @@ def test_proof_rejects_non_beta_tofu_version(tmp_path: Path) -> None:
     manifest.write_text(json.dumps(data), encoding="utf-8")
 
     with pytest.raises(ValueError, match="OpenTofu version"):
+        verify(verifier, manifest, cast)
+
+
+def test_proof_rejects_beta10_spoof_in_cast(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_beta10")
+    manifest, cast = write_valid_proof(tmp_path)
+    write_cast(cast, cast_text().replace("OpenTofu v1.13.0-beta1\n", "OpenTofu v1.13.0-beta10\n"))
+    manifest.write_text(json.dumps(manifest_for(cast)), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="exact OpenTofu version"):
         verify(verifier, manifest, cast)
 
 
@@ -387,6 +428,27 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "test-linting-opentofu-binary" in workflow
     assert "provider-linting-proof" in workflow
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+    assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in recorder
+    assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
+
+
+def test_retime_redacts_longest_nested_path_before_parent() -> None:
+    retimer = load_script(RETIMER, "provider_linting_retimer_nested")
+    repository = "/Users/example/provider"
+    staging = f"{repository}/.provider-linting-proof.JuYZSQ"
+    wrapped_staging = staging[:30] + "\r\n" + staging[30:]
+    events = [
+        [0.5, "o", f"artifact: {staging}/demo\n"],
+        [1.0, "o", f"wrapped: {wrapped_staging}/provider-linting.cast\n"],
+        [1.5, "o", f"repository: {repository}/README.md\n"],
+    ]
+
+    redacted = "".join(event[2] for event in retimer.redact_event_paths(events, [repository, staging]))
+
+    assert ".provider-linting-proof." not in redacted
+    assert "JuYZSQ" not in redacted
+    assert repository not in redacted
+    assert redacted.count("<workspace>") == 3
 
 
 def test_rpc_driver_json_lines_include_proof_identity_fields() -> None:

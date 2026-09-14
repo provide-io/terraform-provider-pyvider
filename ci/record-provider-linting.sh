@@ -41,7 +41,7 @@ if [[ ! -x "$tofu" || ! "$archive_sha" =~ ^[0-9a-f]{64}$ ]]; then
     printf '%s\n' 'error: pinned OpenTofu binary/checksum is unavailable' >&2
     exit 2
 fi
-if ! "$tofu" version | grep -q 'OpenTofu v1.13.0-beta1'; then
+if ! "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-beta1'; then
     printf '%s\n' 'error: OpenTofu v1.13.0-beta1 is required' >&2
     exit 2
 fi

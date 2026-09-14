@@ -85,6 +85,9 @@ _SERIALIZED_SECRET = re.compile(
     r"(?i)[\"']?[a-z0-9_-]*(?:token|password|passwd|secret|authorization|credential)"
     r"[a-z0-9_-]*[\"']?\s*[:=]"
 )
+_CAST_HEADER_KEYS = {"version", "width", "height", "timestamp", "title", "env"}
+_CAST_TITLES = {"pyvider conformance suite", "Pyvider provider-native linting proof"}
+_CAST_ENV = {"TERM": "xterm-256color", "SHELL": "/bin/bash"}
 
 
 def sha256_file(path: Path) -> str:
@@ -110,14 +113,34 @@ def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
     return loaded
 
 
+def _validate_cast_header(header: Any) -> None:
+    if not isinstance(header, dict):
+        raise ValueError("cast header must be an object")
+    _walk_keys(header)
+    if set(header) != _CAST_HEADER_KEYS:
+        raise ValueError("cast header keys do not match the checked schema")
+    if header["version"] != 2:
+        raise ValueError("cast is not asciinema v2")
+    for dimension in ("width", "height"):
+        value = header[dimension]
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise ValueError(f"cast header {dimension} must be a positive integer")
+    timestamp = header["timestamp"]
+    if isinstance(timestamp, bool) or not isinstance(timestamp, int) or timestamp <= 0:
+        raise ValueError("cast header timestamp must be a positive integer")
+    if header["title"] not in _CAST_TITLES:
+        raise ValueError("cast header title is not approved")
+    if header["env"] != _CAST_ENV:
+        raise ValueError("cast header environment does not match the checked schema")
+
+
 def _cast_output(path: Path) -> str:
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
         if not lines:
             raise ValueError("empty cast")
         header = json.loads(lines[0])
-        if not isinstance(header, dict) or header.get("version") != 2:
-            raise ValueError("cast is not asciinema v2")
+        _validate_cast_header(header)
         chunks: list[str] = []
         for line in lines[1:]:
             event = json.loads(line)
@@ -294,8 +317,8 @@ def _validate_cast(output: str, manifest: dict[str, Any]) -> list[str]:
     for statement in required_statements:
         if statement not in output:
             raise ValueError(f"missing proof statement from cast: {statement}")
-    if f"OpenTofu v{OPENTOFU_VERSION}" not in output:
-        raise ValueError(f"cast does not show OpenTofu v{OPENTOFU_VERSION}")
+    if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
+        raise ValueError(f"cast does not show the exact OpenTofu version v{OPENTOFU_VERSION}")
     observations = _parse_observations(output)
     expected_records = [
         {

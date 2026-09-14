@@ -22,8 +22,7 @@ from typing import Any
 def redact_event_paths(events: list[Any], paths: list[str]) -> list[Any]:
     """Redact literal and terminal-wrapped paths while retaining event timing."""
     combined = "".join(event[2] for event in events)
-    for path in paths:
-        combined = combined.replace(path, "<workspace>")
+    for path in sorted(set(paths), key=len, reverse=True):
         # Rich may hard-wrap a long absolute path at the PTY width, placing
         # CRLF inside it. Match that rendering too so proof artifacts never
         # preserve a machine-local path just because the terminal wrapped.

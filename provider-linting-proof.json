@@ -1,7 +1,7 @@
 {
   "cast": {
     "path": "provider-linting.cast",
-    "sha256": "c1e56e6caaf05f9fc8599b4ea51b5a5a7fa8e3b74b7c7260145a307eef15b6b1"
+    "sha256": "73787e95aca86d84e8d888c1f6477dad97189e626d479660cd02427282457008"
   },
   "ci": {
     "repository": null,
@@ -33,7 +33,7 @@
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-14T06:44:53.117786Z",
+  "generated_at": "2026-09-14T07:02:29.595811Z",
   "opentofu": {
     "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
     "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",

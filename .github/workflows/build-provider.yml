@@ -268,7 +268,7 @@ jobs:
             --version 1.13.0-beta1 --cache-dir "$PWD/.cache/opentofu-beta" 2>"$install_log")
           archive_sha=$(awk '/^verified [0-9a-f]{64}$/ { print $2 }' "$install_log")
           [[ "$archive_sha" =~ ^[0-9a-f]{64}$ ]]
-          "$tofu" version | grep 'OpenTofu v1.13.0-beta1'
+          "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-beta1'
           echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
           echo "PYVIDER_OPENTOFU_ARCHIVE_SHA256=$archive_sha" >> "$GITHUB_ENV"
 
