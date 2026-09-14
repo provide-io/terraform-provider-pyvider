@@ -226,6 +226,31 @@ def test_rpc_driver_cli_rejects_a_missing_binary_without_traceback(tmp_path: Pat
     assert "Traceback" not in completed.stderr
 
 
+def test_rpc_driver_cli_rejects_an_invalid_executable_without_traceback(tmp_path: Path) -> None:
+    invalid = tmp_path / "invalid-provider"
+    invalid.write_text("not an executable\n", encoding="utf-8")
+
+    completed = subprocess.run(
+        [
+            str(DRIVER),
+            "--binary",
+            str(invalid),
+            "--selector",
+            "all",
+            "--format",
+            "json-lines",
+        ],
+        close_fds=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert completed.stdout == ""
+    assert completed.stderr == f"error: provider proof failed for binary: {invalid}\n"
+    assert "Traceback" not in completed.stderr
+
+
 def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: Path) -> None:
     completed = subprocess.run(
         [

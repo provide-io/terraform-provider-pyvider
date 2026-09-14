@@ -323,6 +323,12 @@ def main() -> int:
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+    except Exception:
+        # This is the CLI trust boundary: provider launch, handshake, and RPC
+        # failures may contain internal paths or tracebacks. BaseException is
+        # intentionally not caught so KeyboardInterrupt/SystemExit still work.
+        print(f"error: provider proof failed for binary: {args.binary}", file=sys.stderr)
+        return 2
     for record in records:
         print(json.dumps(record, sort_keys=True))
     return 0
