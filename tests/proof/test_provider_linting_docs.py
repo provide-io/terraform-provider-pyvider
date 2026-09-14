@@ -26,6 +26,7 @@ def guide_text() -> str:
         "make build-linting-stack",
         "make test-linting-opentofu-binary",
         "make test-conformance-binary",
+        "PYVIDER_LINT=provide-io/pyvider:security tofu validate",
         'export PYVIDER_SOURCE="$(cd ../pyvider && pwd -P)"',
         'export COMPONENTS_SOURCE="$(cd ../pyvider-components && pwd -P)"',
         "ci/record-provider-linting.sh",
@@ -39,10 +40,15 @@ def guide_text() -> str:
         "Pyvider's author-facing lint API is supported",
         "OpenTofu describes its built-in linting feature as experimental",
         "ordinary warning diagnostics are a temporary compatibility bridge",
+        "publishes both checked artifacts only after verification and rolls back ordinary publication failures",
     ],
 )
 def test_provider_linting_guide_covers_reproduction_contract(required_text: str) -> None:
     assert required_text in guide_text(), f"guide is missing {required_text!r}"
+
+
+def test_provider_linting_guide_does_not_advertise_an_unqualified_group() -> None:
+    assert "PYVIDER_LINT=security tofu validate" not in guide_text()
 
 
 def test_provider_linting_guide_is_in_documentation_navigation() -> None:

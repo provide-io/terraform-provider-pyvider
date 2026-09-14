@@ -56,7 +56,7 @@ Choose a group or exclude one exact rule using the OpenTofu-compatible selector
 grammar:
 
 ```shell
-PYVIDER_LINT=security tofu validate
+PYVIDER_LINT=provide-io/pyvider:security tofu validate
 PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:insecure-http' tofu validate
 ```
 
@@ -141,8 +141,8 @@ uv run python ci/run-provider-linting-rpcs.py \
 ## Record and verify the checked artifacts
 
 The recorder runs six real commands, refuses a binary other than the one named
-by the build provenance, verifies the checksum before and after recording, then
-atomically publishes both checked artifacts:
+by the build provenance, and verifies the checksum before and after recording.
+It publishes both checked artifacts only after verification and rolls back ordinary publication failures:
 
 - [`provider-linting.cast`][cast] — a deterministic asciinema v2 recording.
 - [`provider-linting-proof.json`][manifest] — versions, exact source revisions
