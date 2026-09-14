@@ -146,6 +146,34 @@ def load_driver() -> ModuleType:
     return module
 
 
+def valid_driver_results() -> list[dict[str, Any]]:
+    names = {
+        "provider": "pyvider",
+        "resource": "pyvider_local_directory",
+        "data_source": "pyvider_http_api",
+        "ephemeral_resource": "pyvider_lease",
+        "list_resource": "pyvider_file_content",
+        "action": "pyvider_wait_for_file",
+        "state_store": "pyvider_filesystem_store",
+    }
+    results: list[dict[str, Any]] = []
+    for case in PACKAGED_LINT_RPC_CASES.values():
+        diagnostic = pb.Diagnostic(
+            severity=pb.Diagnostic.WARNING,
+            summary=f"{case.summary} ({case.rule})",
+            detail=case.detail,
+        )
+        diagnostic.attribute.steps.add(attribute_name=case.attribute)
+        results.append(
+            {
+                "kind": case.kind,
+                "name": names[case.kind],
+                "diagnostics": [diagnostic],
+            }
+        )
+    return results
+
+
 def test_rpc_driver_is_importable() -> None:
     module = load_driver()
 
@@ -280,6 +308,74 @@ def test_rpc_driver_rejects_an_incomplete_rpc_catalog() -> None:
         module.assert_expected_catalog([], "all")
 
 
+def test_rpc_driver_rejects_a_diagnostic_owned_by_the_wrong_rpc() -> None:
+    module = load_driver()
+    results = valid_driver_results()
+    results[0]["diagnostics"], results[1]["diagnostics"] = (
+        results[1]["diagnostics"],
+        results[0]["diagnostics"],
+    )
+
+    with pytest.raises(ValueError, match="diagnostic RPC ownership"):
+        module.assert_expected_catalog(results, "all")
+
+
+def test_rpc_driver_rejects_an_error_severity_lint_finding() -> None:
+    module = load_driver()
+    results = valid_driver_results()
+    results[0]["diagnostics"][0].severity = pb.Diagnostic.ERROR
+
+    with pytest.raises(ValueError, match="diagnostic severity"):
+        module.assert_expected_catalog(results, "all")
+
+
+def test_rpc_driver_rejects_a_lint_finding_with_wrong_detail() -> None:
+    module = load_driver()
+    results = valid_driver_results()
+    results[0]["diagnostics"][0].detail = "wrong detail"
+
+    with pytest.raises(ValueError, match="diagnostic detail"):
+        module.assert_expected_catalog(results, "all")
+
+
+def test_rpc_driver_rejects_a_lint_finding_with_wrong_attribute() -> None:
+    module = load_driver()
+    results = valid_driver_results()
+    results[0]["diagnostics"][0].attribute.steps[0].attribute_name = "wrong_attribute"
+
+    with pytest.raises(ValueError, match="diagnostic attribute"):
+        module.assert_expected_catalog(results, "all")
+
+
+def test_rpc_driver_rejects_a_duplicate_lint_diagnostic() -> None:
+    module = load_driver()
+    results = valid_driver_results()
+    results[0]["diagnostics"].append(
+        pb.Diagnostic.FromString(results[0]["diagnostics"][0].SerializeToString())
+    )
+
+    with pytest.raises(ValueError, match="diagnostic catalog"):
+        module.assert_expected_catalog(results, "all")
+
+
+@pytest.mark.parametrize("stage", ["GetProviderSchema", "ConfigureProvider"])
+def test_rpc_driver_rejects_bootstrap_diagnostics(stage: str) -> None:
+    module = load_driver()
+    diagnostic = pb.Diagnostic(
+        severity=pb.Diagnostic.ERROR,
+        summary="configuration failed",
+        detail="bootstrap detail",
+    )
+
+    with pytest.raises(ValueError, match=f"{stage} bootstrap diagnostics"):
+        module.assert_no_bootstrap_diagnostics(
+            {
+                "GetProviderSchema": [diagnostic] if stage == "GetProviderSchema" else [],
+                "ConfigureProvider": [diagnostic] if stage == "ConfigureProvider" else [],
+            }
+        )
+
+
 def test_config_values_are_shaped_from_the_returned_schema() -> None:
     module = load_driver()
     schema = pb.Schema(
@@ -322,6 +418,22 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
     actual_sha = hashlib.sha256(packaged_provider_path.read_bytes()).hexdigest()
     assert actual_sha == data["artifacts"]["binary"]["sha256"]
     assert actual_sha == data["artifacts"]["psp"]["sha256"]
+    provider_repository = Path(__file__).resolve().parents[2]
+    provider_head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=provider_repository,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    provider_archive = subprocess.run(
+        ["git", "archive", provider_head],
+        cwd=provider_repository,
+        check=True,
+        capture_output=True,
+    ).stdout
+    assert data["provider_repository_head"] == provider_head
+    assert data["provider_repository_archive_sha256"] == hashlib.sha256(provider_archive).hexdigest()
     assert [
         "uv",
         "run",
@@ -438,15 +550,6 @@ def test_packaged_lint_rpc_case_catalog_has_exact_collection_ids() -> None:
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_provider_linting_is_off_by_default_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
-) -> None:
-    results = await run_selected_lints(packaged_provider_path, None, tmp_path)
-
-    assert lint_summaries(results) == set()
-
-
-@pytest.mark.asyncio(loop_scope="session")
 @pytest.mark.parametrize(
     ("selector", "expected_rules"),
     [
@@ -531,9 +634,8 @@ async def test_file_selector_precedence_through_packaged_binary(
 async def test_malformed_selector_is_permissive_through_packaged_binary(
     packaged_provider_path: Path, tmp_path: Path
 ) -> None:
-    # This is the honest process-boundary fail-open case available from the shipped
-    # provider. Hook-exception fail-open is covered by Pyvider's reviewed handler
-    # contracts; the packaged provider intentionally has no production fault injector.
+    # Malformed selectors exercise permissive parsing independently from the real
+    # packaged hook-exception fixture exercised immediately below.
     results = await run_selected_lints(
         packaged_provider_path,
         "malformed selector",

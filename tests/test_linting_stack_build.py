@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
@@ -74,6 +76,24 @@ def fake_stack_repositories(tmp_path: Path) -> tuple[Path, Path, Path]:
     return provider, pyvider, components
 
 
+def successful_build_runner(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
+    if "pack" in command:
+        (cwd / "dist").mkdir()
+        (cwd / "dist" / "terraform-provider-pyvider.psp").write_bytes(b"provider package")
+    if "extract" in command:
+        wheel = cwd / "pyvider-0.7.0-py3-none-any.whl"
+        wheel.write_bytes(b"wheel")
+        with tarfile.open(cwd / command[-1], "w:gz") as stream:
+            stream.add(wheel, arcname=f"wheels/{wheel.name}")
+    if "inspect" in command and "--provenance" in command:
+        output = '{"provenance":{"packages":[]}}'
+    elif "inspect" in command:
+        output = '{"slots":[{"index":2,"name":"wheels"}]}'
+    else:
+        output = ""
+    return subprocess.CompletedProcess(command, 0, stdout=output, stderr="")
+
+
 def load_build_module() -> ModuleType:
     spec = importlib.util.spec_from_file_location("build_provider_linting_stack", SCRIPT)
     assert spec is not None and spec.loader is not None
@@ -120,6 +140,54 @@ def test_clean_source_resolves_head_revision(tmp_path: Path) -> None:
     assert module.inspect_source(source, label="Pyvider") == git(source, "rev-parse", "HEAD")
 
 
+def test_build_rejects_a_missing_provider_repository(tmp_path: Path) -> None:
+    module = load_build_module()
+    pyvider = project_repo(tmp_path, "pyvider", {"tracked.txt": "clean\n"})
+    components = project_repo(tmp_path, "components", {"tracked.txt": "clean\n"})
+
+    with pytest.raises(ValueError, match="provider source repository does not exist"):
+        module.build_stack(
+            provider_repository=tmp_path / "missing-provider",
+            pyvider_source=pyvider,
+            components_source=components,
+            output_dir=tmp_path / "output",
+        )
+
+
+def test_build_rejects_a_non_git_provider_repository(tmp_path: Path) -> None:
+    module = load_build_module()
+    provider = tmp_path / "provider"
+    provider.mkdir()
+    pyvider = project_repo(tmp_path, "pyvider", {"tracked.txt": "clean\n"})
+    components = project_repo(tmp_path, "components", {"tracked.txt": "clean\n"})
+
+    with pytest.raises(ValueError, match="provider source is not a Git repository"):
+        module.build_stack(
+            provider_repository=provider,
+            pyvider_source=pyvider,
+            components_source=components,
+            output_dir=tmp_path / "output",
+        )
+
+
+def test_build_rejects_a_dirty_provider_repository(tmp_path: Path) -> None:
+    module = load_build_module()
+    provider, pyvider, components = fake_stack_repositories(tmp_path)
+    (provider / "VERSION").write_text("dirty\n", encoding="utf-8")
+
+    def must_not_build(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
+        raise AssertionError(f"dirty provider reached build command {command!r} in {cwd}")
+
+    with pytest.raises(ValueError, match="provider source repository has uncommitted changes"):
+        module.build_stack(
+            provider_repository=provider,
+            pyvider_source=pyvider,
+            components_source=components,
+            output_dir=tmp_path / "output",
+            command_runner=must_not_build,
+        )
+
+
 def test_source_revision_is_materialized_by_git_archive(tmp_path: Path) -> None:
     module = load_build_module()
     source = initialized_repo(tmp_path)
@@ -160,12 +228,176 @@ def test_git_archive_stdout_is_piped_through_hash_capture_into_tar(
 
     module.materialize_revision(source, revision, destination)
 
-    assert len(processes) >= 3
-    assert calls[1]["stdin"] is processes[0].stdout
-    assert calls[2]["stdin"] is processes[1].stdout
-    capture_args = processes[1].args
-    assert isinstance(capture_args, list)
-    assert capture_args[0] == "tee"
+    assert len(processes) == 2
+    assert calls[0]["stdout"] is subprocess.PIPE
+    assert calls[1]["stdin"] is subprocess.PIPE
+    assert all(process.poll() is not None for process in processes)
+
+
+def test_materialize_removes_partial_destination_when_archive_spawn_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_build_module()
+    source = initialized_repo(tmp_path)
+    destination = tmp_path / "materialized"
+
+    def fail_spawn(*args: Any, **kwargs: Any) -> subprocess.Popen[Any]:
+        raise OSError("archive spawn sentinel")
+
+    monkeypatch.setattr(module.subprocess, "Popen", fail_spawn)
+
+    with pytest.raises(OSError, match="archive spawn sentinel"):
+        module.materialize_revision(source, "HEAD", destination)
+
+    assert not destination.exists()
+
+
+def test_materialize_stops_archive_when_tar_spawn_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_build_module()
+    source = initialized_repo(tmp_path)
+    destination = tmp_path / "materialized"
+
+    class ArchiveProcess:
+        def __init__(self) -> None:
+            self.args = ["git", "archive", "HEAD"]
+            self.stdout = io.BytesIO(b"archive")
+            self.returncode: int | None = None
+            self.terminated = False
+            self.waited = False
+
+        def poll(self) -> int | None:
+            return self.returncode
+
+        def terminate(self) -> None:
+            self.terminated = True
+            self.returncode = -15
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.waited = True
+            self.returncode = 0 if self.returncode is None else self.returncode
+            return self.returncode
+
+        def kill(self) -> None:
+            self.returncode = -9
+
+    archive = ArchiveProcess()
+    calls = 0
+
+    def spawn(*args: Any, **kwargs: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return archive
+        raise OSError("tar spawn sentinel")
+
+    monkeypatch.setattr(module.subprocess, "Popen", spawn)
+
+    with pytest.raises(OSError, match="tar spawn sentinel"):
+        module.materialize_revision(source, "HEAD", destination)
+
+    assert archive.terminated
+    assert archive.waited
+    assert not destination.exists()
+
+
+def test_materialize_stops_children_and_cleans_destination_on_broken_pipe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_build_module()
+    source = initialized_repo(tmp_path)
+    destination = tmp_path / "materialized"
+
+    class BrokenWriter:
+        def write(self, data: bytes) -> int:
+            raise BrokenPipeError("write sentinel")
+
+        def close(self) -> None:
+            pass
+
+    class Process:
+        def __init__(
+            self,
+            args: list[str],
+            *,
+            stdout: io.BytesIO | None,
+            stdin: Any,
+        ) -> None:
+            self.args = args
+            self.stdout = stdout
+            self.stdin = stdin
+            self.returncode: int | None = None
+            self.terminated = False
+            self.waited = False
+
+        def poll(self) -> int | None:
+            return self.returncode
+
+        def terminate(self) -> None:
+            self.terminated = True
+            self.returncode = -15
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.waited = True
+            self.returncode = 0 if self.returncode is None else self.returncode
+            return self.returncode
+
+        def kill(self) -> None:
+            self.returncode = -9
+
+    archive = Process(["git", "archive", "HEAD"], stdout=io.BytesIO(b"archive"), stdin=None)
+    tar = Process(["tar", "-x"], stdout=io.BytesIO(), stdin=BrokenWriter())
+    processes = [archive, tar]
+
+    def spawn(*args: Any, **kwargs: Any) -> Process:
+        if not processes:
+            raise AssertionError("materialization spawned an external capture process")
+        return processes.pop(0)
+
+    monkeypatch.setattr(module.subprocess, "Popen", spawn)
+
+    with pytest.raises(BrokenPipeError, match="write sentinel"):
+        module.materialize_revision(source, "HEAD", destination)
+
+    assert archive.waited
+    assert tar.waited
+    assert not destination.exists()
+
+
+def test_materialize_cleans_destination_when_git_archive_exits_nonzero(tmp_path: Path) -> None:
+    module = load_build_module()
+    source = initialized_repo(tmp_path)
+    destination = tmp_path / "materialized"
+
+    with pytest.raises(subprocess.CalledProcessError):
+        module.materialize_revision(source, "missing-revision", destination)
+
+    assert not destination.exists()
+
+
+def test_materialize_cleans_destination_and_reaps_children_when_tar_exits_nonzero(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_build_module()
+    source = initialized_repo(tmp_path)
+    destination = tmp_path / "materialized"
+    real_popen = subprocess.Popen
+    processes: list[subprocess.Popen[Any]] = []
+
+    def fail_tar(command: list[str], **kwargs: Any) -> subprocess.Popen[Any]:
+        actual = ["/usr/bin/false"] if command[0] == "tar" else command
+        process = real_popen(actual, **kwargs)
+        processes.append(process)
+        return process
+
+    monkeypatch.setattr(module.subprocess, "Popen", fail_tar)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        module.materialize_revision(source, "HEAD", destination)
+
+    assert all(process.poll() is not None for process in processes)
+    assert not destination.exists()
 
 
 def test_local_sources_are_injected_only_into_build_context(tmp_path: Path) -> None:
@@ -352,6 +584,46 @@ def test_build_copies_psp_and_versioned_binary(tmp_path: Path) -> None:
     assert not (output / "_stack").exists()
 
 
+def test_failed_atomic_publication_rolls_back_artifacts_and_cleans_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = load_build_module()
+    provider, pyvider, components = fake_stack_repositories(tmp_path)
+    output = tmp_path / "output"
+    binary = output / module.current_platform() / "terraform-provider-pyvider_v1.2.3"
+    psp = output / "terraform-provider-pyvider.psp"
+    provenance = output / "provider-linting-build-provenance.json"
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b"old binary")
+    psp.write_bytes(b"old psp")
+    provenance.write_bytes(b"old provenance")
+    real_replace = os.replace
+    published: list[Path] = []
+
+    def fail_binary_publication(source: Path, destination: Path) -> None:
+        published.append(Path(destination))
+        if Path(destination) == binary:
+            raise OSError("publication sentinel")
+        real_replace(source, destination)
+
+    monkeypatch.setattr(module.os, "replace", fail_binary_publication)
+
+    with pytest.raises(OSError, match="publication sentinel"):
+        module.build_stack(
+            provider_repository=provider,
+            pyvider_source=pyvider,
+            components_source=components,
+            output_dir=output,
+            command_runner=successful_build_runner,
+        )
+
+    assert psp.read_bytes() == b"old psp"
+    assert binary.read_bytes() == b"old binary"
+    assert provenance.read_bytes() == b"old provenance"
+    assert provenance not in published
+    assert not any("provider-linting-stage" in path.name for path in output.rglob("*"))
+
+
 def test_build_writes_complete_provenance(tmp_path: Path) -> None:
     module = load_build_module()
     provider, pyvider, components = fake_stack_repositories(tmp_path)
@@ -395,6 +667,13 @@ def test_build_writes_complete_provenance(tmp_path: Path) -> None:
     assert result == provenance
     assert provenance["schema_version"] == 1
     assert provenance["provider_repository_head"] == git(provider, "rev-parse", "HEAD")
+    provider_archive = subprocess.run(
+        ["git", "archive", "HEAD"],
+        cwd=provider,
+        check=True,
+        capture_output=True,
+    ).stdout
+    assert provenance["provider_repository_archive_sha256"] == hashlib.sha256(provider_archive).hexdigest()
     assert provenance["sources"] == {
         "pyvider": {
             "sha": git(pyvider, "rev-parse", "HEAD"),
@@ -547,6 +826,70 @@ def test_build_cli_requires_both_source_repositories() -> None:
         module.main([])
 
     assert raised.value.code == 2
+
+
+def test_build_cli_reports_actionable_validation_errors(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    module = load_build_module()
+
+    def fail_validation(**kwargs: Any) -> dict[str, Any]:
+        raise ValueError("Pyvider source repository is dirty: /user/source")
+
+    monkeypatch.setattr(module, "build_stack", fail_validation)
+
+    result = module.main(
+        [
+            "--pyvider-source",
+            "/user/source",
+            "--components-source",
+            "/user/components",
+            "--output-dir",
+            "/user/output",
+        ]
+    )
+
+    assert result == 2
+    assert capsys.readouterr().err == "error: Pyvider source repository is dirty: /user/source\n"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        pytest.param(
+            subprocess.CalledProcessError(1, ["uv", "/private/internal/project"], stderr="secret"),
+            id="command",
+        ),
+        pytest.param(FileNotFoundError("missing /private/internal/tool"), id="missing-tool"),
+        pytest.param(json.JSONDecodeError("secret /private/internal/json", "not-json", 0), id="json"),
+        pytest.param(tarfile.ReadError("secret /private/internal/archive"), id="tar"),
+    ],
+)
+def test_build_cli_sanitizes_unexpected_failures(
+    failure: Exception,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    module = load_build_module()
+
+    def fail_build(**kwargs: Any) -> dict[str, Any]:
+        raise failure
+
+    monkeypatch.setattr(module, "build_stack", fail_build)
+
+    result = module.main(
+        [
+            "--pyvider-source",
+            "/user/source",
+            "--components-source",
+            "/user/components",
+            "--output-dir",
+            "/user/output",
+        ]
+    )
+
+    assert result == 2
+    assert capsys.readouterr().err == "error: coordinated provider build failed\n"
 
 
 def test_make_build_target_refuses_missing_pyvider_source() -> None:

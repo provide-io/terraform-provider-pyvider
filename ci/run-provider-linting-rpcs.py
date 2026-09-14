@@ -14,51 +14,113 @@ import json
 import os
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, NamedTuple
 
 from tofusoup.tfplugin import TfPluginProvider, base_env, pack, start_provider
 
 from pyvider.protocols.tfprotov6.protobuf import tfplugin6_pb2 as pb
 
-EXPECTED_RPCS = {
-    ("provider", "pyvider"),
-    ("resource", "pyvider_local_directory"),
-    ("data_source", "pyvider_http_api"),
-    ("ephemeral_resource", "pyvider_lease"),
-    ("list_resource", "pyvider_file_content"),
-    ("action", "pyvider_wait_for_file"),
-    ("state_store", "pyvider_filesystem_store"),
-}
+
+class LintContract(NamedTuple):
+    kind: str
+    name: str
+    summary: str
+    detail: str
+    attribute: str
+    groups: tuple[str, ...]
+
+
 RULE_CATALOG = {
-    "provide-io/pyvider:insecure-tls": (
-        "TLS certificate verification is disabled",
-        ("provide-io/pyvider:all", "provide-io/pyvider:security"),
+    "provide-io/pyvider:insecure-tls": LintContract(
+        kind="provider",
+        name="pyvider",
+        summary="TLS certificate verification is disabled",
+        detail=(
+            "Skipping TLS certificate verification may be intentional for local development, "
+            "but it permits man-in-the-middle attacks. Set api_insecure_skip_verify to false "
+            "for safer connections. Suppress with !provide-io/pyvider:insecure-tls."
+        ),
+        attribute="api_insecure_skip_verify",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:security"),
     ),
-    "provide-io/pyvider:world-writable-directory": (
-        "Directory permissions are world-writable",
-        ("provide-io/pyvider:all", "provide-io/pyvider:security"),
+    "provide-io/pyvider:world-writable-directory": LintContract(
+        kind="resource",
+        name="pyvider_local_directory",
+        summary="Directory permissions are world-writable",
+        detail=(
+            "World-writable permissions may be intentional for a shared scratch directory, "
+            "but any local user can modify its contents. Remove the POSIX other-write bit "
+            "(for example, set permissions to 0o755) for a safer directory. Suppress with "
+            "!provide-io/pyvider:world-writable-directory."
+        ),
+        attribute="permissions",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:security"),
     ),
-    "provide-io/pyvider:insecure-http": (
-        "HTTP API uses an unencrypted connection",
-        ("provide-io/pyvider:all", "provide-io/pyvider:security"),
+    "provide-io/pyvider:insecure-http": LintContract(
+        kind="data_source",
+        name="pyvider_http_api",
+        summary="HTTP API uses an unencrypted connection",
+        detail=(
+            "Plain HTTP may be intentional for a local endpoint, but request data can be "
+            "intercepted or changed. Set url to an https:// address for a safer connection. "
+            "Suppress with !provide-io/pyvider:insecure-http."
+        ),
+        attribute="url",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:security"),
     ),
-    "provide-io/pyvider:long-lived-lease": (
-        "Lease lifetime exceeds one hour",
-        ("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
+    "provide-io/pyvider:long-lived-lease": LintContract(
+        kind="ephemeral_resource",
+        name="pyvider_lease",
+        summary="Lease lifetime exceeds one hour",
+        detail=(
+            "A lease longer than one hour may be intentional for lengthy operations, but "
+            "long-lived ephemeral values remain usable for longer if exposed. Set ttl_seconds "
+            "to 3600 or less for a safer lease. Suppress with "
+            "!provide-io/pyvider:long-lived-lease."
+        ),
+        attribute="ttl_seconds",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
     ),
-    "provide-io/pyvider:include-hidden-files": (
-        "File listing includes hidden files",
-        ("provide-io/pyvider:all", "provide-io/pyvider:security"),
+    "provide-io/pyvider:include-hidden-files": LintContract(
+        kind="list_resource",
+        name="pyvider_file_content",
+        summary="File listing includes hidden files",
+        detail=(
+            "Including hidden files may be intentional for configuration discovery, but it "
+            "can expose secrets or metadata. Set include_hidden to false for safer listings. "
+            "Suppress with !provide-io/pyvider:include-hidden-files."
+        ),
+        attribute="include_hidden",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:security"),
     ),
-    "provide-io/pyvider:long-action-timeout": (
-        "Action timeout exceeds five minutes",
-        ("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
+    "provide-io/pyvider:long-action-timeout": LintContract(
+        kind="action",
+        name="pyvider_wait_for_file",
+        summary="Action timeout exceeds five minutes",
+        detail=(
+            "A timeout longer than five minutes may be intentional for slow prerequisites, "
+            "but it can leave Terraform waiting for an unresponsive action. Set "
+            "timeout_seconds to 300 or less for a safer timeout. Suppress with "
+            "!provide-io/pyvider:long-action-timeout."
+        ),
+        attribute="timeout_seconds",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
     ),
-    "provide-io/pyvider:relative-state-store-path": (
-        "State store path is relative",
-        ("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
+    "provide-io/pyvider:relative-state-store-path": LintContract(
+        kind="state_store",
+        name="pyvider_filesystem_store",
+        summary="State store path is relative",
+        detail=(
+            "A relative state store path may be intentional for a self-contained workspace, "
+            "but it depends on the provider process's working directory. Set path to an "
+            "absolute path for safer, predictable state storage. Suppress with "
+            "!provide-io/pyvider:relative-state-store-path."
+        ),
+        attribute="path",
+        groups=("provide-io/pyvider:all", "provide-io/pyvider:reliability"),
     ),
 }
+EXPECTED_RPCS = {(contract.kind, contract.name) for contract in RULE_CATALOG.values()}
 
 
 def schema_config(schema: pb.Schema, overrides: dict[str, Any]) -> pb.DynamicValue:
@@ -247,7 +309,11 @@ def _expected_summaries(selector: str) -> set[str]:
             return False
         return "all" in include
 
-    return {f"{summary} ({rule})" for rule, (summary, groups) in RULE_CATALOG.items() if enabled(rule, groups)}
+    return {
+        f"{contract.summary} ({rule})"
+        for rule, contract in RULE_CATALOG.items()
+        if enabled(rule, contract.groups)
+    }
 
 
 def assert_expected_catalog(results: list[dict[str, Any]], selector: str) -> None:
@@ -257,6 +323,24 @@ def assert_expected_catalog(results: list[dict[str, Any]], selector: str) -> Non
         raise ValueError(
             f"RPC catalog mismatch: expected {sorted(EXPECTED_RPCS)!r}, observed {sorted(observed_rpcs)!r}"
         )
+    contracts_by_summary = {
+        f"{contract.summary} ({rule})": contract for rule, contract in RULE_CATALOG.items()
+    }
+    for result in results:
+        for diagnostic in result["diagnostics"]:
+            if diagnostic.severity != pb.Diagnostic.WARNING:
+                raise ValueError(f"diagnostic severity mismatch for {diagnostic.summary!r}")
+            contract = contracts_by_summary.get(diagnostic.summary)
+            if contract is not None and (result["kind"], result["name"]) != (
+                contract.kind,
+                contract.name,
+            ):
+                raise ValueError(f"diagnostic RPC ownership mismatch for {diagnostic.summary!r}")
+            if contract is not None and diagnostic.detail != contract.detail:
+                raise ValueError(f"diagnostic detail mismatch for {diagnostic.summary!r}")
+            attribute = [step.attribute_name for step in diagnostic.attribute.steps]
+            if contract is not None and attribute != [contract.attribute]:
+                raise ValueError(f"diagnostic attribute mismatch for {diagnostic.summary!r}")
     observed_summaries = [diagnostic.summary for result in results for diagnostic in result["diagnostics"]]
     if not observed_summaries:
         raise ValueError(f"provider lint proof returned no diagnostics for selector {selector!r}")
@@ -266,6 +350,13 @@ def assert_expected_catalog(results: list[dict[str, Any]], selector: str) -> Non
             "diagnostic catalog mismatch: "
             f"expected {sorted(expected_summaries)!r}, observed {sorted(observed_summaries)!r}"
         )
+
+
+def assert_no_bootstrap_diagnostics(responses: dict[str, list[pb.Diagnostic]]) -> None:
+    """Reject schema/configuration diagnostics before collecting lint proof."""
+    for rpc, diagnostics in responses.items():
+        if diagnostics:
+            raise ValueError(f"{rpc} bootstrap diagnostics were not empty")
 
 
 @contextmanager
@@ -296,12 +387,19 @@ async def run(binary: Path, selector: str, working_directory: Path) -> list[dict
         ),
     )
     try:
-        session.schema = await session.stub.GetProviderSchema(pb.GetProviderSchema.Request())
-        await session.stub.ConfigureProvider(
+        schema_response = await session.stub.GetProviderSchema(pb.GetProviderSchema.Request())
+        session.schema = schema_response
+        configure_response = await session.stub.ConfigureProvider(
             pb.ConfigureProvider.Request(
                 terraform_version="1.14.9",
                 config=schema_config(session.schema.provider, {}),
             )
+        )
+        assert_no_bootstrap_diagnostics(
+            {
+                "GetProviderSchema": list(schema_response.diagnostics),
+                "ConfigureProvider": list(configure_response.diagnostics),
+            }
         )
         results = await validate_configurations(session, working_directory)
         assert_expected_catalog(results, selector)
