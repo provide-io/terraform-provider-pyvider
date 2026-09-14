@@ -49,6 +49,8 @@ def run_installer(release: Path, cache: Path) -> subprocess.CompletedProcess[str
     return subprocess.run(
         [
             str(SCRIPT),
+            "--version",
+            VERSION,
             "--cache-dir",
             str(cache),
             "--release-base-url",
@@ -89,7 +91,7 @@ def test_installer_rejects_a_checksum_mismatch(tmp_path: Path) -> None:
 def test_installer_is_pinned_and_uses_verified_curl_downloads() -> None:
     source = SCRIPT.read_text(encoding="utf-8")
 
-    assert 'VERSION="1.13.0-beta1"' in source
+    assert 'PINNED_VERSION="1.13.0-beta1"' in source
     assert "curl --fail --location" in source
     assert "shasum -a 256 -c" in source
     assert "latest" not in source.lower()
@@ -99,7 +101,7 @@ def test_installer_requires_an_explicit_cache_directory(tmp_path: Path) -> None:
     release, _ = fake_release(tmp_path)
 
     result = subprocess.run(
-        [str(SCRIPT), "--release-base-url", release.as_uri()],
+        [str(SCRIPT), "--version", VERSION, "--release-base-url", release.as_uri()],
         capture_output=True,
         text=True,
     )
@@ -108,11 +110,92 @@ def test_installer_requires_an_explicit_cache_directory(tmp_path: Path) -> None:
     assert "--cache-dir is required" in result.stderr
 
 
-@pytest.mark.parametrize("argument", ["--version", "latest"])
-def test_installer_does_not_accept_version_selection(argument: str) -> None:
-    result = subprocess.run([str(SCRIPT), argument], capture_output=True, text=True)
+def test_installer_requires_the_explicit_pinned_version(tmp_path: Path) -> None:
+    release, _ = fake_release(tmp_path)
+
+    result = subprocess.run(
+        [
+            str(SCRIPT),
+            "--cache-dir",
+            str(tmp_path / "cache"),
+            "--release-base-url",
+            release.as_uri(),
+        ],
+        capture_output=True,
+        text=True,
+    )
 
     assert result.returncode == 2
+    assert "--version 1.13.0-beta1 is required" in result.stderr
+
+
+@pytest.mark.parametrize("version", ["latest", "1.12.0", "1.13.0"])
+def test_installer_rejects_any_unpinned_version(tmp_path: Path, version: str) -> None:
+    release, _ = fake_release(tmp_path)
+    result = subprocess.run(
+        [
+            str(SCRIPT),
+            "--version",
+            version,
+            "--cache-dir",
+            str(tmp_path / "cache"),
+            "--release-base-url",
+            release.as_uri(),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 2
+    assert "only OpenTofu 1.13.0-beta1 is supported" in result.stderr
+
+
+def test_concurrent_installers_atomically_publish_one_verified_binary(tmp_path: Path) -> None:
+    release, _ = fake_release(tmp_path)
+    cache = tmp_path / "cache"
+    command = [
+        str(SCRIPT),
+        "--version",
+        VERSION,
+        "--cache-dir",
+        str(cache),
+        "--release-base-url",
+        release.as_uri(),
+    ]
+
+    processes = [
+        subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(2)
+    ]
+    completed = [(*process.communicate(), process.returncode) for process in processes]
+
+    expected = cache / VERSION / host_platform() / "tofu"
+    assert all(returncode == 0 for _, _, returncode in completed)
+    assert {stdout for stdout, _, _ in completed} == {f"{expected}\n"}
+    assert subprocess.run([expected, "version"], check=True, capture_output=True, text=True).stdout == (
+        "OpenTofu v1.13.0-beta1\n"
+    )
+    assert list(cache.glob(".install-*")) == []
+
+
+def test_failed_extraction_preserves_an_existing_verified_binary(tmp_path: Path) -> None:
+    release, archive = fake_release(tmp_path)
+    cache = tmp_path / "cache"
+    installed = run_installer(release, cache)
+    binary = Path(installed.stdout.strip())
+    before = binary.read_bytes()
+    archive.write_bytes(b"not a zip archive")
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    (release / f"tofu_{VERSION}_SHA256SUMS").write_text(
+        f"{digest}  {archive.name}\n",
+        encoding="utf-8",
+    )
+
+    failed = run_installer(release, cache)
+
+    assert failed.returncode != 0
+    assert binary.read_bytes() == before
+    assert os.access(binary, os.X_OK)
+    assert list(cache.glob(".install-*")) == []
 
 
 def test_opentofu_make_target_requires_an_explicit_provider_binary() -> None:
@@ -204,6 +287,8 @@ def test_opentofu_make_target_is_a_no_rebuild_dry_run(tmp_path: Path) -> None:
     assert "flavor pack" not in result.stdout
     assert "make build" not in result.stdout
     assert "ci/install-opentofu-beta.sh --cache-dir" in result.stdout
+    assert "--version 1.13.0-beta1" in result.stdout
     assert "OpenTofu v1.13.0-beta1" in result.stdout
     assert "tests/e2e/test_provider_linting_opentofu.py" in result.stdout
+    assert "PYVIDER_OPENTOFU_BINARY=" in result.stdout
     assert str(provenance) in result.stdout

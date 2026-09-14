@@ -489,6 +489,23 @@ def assert_revision_compatible(
     if changed:
         raise AssertionError(f"{label} build inputs changed after packaging:\n{changed}")
 
+    dirty = {
+        "staged": _git(repository, "diff", "--cached", "--name-only", "--", *build_inputs),
+        "unstaged": _git(repository, "diff", "--name-only", "--", *build_inputs),
+        "untracked": _git(
+            repository,
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "--",
+            *build_inputs,
+        ),
+    }
+    dirty = {state: paths for state, paths in dirty.items() if paths}
+    if dirty:
+        detail = "\n".join(f"{state}:\n{paths}" for state, paths in dirty.items())
+        raise AssertionError(f"{label} build inputs have uncommitted changes:\n{detail}")
+
 
 def _provenance_repo(tmp_path: Path) -> tuple[Path, str, str]:
     repo = tmp_path / "source"
@@ -558,6 +575,40 @@ def test_provenance_rejects_runtime_or_build_input_changes(
             recorded_archive_sha256=archive_sha,
             build_inputs=("src", "pyproject.toml"),
         )
+
+
+@pytest.mark.parametrize("dirty_state", ["staged", "unstaged", "untracked"])
+def test_provenance_rejects_dirty_build_inputs(tmp_path: Path, dirty_state: str) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    if dirty_state == "untracked":
+        (repo / "src" / "untracked.py").write_text("DIRTY = True\n", encoding="utf-8")
+    else:
+        (repo / "src" / "runtime.py").write_text("VALUE = 2\n", encoding="utf-8")
+        if dirty_state == "staged":
+            _git(repo, "add", "src/runtime.py")
+
+    with pytest.raises(AssertionError, match="build inputs have uncommitted changes"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=("src",),
+        )
+
+
+def test_provenance_allows_dirty_non_build_files(tmp_path: Path) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    (repo / "docs" / "proof.md").write_text("uncommitted proof work\n", encoding="utf-8")
+    (repo / "task-nine.tmp").write_text("untracked non-build work\n", encoding="utf-8")
+
+    assert_revision_compatible(
+        repo,
+        label="fixture",
+        recorded_sha=recorded,
+        recorded_archive_sha256=archive_sha,
+        build_inputs=("src",),
+    )
 
 
 @pytest.mark.parametrize(
@@ -692,16 +743,6 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
     ] in data["commands"]
 
     for name, source in provenance_source_paths().items():
-        assert (
-            subprocess.run(
-                ["git", "status", "--porcelain"],
-                cwd=source,
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout
-            == ""
-        )
         assert_revision_compatible(
             source,
             label=name,
