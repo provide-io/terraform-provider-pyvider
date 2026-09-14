@@ -431,6 +431,10 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in recorder
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
 
+    proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
+    assert "    env:\n      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider" in proof_job
+    assert "      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components" in proof_job
+
 
 def test_retime_redacts_longest_nested_path_before_parent() -> None:
     retimer = load_script(RETIMER, "provider_linting_retimer_nested")

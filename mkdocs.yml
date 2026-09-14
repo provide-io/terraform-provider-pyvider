@@ -102,7 +102,7 @@ nav:
   - Data Sources:
     - file_info: data-sources/file_info.md
   - List Resources:
-    - directory_entry: list-resources/file_content.md
+    - file_content: list-resources/file_content.md
   - Actions:
     - wait_for_file: actions/wait_for_file.md
 - Lens:

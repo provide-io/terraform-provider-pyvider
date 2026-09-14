@@ -89,17 +89,19 @@ source-archive hash, inventories the packaged wheels, and writes
 `dist/provider-linting-build-provenance.json` beside the binary.
 
 ```shell
-pyvider_source=../pyvider
-components_source=../pyvider-components
+export PYVIDER_SOURCE="$(cd ../pyvider && pwd -P)"
+export COMPONENTS_SOURCE="$(cd ../pyvider-components && pwd -P)"
 
 make build-linting-stack \
-  PYVIDER_SOURCE="$pyvider_source" \
-  COMPONENTS_SOURCE="$components_source"
+  PYVIDER_SOURCE="$PYVIDER_SOURCE" \
+  COMPONENTS_SOURCE="$COMPONENTS_SOURCE"
 
 lint_binary="$PWD/dist/$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/terraform-provider-pyvider_v$(cat VERSION)"
 export PYVIDER_CONFORMANCE_PSP="$lint_binary"
 ```
 
+The exported, canonical source paths remain available to the later conformance
+targets so their provenance checks inspect the exact coordinated checkouts.
 Do not rebuild between the following layers. Each target accepts the explicit
 binary, and the OpenTofu and recording paths check its SHA-256 against the build
 provenance before and after execution.

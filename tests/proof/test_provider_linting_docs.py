@@ -26,6 +26,8 @@ def guide_text() -> str:
         "make build-linting-stack",
         "make test-linting-opentofu-binary",
         "make test-conformance-binary",
+        'export PYVIDER_SOURCE="$(cd ../pyvider && pwd -P)"',
+        'export COMPONENTS_SOURCE="$(cd ../pyvider-components && pwd -P)"',
         "ci/record-provider-linting.sh",
         "ci/verify-provider-linting-proof.py",
         "uv run pytest tests/proof -q",
@@ -50,7 +52,7 @@ def test_provider_linting_guide_is_in_documentation_navigation() -> None:
 
 def test_documentation_navigation_names_the_existing_list_resource_page() -> None:
     mkdocs = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
-    assert "directory_entry: list-resources/file_content.md" in mkdocs
+    assert "file_content: list-resources/file_content.md" in mkdocs
 
 
 def test_readme_links_to_provider_linting_proof_guide() -> None:

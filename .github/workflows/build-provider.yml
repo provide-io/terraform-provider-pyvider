@@ -199,6 +199,9 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+    env:
+      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider
+      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components
 
     steps:
       - name: 📥 Checkout provider
