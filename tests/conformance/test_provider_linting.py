@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 import importlib.util
 import json
@@ -30,6 +31,100 @@ RULE_SUMMARIES = {
     "provide-io/pyvider:include-hidden-files": "File listing includes hidden files",
     "provide-io/pyvider:long-action-timeout": "Action timeout exceeds five minutes",
     "provide-io/pyvider:relative-state-store-path": "State store path is relative",
+}
+
+
+@dataclass(frozen=True)
+class PackagedLintRPCCase:
+    kind: str
+    rule: str
+    summary: str
+    detail: str
+    attribute: str
+
+
+PACKAGED_LINT_RPC_CASES = {
+    "provider": PackagedLintRPCCase(
+        kind="provider",
+        rule="provide-io/pyvider:insecure-tls",
+        summary="TLS certificate verification is disabled",
+        detail=(
+            "Skipping TLS certificate verification may be intentional for local development, "
+            "but it permits man-in-the-middle attacks. Set api_insecure_skip_verify to false "
+            "for safer connections. Suppress with !provide-io/pyvider:insecure-tls."
+        ),
+        attribute="api_insecure_skip_verify",
+    ),
+    "resource": PackagedLintRPCCase(
+        kind="resource",
+        rule="provide-io/pyvider:world-writable-directory",
+        summary="Directory permissions are world-writable",
+        detail=(
+            "World-writable permissions may be intentional for a shared scratch directory, "
+            "but any local user can modify its contents. Remove the POSIX other-write bit "
+            "(for example, set permissions to 0o755) for a safer directory. Suppress with "
+            "!provide-io/pyvider:world-writable-directory."
+        ),
+        attribute="permissions",
+    ),
+    "data_source": PackagedLintRPCCase(
+        kind="data_source",
+        rule="provide-io/pyvider:insecure-http",
+        summary="HTTP API uses an unencrypted connection",
+        detail=(
+            "Plain HTTP may be intentional for a local endpoint, but request data can be "
+            "intercepted or changed. Set url to an https:// address for a safer connection. "
+            "Suppress with !provide-io/pyvider:insecure-http."
+        ),
+        attribute="url",
+    ),
+    "ephemeral": PackagedLintRPCCase(
+        kind="ephemeral_resource",
+        rule="provide-io/pyvider:long-lived-lease",
+        summary="Lease lifetime exceeds one hour",
+        detail=(
+            "A lease longer than one hour may be intentional for lengthy operations, but "
+            "long-lived ephemeral values remain usable for longer if exposed. Set ttl_seconds "
+            "to 3600 or less for a safer lease. Suppress with "
+            "!provide-io/pyvider:long-lived-lease."
+        ),
+        attribute="ttl_seconds",
+    ),
+    "list": PackagedLintRPCCase(
+        kind="list_resource",
+        rule="provide-io/pyvider:include-hidden-files",
+        summary="File listing includes hidden files",
+        detail=(
+            "Including hidden files may be intentional for configuration discovery, but it "
+            "can expose secrets or metadata. Set include_hidden to false for safer listings. "
+            "Suppress with !provide-io/pyvider:include-hidden-files."
+        ),
+        attribute="include_hidden",
+    ),
+    "action": PackagedLintRPCCase(
+        kind="action",
+        rule="provide-io/pyvider:long-action-timeout",
+        summary="Action timeout exceeds five minutes",
+        detail=(
+            "A timeout longer than five minutes may be intentional for slow prerequisites, "
+            "but it can leave Terraform waiting for an unresponsive action. Set "
+            "timeout_seconds to 300 or less for a safer timeout. Suppress with "
+            "!provide-io/pyvider:long-action-timeout."
+        ),
+        attribute="timeout_seconds",
+    ),
+    "state_store": PackagedLintRPCCase(
+        kind="state_store",
+        rule="provide-io/pyvider:relative-state-store-path",
+        summary="State store path is relative",
+        detail=(
+            "A relative state store path may be intentional for a self-contained workspace, "
+            "but it depends on the provider process's working directory. Set path to an "
+            "absolute path for safer, predictable state storage. Suppress with "
+            "!provide-io/pyvider:relative-state-store-path."
+        ),
+        attribute="path",
+    ),
 }
 SECURITY_RULES = {
     rule
@@ -104,6 +199,58 @@ def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
             "summary": ("HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)"),
         }
     ]
+
+
+def test_rpc_driver_cli_rejects_a_missing_binary_without_traceback(tmp_path: Path) -> None:
+    missing = tmp_path / "missing-provider"
+
+    completed = subprocess.run(
+        [
+            str(DRIVER),
+            "--binary",
+            str(missing),
+            "--selector",
+            "all",
+            "--format",
+            "json-lines",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert completed.stdout == ""
+    assert completed.stderr == f"error: provider binary does not exist: {missing}\n"
+    assert "Traceback" not in completed.stderr
+
+
+def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: Path, tmp_path: Path) -> None:
+    completed = subprocess.run(
+        [
+            str(DRIVER),
+            "--binary",
+            str(packaged_provider_path),
+            "--selector",
+            "provide-io/pyvider:unknown-rule",
+            "--format",
+            "json-lines",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert completed.stdout == ""
+    assert completed.stderr.startswith("error: provider lint proof returned no diagnostics")
+    assert "Traceback" not in completed.stderr
+
+
+def test_rpc_driver_rejects_an_incomplete_rpc_catalog() -> None:
+    module = load_driver()
+
+    with pytest.raises(ValueError, match="RPC catalog"):
+        module.assert_expected_catalog([], "all")
 
 
 def test_config_values_are_shaped_from_the_returned_schema() -> None:
@@ -185,10 +332,20 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
 
 
 async def run_selected_lints(
-    packaged_provider_path: Path, selector: str | None, working_directory: Path
+    packaged_provider_path: Path,
+    selector: str | None,
+    working_directory: Path,
+    *,
+    config_rules: tuple[str, ...] | None = None,
+    include_failure_fixture: bool = False,
 ) -> list[dict[str, Any]]:
     driver = load_driver()
     lint_env = {} if selector is None else {"PYVIDER_LINT": selector}
+    if config_rules is not None:
+        config_file = working_directory / "provider-linting-pyvider.toml"
+        rendered_rules = ", ".join(json.dumps(rule) for rule in config_rules)
+        config_file.write_text(f"[lint]\nrules = [{rendered_rules}]\n", encoding="utf-8")
+        lint_env["PYVIDER_CONFIG_FILE"] = str(config_file)
     session: TfPluginProvider = await start_provider(
         packaged_provider_path,
         env=child_env(lint_env),
@@ -202,6 +359,8 @@ async def run_selected_lints(
             )
         )
         results: list[dict[str, Any]] = await driver.validate_configurations(session, working_directory)
+        if include_failure_fixture:
+            results.append(await driver.validate_failing_action_fixture(session))
         return results
     finally:
         await session.stop()
@@ -237,6 +396,18 @@ def lint_summaries(results: list[dict[str, Any]]) -> set[str]:
 
 def summaries_for(rule_ids: set[str]) -> set[str]:
     return {f"{RULE_SUMMARIES[rule]} ({rule})" for rule in rule_ids}
+
+
+def test_packaged_lint_rpc_case_catalog_has_exact_collection_ids() -> None:
+    assert tuple(PACKAGED_LINT_RPC_CASES) == (
+        "provider",
+        "resource",
+        "data_source",
+        "ephemeral",
+        "list",
+        "action",
+        "state_store",
+    )
 
 
 @pytest.mark.asyncio(loop_scope="session")
@@ -280,7 +451,51 @@ async def test_selector_matrix_through_packaged_binary(
     selector: str | None,
     expected_rules: set[str],
 ) -> None:
+    # Selector matching is Task 1 production behavior in the archived Pyvider
+    # source, so these coordination cases were first-run green. Task 8's honest
+    # REDs were the missing process/RPC harness and the file-config helper below.
     results = await run_selected_lints(packaged_provider_path, selector, tmp_path)
+
+    assert lint_summaries(results) == summaries_for(expected_rules)
+
+
+@pytest.mark.asyncio(loop_scope="session")
+@pytest.mark.parametrize(
+    ("selector", "file_rules", "expected_rules"),
+    [
+        pytest.param(
+            None,
+            ("provide-io/pyvider:insecure-http",),
+            {"provide-io/pyvider:insecure-http"},
+            id="file-rules",
+        ),
+        pytest.param(
+            "provide-io/pyvider:insecure-tls",
+            ("provide-io/pyvider:insecure-http",),
+            {"provide-io/pyvider:insecure-tls"},
+            id="env-over-file",
+        ),
+        pytest.param(
+            "",
+            ("provide-io/pyvider:insecure-http",),
+            set(),
+            id="empty-env-disables-file",
+        ),
+    ],
+)
+async def test_file_selector_precedence_through_packaged_binary(
+    packaged_provider_path: Path,
+    tmp_path: Path,
+    selector: str | None,
+    file_rules: tuple[str, ...],
+    expected_rules: set[str],
+) -> None:
+    results = await run_selected_lints(
+        packaged_provider_path,
+        selector,
+        tmp_path,
+        config_rules=file_rules,
+    )
 
     assert lint_summaries(results) == summaries_for(expected_rules)
 
@@ -303,170 +518,48 @@ async def test_malformed_selector_is_permissive_through_packaged_binary(
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_exact_provider_rule_through_packaged_binary(
+async def test_failing_lint_hook_is_nonblocking_through_packaged_binary(
     packaged_provider_path: Path, tmp_path: Path
 ) -> None:
     results = await run_selected_lints(
         packaged_provider_path,
-        "provide-io/pyvider:insecure-tls",
+        "provide-io/pyvider:test-lint-failure",
         tmp_path,
+        include_failure_fixture=True,
     )
 
-    assert_finding(
-        results,
-        kind="provider",
-        rule="provide-io/pyvider:insecure-tls",
-        summary="TLS certificate verification is disabled",
-        detail=(
-            "Skipping TLS certificate verification may be intentional for local development, "
-            "but it permits man-in-the-middle attacks. Set api_insecure_skip_verify to false "
-            "for safer connections. Suppress with !provide-io/pyvider:insecure-tls."
-        ),
-        attribute="api_insecure_skip_verify",
+    result = next(item for item in results if item["kind"] == "failing_action_fixture")
+    diagnostics: list[Any] = result["diagnostics"]
+    assert len(diagnostics) == 1
+    diagnostic = diagnostics[0]
+    assert diagnostic.severity == pb.Diagnostic.WARNING
+    assert diagnostic.summary == "Provider linting did not complete"
+    assert diagnostic.detail == (
+        "The provider could not complete the requested lint checks. Review provider logs for details."
     )
+    rendered = f"{diagnostic.summary}\n{diagnostic.detail}".lower()
+    assert "packaged-lint-hook-sentinel" not in rendered
+    assert "traceback" not in rendered
+    assert list(diagnostic.attribute.steps) == []
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_exact_resource_rule_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
+@pytest.mark.parametrize(
+    "case",
+    [pytest.param(case, id=case_id) for case_id, case in PACKAGED_LINT_RPC_CASES.items()],
+)
+async def test_packaged_lint_rpc(
+    packaged_provider_path: Path,
+    tmp_path: Path,
+    case: PackagedLintRPCCase,
 ) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:world-writable-directory",
-        tmp_path,
-    )
+    results = await run_selected_lints(packaged_provider_path, case.rule, tmp_path)
 
     assert_finding(
         results,
-        kind="resource",
-        rule="provide-io/pyvider:world-writable-directory",
-        summary="Directory permissions are world-writable",
-        detail=(
-            "World-writable permissions may be intentional for a shared scratch directory, "
-            "but any local user can modify its contents. Remove the POSIX other-write bit "
-            "(for example, set permissions to 0o755) for a safer directory. Suppress with "
-            "!provide-io/pyvider:world-writable-directory."
-        ),
-        attribute="permissions",
-    )
-
-
-@pytest.mark.asyncio(loop_scope="session")
-async def test_exact_data_source_rule_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
-) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:insecure-http",
-        tmp_path,
-    )
-
-    assert_finding(
-        results,
-        kind="data_source",
-        rule="provide-io/pyvider:insecure-http",
-        summary="HTTP API uses an unencrypted connection",
-        detail=(
-            "Plain HTTP may be intentional for a local endpoint, but request data can be "
-            "intercepted or changed. Set url to an https:// address for a safer connection. "
-            "Suppress with !provide-io/pyvider:insecure-http."
-        ),
-        attribute="url",
-    )
-
-
-@pytest.mark.asyncio(loop_scope="session")
-async def test_exact_ephemeral_rule_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
-) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:long-lived-lease",
-        tmp_path,
-    )
-
-    assert_finding(
-        results,
-        kind="ephemeral_resource",
-        rule="provide-io/pyvider:long-lived-lease",
-        summary="Lease lifetime exceeds one hour",
-        detail=(
-            "A lease longer than one hour may be intentional for lengthy operations, but "
-            "long-lived ephemeral values remain usable for longer if exposed. Set ttl_seconds "
-            "to 3600 or less for a safer lease. Suppress with "
-            "!provide-io/pyvider:long-lived-lease."
-        ),
-        attribute="ttl_seconds",
-    )
-
-
-@pytest.mark.asyncio(loop_scope="session")
-async def test_exact_list_resource_rule_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
-) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:include-hidden-files",
-        tmp_path,
-    )
-
-    assert_finding(
-        results,
-        kind="list_resource",
-        rule="provide-io/pyvider:include-hidden-files",
-        summary="File listing includes hidden files",
-        detail=(
-            "Including hidden files may be intentional for configuration discovery, but it "
-            "can expose secrets or metadata. Set include_hidden to false for safer listings. "
-            "Suppress with !provide-io/pyvider:include-hidden-files."
-        ),
-        attribute="include_hidden",
-    )
-
-
-@pytest.mark.asyncio(loop_scope="session")
-async def test_exact_action_rule_through_packaged_binary(packaged_provider_path: Path, tmp_path: Path) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:long-action-timeout",
-        tmp_path,
-    )
-
-    assert_finding(
-        results,
-        kind="action",
-        rule="provide-io/pyvider:long-action-timeout",
-        summary="Action timeout exceeds five minutes",
-        detail=(
-            "A timeout longer than five minutes may be intentional for slow prerequisites, "
-            "but it can leave Terraform waiting for an unresponsive action. Set "
-            "timeout_seconds to 300 or less for a safer timeout. Suppress with "
-            "!provide-io/pyvider:long-action-timeout."
-        ),
-        attribute="timeout_seconds",
-    )
-
-
-@pytest.mark.asyncio(loop_scope="session")
-async def test_exact_state_store_rule_through_packaged_binary(
-    packaged_provider_path: Path, tmp_path: Path
-) -> None:
-    results = await run_selected_lints(
-        packaged_provider_path,
-        "provide-io/pyvider:relative-state-store-path",
-        tmp_path,
-    )
-
-    assert_finding(
-        results,
-        kind="state_store",
-        rule="provide-io/pyvider:relative-state-store-path",
-        summary="State store path is relative",
-        detail=(
-            "A relative state store path may be intentional for a self-contained workspace, "
-            "but it depends on the provider process's working directory. Set path to an "
-            "absolute path for safer, predictable state storage. Suppress with "
-            "!provide-io/pyvider:relative-state-store-path."
-        ),
-        attribute="path",
+        kind=case.kind,
+        rule=case.rule,
+        summary=case.summary,
+        detail=case.detail,
+        attribute=case.attribute,
     )
