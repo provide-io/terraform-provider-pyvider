@@ -133,6 +133,15 @@ build: venv deps install-flavor keys ## Build the provider PSP package
 		echo "$(GREEN)✅ Versioned binary created: $(VERSIONED_BINARY)$(NC)" && \
 		ls -lh $(PSP_FILE) $(VERSIONED_BINARY)
 
+.PHONY: build-linting-stack
+build-linting-stack: ## Build against exact local Pyvider and component revisions
+	@test -n "$(PYVIDER_SOURCE)" || (echo "PYVIDER_SOURCE is required" >&2; exit 2)
+	@test -n "$(COMPONENTS_SOURCE)" || (echo "COMPONENTS_SOURCE is required" >&2; exit 2)
+	@uv run python ci/build-provider-linting-stack.py \
+		--pyvider-source "$(PYVIDER_SOURCE)" \
+		--components-source "$(COMPONENTS_SOURCE)" \
+		--output-dir dist
+
 .PHONY: build-all
 build-all: venv deps install-flavor keys ## Build provider for all platforms (CI/CD reference)
 	@echo "$(BLUE)🏗️ Building provider version $(VERSION) for all platforms...$(NC)"
@@ -302,6 +311,16 @@ test-conformance: build clean-workenv warm-workenv ## Drive the packaged provide
 	@# skip, so a green run cannot mean "tested nothing".
 	@. .venv/bin/activate && \
 		PYVIDER_CONFORMANCE_REQUIRED=1 python -m pytest tests/conformance -q
+
+PYVIDER_CONFORMANCE_TESTS ?= tests/conformance
+
+.PHONY: test-conformance-binary
+test-conformance-binary:
+	@test -n "$(PYVIDER_CONFORMANCE_PSP)" || (echo "PYVIDER_CONFORMANCE_PSP is required" >&2; exit 2)
+	@test -f "$(PYVIDER_CONFORMANCE_PSP)" || (echo "missing provider binary: $(PYVIDER_CONFORMANCE_PSP)" >&2; exit 2)
+	@$(MAKE) clean-workenv
+	@ci/warm-workenv.sh "$(PYVIDER_CONFORMANCE_PSP)"
+	@PYVIDER_CONFORMANCE_REQUIRED=1 PYVIDER_CONFORMANCE_PSP="$(PYVIDER_CONFORMANCE_PSP)" uv run pytest $(PYVIDER_CONFORMANCE_TESTS) -q
 
 .PHONY: test-local
 test-local: build ## Test provider with local Terraform
