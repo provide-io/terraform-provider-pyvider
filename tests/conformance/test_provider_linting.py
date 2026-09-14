@@ -136,6 +136,21 @@ SECURITY_RULES = {
         "provide-io/pyvider:relative-state-store-path",
     }
 }
+PROVIDER_BUILD_INPUTS = (
+    ".python-version",
+    "VERSION",
+    "README.md",
+    "pyproject.toml",
+    "uv.lock",
+    "ci/build-provider-linting-stack.py",
+)
+STACK_SOURCE_BUILD_INPUTS = (
+    ".python-version",
+    "README.md",
+    "pyproject.toml",
+    "uv.lock",
+    "src",
+)
 
 
 def load_driver() -> ModuleType:
@@ -406,6 +421,170 @@ def test_provenance_source_paths_follow_the_build_environment(
     }
 
 
+def _git(repo: Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", *args],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def assert_revision_compatible(
+    repository: Path,
+    *,
+    label: str,
+    recorded_sha: str,
+    recorded_archive_sha256: str,
+    build_inputs: tuple[str, ...],
+) -> None:
+    """Prove a recorded build revision still represents the current checkout."""
+    commit = subprocess.run(
+        ["git", "cat-file", "-e", f"{recorded_sha}^{{commit}}"],
+        cwd=repository,
+        capture_output=True,
+    )
+    if commit.returncode != 0:
+        raise AssertionError(f"{label} recorded commit does not exist: {recorded_sha}")
+
+    current_head = _git(repository, "rev-parse", "HEAD")
+    ancestor = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", recorded_sha, current_head],
+        cwd=repository,
+        capture_output=True,
+    )
+    if ancestor.returncode != 0:
+        raise AssertionError(f"{label} recorded commit {recorded_sha} is not an ancestor of {current_head}")
+
+    archive = subprocess.run(
+        ["git", "archive", recorded_sha],
+        cwd=repository,
+        check=True,
+        capture_output=True,
+    ).stdout
+    actual_archive_sha256 = hashlib.sha256(archive).hexdigest()
+    if actual_archive_sha256 != recorded_archive_sha256:
+        raise AssertionError(
+            f"{label} recorded archive checksum mismatch: "
+            f"expected {recorded_archive_sha256}, got {actual_archive_sha256}"
+        )
+
+    changed = _git(
+        repository,
+        "diff",
+        "--name-only",
+        f"{recorded_sha}..{current_head}",
+        "--",
+        *build_inputs,
+    )
+    if changed:
+        raise AssertionError(f"{label} build inputs changed after packaging:\n{changed}")
+
+
+def _provenance_repo(tmp_path: Path) -> tuple[Path, str, str]:
+    repo = tmp_path / "source"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "tests@example.invalid")
+    _git(repo, "config", "user.name", "Test Author")
+    (repo / "src").mkdir()
+    (repo / "src" / "runtime.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (repo / "docs").mkdir()
+    (repo / "docs" / "proof.md").write_text("initial\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "recorded")
+    recorded = _git(repo, "rev-parse", "HEAD")
+    archive = subprocess.run(
+        ["git", "archive", recorded],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    ).stdout
+    return repo, recorded, hashlib.sha256(archive).hexdigest()
+
+
+def test_provenance_accepts_a_descendant_with_only_non_build_changes(tmp_path: Path) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    (repo / "docs" / "proof.md").write_text("documented after build\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "docs only")
+
+    assert_revision_compatible(
+        repo,
+        label="fixture",
+        recorded_sha=recorded,
+        recorded_archive_sha256=archive_sha,
+        build_inputs=("src", "pyproject.toml"),
+    )
+
+
+@pytest.mark.parametrize("changed_path", ["src/runtime.py", "pyproject.toml"])
+def test_provenance_rejects_runtime_or_build_input_changes(
+    tmp_path: Path,
+    changed_path: str,
+) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    changed = repo / changed_path
+    changed.parent.mkdir(parents=True, exist_ok=True)
+    changed.write_text("changed after build\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "change build input")
+
+    with pytest.raises(AssertionError, match="build inputs changed"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=("src", "pyproject.toml"),
+        )
+
+
+def test_provenance_rejects_a_diverged_recorded_commit(tmp_path: Path) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    _git(repo, "checkout", "--orphan", "unrelated")
+    _git(repo, "rm", "-rf", ".")
+    (repo / "unrelated.txt").write_text("unrelated history\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "unrelated")
+
+    with pytest.raises(AssertionError, match="not an ancestor"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=("src",),
+        )
+
+
+def test_provenance_rejects_a_missing_recorded_commit(tmp_path: Path) -> None:
+    repo, _, archive_sha = _provenance_repo(tmp_path)
+
+    with pytest.raises(AssertionError, match="recorded commit does not exist"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha="0" * 40,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=("src",),
+        )
+
+
+def test_provenance_rejects_an_archive_hash_mismatch(tmp_path: Path) -> None:
+    repo, recorded, _ = _provenance_repo(tmp_path)
+
+    with pytest.raises(AssertionError, match="archive checksum mismatch"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256="0" * 64,
+            build_inputs=("src",),
+        )
+
+
 def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path: Path) -> None:
     provenance = Path(__file__).resolve().parents[2] / "dist" / "provider-linting-build-provenance.json"
 
@@ -419,21 +598,13 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
     assert actual_sha == data["artifacts"]["binary"]["sha256"]
     assert actual_sha == data["artifacts"]["psp"]["sha256"]
     provider_repository = Path(__file__).resolve().parents[2]
-    provider_head = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=provider_repository,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    provider_archive = subprocess.run(
-        ["git", "archive", provider_head],
-        cwd=provider_repository,
-        check=True,
-        capture_output=True,
-    ).stdout
-    assert data["provider_repository_head"] == provider_head
-    assert data["provider_repository_archive_sha256"] == hashlib.sha256(provider_archive).hexdigest()
+    assert_revision_compatible(
+        provider_repository,
+        label="provider",
+        recorded_sha=data["provider_repository_head"],
+        recorded_archive_sha256=data["provider_repository_archive_sha256"],
+        build_inputs=PROVIDER_BUILD_INPUTS,
+    )
     assert [
         "uv",
         "run",
@@ -455,16 +626,13 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
             ).stdout
             == ""
         )
-        head = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=source,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip()
-        assert data["sources"][name]["sha"] == head
-        archive = subprocess.run(["git", "archive", head], cwd=source, check=True, capture_output=True).stdout
-        assert data["sources"][name]["archive_sha256"] == hashlib.sha256(archive).hexdigest()
+        assert_revision_compatible(
+            source,
+            label=name,
+            recorded_sha=data["sources"][name]["sha"],
+            recorded_archive_sha256=data["sources"][name]["archive_sha256"],
+            build_inputs=STACK_SOURCE_BUILD_INPUTS,
+        )
 
     assert any(wheel.startswith("pyvider-") for wheel in data["packaged_wheels"])
     assert any(wheel.startswith("pyvider_components-") for wheel in data["packaged_wheels"])
