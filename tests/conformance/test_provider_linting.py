@@ -138,15 +138,19 @@ SECURITY_RULES = {
 }
 PROVIDER_BUILD_INPUTS = (
     ".python-version",
+    "LICENSE",
     "VERSION",
     "README.md",
+    "buildconfig.toml",
     "pyproject.toml",
     "uv.lock",
     "ci/build-provider-linting-stack.py",
 )
 STACK_SOURCE_BUILD_INPUTS = (
     ".python-version",
+    "LICENSE",
     "README.md",
+    "VERSION",
     "pyproject.toml",
     "uv.lock",
     "src",
@@ -538,6 +542,35 @@ def test_provenance_rejects_runtime_or_build_input_changes(
             recorded_sha=recorded,
             recorded_archive_sha256=archive_sha,
             build_inputs=("src", "pyproject.toml"),
+        )
+
+
+@pytest.mark.parametrize(
+    ("build_inputs", "changed_path"),
+    [
+        pytest.param(PROVIDER_BUILD_INPUTS, "buildconfig.toml", id="provider-buildconfig"),
+        pytest.param(PROVIDER_BUILD_INPUTS, "LICENSE", id="provider-license"),
+        pytest.param(STACK_SOURCE_BUILD_INPUTS, "VERSION", id="source-version"),
+        pytest.param(STACK_SOURCE_BUILD_INPUTS, "LICENSE", id="source-license"),
+    ],
+)
+def test_provenance_scopes_cover_root_packaging_inputs(
+    tmp_path: Path,
+    build_inputs: tuple[str, ...],
+    changed_path: str,
+) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    (repo / changed_path).write_text("changed after build\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "change root packaging input")
+
+    with pytest.raises(AssertionError, match="build inputs changed"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=build_inputs,
         )
 
 
