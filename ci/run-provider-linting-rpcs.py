@@ -10,6 +10,7 @@ import argparse
 import asyncio
 from collections.abc import Iterator
 from contextlib import contextmanager
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -276,15 +277,29 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def diagnostic_record(result: dict[str, Any], diagnostic: pb.Diagnostic) -> dict[str, Any]:
+def diagnostic_record(
+    result: dict[str, Any], diagnostic: pb.Diagnostic, provider_sha256: str
+) -> dict[str, Any]:
     """Convert one wire diagnostic into a stable JSON-lines proof record."""
+    summary_rule = diagnostic.summary.rsplit(" (", 1)
+    if len(summary_rule) != 2 or not summary_rule[1].endswith(")"):
+        raise ValueError(f"diagnostic summary has no rule ID: {diagnostic.summary!r}")
+    kind = {
+        "data_source": "data-source",
+        "ephemeral_resource": "ephemeral",
+        "list_resource": "list",
+        "state_store": "state-store",
+    }.get(result["kind"], result["kind"])
+    attribute = [step.attribute_name for step in diagnostic.attribute.steps]
+    if len(attribute) != 1:
+        raise ValueError(f"diagnostic attribute is not top-level: {diagnostic.summary!r}")
     return {
-        "attribute": [step.attribute_name for step in diagnostic.attribute.steps],
-        "detail": diagnostic.detail,
-        "kind": result["kind"],
-        "name": result["name"],
+        "attribute": attribute[0],
+        "kind": kind,
+        "observed_via": "tofusoup",
+        "provider_sha256": provider_sha256,
+        "rule_id": summary_rule[1][:-1],
         "severity": pb.Diagnostic.Severity.Name(diagnostic.severity).lower(),
-        "summary": diagnostic.summary,
     }
 
 
@@ -403,8 +418,11 @@ async def run(binary: Path, selector: str, working_directory: Path) -> list[dict
         )
         results = await validate_configurations(session, working_directory)
         assert_expected_catalog(results, selector)
+        provider_sha256 = hashlib.sha256(binary.read_bytes()).hexdigest()
         return [
-            diagnostic_record(result, diagnostic) for result in results for diagnostic in result["diagnostics"]
+            diagnostic_record(result, diagnostic, provider_sha256)
+            for result in results
+            for diagnostic in result["diagnostics"]
         ]
     finally:
         await session.stop()

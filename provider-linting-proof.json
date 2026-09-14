@@ -1,0 +1,102 @@
+{
+  "cast": {
+    "path": "provider-linting.cast",
+    "sha256": "c1e56e6caaf05f9fc8599b4ea51b5a5a7fa8e3b74b7c7260145a307eef15b6b1"
+  },
+  "ci": {
+    "repository": null,
+    "run_attempt": null,
+    "run_id": null,
+    "workflow": null
+  },
+  "commands": [
+    "tofu version",
+    "tofu validate",
+    "PYVIDER_LINT=provide-io/pyvider:all tofu validate -lint=all",
+    "PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:insecure-http' tofu validate",
+    "soup stir provider-linting",
+    "uv run python ci/run-provider-linting-rpcs.py --binary \"$PYVIDER_CONFORMANCE_PSP\" --selector provide-io/pyvider:all --format json-lines"
+  ],
+  "components": {
+    "pyvider": {
+      "archive_sha256": "f8f9bbb81e79291140996d5bf2011405b50121ef6520b049d4bb82423361f4fb",
+      "sha": "1314043faddaf36792dbfd3779bbd0fb9b82f53a",
+      "version": "0.7.0"
+    },
+    "pyvider-components": {
+      "archive_sha256": "48b46d93f879bcde9c19d699807eb849ca4eaffe725816d8d3ad647bae0ae154",
+      "sha": "17c74a09cd813e74ed520cbaed5c296ba1e016c6",
+      "version": "0.7.2"
+    },
+    "terraform-provider-pyvider": {
+      "sha": "c331e759d2d0ef048620fd95153e4bd3882390b5",
+      "version": "0.5.0"
+    }
+  },
+  "generated_at": "2026-09-14T06:35:41.265328Z",
+  "opentofu": {
+    "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
+    "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",
+    "version": "1.13.0-beta1"
+  },
+  "provider_binary": {
+    "path": "dist/darwin_arm64/terraform-provider-pyvider_v0.5.0",
+    "sha256": "fed5e69e4d5c02434677b9c1f15c9126b47d222b5ed1c3be5d0a11e7d79e4805"
+  },
+  "rules": [
+    {
+      "id": "provide-io/pyvider:insecure-tls",
+      "kind": "provider",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:world-writable-directory",
+      "kind": "resource",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:insecure-http",
+      "kind": "data-source",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:long-lived-lease",
+      "kind": "ephemeral",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:include-hidden-files",
+      "kind": "list",
+      "observed_via": [
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:long-action-timeout",
+      "kind": "action",
+      "observed_via": [
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:relative-state-store-path",
+      "kind": "state-store",
+      "observed_via": [
+        "tofusoup"
+      ]
+    }
+  ],
+  "schema_version": 1
+}

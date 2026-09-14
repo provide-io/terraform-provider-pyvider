@@ -12,15 +12,53 @@ Usage:
 TARGET_SECONDS defaults to 15.
 """
 
+import argparse
 import json
+import re
 import sys
 from typing import Any
 
 
-def retime(input_path: str, output_path: str, target_duration: float) -> None:
+def redact_event_paths(events: list[Any], paths: list[str]) -> list[Any]:
+    """Redact literal and terminal-wrapped paths while retaining event timing."""
+    combined = "".join(event[2] for event in events)
+    for path in paths:
+        combined = combined.replace(path, "<workspace>")
+        # Rich may hard-wrap a long absolute path at the PTY width, placing
+        # CRLF inside it. Match that rendering too so proof artifacts never
+        # preserve a machine-local path just because the terminal wrapped.
+        wrapped_path = "".join(f"{re.escape(character)}(?:\\r?\\n)?" for character in path)
+        combined = re.sub(wrapped_path, "<workspace>", combined)
+    cursor = 0
+    sanitized_events: list[Any] = []
+    for event in events:
+        end = min(cursor + len(event[2]), len(combined))
+        text = combined[cursor:end]
+        cursor = end
+        if text:
+            sanitized_events.append([event[0], event[1], text])
+    if cursor < len(combined):
+        sanitized_events.append([events[-1][0], events[-1][1], combined[cursor:]])
+    return sanitized_events
+
+
+def retime(
+    input_path: str,
+    output_path: str,
+    target_duration: float,
+    *,
+    title: str | None = None,
+    redact_paths: list[str] | None = None,
+) -> None:
     with open(input_path, encoding="utf-8") as f:
         header = json.loads(f.readline())
         events = [json.loads(line) for line in f]
+
+    if title is not None:
+        header["title"] = title
+
+    if redact_paths:
+        events = redact_event_paths(events, redact_paths)
 
     if not events:
         with open(output_path, "w", encoding="utf-8") as f:
@@ -55,14 +93,20 @@ def retime(input_path: str, output_path: str, target_duration: float) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) < 3:
-        print(
-            f"Usage: {sys.argv[0]} INPUT.cast OUTPUT.cast [TARGET_SECONDS]",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    target = float(sys.argv[3]) if len(sys.argv) > 3 else 15.0
-    retime(sys.argv[1], sys.argv[2], target)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--title")
+    parser.add_argument("--redact-path", action="append", default=[])
+    parser.add_argument("input_path")
+    parser.add_argument("output_path")
+    parser.add_argument("target_seconds", nargs="?", type=float, default=15.0)
+    arguments = parser.parse_args()
+    retime(
+        arguments.input_path,
+        arguments.output_path,
+        arguments.target_seconds,
+        title=arguments.title,
+        redact_paths=arguments.redact_path,
+    )
 
 
 if __name__ == "__main__":

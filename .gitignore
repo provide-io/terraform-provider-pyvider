@@ -442,3 +442,7 @@ release/
 
 # Built release artifacts (out of scope for git)
 terraform-provider-*_v*
+
+# Exact-ref source checkouts and atomic proof-generation staging.
+.stack/
+.provider-linting-proof.*/

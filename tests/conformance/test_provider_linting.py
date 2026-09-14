@@ -239,16 +239,12 @@ def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
     records = [json.loads(line) for line in completed.stdout.splitlines()]
     assert records == [
         {
-            "attribute": ["url"],
-            "detail": (
-                "Plain HTTP may be intentional for a local endpoint, but request data can be "
-                "intercepted or changed. Set url to an https:// address for a safer connection. "
-                "Suppress with !provide-io/pyvider:insecure-http."
-            ),
-            "kind": "data_source",
-            "name": "pyvider_http_api",
+            "attribute": "url",
+            "kind": "data-source",
+            "observed_via": "tofusoup",
+            "provider_sha256": hashlib.sha256(packaged_provider_path.read_bytes()).hexdigest(),
+            "rule_id": "provide-io/pyvider:insecure-http",
             "severity": "warning",
-            "summary": ("HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)"),
         }
     ]
 
