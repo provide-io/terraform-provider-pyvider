@@ -8,10 +8,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
 import subprocess
+import tarfile
 from types import ModuleType
 from typing import Any
 
@@ -137,6 +139,7 @@ SECURITY_RULES = {
     }
 }
 PROVIDER_BUILD_INPUTS = (
+    ".gitattributes",
     ".python-version",
     "LICENSE",
     "VERSION",
@@ -147,6 +150,7 @@ PROVIDER_BUILD_INPUTS = (
     "ci/build-provider-linting-stack.py",
 )
 STACK_SOURCE_BUILD_INPUTS = (
+    ".gitattributes",
     ".python-version",
     "LICENSE",
     "README.md",
@@ -508,6 +512,17 @@ def _provenance_repo(tmp_path: Path) -> tuple[Path, str, str]:
     return repo, recorded, hashlib.sha256(archive).hexdigest()
 
 
+def _archive_names(repository: Path, revision: str) -> set[str]:
+    archive = subprocess.run(
+        ["git", "archive", revision],
+        cwd=repository,
+        check=True,
+        capture_output=True,
+    ).stdout
+    with tarfile.open(fileobj=io.BytesIO(archive)) as stream:
+        return set(stream.getnames())
+
+
 def test_provenance_accepts_a_descendant_with_only_non_build_changes(tmp_path: Path) -> None:
     repo, recorded, archive_sha = _provenance_repo(tmp_path)
     (repo / "docs" / "proof.md").write_text("documented after build\n", encoding="utf-8")
@@ -564,6 +579,34 @@ def test_provenance_scopes_cover_root_packaging_inputs(
     _git(repo, "add", ".")
     _git(repo, "commit", "-m", "change root packaging input")
 
+    with pytest.raises(AssertionError, match="build inputs changed"):
+        assert_revision_compatible(
+            repo,
+            label="fixture",
+            recorded_sha=recorded,
+            recorded_archive_sha256=archive_sha,
+            build_inputs=build_inputs,
+        )
+
+
+@pytest.mark.parametrize(
+    "build_inputs",
+    [
+        pytest.param(PROVIDER_BUILD_INPUTS, id="provider"),
+        pytest.param(STACK_SOURCE_BUILD_INPUTS, id="source"),
+    ],
+)
+def test_provenance_rejects_gitattributes_export_ignore_drift(
+    tmp_path: Path,
+    build_inputs: tuple[str, ...],
+) -> None:
+    repo, recorded, archive_sha = _provenance_repo(tmp_path)
+    (repo / ".gitattributes").write_text("src/runtime.py export-ignore\n", encoding="utf-8")
+    _git(repo, "add", ".gitattributes")
+    _git(repo, "commit", "-m", "change archive attributes")
+
+    assert "src/runtime.py" in _archive_names(repo, recorded)
+    assert "src/runtime.py" not in _archive_names(repo, "HEAD")
     with pytest.raises(AssertionError, match="build inputs changed"):
         assert_revision_compatible(
             repo,
