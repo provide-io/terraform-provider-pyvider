@@ -341,12 +341,18 @@ def _wheel_version(wheels: Sequence[Any], distribution: str) -> str:
     return versions.pop()
 
 
+def _provenance_source(sources: dict[str, Any], name: str) -> dict[str, Any]:
+    source = sources.get(name)
+    if not isinstance(source, dict):
+        raise ValueError(f"build provenance {name} source must be an object")
+    return source
+
+
 def generate_proof(
     *,
     cast_path: Path,
     build_provenance_path: Path,
     output_path: Path,
-    provider_source_sha: str,
     provider_version: str,
     opentofu_archive: str,
     opentofu_archive_sha256: str,
@@ -355,11 +361,14 @@ def generate_proof(
 ) -> dict[str, Any]:
     """Generate schema-v1 proof from checked build provenance and a completed cast."""
     provenance = _load_json_object(build_provenance_path, label="build provenance")
-    _assert_sha(provider_source_sha, label="provider source SHA")
     _assert_hash(opentofu_archive_sha256, label="OpenTofu archive checksum")
-    binary_metadata = provenance.get("artifacts", {}).get("binary")
+    artifacts = provenance.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("build provenance artifacts must be an object")
+    provider_source_sha = _assert_sha(provenance.get("provider_repository_head"), label="provider source SHA")
+    binary_metadata = artifacts.get("binary")
     if not isinstance(binary_metadata, dict):
-        raise ValueError("build provenance has no provider binary")
+        raise ValueError("build provenance binary artifact must be an object")
     relative_binary = binary_metadata.get("path")
     if not isinstance(relative_binary, str):
         raise ValueError("build provenance provider binary path is invalid")
@@ -369,7 +378,9 @@ def generate_proof(
         raise ValueError("provider checksum does not match build provenance")
     sources = provenance.get("sources")
     if not isinstance(sources, dict):
-        raise ValueError("build provenance has no coordinated sources")
+        raise ValueError("build provenance sources must be an object")
+    pyvider_source = _provenance_source(sources, "pyvider")
+    components_source = _provenance_source(sources, "pyvider-components")
     wheels = provenance.get("packaged_wheels")
     if not isinstance(wheels, list):
         raise ValueError("build provenance has no packaged wheel inventory")
@@ -389,13 +400,13 @@ def generate_proof(
             },
             "pyvider": {
                 "version": _wheel_version(wheels, "pyvider"),
-                "sha": sources.get("pyvider", {}).get("sha"),
-                "archive_sha256": sources.get("pyvider", {}).get("archive_sha256"),
+                "sha": pyvider_source.get("sha"),
+                "archive_sha256": pyvider_source.get("archive_sha256"),
             },
             "pyvider-components": {
                 "version": _wheel_version(wheels, "pyvider-components"),
-                "sha": sources.get("pyvider-components", {}).get("sha"),
-                "archive_sha256": sources.get("pyvider-components", {}).get("archive_sha256"),
+                "sha": components_source.get("sha"),
+                "archive_sha256": components_source.get("archive_sha256"),
             },
         },
         "opentofu": {

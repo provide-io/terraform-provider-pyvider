@@ -10,6 +10,7 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import sys
 from types import ModuleType
 from typing import Any
 
@@ -307,7 +308,6 @@ def test_proof_generator_uses_build_provenance_and_exact_schema(tmp_path: Path) 
         cast_path=cast,
         build_provenance_path=provenance,
         output_path=output,
-        provider_source_sha="1" * 40,
         provider_version="0.5.0",
         opentofu_archive="tofu_1.13.0-beta1_linux_amd64.zip",
         opentofu_archive_sha256="6" * 64,
@@ -318,7 +318,7 @@ def test_proof_generator_uses_build_provenance_and_exact_schema(tmp_path: Path) 
     assert json.loads(output.read_text(encoding="utf-8")) == manifest_for(cast) | {
         "ci": {"repository": None, "run_id": None, "run_attempt": None, "workflow": None},
         "components": {
-            "terraform-provider-pyvider": {"version": "0.5.0", "sha": "1" * 40},
+            "terraform-provider-pyvider": {"version": "0.5.0", "sha": "0" * 40},
             "pyvider": {"version": "0.7.0", "sha": "2" * 40, "archive_sha256": "3" * 64},
             "pyvider-components": {
                 "version": "0.7.2",
@@ -335,6 +335,40 @@ def test_proof_generator_uses_build_provenance_and_exact_schema(tmp_path: Path) 
             "sha256": hashlib.sha256(cast.read_bytes()).hexdigest(),
         },
     }
+
+
+def test_proof_generator_rejects_malformed_nested_provenance_without_traceback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    generator = load_script(GENERATOR, "provider_linting_generator_malformed")
+    cast = tmp_path / "provider-linting.cast"
+    provenance = tmp_path / "broken-provenance.json"
+    output = tmp_path / "proof.json"
+    write_cast(cast)
+    provenance.write_text('{"artifacts": []}\n', encoding="utf-8")
+    monkeypatch.setenv("PYVIDER_OPENTOFU_ARCHIVE_SHA256", "6" * 64)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(GENERATOR),
+            "--cast",
+            str(cast),
+            "--build-provenance",
+            str(provenance),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert generator.main() == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "error: build provenance artifacts must be an object\n"
+    assert "Traceback" not in captured.err
+    assert str(tmp_path) not in captured.err
 
 
 def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:

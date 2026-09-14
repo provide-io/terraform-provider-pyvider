@@ -10,7 +10,6 @@ import argparse
 import os
 from pathlib import Path
 import platform
-import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -34,19 +33,11 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     try:
-        provider_source_sha = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=root,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip()
         archive_sha = os.environ["PYVIDER_OPENTOFU_ARCHIVE_SHA256"]
         generate_proof(
             cast_path=args.cast,
             build_provenance_path=args.build_provenance,
             output_path=args.output,
-            provider_source_sha=provider_source_sha,
             provider_version=(root / "VERSION").read_text(encoding="utf-8").strip(),
             opentofu_archive=f"tofu_1.13.0-beta1_{_platform()}.zip",
             opentofu_archive_sha256=archive_sha,
@@ -56,8 +47,11 @@ def main() -> int:
     except KeyError:
         print("error: PYVIDER_OPENTOFU_ARCHIVE_SHA256 is required", file=sys.stderr)
         return 2
-    except (OSError, UnicodeError, ValueError, subprocess.CalledProcessError) as exc:
+    except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except (OSError, UnicodeError):
+        print("error: proof generation failed", file=sys.stderr)
         return 2
     return 0
 

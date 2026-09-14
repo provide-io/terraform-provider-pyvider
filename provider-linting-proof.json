@@ -29,11 +29,11 @@
       "version": "0.7.2"
     },
     "terraform-provider-pyvider": {
-      "sha": "c331e759d2d0ef048620fd95153e4bd3882390b5",
+      "sha": "7516af9da7a35745d93f1fb1349154dd27f3f3a3",
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-14T06:35:41.265328Z",
+  "generated_at": "2026-09-14T06:44:53.117786Z",
   "opentofu": {
     "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
     "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",
