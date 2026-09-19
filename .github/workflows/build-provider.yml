@@ -288,7 +288,7 @@ jobs:
         run: |
           PYVIDER_CONFORMANCE_PSP="$PYVIDER_CONFORMANCE_PSP" ci/record-provider-linting.sh
           uv run python ci/verify-provider-linting-proof.py \
-            provider-linting-proof.json provider-linting.cast
+            provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct-rpc.cast
           uv run pytest tests/proof/test_provider_linting_proof.py -q
           test "$(shasum -a 256 "$PYVIDER_CONFORMANCE_PSP" | awk '{print $1}')" = "$PYVIDER_LINTING_BINARY_SHA256"
 
@@ -297,7 +297,8 @@ jobs:
         with:
           name: provider-linting-proof
           path: |
-            provider-linting.cast
+            provider-linting-opentofu.cast
+            provider-linting-direct-rpc.cast
             provider-linting-proof.json
             dist/provider-linting-build-provenance.json
           if-no-files-found: error

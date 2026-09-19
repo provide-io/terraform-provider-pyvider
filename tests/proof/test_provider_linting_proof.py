@@ -533,6 +533,13 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
+    assert (
+        "provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct-rpc.cast"
+        in proof_job
+    )
+    assert "            provider-linting-opentofu.cast" in proof_job
+    assert "            provider-linting-direct-rpc.cast" in proof_job
+    assert "            provider-linting.cast" not in proof_job
     assert "    env:\n      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider" in proof_job
     assert "      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components" in proof_job
 
