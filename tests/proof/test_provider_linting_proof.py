@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 GENERATOR = ROOT / "ci" / "generate-provider-linting-proof.py"
 VERIFIER = ROOT / "ci" / "verify-provider-linting-proof.py"
 RETIMER = ROOT / "ci" / "retime-cast.py"
+PACER = ROOT / "ci" / "pace-provider-linting-cast.py"
 
 COMMANDS = [
     "tofu version",
@@ -64,6 +65,27 @@ OPENTOFU_COMMANDS = [
 DIRECT_RPC_COMMAND = (
     'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 )
+WALKTHROUGH_COMMANDS = [
+    "uv tool install --refresh tofusoup==0.8.0",
+    "soup --version",
+    *OPENTOFU_COMMANDS,
+    DIRECT_RPC_COMMAND,
+]
+FILM_CASTS = {
+    "opentofu": "provider-linting-opentofu.cast",
+    "direct": "provider-linting-direct.cast",
+    "walkthrough": "provider-linting-walkthrough.cast",
+}
+FILM_COMMANDS = {
+    "opentofu": OPENTOFU_COMMANDS,
+    "direct": [DIRECT_RPC_COMMAND],
+    "walkthrough": WALKTHROUGH_COMMANDS,
+}
+FILM_DURATION_RANGES = {
+    "opentofu": (35, 45),
+    "direct": (50, 65),
+    "walkthrough": (70, 90),
+}
 
 
 def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
@@ -225,6 +247,93 @@ def split_manifest_for(opentofu: Path, direct_rpc: Path) -> dict[str, Any]:
     return manifest
 
 
+def film_cast_text(lane: str) -> str:
+    commands = FILM_COMMANDS[lane]
+    if lane == "opentofu":
+        statements = [
+            "Direct provider validation: not requested",
+            "OpenTofu native linting: valid",
+            "Experimental linting enabled",
+        ]
+    elif lane == "direct":
+        statements = [
+            "Direct provider validation: 7/7 cases",
+            *(rule_id for rule_id, _kind, _observed_via, _attribute in RULES),
+        ]
+    else:
+        statements = ["Public walkthrough: OpenTofu native and direct provider validation"]
+    return "\n".join([*(f"$ {command}" for command in commands), *statements]) + "\n"
+
+
+def write_film_cast(path: Path, *, lane: str, timestamp: float = 0.5, text: str | None = None) -> None:
+    write_split_cast(
+        path,
+        title={
+            "opentofu": "Pyvider linting — OpenTofu demonstration",
+            "direct": "Pyvider linting — direct provider validation",
+            "walkthrough": "Pyvider provider-native linting proof",
+        }[lane],
+        text=text or film_cast_text(lane),
+    )
+    if timestamp != 0.5:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        event = json.loads(lines[1])
+        event[0] = timestamp
+        path.write_text("\n".join([lines[0], json.dumps(event)]) + "\n", encoding="utf-8")
+
+
+def film_manifest_for(casts: dict[str, Path]) -> dict[str, Any]:
+    """Schema-v3 fixture; keep manifest_for() as the legacy-v1 compatibility fixture."""
+    manifest = manifest_for(casts["opentofu"])
+    manifest["schema_version"] = 3
+    manifest["commands"] = FILM_COMMANDS
+    manifest.pop("cast")
+    manifest["casts"] = {
+        lane: {
+            "path": FILM_CASTS[lane],
+            "sha256": hashlib.sha256(cast.read_bytes()).hexdigest(),
+        }
+        for lane, cast in casts.items()
+    }
+    return manifest
+
+
+def write_film_proof(tmp_path: Path) -> tuple[Path, dict[str, Path]]:
+    casts = {lane: tmp_path / filename for lane, filename in FILM_CASTS.items()}
+    for lane, cast in casts.items():
+        write_film_cast(cast, lane=lane)
+    manifest = tmp_path / "provider-linting-proof.json"
+    manifest.write_text(json.dumps(film_manifest_for(casts), indent=2) + "\n", encoding="utf-8")
+    return manifest, casts
+
+
+def verify_films(module: ModuleType, manifest: Path, casts: dict[str, Path]) -> None:
+    module.verify_split_proof(manifest, casts["opentofu"], casts["direct"], casts["walkthrough"])
+
+
+def write_film_manifest(path: Path, manifest: dict[str, Any]) -> None:
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
+def refresh_film_cast_hash(manifest: dict[str, Any], lane: str, cast: Path) -> None:
+    manifest["casts"][lane]["sha256"] = hashlib.sha256(cast.read_bytes()).hexdigest()
+
+
+def write_cast_events(path: Path, events: list[list[Any]]) -> None:
+    header = {
+        "version": 2,
+        "width": 120,
+        "height": 40,
+        "timestamp": 1_789_344_000,
+        "title": "Pyvider provider-native linting proof",
+        "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
+    }
+    path.write_text(
+        "\n".join([json.dumps(header), *(json.dumps(event) for event in events)]) + "\n",
+        encoding="utf-8",
+    )
+
+
 def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) -> None:
     verifier = load_script(VERIFIER, "provider_linting_verifier_split")
     opentofu = tmp_path / "provider-linting-opentofu.cast"
@@ -272,6 +381,151 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
     manifest.write_text(json.dumps(split_manifest_for(opentofu, direct_rpc)), encoding="utf-8")
     with pytest.raises(ValueError, match="direct provider recording"):
         verifier.verify_split_proof(manifest, opentofu, direct_rpc)
+
+
+def test_schema_v3_fixture_declares_three_public_proof_films(tmp_path: Path) -> None:
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+
+    assert data["schema_version"] == 3
+    assert set(data["casts"]) == {"opentofu", "direct", "walkthrough"}
+    assert data["commands"] == FILM_COMMANDS
+    for lane, cast in casts.items():
+        assert data["casts"][lane] == {
+            "path": cast.name,
+            "sha256": hashlib.sha256(cast.read_bytes()).hexdigest(),
+        }
+
+
+@pytest.mark.parametrize(
+    ("missing_kind", "lane"),
+    [
+        ("cast", "opentofu"),
+        ("cast", "direct"),
+        ("cast", "walkthrough"),
+        ("hash", "opentofu"),
+        ("hash", "direct"),
+        ("hash", "walkthrough"),
+    ],
+)
+def test_schema_v3_proof_requires_each_checked_cast_and_hash(
+    tmp_path: Path, missing_kind: str, lane: str
+) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_metadata")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    if missing_kind == "cast":
+        data["casts"].pop(lane)
+    else:
+        data["casts"][lane].pop("sha256")
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="film cast metadata"):
+        verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.parametrize("lane", tuple(FILM_COMMANDS))
+def test_schema_v3_proof_requires_exact_public_command_catalog(tmp_path: Path, lane: str) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_commands")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    data["commands"][lane][0] = "public command intentionally changed"
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="command catalog"):
+        verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.parametrize(
+    ("lane", "command"),
+    [(lane, command) for lane, commands in FILM_COMMANDS.items() for command in commands],
+)
+def test_schema_v3_checked_films_require_each_exact_public_command(
+    tmp_path: Path, lane: str, command: str
+) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_cast_commands")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    write_film_cast(
+        casts[lane],
+        lane=lane,
+        text=film_cast_text(lane).replace(f"$ {command}", "$ command intentionally omitted"),
+    )
+    refresh_film_cast_hash(data, lane, casts[lane])
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="missing command"):
+        verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.parametrize("lane", tuple(FILM_CASTS))
+def test_schema_v3_proof_rejects_internal_rpc_driver_in_every_checked_film(tmp_path: Path, lane: str) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_internal_command")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    write_film_cast(
+        casts[lane],
+        lane=lane,
+        text=film_cast_text(lane) + "$ uv run python ci/run-provider-linting-rpcs.py\n",
+    )
+    refresh_film_cast_hash(data, lane, casts[lane])
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="internal proof command"):
+        verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.parametrize(
+    ("lane", "timestamp"),
+    [
+        ("opentofu", 34),
+        ("opentofu", 46),
+        ("direct", 49),
+        ("direct", 66),
+        ("walkthrough", 69),
+        ("walkthrough", 91),
+    ],
+)
+def test_schema_v3_proof_rejects_out_of_range_film_duration(
+    tmp_path: Path, lane: str, timestamp: float
+) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_duration")
+    manifest, casts = write_film_proof(tmp_path)
+    write_film_cast(casts[lane], lane=lane, timestamp=timestamp, text="duration probe\n")
+    data = film_manifest_for(casts)
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="duration"):
+        verify_films(verifier, manifest, casts)
+
+
+def test_pacer_preserves_multiline_cast_bytes_and_walkthrough_duration(tmp_path: Path) -> None:
+    source = tmp_path / "source.cast"
+    paced = tmp_path / "paced.cast"
+    source_events: list[list[Any]] = [
+        [0.1, "o", "first line\\n"],
+        [0.2, "o", "second line: ✓\\n"],
+        [0.3, "o", "third line\\n"],
+    ]
+    write_cast_events(source, source_events)
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), str(source), str(paced), "--profile", "walkthrough"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    paced_events = [json.loads(line) for line in paced.read_text(encoding="utf-8").splitlines()[1:]]
+    source_bytes = b"".join(event[2].encode("utf-8") for event in source_events)
+    paced_bytes = b"".join(event[2].encode("utf-8") for event in paced_events)
+    timestamps = [event[0] for event in paced_events]
+
+    assert paced_bytes == source_bytes
+    assert timestamps == sorted(timestamps)
+    lower, upper = FILM_DURATION_RANGES["walkthrough"]
+    assert lower <= timestamps[-1] <= upper
 
 
 def test_proof_valid_fixture_reports_all_seven_rules(tmp_path: Path) -> None:
