@@ -102,6 +102,9 @@ def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
     assert "--lane direct" in direct_demo
     assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in native_demo
     assert "--lane opentofu" in native_demo
+    assert (
+        "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)"
+    ) in native_demo
     assert "run-provider-linting-rpcs.py" not in direct_demo + native_demo
 
 

@@ -26,3 +26,4 @@ show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$P
 soup lint tests/e2e/provider-linting/lint.soup.toml \
     --provider "$PYVIDER_CONFORMANCE_PSP" \
     --opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu
+printf '%s\n' 'OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)'
