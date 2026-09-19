@@ -549,9 +549,9 @@ def test_pacer_preserves_multiline_cast_bytes_and_walkthrough_duration(tmp_path:
     source = tmp_path / "source.cast"
     paced = tmp_path / "paced.cast"
     source_events: list[list[Any]] = [
-        [0.1, "o", "first line\\n"],
-        [0.2, "o", "second line: ✓\\n"],
-        [0.3, "o", "third line\\n"],
+        [0.1, "o", "first line\n"],
+        [0.2, "o", "second line: ✓\nsecond continuation\n"],
+        [0.3, "o", "third line\n"],
     ]
     write_cast_events(source, source_events)
 
