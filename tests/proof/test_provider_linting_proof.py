@@ -301,7 +301,8 @@ def film_manifest_for(casts: dict[str, Path]) -> dict[str, Any]:
 def write_film_proof(tmp_path: Path) -> tuple[Path, dict[str, Path]]:
     casts = {lane: tmp_path / filename for lane, filename in FILM_CASTS.items()}
     for lane, cast in casts.items():
-        write_film_cast(cast, lane=lane)
+        lower, upper = FILM_DURATION_RANGES[lane]
+        write_film_cast(cast, lane=lane, timestamp=(lower + upper) / 2)
     manifest = tmp_path / "provider-linting-proof.json"
     manifest.write_text(json.dumps(film_manifest_for(casts), indent=2) + "\n", encoding="utf-8")
     return manifest, casts
@@ -397,6 +398,13 @@ def test_schema_v3_fixture_declares_three_public_proof_films(tmp_path: Path) -> 
         }
 
 
+def test_schema_v3_proof_accepts_an_unmodified_valid_three_film_fixture(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_valid")
+    manifest, casts = write_film_proof(tmp_path)
+
+    verify_films(verifier, manifest, casts)
+
+
 @pytest.mark.parametrize(
     ("missing_kind", "lane"),
     [
@@ -421,6 +429,17 @@ def test_schema_v3_proof_requires_each_checked_cast_and_hash(
     write_film_manifest(manifest, data)
 
     with pytest.raises(ValueError, match="film cast metadata"):
+        verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.parametrize("lane", tuple(FILM_CASTS))
+def test_schema_v3_proof_rejects_a_tampered_checked_cast_checksum(tmp_path: Path, lane: str) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_tampered_cast")
+    manifest, casts = write_film_proof(tmp_path)
+    with casts[lane].open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps([FILM_DURATION_RANGES[lane][1], "o", "tampered"]) + "\n")
+
+    with pytest.raises(ValueError, match="cast checksum"):
         verify_films(verifier, manifest, casts)
 
 
@@ -491,12 +510,39 @@ def test_schema_v3_proof_rejects_out_of_range_film_duration(
 ) -> None:
     verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_duration")
     manifest, casts = write_film_proof(tmp_path)
-    write_film_cast(casts[lane], lane=lane, timestamp=timestamp, text="duration probe\n")
+    write_film_cast(casts[lane], lane=lane, timestamp=timestamp)
     data = film_manifest_for(casts)
     write_film_manifest(manifest, data)
 
     with pytest.raises(ValueError, match="duration"):
         verify_films(verifier, manifest, casts)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason="schema-v3 verification has not extended verify_split_proof to the walkthrough cast",
+)
+@pytest.mark.parametrize(
+    ("lane", "timestamp"),
+    [
+        ("opentofu", 35),
+        ("opentofu", 45),
+        ("direct", 50),
+        ("direct", 65),
+        ("walkthrough", 70),
+        ("walkthrough", 90),
+    ],
+)
+def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
+    tmp_path: Path, lane: str, timestamp: float
+) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_duration_boundaries")
+    manifest, casts = write_film_proof(tmp_path)
+    write_film_cast(casts[lane], lane=lane, timestamp=timestamp)
+    write_film_manifest(manifest, film_manifest_for(casts))
+
+    verify_films(verifier, manifest, casts)
 
 
 def test_pacer_preserves_multiline_cast_bytes_and_walkthrough_duration(tmp_path: Path) -> None:
