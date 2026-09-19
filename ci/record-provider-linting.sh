@@ -46,51 +46,74 @@ if ! "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-beta1'; then
     exit 2
 fi
 
-raw_cast=$staging/provider-linting.raw.cast
-checked_cast=$staging/provider-linting.cast
+raw_opentofu_cast=$staging/provider-linting-opentofu.raw.cast
+checked_opentofu_cast=$staging/provider-linting-opentofu.cast
+raw_direct_rpc_cast=$staging/provider-linting-direct-rpc.raw.cast
+checked_direct_rpc_cast=$staging/provider-linting-direct-rpc.cast
 checked_manifest=$staging/provider-linting-proof.json
-demo_root=$staging/demo
+opentofu_demo_root=$staging/opentofu-demo
+direct_rpc_demo_root=$staging/direct-rpc-demo
 
 PYVIDER_OPENTOFU_BINARY="$tofu" \
-PYVIDER_LINTING_DEMO_ROOT="$demo_root" \
+PYVIDER_LINTING_DEMO_ROOT="$opentofu_demo_root" \
 python3 "$repo_root/ci/record-to-cast.py" \
-    --title 'Pyvider provider-native linting proof' --width 120 --height 40 \
-    "$raw_cast" "$repo_root/ci/provider-linting-demo.sh"
+    --title 'Pyvider linting — OpenTofu demonstration' --width 120 --height 40 \
+    "$raw_opentofu_cast" "$repo_root/ci/provider-linting-demo.sh"
 
 python3 "$repo_root/ci/retime-cast.py" \
-    --title 'Pyvider provider-native linting proof' \
+    --title 'Pyvider linting — OpenTofu demonstration' \
     --redact-path "$repo_root" --redact-path "$staging" \
-    "$raw_cast" "$checked_cast" 35
+    "$raw_opentofu_cast" "$checked_opentofu_cast" 22
+
+PYVIDER_LINTING_DEMO_ROOT="$direct_rpc_demo_root" \
+python3 "$repo_root/ci/record-to-cast.py" \
+    --title 'Pyvider linting — direct RPC coverage' --width 120 --height 40 \
+    "$raw_direct_rpc_cast" "$repo_root/ci/provider-linting-direct-rpc-demo.sh"
+
+python3 "$repo_root/ci/retime-cast.py" \
+    --title 'Pyvider linting — direct RPC coverage' \
+    --redact-path "$repo_root" --redact-path "$staging" \
+    "$raw_direct_rpc_cast" "$checked_direct_rpc_cast" 14
 
 PYVIDER_OPENTOFU_ARCHIVE_SHA256="$archive_sha" \
 uv run python "$repo_root/ci/generate-provider-linting-proof.py" \
-    --cast "$checked_cast" --build-provenance "$provenance" --output "$checked_manifest"
-uv run python "$repo_root/ci/verify-provider-linting-proof.py" "$checked_manifest" "$checked_cast"
+    --opentofu-cast "$checked_opentofu_cast" --direct-rpc-cast "$checked_direct_rpc_cast" \
+    --build-provenance "$provenance" --output "$checked_manifest"
+uv run python "$repo_root/ci/verify-provider-linting-proof.py" \
+    "$checked_manifest" "$checked_opentofu_cast" "$checked_direct_rpc_cast"
 
 if [[ "$(binary_sha)" != "$expected_sha" ]]; then
     printf '%s\n' 'error: provider binary checksum changed during recording' >&2
     exit 2
 fi
 
-backup_cast=$staging/original.cast
+backup_opentofu_cast=$staging/original-opentofu.cast
+backup_direct_rpc_cast=$staging/original-direct-rpc.cast
 backup_manifest=$staging/original.json
-[[ ! -e "$repo_root/provider-linting.cast" ]] || cp "$repo_root/provider-linting.cast" "$backup_cast"
+[[ ! -e "$repo_root/provider-linting-opentofu.cast" ]] || cp "$repo_root/provider-linting-opentofu.cast" "$backup_opentofu_cast"
+[[ ! -e "$repo_root/provider-linting-direct-rpc.cast" ]] || cp "$repo_root/provider-linting-direct-rpc.cast" "$backup_direct_rpc_cast"
 [[ ! -e "$repo_root/provider-linting-proof.json" ]] || cp "$repo_root/provider-linting-proof.json" "$backup_manifest"
-published_cast=false
+published_opentofu_cast=false
+published_direct_rpc_cast=false
 published_manifest=false
 rollback() {
     if [[ "$published_manifest" == true ]]; then
         if [[ -e "$backup_manifest" ]]; then cp "$backup_manifest" "$repo_root/provider-linting-proof.json"; else rm -f "$repo_root/provider-linting-proof.json"; fi
     fi
-    if [[ "$published_cast" == true ]]; then
-        if [[ -e "$backup_cast" ]]; then cp "$backup_cast" "$repo_root/provider-linting.cast"; else rm -f "$repo_root/provider-linting.cast"; fi
+    if [[ "$published_direct_rpc_cast" == true ]]; then
+        if [[ -e "$backup_direct_rpc_cast" ]]; then cp "$backup_direct_rpc_cast" "$repo_root/provider-linting-direct-rpc.cast"; else rm -f "$repo_root/provider-linting-direct-rpc.cast"; fi
+    fi
+    if [[ "$published_opentofu_cast" == true ]]; then
+        if [[ -e "$backup_opentofu_cast" ]]; then cp "$backup_opentofu_cast" "$repo_root/provider-linting-opentofu.cast"; else rm -f "$repo_root/provider-linting-opentofu.cast"; fi
     fi
 }
 trap 'rollback; rm -rf "$staging"' ERR
-mv "$checked_cast" "$repo_root/provider-linting.cast"
-published_cast=true
+mv "$checked_opentofu_cast" "$repo_root/provider-linting-opentofu.cast"
+published_opentofu_cast=true
+mv "$checked_direct_rpc_cast" "$repo_root/provider-linting-direct-rpc.cast"
+published_direct_rpc_cast=true
 mv "$checked_manifest" "$repo_root/provider-linting-proof.json"
 published_manifest=true
 trap - ERR
 
-printf 'Published checked proof: provider-linting.cast + provider-linting-proof.json\n'
+printf 'Published checked proof: provider-linting-opentofu.cast + provider-linting-direct-rpc.cast + provider-linting-proof.json\n'

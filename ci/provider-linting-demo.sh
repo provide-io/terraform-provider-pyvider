@@ -24,8 +24,6 @@ esac
 
 mkdir -p "$demo_root" "$demo_root/mirror/registry.opentofu.org/provide-io/pyvider/$version/${os}_${arch}"
 cp "$repo_root/tests/e2e/provider-linting/main.tf" "$demo_root/main.tf"
-cp -R "$repo_root/tests/proof/fixtures/provider-linting" "$demo_root/provider-linting"
-ln -s "$repo_root/ci" "$demo_root/ci"
 provider_copy="$demo_root/mirror/registry.opentofu.org/provide-io/pyvider/$version/${os}_${arch}/terraform-provider-pyvider_v$version"
 cp "$PYVIDER_CONFORMANCE_PSP" "$provider_copy"
 chmod +x "$provider_copy"
@@ -107,14 +105,3 @@ PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:insecure-http' tofu val
 assert_rule_set 'provide-io/pyvider:all,!provide-io/pyvider:insecure-http' \
     'provide-io/pyvider:insecure-tls,provide-io/pyvider:world-writable-directory,provide-io/pyvider:long-lived-lease'
 printf '%s\n' 'PASS: exact exclusion removed provide-io/pyvider:insecure-http'
-
-show_command 'soup stir provider-linting'
-env -u PYVIDER_LINT soup stir provider-linting
-printf '%s\n' 'TofuSoup lifecycle: PASS (same packaged provider; not direct RPC coverage)'
-
-# The literal variable is part of the reproducible command shown in the cast.
-# shellcheck disable=SC2016
-show_command 'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" --selector provide-io/pyvider:all --format json-lines'
-uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" \
-    --selector provide-io/pyvider:all --format json-lines
-printf '%s\n' 'TofuSoup direct RPC proof: 7/7 provider lint rules passed'

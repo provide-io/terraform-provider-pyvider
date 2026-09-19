@@ -14,9 +14,9 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from provider_linting_proof import generate_proof, github_environment, utc_now
+from provider_linting_proof import generate_proof, generate_split_proof, github_environment, utc_now
 
-__all__ = ["generate_proof"]
+__all__ = ["generate_proof", "generate_split_proof"]
 
 
 def _platform() -> str:
@@ -27,15 +27,17 @@ def _platform() -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cast", type=Path, required=True)
+    parser.add_argument("--opentofu-cast", type=Path, required=True)
+    parser.add_argument("--direct-rpc-cast", type=Path, required=True)
     parser.add_argument("--build-provenance", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     try:
         archive_sha = os.environ["PYVIDER_OPENTOFU_ARCHIVE_SHA256"]
-        generate_proof(
-            cast_path=args.cast,
+        generate_split_proof(
+            opentofu_cast_path=args.opentofu_cast,
+            direct_rpc_cast_path=args.direct_rpc_cast,
             build_provenance_path=args.build_provenance,
             output_path=args.output,
             provider_version=(root / "VERSION").read_text(encoding="utf-8").strip(),

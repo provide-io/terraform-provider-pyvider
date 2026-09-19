@@ -25,10 +25,16 @@ proves that the deliberately unreachable HTTP data source is never contacted.
 OpenTofu declares action, list-resource, and state-store validation RPCs but
 does not currently call them from core. TofuSoup directly proves 7/7 paths
 against the same packaged binary. The direct RPC suite covers the preceding
-four paths plus list resource, action, and state store. The separate lifecycle
-fixture at [`tests/proof/fixtures/provider-linting/main.tf`][tofusoup-fixture]
-keeps the recorded `soup stir provider-linting` demonstration side-effect-free;
-the recording does not mislabel that lifecycle command as seven-path coverage.
+four paths plus list resource, action, and state store.
+
+The primary recording is the OpenTofu demonstration. It shows the ordinary
+validation flow and the four paths OpenTofu currently reaches; it does not show
+the generic `soup stir` lifecycle dashboard or direct-RPC output. The technical recording is direct RPC coverage. It shows seven readable rule observations
+through the same packaged provider, including the three paths OpenTofu core
+does not reach today. The lifecycle fixture at
+[`tests/proof/fixtures/provider-linting/main.tf`][tofusoup-fixture] remains
+normal conformance coverage, but it answers a different question and is not a
+linting recording.
 
 | Component path | Rule | OpenTofu | TofuSoup direct |
 | --- | --- | ---: | ---: |
@@ -140,28 +146,35 @@ uv run python ci/run-provider-linting-rpcs.py \
 
 ## Record and verify the checked artifacts
 
-The recorder runs six real commands, refuses a binary other than the one named
-by the build provenance, and verifies the checksum before and after recording.
-It publishes both checked artifacts only after verification and rolls back ordinary publication failures:
+The recorder runs the OpenTofu and direct-RPC demonstrations against one named
+package, refuses a binary other than the one named by build provenance, and
+verifies its checksum before and after recording. It publishes both checked artifacts only after verification and rolls back ordinary publication failures:
 
-- [`provider-linting.cast`][cast] — a deterministic asciinema v2 recording.
+- [`provider-linting-opentofu.cast`][opentofu-cast] — the deterministic
+  OpenTofu demonstration.
+- [`provider-linting-direct-rpc.cast`][direct-rpc-cast] — the deterministic
+  seven-path technical recording.
 - [`provider-linting-proof.json`][manifest] — versions, exact source revisions
-  and archive hashes, binary and cast checksums, the command list, the seven-rule
-  catalog, observation channels, OpenTofu archive checksum, and CI identity.
+and archive hashes, binary and recording checksums, the command list, the
+seven-rule catalog, observation channels, OpenTofu archive checksum, and CI
+identity.
 
 ```shell
 PYVIDER_CONFORMANCE_PSP="$lint_binary" ci/record-provider-linting.sh
 
 uv run python ci/verify-provider-linting-proof.py \
-  provider-linting-proof.json provider-linting.cast
+  provider-linting-proof.json \
+  provider-linting-opentofu.cast \
+  provider-linting-direct-rpc.cast
 
 uv run pytest tests/proof -q
 ```
 
-The verifier parses the complete cast after stripping terminal controls. It
-requires all six commands, default-off and exact-exclusion evidence, the four-
-path OpenTofu statement, all seven TofuSoup JSON observations, matching artifact
-checksums, the pinned beta, and provenance without secrets or local paths.
+The verifier parses both complete casts after stripping terminal controls. It
+requires the OpenTofu commands, default-off and exact-exclusion evidence, the
+four-path statement, all seven readable direct-RPC observations, matching
+artifact checksums, the pinned beta, and provenance without secrets or local
+paths.
 
 ## Retrieve the exact CI proof
 
@@ -182,7 +195,8 @@ gh run download "$proof_run_id" \
 
 uv run python ci/verify-provider-linting-proof.py \
   "$proof_dir/provider-linting-proof.json" \
-  "$proof_dir/provider-linting.cast"
+  "$proof_dir/provider-linting-opentofu.cast" \
+  "$proof_dir/provider-linting-direct-rpc.cast"
 ```
 
 Before publishing the downloaded files, also compare the manifest's provider,
@@ -201,7 +215,8 @@ IDs, groups, selectors, and documentation remain stable.
 
 [opentofu-fixture]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/tests/e2e/provider-linting/main.tf
 [tofusoup-fixture]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/tests/proof/fixtures/provider-linting/main.tf
-[cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting.cast
+[opentofu-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-opentofu.cast
+[direct-rpc-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-direct-rpc.cast
 [manifest]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-proof.json
 [rfc]: https://github.com/opentofu/opentofu/blob/main/rfc/20260406-linting.md
 [tracker]: https://github.com/opentofu/opentofu/issues/4310

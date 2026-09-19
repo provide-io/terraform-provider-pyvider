@@ -27,6 +27,17 @@ COMMANDS = [
         "--selector provide-io/pyvider:all --format json-lines"
     ),
 ]
+SPLIT_COMMANDS = {
+    "opentofu": COMMANDS[:4],
+    "direct_rpc": [
+        'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" '
+        "--selector provide-io/pyvider:all --format terminal"
+    ],
+}
+SPLIT_CASTS = {
+    "opentofu": "provider-linting-opentofu.cast",
+    "direct_rpc": "provider-linting-direct-rpc.cast",
+}
 RULES: list[dict[str, Any]] = [
     {
         "id": "provide-io/pyvider:insecure-tls",
@@ -86,7 +97,12 @@ _SERIALIZED_SECRET = re.compile(
     r"[a-z0-9_-]*[\"']?\s*[:=]"
 )
 _CAST_HEADER_KEYS = {"version", "width", "height", "timestamp", "title", "env"}
-_CAST_TITLES = {"pyvider conformance suite", "Pyvider provider-native linting proof"}
+_CAST_TITLES = {
+    "pyvider conformance suite",
+    "Pyvider provider-native linting proof",
+    "Pyvider linting — OpenTofu demonstration",
+    "Pyvider linting — direct RPC coverage",
+}
 _CAST_ENV = {"TERM": "xterm-256color", "SHELL": "/bin/bash"}
 
 
@@ -261,6 +277,18 @@ def _validate_cast_metadata(value: Any) -> None:
     _assert_hash(value["sha256"], label="cast checksum")
 
 
+def _validate_split_casts(value: Any) -> None:
+    if not isinstance(value, dict) or set(value) != set(SPLIT_CASTS):
+        raise ValueError("split cast metadata is incomplete")
+    for name, expected_path in SPLIT_CASTS.items():
+        metadata = value[name]
+        if not isinstance(metadata, dict) or set(metadata) != {"path", "sha256"}:
+            raise ValueError(f"invalid {name} cast metadata")
+        if metadata["path"] != expected_path:
+            raise ValueError(f"{name} cast path is invalid")
+        _assert_hash(metadata["sha256"], label=f"{name} cast checksum")
+
+
 def _validate_manifest(manifest: dict[str, Any]) -> None:
     required = {
         "schema_version",
@@ -287,6 +315,34 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
         raise ValueError("command catalog does not match the checked proof")
     _validate_rules(manifest["rules"])
     _validate_cast_metadata(manifest["cast"])
+
+
+def _validate_split_manifest(manifest: dict[str, Any]) -> None:
+    required = {
+        "schema_version",
+        "generated_at",
+        "ci",
+        "components",
+        "opentofu",
+        "provider_binary",
+        "commands",
+        "rules",
+        "casts",
+    }
+    if set(manifest) != required:
+        raise ValueError("manifest schema keys do not match version 2")
+    if manifest["schema_version"] != 2:
+        raise ValueError("manifest schema version must be 2")
+    _validate_generated_at(manifest["generated_at"])
+    if not isinstance(manifest["ci"], dict):
+        raise ValueError("ci identity must be an object")
+    _validate_components(manifest["components"])
+    _validate_opentofu(manifest["opentofu"])
+    _validate_provider_binary(manifest["provider_binary"])
+    if manifest["commands"] != SPLIT_COMMANDS:
+        raise ValueError("command catalog does not match the split proof")
+    _validate_rules(manifest["rules"])
+    _validate_split_casts(manifest["casts"])
 
 
 def _parse_observations(output: str) -> list[dict[str, Any]]:
@@ -340,6 +396,39 @@ def _validate_cast(output: str, manifest: dict[str, Any]) -> list[str]:
     return [record["rule_id"] for record in observations]
 
 
+def _validate_opentofu_cast(output: str) -> None:
+    for command in SPLIT_COMMANDS["opentofu"]:
+        if f"$ {command}" not in output:
+            raise ValueError(f"missing command from OpenTofu recording: {command}")
+    for statement in (
+        "PASS: provider linting default-off (0 provider lint diagnostics)",
+        "PASS: exact exclusion removed provide-io/pyvider:insecure-http",
+        "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
+    ):
+        if statement not in output:
+            raise ValueError(f"missing proof statement from OpenTofu recording: {statement}")
+    if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
+        raise ValueError(f"OpenTofu recording does not show the exact version v{OPENTOFU_VERSION}")
+    if "soup stir" in output or "run-provider-linting-rpcs.py" in output:
+        raise ValueError("OpenTofu recording contains unrelated proof output")
+
+
+def _validate_direct_rpc_cast(output: str, manifest: dict[str, Any]) -> list[str]:
+    command = SPLIT_COMMANDS["direct_rpc"][0]
+    if f"$ {command}" not in output:
+        raise ValueError(f"missing command from direct RPC recording: {command}")
+    if "Direct provider lint coverage (TofuSoup RPC driver)" not in output:
+        raise ValueError("direct RPC recording has no coverage heading")
+    expected_rows = [f"✓ {rule['kind']} | {rule['attribute']} | {rule['id']} | warning" for rule in RULES]
+    if any(row not in output for row in expected_rows):
+        raise ValueError("direct RPC recording does not contain the seven-rule catalog")
+    if f"Package SHA-256: {manifest['provider_binary']['sha256']}" not in output:
+        raise ValueError("direct RPC recording has the wrong package checksum")
+    if "Direct validation RPC coverage: 7/7 rules observed" not in output:
+        raise ValueError("direct RPC recording has no 7/7 summary")
+    return [rule["id"] for rule in RULES]
+
+
 def verify_proof(manifest_path: Path, cast_path: Path) -> list[str]:
     """Validate the manifest and every semantic assertion in the complete cast."""
     manifest = _load_json_object(manifest_path, label="proof manifest")
@@ -349,6 +438,20 @@ def verify_proof(manifest_path: Path, cast_path: Path) -> list[str]:
     output = _cast_output(cast_path)
     _assert_no_leaks(manifest, output)
     return _validate_cast(output, manifest)
+
+
+def verify_split_proof(manifest_path: Path, opentofu_cast_path: Path, direct_rpc_cast_path: Path) -> list[str]:
+    """Validate both purpose-specific recordings from one schema-v2 manifest."""
+    manifest = _load_json_object(manifest_path, label="split proof manifest")
+    _validate_split_manifest(manifest)
+    for name, path in (("opentofu", opentofu_cast_path), ("direct_rpc", direct_rpc_cast_path)):
+        if sha256_file(path) != manifest["casts"][name]["sha256"]:
+            raise ValueError(f"{name} cast checksum does not match manifest")
+    opentofu_output = _cast_output(opentofu_cast_path)
+    direct_rpc_output = _cast_output(direct_rpc_cast_path)
+    _assert_no_leaks(manifest, opentofu_output + "\n" + direct_rpc_output)
+    _validate_opentofu_cast(opentofu_output)
+    return _validate_direct_rpc_cast(direct_rpc_output, manifest)
 
 
 def _wheel_version(wheels: Sequence[Any], distribution: str) -> str:
@@ -452,6 +555,91 @@ def generate_proof(
     cast_output = _cast_output(cast_path)
     _assert_no_leaks(manifest, cast_output)
     _validate_cast(cast_output, manifest)
+    output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return manifest
+
+
+def generate_split_proof(
+    *,
+    opentofu_cast_path: Path,
+    direct_rpc_cast_path: Path,
+    build_provenance_path: Path,
+    output_path: Path,
+    provider_version: str,
+    opentofu_archive: str,
+    opentofu_archive_sha256: str,
+    generated_at: str,
+    ci_environment: Mapping[str, str],
+) -> dict[str, Any]:
+    """Generate schema-v2 proof from separate OpenTofu and direct-RPC casts."""
+    provenance = _load_json_object(build_provenance_path, label="build provenance")
+    _assert_hash(opentofu_archive_sha256, label="OpenTofu archive checksum")
+    artifacts = provenance.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("build provenance artifacts must be an object")
+    provider_source_sha = _assert_sha(provenance.get("provider_repository_head"), label="provider source SHA")
+    binary_metadata = artifacts.get("binary")
+    if not isinstance(binary_metadata, dict):
+        raise ValueError("build provenance binary artifact must be an object")
+    relative_binary = binary_metadata.get("path")
+    if not isinstance(relative_binary, str):
+        raise ValueError("build provenance provider binary path is invalid")
+    binary_path = build_provenance_path.parent / relative_binary
+    expected_binary_sha = _assert_hash(binary_metadata.get("sha256"), label="provider checksum")
+    if sha256_file(binary_path) != expected_binary_sha:
+        raise ValueError("provider checksum does not match build provenance")
+    sources = provenance.get("sources")
+    if not isinstance(sources, dict):
+        raise ValueError("build provenance sources must be an object")
+    pyvider_source = _provenance_source(sources, "pyvider")
+    components_source = _provenance_source(sources, "pyvider-components")
+    wheels = provenance.get("packaged_wheels")
+    if not isinstance(wheels, list):
+        raise ValueError("build provenance has no packaged wheel inventory")
+    manifest: dict[str, Any] = {
+        "schema_version": 2,
+        "generated_at": generated_at,
+        "ci": {
+            "repository": ci_environment.get("GITHUB_REPOSITORY"),
+            "run_id": ci_environment.get("GITHUB_RUN_ID"),
+            "run_attempt": ci_environment.get("GITHUB_RUN_ATTEMPT"),
+            "workflow": ci_environment.get("GITHUB_WORKFLOW"),
+        },
+        "components": {
+            "terraform-provider-pyvider": {"version": provider_version, "sha": provider_source_sha},
+            "pyvider": {
+                "version": _wheel_version(wheels, "pyvider"),
+                "sha": pyvider_source.get("sha"),
+                "archive_sha256": pyvider_source.get("archive_sha256"),
+            },
+            "pyvider-components": {
+                "version": _wheel_version(wheels, "pyvider-components"),
+                "sha": components_source.get("sha"),
+                "archive_sha256": components_source.get("archive_sha256"),
+            },
+        },
+        "opentofu": {
+            "version": OPENTOFU_VERSION,
+            "archive": opentofu_archive,
+            "archive_sha256": opentofu_archive_sha256,
+        },
+        "provider_binary": {"path": f"dist/{relative_binary}", "sha256": expected_binary_sha},
+        "commands": SPLIT_COMMANDS,
+        "rules": _expected_manifest_rules(),
+        "casts": {
+            name: {"path": path, "sha256": sha256_file(cast_path)}
+            for name, path, cast_path in (
+                ("opentofu", SPLIT_CASTS["opentofu"], opentofu_cast_path),
+                ("direct_rpc", SPLIT_CASTS["direct_rpc"], direct_rpc_cast_path),
+            )
+        },
+    }
+    _validate_split_manifest(manifest)
+    opentofu_output = _cast_output(opentofu_cast_path)
+    direct_rpc_output = _cast_output(direct_rpc_cast_path)
+    _assert_no_leaks(manifest, opentofu_output + "\n" + direct_rpc_output)
+    _validate_opentofu_cast(opentofu_output)
+    _validate_direct_rpc_cast(direct_rpc_output, manifest)
     output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest
 

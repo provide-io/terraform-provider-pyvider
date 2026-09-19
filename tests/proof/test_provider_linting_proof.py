@@ -57,6 +57,11 @@ RULES = [
     ),
 ]
 PROVIDER_SHA = "a" * 64
+OPENTOFU_COMMANDS = COMMANDS[:4]
+DIRECT_RPC_COMMAND = (
+    'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" '
+    "--selector provide-io/pyvider:all --format terminal"
+)
 
 
 def load_script(path: Path, name: str) -> ModuleType:
@@ -169,6 +174,92 @@ def write_valid_proof(tmp_path: Path) -> tuple[Path, Path]:
 
 def verify(module: ModuleType, manifest: Path, cast: Path) -> None:
     module.verify_proof(manifest, cast)
+
+
+def write_split_cast(path: Path, *, title: str, text: str) -> None:
+    header = {
+        "version": 2,
+        "width": 120,
+        "height": 40,
+        "timestamp": 1_789_344_000,
+        "title": title,
+        "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
+    }
+    path.write_text(json.dumps(header) + "\n" + json.dumps([0.5, "o", text]) + "\n", encoding="utf-8")
+
+
+def split_manifest_for(opentofu: Path, direct_rpc: Path) -> dict[str, Any]:
+    manifest = manifest_for(opentofu)
+    manifest["schema_version"] = 2
+    manifest["commands"] = {"opentofu": OPENTOFU_COMMANDS, "direct_rpc": [DIRECT_RPC_COMMAND]}
+    manifest.pop("cast")
+    manifest["casts"] = {
+        "opentofu": {
+            "path": "provider-linting-opentofu.cast",
+            "sha256": hashlib.sha256(opentofu.read_bytes()).hexdigest(),
+        },
+        "direct_rpc": {
+            "path": "provider-linting-direct-rpc.cast",
+            "sha256": hashlib.sha256(direct_rpc.read_bytes()).hexdigest(),
+        },
+    }
+    return manifest
+
+
+def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_split")
+    opentofu = tmp_path / "provider-linting-opentofu.cast"
+    direct_rpc = tmp_path / "provider-linting-direct-rpc.cast"
+    write_split_cast(
+        opentofu,
+        title="Pyvider linting — OpenTofu demonstration",
+        text="\n".join(
+            [
+                *(f"$ {command}" for command in OPENTOFU_COMMANDS),
+                "OpenTofu v1.13.0-beta1",
+                "PASS: provider linting default-off (0 provider lint diagnostics)",
+                "PASS: exact exclusion removed provide-io/pyvider:insecure-http",
+                "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
+            ]
+        ),
+    )
+    direct_rows = [
+        f"✓ {kind} | {attribute} | {rule_id} | warning" for rule_id, kind, _observed_via, attribute in RULES
+    ]
+    write_split_cast(
+        direct_rpc,
+        title="Pyvider linting — direct RPC coverage",
+        text="\n".join(
+            [
+                f"$ {DIRECT_RPC_COMMAND}",
+                "Direct provider lint coverage (TofuSoup RPC driver)",
+                *direct_rows,
+                f"Package SHA-256: {PROVIDER_SHA}",
+                "Direct validation RPC coverage: 7/7 rules observed",
+            ]
+        ),
+    )
+    manifest = tmp_path / "provider-linting-proof.json"
+    manifest.write_text(json.dumps(split_manifest_for(opentofu, direct_rpc)), encoding="utf-8")
+
+    assert verifier.verify_split_proof(manifest, opentofu, direct_rpc) == [rule[0] for rule in RULES]
+
+    incomplete = direct_rows[:-1]
+    write_split_cast(
+        direct_rpc,
+        title="Pyvider linting — direct RPC coverage",
+        text="\n".join(
+            [
+                f"$ {DIRECT_RPC_COMMAND}",
+                *incomplete,
+                f"Package SHA-256: {PROVIDER_SHA}",
+                "Direct validation RPC coverage: 7/7 rules observed",
+            ]
+        ),
+    )
+    manifest.write_text(json.dumps(split_manifest_for(opentofu, direct_rpc)), encoding="utf-8")
+    with pytest.raises(ValueError, match="direct RPC recording"):
+        verifier.verify_split_proof(manifest, opentofu, direct_rpc)
 
 
 def test_proof_valid_fixture_reports_all_seven_rules(tmp_path: Path) -> None:
@@ -395,7 +486,9 @@ def test_proof_generator_rejects_malformed_nested_provenance_without_traceback(
         "argv",
         [
             str(GENERATOR),
-            "--cast",
+            "--opentofu-cast",
+            str(cast),
+            "--direct-rpc-cast",
             str(cast),
             "--build-provenance",
             str(provenance),
@@ -413,13 +506,21 @@ def test_proof_generator_rejects_malformed_nested_provenance_without_traceback(
 
 
 def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
-    demo = (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8")
+    opentofu_demo = (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8")
+    direct_rpc_demo = (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8")
     recorder = (ROOT / "ci" / "record-provider-linting.sh").read_text(encoding="utf-8")
     workflow = (ROOT / ".github" / "workflows" / "build-provider.yml").read_text(encoding="utf-8")
 
-    for command in COMMANDS:
-        assert command in demo
-    assert "flavor pack" not in demo + recorder
+    for command in OPENTOFU_COMMANDS:
+        assert command in opentofu_demo
+    assert DIRECT_RPC_COMMAND in direct_rpc_demo
+    assert "soup stir provider-linting" not in opentofu_demo + direct_rpc_demo
+    assert "--format json-lines" not in opentofu_demo + direct_rpc_demo
+    assert "--format terminal" in direct_rpc_demo
+    assert "provider-linting-opentofu.cast" in recorder
+    assert "provider-linting-direct-rpc.cast" in recorder
+    assert "--opentofu-cast" in recorder and "--direct-rpc-cast" in recorder
+    assert "flavor pack" not in opentofu_demo + direct_rpc_demo + recorder
     assert "provider_linting_proof:" in workflow
     assert "pyvider_ref:" in workflow
     assert "components_ref:" in workflow

@@ -12,18 +12,23 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from provider_linting_proof import strip_terminal_controls, verify_proof
+from provider_linting_proof import strip_terminal_controls, verify_proof, verify_split_proof
 
-__all__ = ["strip_terminal_controls", "verify_proof"]
+__all__ = ["strip_terminal_controls", "verify_proof", "verify_split_proof"]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path)
-    parser.add_argument("cast", type=Path)
+    parser.add_argument("casts", type=Path, nargs="+")
     args = parser.parse_args()
     try:
-        rule_ids = verify_proof(args.manifest, args.cast)
+        if len(args.casts) == 1:
+            rule_ids = verify_proof(args.manifest, args.casts[0])
+        elif len(args.casts) == 2:
+            rule_ids = verify_split_proof(args.manifest, args.casts[0], args.casts[1])
+        else:
+            raise ValueError("provide one legacy cast or the OpenTofu and direct RPC casts")
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

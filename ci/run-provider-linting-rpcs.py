@@ -273,7 +273,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--selector", required=True)
-    parser.add_argument("--format", choices=("json-lines",), required=True)
+    parser.add_argument("--format", choices=("json-lines", "terminal"), required=True)
     return parser.parse_args()
 
 
@@ -428,6 +428,18 @@ async def run(binary: Path, selector: str, working_directory: Path) -> list[dict
         await session.stop()
 
 
+def terminal_lines(records: list[dict[str, Any]]) -> list[str]:
+    """Render the complete direct-RPC catalog for a human-facing recording."""
+    provider_sha256 = records[0]["provider_sha256"]
+    return [
+        "Direct provider lint coverage (TofuSoup RPC driver)",
+        *("✓ {kind} | {attribute} | {rule_id} | {severity}".format(**record) for record in records),
+        f"Package SHA-256: {provider_sha256}",
+        f"Direct validation RPC coverage: {len(records)}/{len(records)} "
+        f"rule{'s' if len(records) != 1 else ''} observed",
+    ]
+
+
 def main() -> int:
     args = parse_args()
     if not args.binary.is_file():
@@ -445,8 +457,11 @@ def main() -> int:
         # intentionally not caught so KeyboardInterrupt/SystemExit still work.
         print(f"error: provider proof failed for binary: {args.binary}", file=sys.stderr)
         return 2
-    for record in records:
-        print(json.dumps(record, sort_keys=True))
+    if args.format == "json-lines":
+        for record in records:
+            print(json.dumps(record, sort_keys=True))
+    else:
+        print("\n".join(terminal_lines(records)))
     return 0
 
 

@@ -214,7 +214,7 @@ def test_rpc_driver_cli_documents_the_proof_interface() -> None:
 
     assert "--binary" in completed.stdout
     assert "--selector" in completed.stdout
-    assert "--format {json-lines}" in completed.stdout
+    assert "--format {json-lines,terminal}" in completed.stdout
 
 
 def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
@@ -246,6 +246,34 @@ def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
             "rule_id": "provide-io/pyvider:insecure-http",
             "severity": "warning",
         }
+    ]
+
+
+def test_rpc_driver_cli_emits_readable_real_provider_findings(
+    packaged_provider_path: Path,
+) -> None:
+    completed = subprocess.run(
+        [
+            str(DRIVER),
+            "--binary",
+            str(packaged_provider_path),
+            "--selector",
+            "provide-io/pyvider:insecure-http",
+            "--format",
+            "terminal",
+        ],
+        check=True,
+        close_fds=False,
+        capture_output=True,
+        text=True,
+    )
+
+    provider_sha256 = hashlib.sha256(packaged_provider_path.read_bytes()).hexdigest()
+    assert completed.stdout.splitlines() == [
+        "Direct provider lint coverage (TofuSoup RPC driver)",
+        "✓ data-source | url | provide-io/pyvider:insecure-http | warning",
+        f"Package SHA-256: {provider_sha256}",
+        "Direct validation RPC coverage: 1/1 rule observed",
     ]
 
 
