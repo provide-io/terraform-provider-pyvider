@@ -1,12 +1,16 @@
 {
   "casts": {
-    "direct_rpc": {
-      "path": "provider-linting-direct-rpc.cast",
-      "sha256": "1701351d39027a125d461c6aee6ea5295d5f403f893de0c45590f3bcf49dba35"
+    "direct": {
+      "path": "provider-linting-direct.cast",
+      "sha256": "4752e4cb6774261d7148951f432d70ed6ebd33204b0066966475414df7452030"
     },
     "opentofu": {
       "path": "provider-linting-opentofu.cast",
-      "sha256": "d1edaa175cfbda0de420e81a33d560e60e017642dc89f7a7a01441307f2c4c01"
+      "sha256": "51a786c71304f1e74d53c82039002683eb8473f2757697221ba0b6cbd411e225"
+    },
+    "walkthrough": {
+      "path": "provider-linting-walkthrough.cast",
+      "sha256": "0d86327669983143222cca7c6bb3021e63c99e343cd01776ba42b4c593b244e6"
     }
   },
   "ci": {
@@ -16,11 +20,17 @@
     "workflow": null
   },
   "commands": {
-    "direct_rpc": [
+    "direct": [
       "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --lane direct"
     ],
     "opentofu": [
       "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --opentofu \"$PYVIDER_OPENTOFU_BINARY\" --lane opentofu"
+    ],
+    "walkthrough": [
+      "uv tool install --refresh tofusoup==0.8.0",
+      "soup --version",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --opentofu \"$PYVIDER_OPENTOFU_BINARY\" --lane opentofu",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --lane direct"
     ]
   },
   "components": {
@@ -35,11 +45,11 @@
       "version": "0.7.2"
     },
     "terraform-provider-pyvider": {
-      "sha": "7edf71e0a0c56fe02cf15265b32ca452cf17704d",
+      "sha": "58403ecb39221546b652b216dc4165bcdab53059",
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-19T20:16:26.390406Z",
+  "generated_at": "2026-09-19T23:49:05.726325Z",
   "opentofu": {
     "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
     "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",
@@ -47,7 +57,7 @@
   },
   "provider_binary": {
     "path": "dist/darwin_arm64/terraform-provider-pyvider_v0.5.0",
-    "sha256": "03ef8bf66a7ae45fcb67e88f42b00aa1c82325f5ef01d95f1a33ef87e46de426"
+    "sha256": "589a4b17142783764023fbbe3d2231b3f95e7fa8e181a6fbb7d46f780b9cdeb0"
   },
   "rules": [
     {
@@ -104,5 +114,5 @@
       ]
     }
   ],
-  "schema_version": 2
+  "schema_version": 3
 }
