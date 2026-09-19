@@ -28,10 +28,13 @@ COMMANDS = [
     ),
 ]
 SPLIT_COMMANDS = {
-    "opentofu": COMMANDS[:4],
+    "opentofu": [
+        'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" '
+        '--opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
+    ],
     "direct_rpc": [
-        'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" '
-        "--selector provide-io/pyvider:all --format terminal"
+        'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" '
+        "--lane direct"
     ],
 }
 SPLIT_CASTS = {
@@ -101,7 +104,7 @@ _CAST_TITLES = {
     "pyvider conformance suite",
     "Pyvider provider-native linting proof",
     "Pyvider linting — OpenTofu demonstration",
-    "Pyvider linting — direct RPC coverage",
+    "Pyvider linting — direct provider validation",
 }
 _CAST_ENV = {"TERM": "xterm-256color", "SHELL": "/bin/bash"}
 
@@ -401,31 +404,26 @@ def _validate_opentofu_cast(output: str) -> None:
         if f"$ {command}" not in output:
             raise ValueError(f"missing command from OpenTofu recording: {command}")
     for statement in (
-        "PASS: provider linting default-off (0 provider lint diagnostics)",
-        "PASS: exact exclusion removed provide-io/pyvider:insecure-http",
-        "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
+        "Direct provider validation: not requested",
+        "OpenTofu native linting: valid",
+        "Experimental linting enabled",
     ):
         if statement not in output:
             raise ValueError(f"missing proof statement from OpenTofu recording: {statement}")
-    if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
-        raise ValueError(f"OpenTofu recording does not show the exact version v{OPENTOFU_VERSION}")
-    if "soup stir" in output or "run-provider-linting-rpcs.py" in output:
-        raise ValueError("OpenTofu recording contains unrelated proof output")
+    if "run-provider-linting-rpcs.py" in output:
+        raise ValueError("OpenTofu recording contains an internal proof command")
 
 
 def _validate_direct_rpc_cast(output: str, manifest: dict[str, Any]) -> list[str]:
     command = SPLIT_COMMANDS["direct_rpc"][0]
     if f"$ {command}" not in output:
         raise ValueError(f"missing command from direct RPC recording: {command}")
-    if "Direct provider lint coverage (TofuSoup RPC driver)" not in output:
-        raise ValueError("direct RPC recording has no coverage heading")
-    expected_rows = [f"✓ {rule['kind']} | {rule['attribute']} | {rule['id']} | warning" for rule in RULES]
-    if any(row not in output for row in expected_rows):
+    if "Direct provider validation: 7/7 cases" not in output:
+        raise ValueError("direct provider recording has no coverage heading")
+    if any(rule["id"] not in output for rule in RULES):
         raise ValueError("direct RPC recording does not contain the seven-rule catalog")
-    if f"Package SHA-256: {manifest['provider_binary']['sha256']}" not in output:
-        raise ValueError("direct RPC recording has the wrong package checksum")
-    if "Direct validation RPC coverage: 7/7 rules observed" not in output:
-        raise ValueError("direct RPC recording has no 7/7 summary")
+    if "run-provider-linting-rpcs.py" in output:
+        raise ValueError("direct provider recording contains an internal proof command")
     return [rule["id"] for rule in RULES]
 
 

@@ -1,0 +1,55 @@
+version = 1
+
+[provider]
+source = "registry.opentofu.org/provide-io/pyvider"
+version = "0.5.0"
+
+[provider.environment]
+PYVIDER_TESTMODE = "true"
+PYVIDER_LOG_LEVEL = "ERROR"
+PYVIDER_LINT = "provide-io/pyvider:all"
+
+[opentofu]
+fixture = "."
+lint = "all"
+
+[[case]]
+kind = "provider"
+config = { api_insecure_skip_verify = true }
+expect = [{ severity = "warning", summary = "TLS certificate verification is disabled (provide-io/pyvider:insecure-tls)" }]
+
+[[case]]
+kind = "resource"
+type_name = "pyvider_local_directory"
+config = { path = "world-writable", permissions = "0o777" }
+expect = [{ severity = "warning", summary = "Directory permissions are world-writable (provide-io/pyvider:world-writable-directory)" }]
+
+[[case]]
+kind = "data-source"
+type_name = "pyvider_http_api"
+config = { url = "http://127.0.0.1/provider-lint-proof", method = "GET", headers = {}, timeout = 30 }
+expect = [{ severity = "warning", summary = "HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)" }]
+
+[[case]]
+kind = "ephemeral"
+type_name = "pyvider_lease"
+config = { name = "provider-lint-proof", path = "proof.lease", ttl_seconds = 3601 }
+expect = [{ severity = "warning", summary = "Lease lifetime exceeds one hour (provide-io/pyvider:long-lived-lease)" }]
+
+[[case]]
+kind = "list"
+type_name = "pyvider_file_content"
+config = { path = ".", include_hidden = true }
+expect = [{ severity = "warning", summary = "File listing includes hidden files (provide-io/pyvider:include-hidden-files)" }]
+
+[[case]]
+kind = "action"
+type_name = "pyvider_wait_for_file"
+config = { path = "eventually-created", timeout_seconds = 301 }
+expect = [{ severity = "warning", summary = "Action timeout exceeds five minutes (provide-io/pyvider:long-action-timeout)" }]
+
+[[case]]
+kind = "state-store"
+type_name = "pyvider_filesystem_store"
+config = { path = "relative-state-store" }
+expect = [{ severity = "warning", summary = "State store path is relative (provide-io/pyvider:relative-state-store-path)" }]

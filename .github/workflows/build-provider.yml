@@ -242,6 +242,9 @@ jobs:
           test "$(git -C .stack/pyvider rev-parse HEAD)" = "$PYVIDER_REF"
           test "$(git -C .stack/pyvider-components rev-parse HEAD)" = "$COMPONENTS_REF"
 
+      - name: 🍲 Install released TofuSoup lint runner
+        run: uv tool install --refresh tofusoup==0.8.0
+
       - name: 🔧 Install proof dependencies
         run: uv sync --group dev
 

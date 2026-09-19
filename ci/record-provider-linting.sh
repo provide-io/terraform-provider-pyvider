@@ -67,11 +67,11 @@ python3 "$repo_root/ci/retime-cast.py" \
 
 PYVIDER_LINTING_DEMO_ROOT="$direct_rpc_demo_root" \
 python3 "$repo_root/ci/record-to-cast.py" \
-    --title 'Pyvider linting — direct RPC coverage' --width 120 --height 40 \
+    --title 'Pyvider linting — direct provider validation' --width 120 --height 40 \
     "$raw_direct_rpc_cast" "$repo_root/ci/provider-linting-direct-rpc-demo.sh"
 
 python3 "$repo_root/ci/retime-cast.py" \
-    --title 'Pyvider linting — direct RPC coverage' \
+    --title 'Pyvider linting — direct provider validation' \
     --redact-path "$repo_root" --redact-path "$staging" \
     "$raw_direct_rpc_cast" "$checked_direct_rpc_cast" 14
 

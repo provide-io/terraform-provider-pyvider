@@ -5,12 +5,10 @@ lint findings survive packaging and reach real protocol clients. The proof uses
 one coordinated provider binary throughout; it does not substitute editable
 Python imports for the packaged artifact.
 
-Pyvider's author-facing lint API is supported.
-OpenTofu describes its built-in linting feature as experimental.
-Because tfprotov6 does not yet define native provider-lint messages or pass core
-lint selections to providers, provider findings are transported as ordinary
-warnings: ordinary warning diagnostics are a temporary compatibility bridge,
-not the public author API or a new wire protocol.
+Pyvider's author-facing lint API is supported. OpenTofu describes its built-in
+linting feature as experimental in v1.13.0-beta1. The proof keeps Pyvider's
+rules independently selectable while following the upstream implementation as
+it evolves.
 
 ## What the proof covers
 
@@ -22,16 +20,15 @@ rule, severity, detail, attribute path, source range, default-off behavior,
 configuration and environment selection, and exact exclusion. Validation also
 proves that the deliberately unreachable HTTP data source is never contacted.
 
-OpenTofu declares action, list-resource, and state-store validation RPCs but
-does not currently call them from core. TofuSoup directly proves 7/7 paths
-against the same packaged binary. The direct RPC suite covers the preceding
-four paths plus list resource, action, and state store.
+TofuSoup 0.8.0 directly proves 7/7 paths against the same packaged binary. Its
+direct provider-validation lane covers the preceding four paths plus list
+resource, action, and state store.
 
 The primary recording is the OpenTofu demonstration. It shows the ordinary
-validation flow and the four paths OpenTofu currently reaches; it does not show
-the generic `soup stir` lifecycle dashboard or direct-RPC output. The technical recording is direct RPC coverage. It shows seven readable rule observations
-through the same packaged provider, including the three paths OpenTofu core
-does not reach today. The lifecycle fixture at
+validation flow and the four paths OpenTofu currently reaches. The technical
+recording is direct provider validation. It shows seven readable rule
+observations through the same packaged provider, including the three paths
+OpenTofu core does not reach today. The lifecycle fixture at
 [`tests/proof/fixtures/provider-linting/main.tf`][tofusoup-fixture] remains
 normal conformance coverage, but it answers a different question and is not a
 linting recording.
@@ -134,26 +131,26 @@ make test-conformance-binary \
   PYVIDER_CONFORMANCE_PSP="$lint_binary"
 ```
 
-For the deterministic seven-line observation stream used by the recording, run
-the same direct driver explicitly:
+For the deterministic direct-provider result used by the recording, install the
+released runner and run the public suite command:
 
 ```shell
-uv run python ci/run-provider-linting-rpcs.py \
-  --binary "$PYVIDER_CONFORMANCE_PSP" \
-  --selector provide-io/pyvider:all \
-  --format json-lines
+uv tool install --refresh tofusoup==0.8.0
+soup lint tests/e2e/provider-linting/lint.soup.toml \
+  --provider "$PYVIDER_CONFORMANCE_PSP" \
+  --lane direct
 ```
 
 ## Record and verify the checked artifacts
 
-The recorder runs the OpenTofu and direct-RPC demonstrations against one named
+The recorder runs the OpenTofu and direct-provider demonstrations against one named
 package, refuses a binary other than the one named by build provenance, and
 verifies its checksum before and after recording. It publishes both checked artifacts only after verification and rolls back ordinary publication failures:
 
 - [`provider-linting-opentofu.cast`][opentofu-cast] — the deterministic
   OpenTofu demonstration.
 - [`provider-linting-direct-rpc.cast`][direct-rpc-cast] — the deterministic
-  seven-path technical recording.
+  seven-path direct-provider recording.
 - [`provider-linting-proof.json`][manifest] — versions, exact source revisions
 and archive hashes, binary and recording checksums, the command list, the
 seven-rule catalog, observation channels, OpenTofu archive checksum, and CI
@@ -171,10 +168,9 @@ uv run pytest tests/proof -q
 ```
 
 The verifier parses both complete casts after stripping terminal controls. It
-requires the OpenTofu commands, default-off and exact-exclusion evidence, the
-four-path statement, all seven readable direct-RPC observations, matching
-artifact checksums, the pinned beta, and provenance without secrets or local
-paths.
+requires the two public `soup lint` commands, the separate native/direct lane
+results, all seven readable direct-provider observations, matching artifact
+checksums, the pinned beta, and provenance without secrets or local paths.
 
 ## Retrieve the exact CI proof
 

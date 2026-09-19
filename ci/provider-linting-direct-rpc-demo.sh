@@ -10,15 +10,15 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 demo_root=$PYVIDER_LINTING_DEMO_ROOT
 mkdir -p "$demo_root"
-ln -s "$repo_root/ci" "$demo_root/ci"
+ln -s "$repo_root/tests" "$demo_root/tests"
 cd "$demo_root"
 
 show_command() {
     printf '\033[1;36m$ %s\033[0m\n' "$1"
 }
 
-# The literal variable is deliberately retained in the recording so the exact
-# reusable command stays visible without leaking its machine-local expansion.
-show_command 'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" --selector provide-io/pyvider:all --format terminal'
-uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" \
-    --selector provide-io/pyvider:all --format terminal
+# The literal variables are deliberately retained in the recording so the
+# exact reusable command stays visible without leaking machine-local paths.
+show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
+soup lint tests/e2e/provider-linting/lint.soup.toml \
+    --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct

@@ -57,11 +57,30 @@ RULES = [
     ),
 ]
 PROVIDER_SHA = "a" * 64
-OPENTOFU_COMMANDS = COMMANDS[:4]
+OPENTOFU_COMMANDS = [
+    'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" '
+    '--opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
+]
 DIRECT_RPC_COMMAND = (
-    'uv run python ci/run-provider-linting-rpcs.py --binary "$PYVIDER_CONFORMANCE_PSP" '
-    "--selector provide-io/pyvider:all --format terminal"
+    'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 )
+
+
+def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
+    suite = ROOT / "tests" / "e2e" / "provider-linting" / "lint.soup.toml"
+    direct_demo = (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8")
+    native_demo = (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8")
+
+    assert suite.is_file()
+    suite_text = suite.read_text(encoding="utf-8")
+    assert 'source = "registry.opentofu.org/provide-io/pyvider"' in suite_text
+    assert 'fixture = "."' in suite_text
+    assert 'kind = "state-store"' in suite_text
+    assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in direct_demo
+    assert "--lane direct" in direct_demo
+    assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in native_demo
+    assert "--lane opentofu" in native_demo
+    assert "run-provider-linting-rpcs.py" not in direct_demo + native_demo
 
 
 def load_script(path: Path, name: str) -> ModuleType:
@@ -216,26 +235,21 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
         text="\n".join(
             [
                 *(f"$ {command}" for command in OPENTOFU_COMMANDS),
-                "OpenTofu v1.13.0-beta1",
-                "PASS: provider linting default-off (0 provider lint diagnostics)",
-                "PASS: exact exclusion removed provide-io/pyvider:insecure-http",
-                "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
+                "Direct provider validation: not requested",
+                "OpenTofu native linting: valid",
+                "Experimental linting enabled",
             ]
         ),
     )
-    direct_rows = [
-        f"✓ {kind} | {attribute} | {rule_id} | warning" for rule_id, kind, _observed_via, attribute in RULES
-    ]
+    direct_rows = [rule_id for rule_id, _kind, _observed_via, _attribute in RULES]
     write_split_cast(
         direct_rpc,
-        title="Pyvider linting — direct RPC coverage",
+        title="Pyvider linting — direct provider validation",
         text="\n".join(
             [
                 f"$ {DIRECT_RPC_COMMAND}",
-                "Direct provider lint coverage (TofuSoup RPC driver)",
+                "Direct provider validation: 7/7 cases",
                 *direct_rows,
-                f"Package SHA-256: {PROVIDER_SHA}",
-                "Direct validation RPC coverage: 7/7 rules observed",
             ]
         ),
     )
@@ -247,18 +261,16 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
     incomplete = direct_rows[:-1]
     write_split_cast(
         direct_rpc,
-        title="Pyvider linting — direct RPC coverage",
+        title="Pyvider linting — direct provider validation",
         text="\n".join(
             [
                 f"$ {DIRECT_RPC_COMMAND}",
                 *incomplete,
-                f"Package SHA-256: {PROVIDER_SHA}",
-                "Direct validation RPC coverage: 7/7 rules observed",
             ]
         ),
     )
     manifest.write_text(json.dumps(split_manifest_for(opentofu, direct_rpc)), encoding="utf-8")
-    with pytest.raises(ValueError, match="direct RPC recording"):
+    with pytest.raises(ValueError, match="direct provider recording"):
         verifier.verify_split_proof(manifest, opentofu, direct_rpc)
 
 
@@ -515,8 +527,8 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
         assert command in opentofu_demo
     assert DIRECT_RPC_COMMAND in direct_rpc_demo
     assert "soup stir provider-linting" not in opentofu_demo + direct_rpc_demo
-    assert "--format json-lines" not in opentofu_demo + direct_rpc_demo
-    assert "--format terminal" in direct_rpc_demo
+    assert "run-provider-linting-rpcs.py" not in opentofu_demo + direct_rpc_demo
+    assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in opentofu_demo + direct_rpc_demo
     assert "provider-linting-opentofu.cast" in recorder
     assert "provider-linting-direct-rpc.cast" in recorder
     assert "--opentofu-cast" in recorder and "--direct-rpc-cast" in recorder
@@ -531,6 +543,7 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in recorder
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
+    assert "uv tool install --refresh tofusoup==0.8.0" in workflow
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
     assert (

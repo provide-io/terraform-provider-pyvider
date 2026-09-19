@@ -1,26 +1,32 @@
 {
-  "cast": {
-    "path": "provider-linting.cast",
-    "sha256": "ff83b187b1d2cca49067c06847181a61ae522f02a4497631dddf5726fd4665c9"
+  "casts": {
+    "direct_rpc": {
+      "path": "provider-linting-direct-rpc.cast",
+      "sha256": "1701351d39027a125d461c6aee6ea5295d5f403f893de0c45590f3bcf49dba35"
+    },
+    "opentofu": {
+      "path": "provider-linting-opentofu.cast",
+      "sha256": "d1edaa175cfbda0de420e81a33d560e60e017642dc89f7a7a01441307f2c4c01"
+    }
   },
   "ci": {
-    "repository": "provide-io/terraform-provider-pyvider",
-    "run_attempt": "1",
-    "run_id": "34831588726",
-    "workflow": "\ud83c\udfd7\ufe0f Build Provider Binary"
+    "repository": null,
+    "run_attempt": null,
+    "run_id": null,
+    "workflow": null
   },
-  "commands": [
-    "tofu version",
-    "tofu validate",
-    "PYVIDER_LINT=provide-io/pyvider:all tofu validate -lint=all",
-    "PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:insecure-http' tofu validate",
-    "soup stir provider-linting",
-    "uv run python ci/run-provider-linting-rpcs.py --binary \"$PYVIDER_CONFORMANCE_PSP\" --selector provide-io/pyvider:all --format json-lines"
-  ],
+  "commands": {
+    "direct_rpc": [
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --lane direct"
+    ],
+    "opentofu": [
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --opentofu \"$PYVIDER_OPENTOFU_BINARY\" --lane opentofu"
+    ]
+  },
   "components": {
     "pyvider": {
-      "archive_sha256": "731bf31188a2c876736ca47ddabfe60b9435b9ab289e4d3eef51d17dc853c2da",
-      "sha": "7dd83415d8cf09c84c70b445d333b3680493ea74",
+      "archive_sha256": "c85c90fc1b98afc9140de826e63904a425494b30a0681df42c1b5a7583a3503c",
+      "sha": "57af903fe1bdcb5a5d69e3b1c615a62487b45ae5",
       "version": "0.7.0"
     },
     "pyvider-components": {
@@ -29,19 +35,19 @@
       "version": "0.7.2"
     },
     "terraform-provider-pyvider": {
-      "sha": "1e222053f5bc0525c140110dd1872091d00bba92",
+      "sha": "7edf71e0a0c56fe02cf15265b32ca452cf17704d",
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-14T10:10:53.743544Z",
+  "generated_at": "2026-09-19T20:16:26.390406Z",
   "opentofu": {
-    "archive": "tofu_1.13.0-beta1_linux_amd64.zip",
-    "archive_sha256": "43a270b718393f8dec878aebe0cc432a3d34dda5aaa3bfe669f32a314b5b779b",
+    "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
+    "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",
     "version": "1.13.0-beta1"
   },
   "provider_binary": {
-    "path": "dist/linux_amd64/terraform-provider-pyvider_v0.5.0",
-    "sha256": "66cab6bc603cb3a9d0f9ae18fe969740f71acdf2d280421644363a17f37f65bd"
+    "path": "dist/darwin_arm64/terraform-provider-pyvider_v0.5.0",
+    "sha256": "03ef8bf66a7ae45fcb67e88f42b00aa1c82325f5ef01d95f1a33ef87e46de426"
   },
   "rules": [
     {
@@ -98,5 +104,5 @@
       ]
     }
   ],
-  "schema_version": 1
+  "schema_version": 2
 }
