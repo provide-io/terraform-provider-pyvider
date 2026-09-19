@@ -105,6 +105,8 @@ def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
     assert (
         "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)"
     ) in native_demo
+    assert "show_command 'tofu version'" in native_demo
+    assert '"$PYVIDER_OPENTOFU_BINARY" version' in native_demo
     assert "run-provider-linting-rpcs.py" not in direct_demo + native_demo
 
 
