@@ -977,7 +977,8 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "run-provider-linting-rpcs.py" not in opentofu_demo + direct_rpc_demo
     assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in opentofu_demo + direct_rpc_demo
     assert "provider-linting-opentofu.cast" in recorder
-    assert "provider-linting-direct-rpc.cast" in recorder
+    assert "provider-linting-direct.cast" in recorder
+    assert "provider-linting-walkthrough.cast" in recorder
     assert "--opentofu-cast" in recorder and "--direct-rpc-cast" in recorder
     assert "flavor pack" not in opentofu_demo + direct_rpc_demo + recorder
     assert "provider_linting_proof:" in workflow
@@ -1002,6 +1003,28 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "            provider-linting.cast" not in proof_job
     assert "    env:\n      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider" in proof_job
     assert "      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components" in proof_job
+
+
+def test_recording_scripts_preserve_all_public_films_without_the_private_driver() -> None:
+    scripts = {
+        "opentofu": (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8"),
+        "direct": (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8"),
+        "walkthrough": (ROOT / "ci" / "provider-linting-walkthrough.sh").read_text(encoding="utf-8"),
+    }
+    recorder = (ROOT / "ci" / "record-provider-linting.sh").read_text(encoding="utf-8")
+
+    for lane, commands in FILM_COMMANDS.items():
+        for command in commands:
+            assert command in scripts[lane]
+        assert "run-provider-linting-rpcs.py" not in scripts[lane]
+        assert f"provider-linting-{lane}.raw.cast" in recorder
+        assert f"provider-linting-{lane}.cast" in recorder
+        assert f"--lane {lane}" in recorder
+
+    assert "provider-linting-walkthrough.sh" in recorder
+    assert "pace-provider-linting-cast.py" in recorder
+    assert "retime-cast.py" not in recorder
+    assert "run-provider-linting-rpcs.py" not in recorder
 
 
 def test_retime_redacts_longest_nested_path_before_parent() -> None:

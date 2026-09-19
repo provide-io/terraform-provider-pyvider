@@ -19,6 +19,10 @@ show_command() {
 
 # The literal variables are deliberately retained in the recording so the
 # exact reusable command stays visible without leaking machine-local paths.
+printf '%s\n' 'Lane: direct runs the public suite against the checked provider without OpenTofu orchestration.'
+printf '%s\n' 'Warnings are lint findings from this fixture; any nonzero lint result stops the recording.'
+printf '%s\n' 'Coverage boundary: this lane demonstrates direct provider validation, not OpenTofu-native behavior.'
+
 show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
     --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct
