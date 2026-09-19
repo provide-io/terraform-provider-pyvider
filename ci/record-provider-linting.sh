@@ -84,9 +84,10 @@ python3 "$repo_root/ci/pace-provider-linting-cast.py" \
 PYVIDER_OPENTOFU_ARCHIVE_SHA256="$archive_sha" \
 uv run python "$repo_root/ci/generate-provider-linting-proof.py" \
     --opentofu-cast "$checked_opentofu_cast" --direct-rpc-cast "$checked_direct_cast" \
+    --walkthrough-cast "$checked_walkthrough_cast" \
     --build-provenance "$provenance" --output "$checked_manifest"
 uv run python "$repo_root/ci/verify-provider-linting-proof.py" \
-    "$checked_manifest" "$checked_opentofu_cast" "$checked_direct_cast"
+    "$checked_manifest" "$checked_opentofu_cast" "$checked_direct_cast" "$checked_walkthrough_cast"
 
 if [[ "$(binary_sha)" != "$expected_sha" ]]; then
     printf '%s\n' 'error: provider binary checksum changed during recording' >&2

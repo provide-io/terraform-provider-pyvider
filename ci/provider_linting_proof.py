@@ -9,12 +9,15 @@ from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
+from tempfile import NamedTemporaryFile
 from typing import Any
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
+LEGACY_SCHEMA_VERSION = 1
 OPENTOFU_VERSION = "1.13.0-beta1"
 COMMANDS = [
     "tofu version",
@@ -40,6 +43,26 @@ SPLIT_COMMANDS = {
 SPLIT_CASTS = {
     "opentofu": "provider-linting-opentofu.cast",
     "direct_rpc": "provider-linting-direct-rpc.cast",
+}
+FILM_COMMANDS = {
+    "opentofu": SPLIT_COMMANDS["opentofu"],
+    "direct": SPLIT_COMMANDS["direct_rpc"],
+    "walkthrough": [
+        "uv tool install --refresh tofusoup==0.8.0",
+        "soup --version",
+        *SPLIT_COMMANDS["opentofu"],
+        *SPLIT_COMMANDS["direct_rpc"],
+    ],
+}
+FILM_CASTS = {
+    "opentofu": "provider-linting-opentofu.cast",
+    "direct": "provider-linting-direct.cast",
+    "walkthrough": "provider-linting-walkthrough.cast",
+}
+FILM_DURATION_RANGES = {
+    "opentofu": (35.0, 45.0),
+    "direct": (50.0, 65.0),
+    "walkthrough": (70.0, 90.0),
 }
 RULES: list[dict[str, Any]] = [
     {
@@ -177,6 +200,34 @@ def _cast_output(path: Path) -> str:
     return strip_terminal_controls("".join(chunks))
 
 
+def _cast_duration(path: Path) -> float:
+    """Return the terminal elapsed time from a checked asciinema v2 cast."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if len(lines) < 2:
+            raise ValueError("empty cast")
+        _validate_cast_header(json.loads(lines[0]))
+        timestamps: list[float] = []
+        for line in lines[1:]:
+            event = json.loads(line)
+            if (
+                not isinstance(event, list)
+                or len(event) != 3
+                or isinstance(event[0], bool)
+                or not isinstance(event[0], (int, float))
+                or event[1] != "o"
+                or not isinstance(event[2], str)
+            ):
+                raise ValueError("invalid cast event")
+            timestamp = float(event[0])
+            if not math.isfinite(timestamp):
+                raise ValueError("invalid cast event timestamp")
+            timestamps.append(timestamp)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError("invalid cast") from exc
+    return max(timestamps)
+
+
 def _assert_hash(value: Any, *, label: str) -> str:
     if not isinstance(value, str) or _HASH.fullmatch(value) is None:
         raise ValueError(f"invalid {label}")
@@ -292,6 +343,18 @@ def _validate_split_casts(value: Any) -> None:
         _assert_hash(metadata["sha256"], label=f"{name} cast checksum")
 
 
+def _validate_film_casts(value: Any) -> None:
+    if not isinstance(value, dict) or set(value) != set(FILM_CASTS):
+        raise ValueError("film cast metadata is incomplete")
+    for name, expected_path in FILM_CASTS.items():
+        metadata = value[name]
+        if not isinstance(metadata, dict) or set(metadata) != {"path", "sha256"}:
+            raise ValueError("film cast metadata is invalid")
+        if metadata["path"] != expected_path:
+            raise ValueError("film cast metadata has an invalid path")
+        _assert_hash(metadata["sha256"], label=f"{name} cast checksum")
+
+
 def _validate_manifest(manifest: dict[str, Any]) -> None:
     required = {
         "schema_version",
@@ -306,7 +369,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     }
     if set(manifest) != required:
         raise ValueError("manifest schema keys do not match version 1")
-    if manifest["schema_version"] != SCHEMA_VERSION:
+    if manifest["schema_version"] != LEGACY_SCHEMA_VERSION:
         raise ValueError("manifest schema version must be 1")
     _validate_generated_at(manifest["generated_at"])
     if not isinstance(manifest["ci"], dict):
@@ -346,6 +409,34 @@ def _validate_split_manifest(manifest: dict[str, Any]) -> None:
         raise ValueError("command catalog does not match the split proof")
     _validate_rules(manifest["rules"])
     _validate_split_casts(manifest["casts"])
+
+
+def _validate_film_manifest(manifest: dict[str, Any]) -> None:
+    required = {
+        "schema_version",
+        "generated_at",
+        "ci",
+        "components",
+        "opentofu",
+        "provider_binary",
+        "commands",
+        "rules",
+        "casts",
+    }
+    if set(manifest) != required:
+        raise ValueError("manifest schema keys do not match version 3")
+    if manifest["schema_version"] != SCHEMA_VERSION:
+        raise ValueError("manifest schema version must be 3")
+    _validate_generated_at(manifest["generated_at"])
+    if not isinstance(manifest["ci"], dict):
+        raise ValueError("ci identity must be an object")
+    _validate_components(manifest["components"])
+    _validate_opentofu(manifest["opentofu"])
+    _validate_provider_binary(manifest["provider_binary"])
+    if manifest["commands"] != FILM_COMMANDS:
+        raise ValueError("command catalog does not match the checked proof films")
+    _validate_rules(manifest["rules"])
+    _validate_film_casts(manifest["casts"])
 
 
 def _parse_observations(output: str) -> list[dict[str, Any]]:
@@ -399,15 +490,20 @@ def _validate_cast(output: str, manifest: dict[str, Any]) -> list[str]:
     return [record["rule_id"] for record in observations]
 
 
-def _validate_opentofu_cast(output: str) -> None:
+def _validate_opentofu_cast(output: str, *, require_four_paths: bool = False) -> None:
     for command in SPLIT_COMMANDS["opentofu"]:
         if f"$ {command}" not in output:
             raise ValueError(f"missing command from OpenTofu recording: {command}")
-    for statement in (
+    statements: tuple[str, ...] = (
         "Direct provider validation: not requested",
         "OpenTofu native linting: valid",
         "Experimental linting enabled",
-    ):
+    )
+    if require_four_paths:
+        statements += (
+            "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
+        )
+    for statement in statements:
         if statement not in output:
             raise ValueError(f"missing proof statement from OpenTofu recording: {statement}")
     if "run-provider-linting-rpcs.py" in output:
@@ -427,6 +523,35 @@ def _validate_direct_rpc_cast(output: str, manifest: dict[str, Any]) -> list[str
     return [rule["id"] for rule in RULES]
 
 
+def _validate_film_duration(lane: str, path: Path) -> None:
+    lower, upper = FILM_DURATION_RANGES[lane]
+    duration = _cast_duration(path)
+    if not lower <= duration <= upper:
+        raise ValueError(f"{lane} cast duration must be between {lower:g} and {upper:g} seconds")
+
+
+def _validate_walkthrough_cast(output: str) -> None:
+    for command in FILM_COMMANDS["walkthrough"]:
+        if f"$ {command}" not in output:
+            raise ValueError(f"missing command from walkthrough recording: {command}")
+    for statement in (
+        "OpenTofu native linting: valid",
+        "Direct provider validation: 7/7 cases",
+    ):
+        if statement not in output:
+            raise ValueError(f"missing proof statement from walkthrough recording: {statement}")
+    if "run-provider-linting-rpcs.py" in output:
+        raise ValueError("walkthrough recording contains an internal proof command")
+
+
+def _validate_film_opentofu_cast(output: str) -> None:
+    _validate_opentofu_cast(output, require_four_paths=True)
+    if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
+        raise ValueError(f"cast does not show the exact OpenTofu version v{OPENTOFU_VERSION}")
+    if f"$ {FILM_COMMANDS['direct'][0]}" in output or "Direct provider validation: 7/7 cases" in output:
+        raise ValueError("OpenTofu recording contains direct provider evidence")
+
+
 def verify_proof(manifest_path: Path, cast_path: Path) -> list[str]:
     """Validate the manifest and every semantic assertion in the complete cast."""
     manifest = _load_json_object(manifest_path, label="proof manifest")
@@ -438,8 +563,20 @@ def verify_proof(manifest_path: Path, cast_path: Path) -> list[str]:
     return _validate_cast(output, manifest)
 
 
-def verify_split_proof(manifest_path: Path, opentofu_cast_path: Path, direct_rpc_cast_path: Path) -> list[str]:
-    """Validate both purpose-specific recordings from one schema-v2 manifest."""
+def verify_split_proof(
+    manifest_path: Path,
+    opentofu_cast_path: Path,
+    direct_rpc_cast_path: Path,
+    walkthrough_cast_path: Path | None = None,
+) -> list[str]:
+    """Validate legacy split casts or all three schema-v3 public proof films."""
+    if walkthrough_cast_path is not None:
+        return verify_film_proof(
+            manifest_path,
+            opentofu_cast_path,
+            direct_rpc_cast_path,
+            walkthrough_cast_path,
+        )
     manifest = _load_json_object(manifest_path, label="split proof manifest")
     _validate_split_manifest(manifest)
     for name, path in (("opentofu", opentofu_cast_path), ("direct_rpc", direct_rpc_cast_path)):
@@ -450,6 +587,36 @@ def verify_split_proof(manifest_path: Path, opentofu_cast_path: Path, direct_rpc
     _assert_no_leaks(manifest, opentofu_output + "\n" + direct_rpc_output)
     _validate_opentofu_cast(opentofu_output)
     return _validate_direct_rpc_cast(direct_rpc_output, manifest)
+
+
+def verify_film_proof(
+    manifest_path: Path,
+    opentofu_cast_path: Path,
+    direct_cast_path: Path,
+    walkthrough_cast_path: Path,
+) -> list[str]:
+    """Validate the schema-v3 public OpenTofu, direct, and walkthrough films."""
+    manifest = _load_json_object(manifest_path, label="proof manifest")
+    _validate_film_manifest(manifest)
+    paths = {
+        "opentofu": opentofu_cast_path,
+        "direct": direct_cast_path,
+        "walkthrough": walkthrough_cast_path,
+    }
+    for lane, path in paths.items():
+        if sha256_file(path) != manifest["casts"][lane]["sha256"]:
+            raise ValueError(f"{lane} cast checksum does not match manifest")
+    outputs = {lane: _cast_output(path) for lane, path in paths.items()}
+    _assert_no_leaks(manifest, "\n".join(outputs.values()))
+    for lane in paths:
+        if "run-provider-linting-rpcs.py" in outputs[lane]:
+            raise ValueError(f"{lane} recording contains an internal proof command")
+    _validate_film_opentofu_cast(outputs["opentofu"])
+    rule_ids = _validate_direct_rpc_cast(outputs["direct"], manifest)
+    _validate_walkthrough_cast(outputs["walkthrough"])
+    for lane, path in paths.items():
+        _validate_film_duration(lane, path)
+    return rule_ids
 
 
 def _wheel_version(wheels: Sequence[Any], distribution: str) -> str:
@@ -509,7 +676,7 @@ def generate_proof(
     if not isinstance(wheels, list):
         raise ValueError("build provenance has no packaged wheel inventory")
     manifest: dict[str, Any] = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": LEGACY_SCHEMA_VERSION,
         "generated_at": generated_at,
         "ci": {
             "repository": ci_environment.get("GITHUB_REPOSITORY"),
@@ -557,19 +724,18 @@ def generate_proof(
     return manifest
 
 
-def generate_split_proof(
+def _build_split_manifest(
     *,
     opentofu_cast_path: Path,
     direct_rpc_cast_path: Path,
     build_provenance_path: Path,
-    output_path: Path,
     provider_version: str,
     opentofu_archive: str,
     opentofu_archive_sha256: str,
     generated_at: str,
     ci_environment: Mapping[str, str],
 ) -> dict[str, Any]:
-    """Generate schema-v2 proof from separate OpenTofu and direct-RPC casts."""
+    """Assemble schema-v2 metadata without publishing it."""
     provenance = _load_json_object(build_provenance_path, label="build provenance")
     _assert_hash(opentofu_archive_sha256, label="OpenTofu archive checksum")
     artifacts = provenance.get("artifacts")
@@ -632,6 +798,32 @@ def generate_split_proof(
             )
         },
     }
+    return manifest
+
+
+def generate_split_proof(
+    *,
+    opentofu_cast_path: Path,
+    direct_rpc_cast_path: Path,
+    build_provenance_path: Path,
+    output_path: Path,
+    provider_version: str,
+    opentofu_archive: str,
+    opentofu_archive_sha256: str,
+    generated_at: str,
+    ci_environment: Mapping[str, str],
+) -> dict[str, Any]:
+    """Generate schema-v2 proof from separate OpenTofu and direct-RPC casts."""
+    manifest = _build_split_manifest(
+        opentofu_cast_path=opentofu_cast_path,
+        direct_rpc_cast_path=direct_rpc_cast_path,
+        build_provenance_path=build_provenance_path,
+        provider_version=provider_version,
+        opentofu_archive=opentofu_archive,
+        opentofu_archive_sha256=opentofu_archive_sha256,
+        generated_at=generated_at,
+        ci_environment=ci_environment,
+    )
     _validate_split_manifest(manifest)
     opentofu_output = _cast_output(opentofu_cast_path)
     direct_rpc_output = _cast_output(direct_rpc_cast_path)
@@ -639,6 +831,77 @@ def generate_split_proof(
     _validate_opentofu_cast(opentofu_output)
     _validate_direct_rpc_cast(direct_rpc_output, manifest)
     output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return manifest
+
+
+def _write_json_atomically(path: Path, value: Mapping[str, Any]) -> None:
+    temporary: Path | None = None
+    try:
+        content = json.dumps(value, indent=2, sort_keys=True) + "\n"
+        with NamedTemporaryFile(
+            mode="w", encoding="utf-8", prefix=f".{path.name}.", dir=path.parent, delete=False
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(content)
+        temporary.replace(path)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
+
+
+def generate_film_proof(
+    *,
+    opentofu_cast_path: Path,
+    direct_cast_path: Path,
+    walkthrough_cast_path: Path,
+    build_provenance_path: Path,
+    output_path: Path,
+    provider_version: str,
+    opentofu_archive: str,
+    opentofu_archive_sha256: str,
+    generated_at: str,
+    ci_environment: Mapping[str, str],
+) -> dict[str, Any]:
+    """Generate a schema-v3 manifest for the three paced public proof films."""
+    legacy = _build_split_manifest(
+        opentofu_cast_path=opentofu_cast_path,
+        direct_rpc_cast_path=direct_cast_path,
+        build_provenance_path=build_provenance_path,
+        provider_version=provider_version,
+        opentofu_archive=opentofu_archive,
+        opentofu_archive_sha256=opentofu_archive_sha256,
+        generated_at=generated_at,
+        ci_environment=ci_environment,
+    )
+    manifest = legacy | {
+        "schema_version": SCHEMA_VERSION,
+        "commands": FILM_COMMANDS,
+        "casts": {
+            lane: {"path": FILM_CASTS[lane], "sha256": sha256_file(path)}
+            for lane, path in (
+                ("opentofu", opentofu_cast_path),
+                ("direct", direct_cast_path),
+                ("walkthrough", walkthrough_cast_path),
+            )
+        },
+    }
+    _validate_film_manifest(manifest)
+    outputs = {
+        "opentofu": _cast_output(opentofu_cast_path),
+        "direct": _cast_output(direct_cast_path),
+        "walkthrough": _cast_output(walkthrough_cast_path),
+    }
+    _assert_no_leaks(manifest, "\n".join(outputs.values()))
+    for lane, path in (
+        ("opentofu", opentofu_cast_path),
+        ("direct", direct_cast_path),
+        ("walkthrough", walkthrough_cast_path),
+    ):
+        _validate_film_duration(lane, path)
+    _validate_film_opentofu_cast(outputs["opentofu"])
+    _validate_direct_rpc_cast(outputs["direct"], manifest)
+    _validate_walkthrough_cast(outputs["walkthrough"])
+    _write_json_atomically(output_path, manifest)
     return manifest
 
 

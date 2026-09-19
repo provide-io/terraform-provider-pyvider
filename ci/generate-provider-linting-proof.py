@@ -14,9 +14,15 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from provider_linting_proof import generate_proof, generate_split_proof, github_environment, utc_now
+from provider_linting_proof import (
+    generate_film_proof,
+    generate_proof,
+    generate_split_proof,
+    github_environment,
+    utc_now,
+)
 
-__all__ = ["generate_proof", "generate_split_proof"]
+__all__ = ["generate_film_proof", "generate_proof", "generate_split_proof"]
 
 
 def _platform() -> str:
@@ -29,23 +35,31 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--opentofu-cast", type=Path, required=True)
     parser.add_argument("--direct-rpc-cast", type=Path, required=True)
+    parser.add_argument("--walkthrough-cast", type=Path)
     parser.add_argument("--build-provenance", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     try:
         archive_sha = os.environ["PYVIDER_OPENTOFU_ARCHIVE_SHA256"]
-        generate_split_proof(
-            opentofu_cast_path=args.opentofu_cast,
-            direct_rpc_cast_path=args.direct_rpc_cast,
-            build_provenance_path=args.build_provenance,
-            output_path=args.output,
-            provider_version=(root / "VERSION").read_text(encoding="utf-8").strip(),
-            opentofu_archive=f"tofu_1.13.0-beta1_{_platform()}.zip",
-            opentofu_archive_sha256=archive_sha,
-            generated_at=utc_now(),
-            ci_environment=github_environment(),
-        )
+        common = {
+            "opentofu_cast_path": args.opentofu_cast,
+            "build_provenance_path": args.build_provenance,
+            "output_path": args.output,
+            "provider_version": (root / "VERSION").read_text(encoding="utf-8").strip(),
+            "opentofu_archive": f"tofu_1.13.0-beta1_{_platform()}.zip",
+            "opentofu_archive_sha256": archive_sha,
+            "generated_at": utc_now(),
+            "ci_environment": github_environment(),
+        }
+        if args.walkthrough_cast is None:
+            generate_split_proof(direct_rpc_cast_path=args.direct_rpc_cast, **common)
+        else:
+            generate_film_proof(
+                direct_cast_path=args.direct_rpc_cast,
+                walkthrough_cast_path=args.walkthrough_cast,
+                **common,
+            )
     except KeyError:
         print("error: PYVIDER_OPENTOFU_ARCHIVE_SHA256 is required", file=sys.stderr)
         return 2

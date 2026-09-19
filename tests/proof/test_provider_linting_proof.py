@@ -251,9 +251,11 @@ def film_cast_text(lane: str) -> str:
     commands = FILM_COMMANDS[lane]
     if lane == "opentofu":
         statements = [
+            "OpenTofu v1.13.0-beta1",
             "Direct provider validation: not requested",
             "OpenTofu native linting: valid",
             "Experimental linting enabled",
+            "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
         ]
     elif lane == "direct":
         statements = [
@@ -261,7 +263,11 @@ def film_cast_text(lane: str) -> str:
             *(rule_id for rule_id, _kind, _observed_via, _attribute in RULES),
         ]
     else:
-        statements = ["Public walkthrough: OpenTofu native and direct provider validation"]
+        statements = [
+            "Public walkthrough: OpenTofu native and direct provider validation",
+            "OpenTofu native linting: valid",
+            "Direct provider validation: 7/7 cases",
+        ]
     return "\n".join([*(f"$ {command}" for command in commands), *statements]) + "\n"
 
 
@@ -494,6 +500,54 @@ def test_schema_v3_proof_rejects_internal_rpc_driver_in_every_checked_film(tmp_p
         verify_films(verifier, manifest, casts)
 
 
+def test_schema_v3_opentofu_film_rejects_direct_provider_evidence(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_native_only")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    write_film_cast(
+        casts["opentofu"],
+        lane="opentofu",
+        text=film_cast_text("opentofu") + f"$ {DIRECT_RPC_COMMAND}\nDirect provider validation: 7/7 cases\n",
+    )
+    refresh_film_cast_hash(data, "opentofu", casts["opentofu"])
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="direct provider evidence"):
+        verify_films(verifier, manifest, casts)
+
+
+def test_schema_v3_opentofu_film_requires_the_pinned_beta_version(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_beta_version")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    write_film_cast(
+        casts["opentofu"],
+        lane="opentofu",
+        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-beta1\n", ""),
+    )
+    refresh_film_cast_hash(data, "opentofu", casts["opentofu"])
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="exact OpenTofu version"):
+        verify_films(verifier, manifest, casts)
+
+
+def test_schema_v3_opentofu_film_rejects_a_hash_refreshed_beta10_version(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_beta10")
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    write_film_cast(
+        casts["opentofu"],
+        lane="opentofu",
+        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-beta1\n", "OpenTofu v1.13.0-beta10\n"),
+    )
+    refresh_film_cast_hash(data, "opentofu", casts["opentofu"])
+    write_film_manifest(manifest, data)
+
+    with pytest.raises(ValueError, match="exact OpenTofu version"):
+        verify_films(verifier, manifest, casts)
+
+
 @pytest.mark.parametrize(
     ("lane", "timestamp"),
     [
@@ -518,11 +572,53 @@ def test_schema_v3_proof_rejects_out_of_range_film_duration(
         verify_films(verifier, manifest, casts)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="schema-v3 verification has not extended verify_split_proof to the walkthrough cast",
+@pytest.mark.parametrize(
+    ("mutation", "expected_error"),
+    [
+        ("byte", "direct cast checksum"),
+        ("duration", "direct cast duration"),
+        ("command", "missing command from walkthrough recording"),
+    ],
 )
+def test_schema_v3_verifier_cli_rejects_each_checked_film_mutation_independently(
+    tmp_path: Path, mutation: str, expected_error: str
+) -> None:
+    """Exercise the public verifier command for independent v3 evidence changes."""
+    manifest, casts = write_film_proof(tmp_path)
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+
+    if mutation == "byte":
+        casts["direct"].write_bytes(casts["direct"].read_bytes() + b" ")
+    elif mutation == "duration":
+        write_film_cast(casts["direct"], lane="direct", timestamp=49)
+        write_film_manifest(manifest, film_manifest_for(casts))
+    else:
+        write_film_cast(
+            casts["walkthrough"],
+            lane="walkthrough",
+            text=film_cast_text("walkthrough").replace("$ soup --version", "$ command omitted"),
+        )
+        refresh_film_cast_hash(data, "walkthrough", casts["walkthrough"])
+        write_film_manifest(manifest, data)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(VERIFIER),
+            str(manifest),
+            str(casts["opentofu"]),
+            str(casts["direct"]),
+            str(casts["walkthrough"]),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 2
+    assert expected_error in result.stderr
+
+
 @pytest.mark.parametrize(
     ("lane", "timestamp"),
     [
@@ -928,6 +1024,62 @@ def test_proof_generator_uses_build_provenance_and_exact_schema(tmp_path: Path) 
     }
 
 
+def test_film_generator_rejects_invalid_walkthrough_without_overwriting_output(tmp_path: Path) -> None:
+    generator = load_script(GENERATOR, "provider_linting_film_generator_atomic_output")
+    _manifest, casts = write_film_proof(tmp_path)
+    write_film_cast(
+        casts["walkthrough"],
+        lane="walkthrough",
+        timestamp=80,
+        text=film_cast_text("walkthrough").replace("$ soup --version\n", ""),
+    )
+    binary = tmp_path / "dist" / "linux_amd64" / "terraform-provider-pyvider_v0.5.0"
+    binary.parent.mkdir(parents=True)
+    binary.write_bytes(b"packaged provider")
+    provenance = tmp_path / "dist" / "provider-linting-build-provenance.json"
+    provenance.write_text(
+        json.dumps(
+            {
+                "provider_repository_head": "0" * 40,
+                "sources": {
+                    "pyvider": {"sha": "2" * 40, "archive_sha256": "3" * 64},
+                    "pyvider-components": {"sha": "4" * 40, "archive_sha256": "5" * 64},
+                },
+                "packaged_wheels": [
+                    "pyvider-0.7.0-py3-none-any.whl",
+                    "pyvider_components-0.7.2-py3-none-any.whl",
+                ],
+                "artifacts": {
+                    "binary": {
+                        "path": "linux_amd64/terraform-provider-pyvider_v0.5.0",
+                        "sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "provider-linting-proof.json"
+    sentinel = b"preserve this existing proof exactly\n"
+    output.write_bytes(sentinel)
+
+    with pytest.raises(ValueError, match="missing command from walkthrough recording"):
+        generator.generate_film_proof(
+            opentofu_cast_path=casts["opentofu"],
+            direct_cast_path=casts["direct"],
+            walkthrough_cast_path=casts["walkthrough"],
+            build_provenance_path=provenance,
+            output_path=output,
+            provider_version="0.5.0",
+            opentofu_archive="tofu_1.13.0-beta1_linux_amd64.zip",
+            opentofu_archive_sha256="6" * 64,
+            generated_at="2026-09-14T07:00:00Z",
+            ci_environment={},
+        )
+
+    assert output.read_bytes() == sentinel
+
+
 def test_proof_generator_rejects_malformed_nested_provenance_without_traceback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -995,11 +1147,11 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
     assert (
-        "provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct-rpc.cast"
-        in proof_job
+        "provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct.cast" in proof_job
     )
     assert "            provider-linting-opentofu.cast" in proof_job
-    assert "            provider-linting-direct-rpc.cast" in proof_job
+    assert "            provider-linting-direct.cast" in proof_job
+    assert "            provider-linting-walkthrough.cast" in proof_job
     assert "            provider-linting.cast" not in proof_job
     assert "    env:\n      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider" in proof_job
     assert "      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components" in proof_job
