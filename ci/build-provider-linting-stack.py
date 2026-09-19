@@ -367,7 +367,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     try:
         build_stack(
-            provider_repository=Path(__file__).resolve().parents[1],
+            provider_repository=Path(__file__).absolute().parents[1],
             pyvider_source=arguments.pyvider_source,
             components_source=arguments.components_source,
             output_dir=arguments.output_dir,

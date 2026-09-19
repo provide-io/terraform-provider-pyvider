@@ -828,6 +828,43 @@ def test_build_cli_requires_both_source_repositories() -> None:
     assert raised.value.code == 2
 
 
+def test_build_cli_keeps_the_logical_script_worktree_when_script_is_symlinked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The recorded provenance must name the invoking worktree, not a symlink target."""
+    module = load_build_module()
+    logical_root = tmp_path / "provider-worktree"
+    symlink_target_root = tmp_path / "unrelated-checkout"
+    logical_script = logical_root / "ci" / SCRIPT.name
+    target_script = symlink_target_root / "ci" / SCRIPT.name
+    logical_script.parent.mkdir(parents=True)
+    target_script.parent.mkdir(parents=True)
+    target_script.write_text("# target\n", encoding="utf-8")
+    logical_script.symlink_to(target_script)
+    captured: dict[str, Any] = {}
+
+    def capture_build_stack(**kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return {}
+
+    monkeypatch.setattr(module, "__file__", str(logical_script))
+    monkeypatch.setattr(module, "build_stack", capture_build_stack)
+
+    result = module.main(
+        [
+            "--pyvider-source",
+            "/safe/pyvider",
+            "--components-source",
+            "/safe/components",
+            "--output-dir",
+            "/safe/output",
+        ]
+    )
+
+    assert result == 0
+    assert captured["provider_repository"] == logical_root
+
+
 def test_build_cli_reports_actionable_validation_errors(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
