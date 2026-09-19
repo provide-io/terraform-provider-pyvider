@@ -545,18 +545,25 @@ def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
     verify_films(verifier, manifest, casts)
 
 
-def test_pacer_preserves_multiline_cast_bytes_and_walkthrough_duration(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ("lane", "target"),
+    [("opentofu", 40), ("direct", 58), ("walkthrough", 80)],
+)
+def test_pacer_preserves_ansi_wrapped_cast_bytes_and_lane_duration(
+    tmp_path: Path, lane: str, target: float
+) -> None:
     source = tmp_path / "source.cast"
     paced = tmp_path / "paced.cast"
     source_events: list[list[Any]] = [
-        [0.1, "o", "first line\n"],
-        [0.2, "o", "second line: ✓\nsecond continuation\n"],
-        [0.3, "o", "third line\n"],
+        [0.1, "o", "\x1b[1;36m$ tofu vali"],
+        [0.2, "o", "date\x1b[0m\r\n"],
+        [0.3, "o", "\nLint summary:\nwarning: retain output ✓\n"],
+        [0.4, "o", "PASS: provider validation\n"],
     ]
     write_cast_events(source, source_events)
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), str(source), str(paced), "--profile", "walkthrough"],
+        ["uv", "run", "python", str(PACER), "--lane", lane, str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -568,10 +575,150 @@ def test_pacer_preserves_multiline_cast_bytes_and_walkthrough_duration(tmp_path:
     paced_bytes = b"".join(event[2].encode("utf-8") for event in paced_events)
     timestamps = [event[0] for event in paced_events]
 
+    assert json.loads(paced.read_text(encoding="utf-8").splitlines()[0]) == json.loads(
+        source.read_text(encoding="utf-8").splitlines()[0]
+    )
     assert paced_bytes == source_bytes
+    assert all(event[2].endswith("\n") for event in paced_events)
     assert timestamps == sorted(timestamps)
-    lower, upper = FILM_DURATION_RANGES["walkthrough"]
+    assert timestamps[-1] == target
+    assert timestamps[1] - timestamps[0] > timestamps[2] - timestamps[1]
+    assert timestamps[2] - timestamps[1] > 0
+    assert timestamps[3] - timestamps[2] > 0
+    lower, upper = FILM_DURATION_RANGES[lane]
     assert lower <= timestamps[-1] <= upper
+
+
+@pytest.mark.parametrize(
+    ("header_version", "events", "error"),
+    [
+        (3, [[0.1, "o", "not supported\n"]], "unsupported asciinema cast version"),
+        (2, [[0.1, "i", "keystrokes"]], "cast has no output events"),
+        (2, [[0.1, "o", "\udcff"]], "output event payload is not valid UTF-8"),
+    ],
+)
+def test_pacer_rejects_unsafe_cast_inputs(
+    tmp_path: Path, header_version: int, events: list[list[Any]], error: str
+) -> None:
+    source = tmp_path / "source.cast"
+    paced = tmp_path / "paced.cast"
+    write_cast_events(source, events)
+    rewrite_cast_header(source, version=header_version)
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert error in completed.stderr
+    assert not paced.exists()
+
+
+def test_pacer_rejects_an_unknown_lane(tmp_path: Path) -> None:
+    completed = subprocess.run(
+        [
+            "uv",
+            "run",
+            "python",
+            str(PACER),
+            "--lane",
+            "not-a-lane",
+            str(tmp_path / "in"),
+            str(tmp_path / "out"),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "invalid choice" in completed.stderr
+
+
+def test_pacer_preserves_a_literal_unicode_line_separator_in_output(tmp_path: Path) -> None:
+    source = tmp_path / "source.cast"
+    paced = tmp_path / "paced.cast"
+    source_events = [[0.1, "o", "first\u2028second\n"]]
+    write_cast_events(source, source_events)
+    source.write_text(source.read_text(encoding="utf-8").replace("\\u2028", "\u2028"), encoding="utf-8")
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    paced_events = [json.loads(line) for line in paced.read_text(encoding="utf-8").split("\n")[1:] if line]
+    assert b"".join(event[2].encode("utf-8") for event in paced_events) == b"first\xe2\x80\xa8second\n"
+
+
+def test_pacer_rejects_a_surrogate_header_without_overwriting_its_input(tmp_path: Path) -> None:
+    source = tmp_path / "source.cast"
+    write_cast_events(source, [[0.1, "o", "safe source\n"]])
+    lines = source.read_text(encoding="utf-8").splitlines()
+    header = json.loads(lines[0])
+    header["title"] = "\udcff"
+    source.write_text("\n".join([json.dumps(header), *lines[1:]]) + "\n", encoding="utf-8")
+    original = source.read_bytes()
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(source)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "cast header contains invalid UTF-8" in completed.stderr
+    assert source.read_bytes() == original
+    assert source.read_bytes()
+
+
+def test_pacer_rejects_an_unrepresentably_large_timestamp(tmp_path: Path) -> None:
+    source = tmp_path / "source.cast"
+    paced = tmp_path / "paced.cast"
+    write_cast_events(source, [[int("9" * 400), "o", "line\n"]])
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "invalid timestamp" in completed.stderr
+    assert "OverflowError" not in completed.stderr
+    assert not paced.exists()
+
+
+def test_pacer_preserves_input_event_order_after_complete_output_lines(tmp_path: Path) -> None:
+    source = tmp_path / "source.cast"
+    paced = tmp_path / "paced.cast"
+    write_cast_events(
+        source,
+        [[0.1, "o", "first\n"], [0.2, "o", "second\n"], [0.3, "i", "input"]],
+    )
+
+    completed = subprocess.run(
+        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    paced_events = [json.loads(line) for line in paced.read_text(encoding="utf-8").splitlines()[1:]]
+    assert [(event[1], event[2]) for event in paced_events] == [
+        ("o", "first\n"),
+        ("o", "second\n"),
+        ("i", "input"),
+    ]
 
 
 def test_proof_valid_fixture_reports_all_seven_rules(tmp_path: Path) -> None:
