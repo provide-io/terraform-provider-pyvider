@@ -60,9 +60,9 @@ FILM_CASTS = {
     "walkthrough": "provider-linting-walkthrough.cast",
 }
 FILM_DURATION_RANGES = {
-    "opentofu": (35.0, 45.0),
-    "direct": (50.0, 65.0),
-    "walkthrough": (70.0, 90.0),
+    "opentofu": (30.0, 36.0),
+    "direct": (33.0, 39.0),
+    "walkthrough": (36.0, 40.0),
 }
 RULES: list[dict[str, Any]] = [
     {

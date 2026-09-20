@@ -21,6 +21,7 @@ GENERATOR = ROOT / "ci" / "generate-provider-linting-proof.py"
 VERIFIER = ROOT / "ci" / "verify-provider-linting-proof.py"
 RETIMER = ROOT / "ci" / "retime-cast.py"
 PACER = ROOT / "ci" / "pace-provider-linting-cast.py"
+PROOF_LIBRARY = ROOT / "ci" / "provider_linting_proof.py"
 
 COMMANDS = [
     "tofu version",
@@ -82,15 +83,31 @@ FILM_COMMANDS = {
     "walkthrough": WALKTHROUGH_COMMANDS,
 }
 FILM_DURATION_RANGES = {
-    "opentofu": (35, 45),
-    "direct": (50, 65),
-    "walkthrough": (70, 90),
+    "opentofu": (30, 36),
+    "direct": (33, 39),
+    "walkthrough": (36, 40),
 }
 FILM_CAPTURE_GEOMETRIES = {
     "opentofu": (110, 26),
     "direct": (110, 26),
     "walkthrough": (110, 26),
 }
+
+
+def test_public_film_pace_profiles_are_readable_and_fit_the_short_showcase_window() -> None:
+    """Every public proof film stays observable without becoming a long demo."""
+    pacer = load_script(PACER, "provider_linting_pacer_showcase_window")
+    verifier = load_script(PROOF_LIBRARY, "provider_linting_proof_showcase_window")
+    expected = {
+        "opentofu": {"target": 34.0, "range": (30.0, 36.0)},
+        "direct": {"target": 37.0, "range": (33.0, 39.0)},
+        "walkthrough": {"target": 40.0, "range": (36.0, 40.0)},
+    }
+
+    assert {
+        lane: {"target": profile.target_seconds, "range": verifier.FILM_DURATION_RANGES[lane]}
+        for lane, profile in pacer.PROFILES.items()
+    } == expected
 
 
 def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
@@ -119,7 +136,11 @@ def load_script(path: Path, name: str) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.modules.pop(name, None)
     return module
 
 
@@ -569,12 +590,12 @@ def test_schema_v3_opentofu_film_rejects_a_hash_refreshed_beta10_version(tmp_pat
 @pytest.mark.parametrize(
     ("lane", "timestamp"),
     [
-        ("opentofu", 34),
-        ("opentofu", 46),
-        ("direct", 49),
-        ("direct", 66),
-        ("walkthrough", 69),
-        ("walkthrough", 91),
+        ("opentofu", 29),
+        ("opentofu", 37),
+        ("direct", 32),
+        ("direct", 40),
+        ("walkthrough", 35),
+        ("walkthrough", 41),
     ],
 )
 def test_schema_v3_proof_rejects_out_of_range_film_duration(
@@ -640,12 +661,12 @@ def test_schema_v3_verifier_cli_rejects_each_checked_film_mutation_independently
 @pytest.mark.parametrize(
     ("lane", "timestamp"),
     [
-        ("opentofu", 35),
-        ("opentofu", 45),
-        ("direct", 50),
-        ("direct", 65),
-        ("walkthrough", 70),
-        ("walkthrough", 90),
+        ("opentofu", 30),
+        ("opentofu", 36),
+        ("direct", 33),
+        ("direct", 39),
+        ("walkthrough", 36),
+        ("walkthrough", 40),
     ],
 )
 def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
@@ -661,7 +682,7 @@ def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
 
 @pytest.mark.parametrize(
     ("lane", "target"),
-    [("opentofu", 40), ("direct", 58), ("walkthrough", 80)],
+    [("opentofu", 34), ("direct", 37), ("walkthrough", 40)],
 )
 def test_pacer_preserves_ansi_wrapped_cast_bytes_and_lane_duration(
     tmp_path: Path, lane: str, target: float
@@ -1048,7 +1069,7 @@ def test_film_generator_rejects_invalid_walkthrough_without_overwriting_output(t
     write_film_cast(
         casts["walkthrough"],
         lane="walkthrough",
-        timestamp=80,
+        timestamp=40,
         text=film_cast_text("walkthrough").replace("$ soup --version\n", ""),
     )
     binary = tmp_path / "dist" / "linux_amd64" / "terraform-provider-pyvider_v0.5.0"

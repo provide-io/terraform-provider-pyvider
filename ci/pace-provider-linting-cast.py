@@ -30,9 +30,9 @@ class PaceProfile:
 
 
 PROFILES = {
-    "opentofu": PaceProfile(target_seconds=40.0),
-    "direct": PaceProfile(target_seconds=58.0),
-    "walkthrough": PaceProfile(target_seconds=80.0),
+    "opentofu": PaceProfile(target_seconds=34.0),
+    "direct": PaceProfile(target_seconds=37.0),
+    "walkthrough": PaceProfile(target_seconds=40.0),
 }
 
 
