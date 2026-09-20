@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+from itertools import pairwise
 import json
 from pathlib import Path
 import subprocess
@@ -108,6 +109,24 @@ def test_public_film_pace_profiles_are_readable_and_fit_the_short_showcase_windo
         lane: {"target": profile.target_seconds, "range": verifier.FILM_DURATION_RANGES[lane]}
         for lane, profile in pacer.PROFILES.items()
     } == expected
+
+
+def test_pacer_keeps_every_visible_walkthrough_line_on_screen_for_at_least_1_2_seconds() -> None:
+    """Bridge, command, and status lines must remain observable in the short film."""
+    pacer = load_script(PACER, "provider_linting_pacer_visible_dwell")
+    output = "".join(
+        [
+            *(f"$ public command {index}\n" for index in range(6)),
+            *(f"warning: checked finding {index}\n" for index in range(10)),
+            *(f"status: bridge line {index}\n" for index in range(11)),
+        ]
+    )
+
+    timestamps = [timestamp for _chunk, timestamp in pacer.pace_output(output, pacer.PROFILES["walkthrough"])]
+    visible_dwells = [later - earlier for earlier, later in pairwise(timestamps)]
+
+    assert timestamps[-1] == 40.0
+    assert min(round(dwell, 3) for dwell in visible_dwells) >= 1.2
 
 
 def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:

@@ -22,6 +22,7 @@ class PaceProfile:
     """A named presentation lane and its observed-duration target."""
 
     target_seconds: float
+    minimum_visible_dwell_seconds: float = 1.2
     command_weight: float = 3.0
     heading_weight: float = 3.0
     warning_weight: float = 2.2
@@ -219,10 +220,16 @@ def pace_output(output: str, profile: PaceProfile) -> list[tuple[str, float]]:
     total_weight = sum(weights)
     if total_weight == 0:
         return []
+    minimum_total = profile.minimum_visible_dwell_seconds * len(chunks)
+    if minimum_total > profile.target_seconds:
+        raise CastError(
+            "target duration cannot keep every visible line on screen for the required minimum dwell"
+        )
+    discretionary_seconds = profile.target_seconds - minimum_total
     elapsed = 0.0
     paced: list[tuple[str, float]] = []
     for index, (chunk, weight) in enumerate(zip(chunks, weights, strict=True)):
-        elapsed += profile.target_seconds * weight / total_weight
+        elapsed += profile.minimum_visible_dwell_seconds + discretionary_seconds * weight / total_weight
         timestamp = profile.target_seconds if index == len(chunks) - 1 else round(elapsed, 3)
         paced.append((chunk, timestamp))
     return paced
