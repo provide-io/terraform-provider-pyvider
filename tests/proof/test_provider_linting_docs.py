@@ -19,8 +19,11 @@ def guide_text() -> str:
         "tests/e2e/provider-linting/main.tf",
         "tests/proof/fixtures/provider-linting/main.tf",
         "provider-linting-opentofu.cast",
-        "provider-linting-direct-rpc.cast",
+        "provider-linting-direct.cast",
+        "provider-linting-walkthrough.cast",
         "provider-linting-proof.json",
+        "schema-v3 manifest",
+        "three checked films",
         "v1.13.0-beta1",
         "OpenTofu core reaches 4/7",
         "TofuSoup 0.8.0 directly proves 7/7",
@@ -44,7 +47,7 @@ def guide_text() -> str:
         "Pyvider's author-facing lint API is supported",
         "built-in\nlinting feature as experimental",
         "rules independently selectable",
-        "publishes both checked artifacts only after verification and rolls back ordinary publication failures",
+        "publishes three checked films\nonly after verification and rolls back ordinary publication failures",
     ],
 )
 def test_provider_linting_guide_covers_reproduction_contract(required_text: str) -> None:
@@ -53,6 +56,10 @@ def test_provider_linting_guide_covers_reproduction_contract(required_text: str)
 
 def test_provider_linting_guide_does_not_advertise_an_unqualified_group() -> None:
     assert "PYVIDER_LINT=security tofu validate" not in guide_text()
+
+
+def test_provider_linting_guide_does_not_advertise_the_superseded_direct_rpc_cast() -> None:
+    assert "provider-linting-direct-rpc.cast" not in guide_text()
 
 
 def test_provider_linting_guide_is_in_documentation_navigation() -> None:

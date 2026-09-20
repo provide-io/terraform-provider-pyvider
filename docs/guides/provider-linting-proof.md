@@ -145,16 +145,19 @@ soup lint tests/e2e/provider-linting/lint.soup.toml \
 
 The recorder runs the OpenTofu and direct-provider demonstrations against one named
 package, refuses a binary other than the one named by build provenance, and
-verifies its checksum before and after recording. It publishes both checked artifacts only after verification and rolls back ordinary publication failures:
+verifies its checksum before and after recording. It publishes three checked films
+only after verification and rolls back ordinary publication failures:
 
 - [`provider-linting-opentofu.cast`][opentofu-cast] — the deterministic
   OpenTofu demonstration.
-- [`provider-linting-direct-rpc.cast`][direct-rpc-cast] — the deterministic
+- [`provider-linting-direct.cast`][direct-cast] — the deterministic
   seven-path direct-provider recording.
-- [`provider-linting-proof.json`][manifest] — versions, exact source revisions
-and archive hashes, binary and recording checksums, the command list, the
-seven-rule catalog, observation channels, OpenTofu archive checksum, and CI
-identity.
+- [`provider-linting-walkthrough.cast`][walkthrough-cast] — the public
+  walkthrough that installs released TofuSoup 0.8.0 and shows both lanes.
+- [`provider-linting-proof.json`][manifest] — the schema-v3 manifest that
+  records versions, exact source revisions and archive hashes, the binary and
+  all three recording checksums, the command list, the seven-rule catalog,
+  observation channels, the OpenTofu archive checksum, and CI identity.
 
 ```shell
 PYVIDER_CONFORMANCE_PSP="$lint_binary" ci/record-provider-linting.sh
@@ -162,15 +165,20 @@ PYVIDER_CONFORMANCE_PSP="$lint_binary" ci/record-provider-linting.sh
 uv run python ci/verify-provider-linting-proof.py \
   provider-linting-proof.json \
   provider-linting-opentofu.cast \
-  provider-linting-direct-rpc.cast
+  provider-linting-direct.cast \
+  provider-linting-walkthrough.cast
 
 uv run pytest tests/proof -q
 ```
 
-The verifier parses both complete casts after stripping terminal controls. It
-requires the two public `soup lint` commands, the separate native/direct lane
-results, all seven readable direct-provider observations, matching artifact
-checksums, the pinned beta, and provenance without secrets or local paths.
+The verifier parses all three complete casts after stripping terminal controls.
+It requires the public `soup lint` commands, the separate native/direct lane
+results, the released TofuSoup walkthrough, all seven readable direct-provider
+observations, matching artifact checksums, the pinned beta, and provenance
+without secrets or local paths. The manifest's provider revision names the exact
+source tree used to build the checked binary; a later repository commit may add
+only the generated proof metadata, so compare the recorded revision and hashes
+rather than inferring provenance from a filename or a “latest” build.
 
 ## Retrieve the exact CI proof
 
@@ -192,7 +200,8 @@ gh run download "$proof_run_id" \
 uv run python ci/verify-provider-linting-proof.py \
   "$proof_dir/provider-linting-proof.json" \
   "$proof_dir/provider-linting-opentofu.cast" \
-  "$proof_dir/provider-linting-direct-rpc.cast"
+  "$proof_dir/provider-linting-direct.cast" \
+  "$proof_dir/provider-linting-walkthrough.cast"
 ```
 
 Before publishing the downloaded files, also compare the manifest's provider,
@@ -212,7 +221,8 @@ IDs, groups, selectors, and documentation remain stable.
 [opentofu-fixture]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/tests/e2e/provider-linting/main.tf
 [tofusoup-fixture]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/tests/proof/fixtures/provider-linting/main.tf
 [opentofu-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-opentofu.cast
-[direct-rpc-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-direct-rpc.cast
+[direct-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-direct.cast
+[walkthrough-cast]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-walkthrough.cast
 [manifest]: https://github.com/provide-io/terraform-provider-pyvider/blob/main/provider-linting-proof.json
 [rfc]: https://github.com/opentofu/opentofu/blob/main/rfc/20260406-linting.md
 [tracker]: https://github.com/opentofu/opentofu/issues/4310
