@@ -56,30 +56,50 @@ checked_manifest=$staging/provider-linting-proof.json
 opentofu_demo_root=$staging/opentofu-demo
 direct_demo_root=$staging/direct-demo
 
-PYVIDER_OPENTOFU_BINARY="$tofu" \
-PYVIDER_LINTING_DEMO_ROOT="$opentofu_demo_root" \
-python3 "$repo_root/ci/record-to-cast.py" \
-    --title 'Pyvider linting — OpenTofu demonstration' --width 120 --height 40 \
-    "$raw_opentofu_cast" "$repo_root/ci/provider-linting-demo.sh"
+record_lane() {
+    local lane=$1
+    local width=$2
+    local height=$3
+    local raw_cast=$staging/provider-linting-${lane}.raw.cast
+    local checked_cast=$staging/provider-linting-${lane}.cast
 
-python3 "$repo_root/ci/pace-provider-linting-cast.py" \
-    --lane opentofu "$raw_opentofu_cast" "$checked_opentofu_cast"
+    case "$lane" in
+        opentofu)
+            PYVIDER_OPENTOFU_BINARY="$tofu" \
+            PYVIDER_LINTING_DEMO_ROOT="$opentofu_demo_root" \
+            python3 "$repo_root/ci/record-to-cast.py" \
+                --title 'Pyvider linting — OpenTofu demonstration' --width "$width" --height "$height" \
+                "$raw_cast" "$repo_root/ci/provider-linting-demo.sh"
+            python3 "$repo_root/ci/pace-provider-linting-cast.py" \
+                --lane opentofu "$raw_cast" "$checked_cast"
+            ;;
+        direct)
+            PYVIDER_LINTING_DEMO_ROOT="$direct_demo_root" \
+            python3 "$repo_root/ci/record-to-cast.py" \
+                --title 'Pyvider linting — direct provider validation' --width "$width" --height "$height" \
+                "$raw_cast" "$repo_root/ci/provider-linting-direct-rpc-demo.sh"
+            python3 "$repo_root/ci/pace-provider-linting-cast.py" \
+                --lane direct "$raw_cast" "$checked_cast"
+            ;;
+        walkthrough)
+            PYVIDER_OPENTOFU_BINARY="$tofu" \
+            python3 "$repo_root/ci/record-to-cast.py" \
+                --title 'Pyvider provider-native linting proof' --width "$width" --height "$height" \
+                "$raw_cast" "$repo_root/ci/provider-linting-walkthrough.sh"
+            python3 "$repo_root/ci/pace-provider-linting-cast.py" \
+                --lane walkthrough "$raw_cast" "$checked_cast"
+            ;;
+        *)
+            printf 'error: unknown proof film lane: %s\n' "$lane" >&2
+            return 2
+            ;;
+    esac
 
-PYVIDER_LINTING_DEMO_ROOT="$direct_demo_root" \
-python3 "$repo_root/ci/record-to-cast.py" \
-    --title 'Pyvider linting — direct provider validation' --width 120 --height 40 \
-    "$raw_direct_cast" "$repo_root/ci/provider-linting-direct-rpc-demo.sh"
+}
 
-python3 "$repo_root/ci/pace-provider-linting-cast.py" \
-    --lane direct "$raw_direct_cast" "$checked_direct_cast"
-
-PYVIDER_OPENTOFU_BINARY="$tofu" \
-python3 "$repo_root/ci/record-to-cast.py" \
-    --title 'Pyvider provider-native linting proof' --width 120 --height 40 \
-    "$raw_walkthrough_cast" "$repo_root/ci/provider-linting-walkthrough.sh"
-
-python3 "$repo_root/ci/pace-provider-linting-cast.py" \
-    --lane walkthrough "$raw_walkthrough_cast" "$checked_walkthrough_cast"
+record_lane opentofu 120 18
+record_lane direct 120 20
+record_lane walkthrough 120 20
 
 PYVIDER_OPENTOFU_ARCHIVE_SHA256="$archive_sha" \
 uv run python "$repo_root/ci/generate-provider-linting-proof.py" \

@@ -86,6 +86,11 @@ FILM_DURATION_RANGES = {
     "direct": (50, 65),
     "walkthrough": (70, 90),
 }
+FILM_CAPTURE_GEOMETRIES = {
+    "opentofu": (120, 18),
+    "direct": (120, 20),
+    "walkthrough": (120, 20),
+}
 
 
 def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
@@ -407,6 +412,14 @@ def test_schema_v3_fixture_declares_three_public_proof_films(tmp_path: Path) -> 
             "path": cast.name,
             "sha256": hashlib.sha256(cast.read_bytes()).hexdigest(),
         }
+
+
+@pytest.mark.parametrize("lane", tuple(FILM_CASTS))
+def test_checked_schema_v3_films_use_the_canonical_compact_capture_geometry(lane: str) -> None:
+    """The public film viewport is capture metadata, never a site-side crop."""
+    header = json.loads((ROOT / FILM_CASTS[lane]).read_text(encoding="utf-8").splitlines()[0])
+
+    assert (header["width"], header["height"]) == FILM_CAPTURE_GEOMETRIES[lane]
 
 
 def test_schema_v3_proof_accepts_an_unmodified_valid_three_film_fixture(tmp_path: Path) -> None:
