@@ -1197,6 +1197,24 @@ def test_recording_scripts_preserve_all_public_films_without_the_private_driver(
     assert "run-provider-linting-rpcs.py" not in recorder
 
 
+def test_public_recording_commands_have_a_real_blank_line_before_them() -> None:
+    scripts = {
+        "opentofu": (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8"),
+        "direct": (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8"),
+        "walkthrough": (ROOT / "ci" / "provider-linting-walkthrough.sh").read_text(encoding="utf-8"),
+    }
+
+    public_commands = {
+        "opentofu": ["tofu version", *OPENTOFU_COMMANDS],
+        "direct": [DIRECT_RPC_COMMAND],
+        "walkthrough": WALKTHROUGH_COMMANDS,
+    }
+
+    for lane, commands in public_commands.items():
+        for command in commands:
+            assert f"printf '\\n'\nshow_command '{command}'" in scripts[lane]
+
+
 def test_retime_redacts_longest_nested_path_before_parent() -> None:
     retimer = load_script(RETIMER, "provider_linting_retimer_nested")
     repository = "/Users/example/provider"

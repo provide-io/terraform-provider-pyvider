@@ -21,14 +21,18 @@ printf '%s\n' 'Fixture: a temporary working directory links the repository provi
 printf '%s\n' 'Warnings are lint findings from the documented fixture; any nonzero lint result stops the walkthrough.'
 printf '%s\n' 'Coverage boundary: OpenTofu demonstrates native validation and direct demonstrates provider validation.'
 
+printf '\n'
 show_command 'uv tool install --refresh tofusoup==0.8.0'
 uv tool install --refresh tofusoup==0.8.0
+printf '\n'
 show_command 'soup --version'
 soup --version
+printf '\n'
 show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
     --provider "$PYVIDER_CONFORMANCE_PSP" \
     --opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu
+printf '\n'
 show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
     --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct

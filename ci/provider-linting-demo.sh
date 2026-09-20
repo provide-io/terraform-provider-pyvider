@@ -22,9 +22,11 @@ printf '%s\n' 'Lane: OpenTofu runs the public suite through the checked provider
 printf '%s\n' 'Warnings are lint findings from this fixture; any nonzero lint result stops the recording.'
 printf '%s\n' 'Coverage boundary: this lane demonstrates OpenTofu-native validation, not direct provider RPC coverage.'
 
+printf '\n'
 show_command 'tofu version'
 "$PYVIDER_OPENTOFU_BINARY" version
 
+printf '\n'
 show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
     --provider "$PYVIDER_CONFORMANCE_PSP" \
