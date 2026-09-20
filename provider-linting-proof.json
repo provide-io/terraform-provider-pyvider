@@ -2,15 +2,15 @@
   "casts": {
     "direct": {
       "path": "provider-linting-direct.cast",
-      "sha256": "a775f953dd38ed06e586dee7e8be470d27fef624b20d0c5be80692338aef542f"
+      "sha256": "1df15f1a650d8a513bf8ab549a3232412a88d4296cdcc60dd87e163a71553378"
     },
     "opentofu": {
       "path": "provider-linting-opentofu.cast",
-      "sha256": "e21d78c9feb2a904bbafa0075d9f0e9e21ff6f85e3ff53408b63914f75c06709"
+      "sha256": "d1f58c6320520dd922466d4a6353786dbd25e58f5e179b91fb51a953f29eda39"
     },
     "walkthrough": {
       "path": "provider-linting-walkthrough.cast",
-      "sha256": "a4e128bd80bdf01c6193c6ad419a08149110dbee34a7589301fab198efc48130"
+      "sha256": "41fdc5c9395b8bff64c0d66e8fd2fbb0452c5d4afa46825ab12ade9b17c2f2a8"
     }
   },
   "ci": {
@@ -49,7 +49,7 @@
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-20T01:32:53.248373Z",
+  "generated_at": "2026-09-20T02:47:28.558727Z",
   "opentofu": {
     "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
     "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",

@@ -1,4 +1,4 @@
-{"version": 2, "width": 120, "height": 20, "timestamp": 1789867968, "title": "Pyvider provider-native linting proof", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
+{"version": 2, "width": 110, "height": 26, "timestamp": 1789872443, "title": "Pyvider provider-native linting proof", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
 [1.55, "o", "Fixture: a temporary working directory links the repository provider-linting suite for this walkthrough.\r\n"]
 [4.961, "o", "Warnings are lint findings from the documented fixture; any nonzero lint result stops the walkthrough.\r\n"]
 [6.512, "o", "Coverage boundary: OpenTofu demonstrates native validation and direct demonstrates provider validation.\r\n"]
@@ -11,9 +11,9 @@
 [26.667, "o", "OpenTofu native linting: valid\r\n"]
 [30.078, "o", "  warning: Experimental linting enabled\r\n"]
 [33.488, "o", "  warning: TLS certificate verification is disabled (provide-io/pyvider:insecure-tls)\r\n"]
-[36.899, "o", "  warning: Directory permissions are world-writable (provide-io/pyvider:world-writable-directory)\r\n"]
-[40.31, "o", "  warning: HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)\r\n"]
-[43.721, "o", "  warning: Lease lifetime exceeds one hour (provide-io/pyvider:long-lived-lease)\r\n"]
+[36.899, "o", "  warning: Lease lifetime exceeds one hour (provide-io/pyvider:long-lived-lease)\r\n"]
+[40.31, "o", "  warning: Directory permissions are world-writable (provide-io/pyvider:world-writable-directory)\r\n"]
+[43.721, "o", "  warning: HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)\r\n"]
 [45.271, "o", "OpenTofu coverage is separate from direct provider coverage.\r\n"]
 [49.922, "o", "\u001b[1;36m$ soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$PYVIDER_CONFORMANCE_PSP\" --lane direct\u001b[0m\r\n"]
 [53.023, "o", "Direct provider validation: 7/7 cases\r\n"]

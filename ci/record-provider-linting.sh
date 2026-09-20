@@ -97,9 +97,9 @@ record_lane() {
 
 }
 
-record_lane opentofu 120 18
-record_lane direct 120 20
-record_lane walkthrough 120 20
+record_lane opentofu 110 26
+record_lane direct 110 26
+record_lane walkthrough 110 26
 
 PYVIDER_OPENTOFU_ARCHIVE_SHA256="$archive_sha" \
 uv run python "$repo_root/ci/generate-provider-linting-proof.py" \

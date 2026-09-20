@@ -87,9 +87,9 @@ FILM_DURATION_RANGES = {
     "walkthrough": (70, 90),
 }
 FILM_CAPTURE_GEOMETRIES = {
-    "opentofu": (120, 18),
-    "direct": (120, 20),
-    "walkthrough": (120, 20),
+    "opentofu": (110, 26),
+    "direct": (110, 26),
+    "walkthrough": (110, 26),
 }
 
 
