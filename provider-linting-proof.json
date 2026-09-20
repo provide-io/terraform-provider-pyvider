@@ -2,15 +2,15 @@
   "casts": {
     "direct": {
       "path": "provider-linting-direct.cast",
-      "sha256": "4752e4cb6774261d7148951f432d70ed6ebd33204b0066966475414df7452030"
+      "sha256": "a775f953dd38ed06e586dee7e8be470d27fef624b20d0c5be80692338aef542f"
     },
     "opentofu": {
       "path": "provider-linting-opentofu.cast",
-      "sha256": "51a786c71304f1e74d53c82039002683eb8473f2757697221ba0b6cbd411e225"
+      "sha256": "e21d78c9feb2a904bbafa0075d9f0e9e21ff6f85e3ff53408b63914f75c06709"
     },
     "walkthrough": {
       "path": "provider-linting-walkthrough.cast",
-      "sha256": "0d86327669983143222cca7c6bb3021e63c99e343cd01776ba42b4c593b244e6"
+      "sha256": "a4e128bd80bdf01c6193c6ad419a08149110dbee34a7589301fab198efc48130"
     }
   },
   "ci": {
@@ -45,11 +45,11 @@
       "version": "0.7.2"
     },
     "terraform-provider-pyvider": {
-      "sha": "58403ecb39221546b652b216dc4165bcdab53059",
+      "sha": "d550ed3934d93671f4c5899c2ae239e78bcee14e",
       "version": "0.5.0"
     }
   },
-  "generated_at": "2026-09-19T23:49:05.726325Z",
+  "generated_at": "2026-09-20T01:32:53.248373Z",
   "opentofu": {
     "archive": "tofu_1.13.0-beta1_darwin_arm64.zip",
     "archive_sha256": "a50175f3d22ea87226f0f3d0edbbdb41fa6565a82c85fc0a97a89ab7ee0d4886",
@@ -57,7 +57,7 @@
   },
   "provider_binary": {
     "path": "dist/darwin_arm64/terraform-provider-pyvider_v0.5.0",
-    "sha256": "589a4b17142783764023fbbe3d2231b3f95e7fa8e181a6fbb7d46f780b9cdeb0"
+    "sha256": "460196acda810c7fd3b42fccb075b58a5036ceafc1b701ca042988925a032590"
   },
   "rules": [
     {
