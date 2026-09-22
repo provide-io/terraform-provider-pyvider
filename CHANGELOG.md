@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   source, ephemeral resource, list resource, action, and state-store
   configuration paths. Stable selectors can enable all rules, groups, exact
   rules, and exact exclusions.
-- Added a separate OpenTofu beta validation lane that reaches four OpenTofu
+- Added separate OpenTofu experimental lint validation that reaches four OpenTofu
   paths through ordinary validation RPCs. It does not claim that OpenTofu has
   shipped a provider-lint transport.
 - Added three paced, user-runnable recordings and

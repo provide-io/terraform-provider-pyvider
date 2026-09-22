@@ -200,10 +200,10 @@ jobs:
               assert component["wheel_sha256"] == dependency["sha256"]
           PY
 
-      - name: 🪣 Install pinned OpenTofu beta
+      - name: 🪣 Install pinned OpenTofu prerelease
         shell: bash
         run: |
-          tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-beta1 --cache-dir "$PWD/.cache/opentofu-beta")
+          tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
           echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
 
       - name: 🧪 Re-run the released linux_amd64 proof

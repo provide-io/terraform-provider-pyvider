@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""OpenTofu v1.13.0-beta1 proof for the four provider-reachable lint paths.
+"""OpenTofu v1.13.0-rc1 proof for the four provider-reachable lint paths.
 
 OpenTofu core does not yet call action, list-resource, or state-store validation.
 Those three paths are deliberately asserted absent here and are proven through
@@ -133,20 +133,20 @@ def resolve_tofu_binary(cache: Path) -> Path:
             pytest.fail(f"preinstalled OpenTofu binary not found at {tofu}")
     else:
         completed = subprocess.run(
-            [str(INSTALLER), "--cache-dir", str(cache), "--version", "1.13.0-beta1"],
+            [str(INSTALLER), "--cache-dir", str(cache), "--version", "1.13.0-rc1"],
             check=True,
             capture_output=True,
             text=True,
         )
         tofu = Path(completed.stdout.strip()).resolve()
     version = subprocess.run([tofu, "version"], check=True, capture_output=True, text=True).stdout
-    assert "OpenTofu v1.13.0-beta1" in version
+    assert "OpenTofu v1.13.0-rc1" in version
     return tofu
 
 
 @pytest.fixture(scope="session")
 def tofu_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    return resolve_tofu_binary(tmp_path_factory.mktemp("opentofu-beta"))
+    return resolve_tofu_binary(tmp_path_factory.mktemp("opentofu-prerelease"))
 
 
 def install_provider_mirror(root: Path, binary: Path) -> tuple[Path, Path]:
@@ -315,7 +315,7 @@ def test_e2e_uses_the_exact_preinstalled_opentofu_binary(
     tmp_path: Path,
 ) -> None:
     tofu = tmp_path / "tofu"
-    tofu.write_text("#!/bin/sh\nprintf 'OpenTofu v1.13.0-beta1\\n'\n", encoding="utf-8")
+    tofu.write_text("#!/bin/sh\nprintf 'OpenTofu v1.13.0-rc1\\n'\n", encoding="utf-8")
     tofu.chmod(0o755)
     monkeypatch.setenv("PYVIDER_OPENTOFU_BINARY", str(tofu))
 

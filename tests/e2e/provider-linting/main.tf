@@ -1,5 +1,5 @@
 terraform {
-  required_version = "= 1.13.0-beta1"
+  required_version = "= 1.13.0-rc1"
 
   required_providers {
     pyvider = {

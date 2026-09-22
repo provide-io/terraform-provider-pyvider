@@ -4,13 +4,13 @@
 
 set -eu
 
-PINNED_VERSION="1.13.0-beta1"
+PINNED_VERSION="1.13.0-rc1"
 VERSION=""
 RELEASE_BASE_URL=""
 CACHE_DIR=""
 
 usage() {
-    printf 'usage: %s --version 1.13.0-beta1 --cache-dir PATH [--release-base-url URL]\n' "$0" >&2
+    printf 'usage: %s --version 1.13.0-rc1 --cache-dir PATH [--release-base-url URL]\n' "$0" >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -38,11 +38,11 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ -z "$VERSION" ]; then
-    printf '%s\n' 'error: --version 1.13.0-beta1 is required' >&2
+    printf '%s\n' 'error: --version 1.13.0-rc1 is required' >&2
     exit 2
 fi
 if [ "$VERSION" != "$PINNED_VERSION" ]; then
-    printf '%s\n' 'error: only OpenTofu 1.13.0-beta1 is supported' >&2
+    printf '%s\n' 'error: only OpenTofu 1.13.0-rc1 is supported' >&2
     exit 2
 fi
 if [ -z "$CACHE_DIR" ]; then

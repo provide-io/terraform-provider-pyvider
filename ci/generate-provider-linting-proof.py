@@ -47,7 +47,7 @@ def main() -> int:
             "build_provenance_path": args.build_provenance,
             "output_path": args.output,
             "provider_version": (root / "VERSION").read_text(encoding="utf-8").strip(),
-            "opentofu_archive": f"tofu_1.13.0-beta1_{_platform()}.zip",
+            "opentofu_archive": f"tofu_1.13.0-rc1_{_platform()}.zip",
             "opentofu_archive_sha256": archive_sha,
             "generated_at": utc_now(),
             "ci_environment": github_environment(),

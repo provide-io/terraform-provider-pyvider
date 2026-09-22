@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Contract tests for the pinned OpenTofu beta installer."""
+"""Contract tests for the pinned OpenTofu prerelease installer."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "ci" / "install-opentofu-beta.sh"
 ROOT = SCRIPT.parents[1]
-VERSION = "1.13.0-beta1"
+VERSION = "1.13.0-rc1"
 
 
 def host_platform() -> str:
@@ -33,7 +33,7 @@ def fake_release(tmp_path: Path, *, checksum: str | None = None) -> tuple[Path, 
     archive_name = f"tofu_{VERSION}_{host_platform()}.zip"
     archive = release / archive_name
     tofu = tmp_path / "tofu"
-    tofu.write_text("#!/bin/sh\nprintf 'OpenTofu v1.13.0-beta1\\n'\n", encoding="utf-8")
+    tofu.write_text("#!/bin/sh\nprintf 'OpenTofu v1.13.0-rc1\\n'\n", encoding="utf-8")
     tofu.chmod(0o755)
     with zipfile.ZipFile(archive, "w") as bundle:
         bundle.write(tofu, arcname="tofu")
@@ -73,7 +73,7 @@ def test_installer_selects_host_archive_verifies_it_and_prints_binary(tmp_path: 
     assert expected.is_file()
     assert os.access(expected, os.X_OK)
     assert subprocess.run([expected, "version"], check=True, capture_output=True, text=True).stdout == (
-        "OpenTofu v1.13.0-beta1\n"
+        "OpenTofu v1.13.0-rc1\n"
     )
     assert hashlib.sha256(archive.read_bytes()).hexdigest() in result.stderr
 
@@ -91,7 +91,7 @@ def test_installer_rejects_a_checksum_mismatch(tmp_path: Path) -> None:
 def test_installer_is_pinned_and_uses_verified_curl_downloads() -> None:
     source = SCRIPT.read_text(encoding="utf-8")
 
-    assert 'PINNED_VERSION="1.13.0-beta1"' in source
+    assert 'PINNED_VERSION="1.13.0-rc1"' in source
     assert "curl --fail --location" in source
     assert "shasum -a 256 -c" in source
     assert "latest" not in source.lower()
@@ -126,7 +126,7 @@ def test_installer_requires_the_explicit_pinned_version(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 2
-    assert "--version 1.13.0-beta1 is required" in result.stderr
+    assert "--version 1.13.0-rc1 is required" in result.stderr
 
 
 @pytest.mark.parametrize("version", ["latest", "1.12.0", "1.13.0"])
@@ -147,7 +147,7 @@ def test_installer_rejects_any_unpinned_version(tmp_path: Path, version: str) ->
     )
 
     assert result.returncode == 2
-    assert "only OpenTofu 1.13.0-beta1 is supported" in result.stderr
+    assert "only OpenTofu 1.13.0-rc1 is supported" in result.stderr
 
 
 def test_concurrent_installers_atomically_publish_one_verified_binary(tmp_path: Path) -> None:
@@ -172,7 +172,7 @@ def test_concurrent_installers_atomically_publish_one_verified_binary(tmp_path: 
     assert all(returncode == 0 for _, _, returncode in completed)
     assert {stdout for stdout, _, _ in completed} == {f"{expected}\n"}
     assert subprocess.run([expected, "version"], check=True, capture_output=True, text=True).stdout == (
-        "OpenTofu v1.13.0-beta1\n"
+        "OpenTofu v1.13.0-rc1\n"
     )
     assert list(cache.glob(".install-*")) == []
 
@@ -287,8 +287,8 @@ def test_opentofu_make_target_is_a_no_rebuild_dry_run(tmp_path: Path) -> None:
     assert "flavor pack" not in result.stdout
     assert "make build" not in result.stdout
     assert "ci/install-opentofu-beta.sh --cache-dir" in result.stdout
-    assert "--version 1.13.0-beta1" in result.stdout
-    assert "OpenTofu v1.13.0-beta1" in result.stdout
+    assert "--version 1.13.0-rc1" in result.stdout
+    assert "OpenTofu v1.13.0-rc1" in result.stdout
     assert "tests/e2e/test_provider_linting_opentofu.py" in result.stdout
     assert "PYVIDER_OPENTOFU_BINARY=" in result.stdout
     assert str(provenance) in result.stdout

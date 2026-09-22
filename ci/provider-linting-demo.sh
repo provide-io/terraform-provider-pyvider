@@ -20,7 +20,7 @@ show_command() {
 
 printf '%s\n' 'Lane: OpenTofu runs the public suite through the checked provider and OpenTofu binary.'
 printf '%s\n' 'Warnings are lint findings from this fixture; any nonzero lint result stops the recording.'
-printf '%s\n' 'Coverage boundary: this OpenTofu beta validation lane reaches four ordinary validation paths.'
+printf '%s\n' 'Coverage boundary: OpenTofu experimental lint validation reaches four ordinary validation paths.'
 
 printf '\n'
 show_command 'tofu version'

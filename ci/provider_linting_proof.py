@@ -18,7 +18,8 @@ from typing import Any
 
 SCHEMA_VERSION = 3
 LEGACY_SCHEMA_VERSION = 1
-OPENTOFU_VERSION = "1.13.0-beta1"
+OPENTOFU_VERSION = "1.13.0-rc1"
+LEGACY_OPENTOFU_VERSION = "1.13.0-beta1"
 TOFUSOUP_VERSION = "0.8.2"
 PYPI_REGISTRY = "https://pypi.org/simple"
 COMMANDS = [
@@ -324,11 +325,12 @@ def _validate_generated_at(value: Any) -> None:
 def _validate_opentofu(value: Any) -> None:
     if not isinstance(value, dict) or set(value) != {"version", "archive", "archive_sha256"}:
         raise ValueError("OpenTofu metadata is invalid")
-    if value.get("version") != OPENTOFU_VERSION:
+    version = value.get("version")
+    if version not in {OPENTOFU_VERSION, LEGACY_OPENTOFU_VERSION}:
         raise ValueError(f"OpenTofu version must be {OPENTOFU_VERSION}")
     archive = value.get("archive")
-    if not isinstance(archive, str) or not archive.startswith(f"tofu_{OPENTOFU_VERSION}_"):
-        raise ValueError("OpenTofu archive does not match the pinned beta")
+    if not isinstance(archive, str) or not archive.startswith(f"tofu_{version}_"):
+        raise ValueError("OpenTofu archive does not match the pinned prerelease")
     _assert_hash(value.get("archive_sha256"), label="OpenTofu archive checksum")
 
 
@@ -559,10 +561,10 @@ def _validate_cast(output: str, manifest: dict[str, Any]) -> list[str]:
 
 
 def _opentofu_status_statement(manifest: Mapping[str, Any]) -> str:
-    provider = manifest.get("components", {}).get("terraform-provider-pyvider", {})
-    if provider.get("version") == "0.5.0":
+    opentofu = manifest.get("opentofu", {})
+    if opentofu.get("version") == LEGACY_OPENTOFU_VERSION:
         return "OpenTofu native linting: valid"
-    return "OpenTofu beta validation: valid"
+    return "OpenTofu experimental lint validation: valid"
 
 
 def _validate_opentofu_cast(
@@ -623,8 +625,9 @@ def _validate_walkthrough_cast(output: str, manifest: Mapping[str, Any]) -> None
 
 def _validate_film_opentofu_cast(output: str, manifest: Mapping[str, Any]) -> None:
     _validate_opentofu_cast(output, manifest=manifest, require_four_paths=True)
-    if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
-        raise ValueError(f"cast does not show the exact OpenTofu version v{OPENTOFU_VERSION}")
+    expected_version = manifest["opentofu"]["version"]
+    if f"OpenTofu v{expected_version}" not in output.splitlines():
+        raise ValueError(f"cast does not show the exact OpenTofu version v{expected_version}")
     if f"$ {FILM_COMMANDS['direct'][0]}" in output or "Direct provider validation: 7/7 cases" in output:
         raise ValueError("OpenTofu recording contains direct provider evidence")
 

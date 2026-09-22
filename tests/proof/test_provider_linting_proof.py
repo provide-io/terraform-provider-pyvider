@@ -181,7 +181,7 @@ def cast_text() -> str:
     return "\n".join(
         [
             *(f"\x1b[1;36m$ {command}\x1b[0m" for command in COMMANDS),
-            "OpenTofu v1.13.0-beta1",
+            "OpenTofu v1.13.0-rc1",
             "PASS: provider linting default-off (0 provider lint diagnostics)",
             "PASS: exact exclusion removed provide-io/pyvider:insecure-http",
             "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
@@ -235,8 +235,8 @@ def manifest_for(cast: Path) -> dict[str, Any]:
             },
         },
         "opentofu": {
-            "version": "1.13.0-beta1",
-            "archive": "tofu_1.13.0-beta1_linux_amd64.zip",
+            "version": "1.13.0-rc1",
+            "archive": "tofu_1.13.0-rc1_linux_amd64.zip",
             "archive_sha256": "6" * 64,
         },
         "provider_binary": {
@@ -301,9 +301,9 @@ def film_cast_text(lane: str) -> str:
     commands = FILM_COMMANDS[lane]
     if lane == "opentofu":
         statements = [
-            "OpenTofu v1.13.0-beta1",
+            "OpenTofu v1.13.0-rc1",
             "Direct provider validation: not requested",
-            "OpenTofu native linting: valid",
+            "OpenTofu experimental lint validation: valid",
             "Experimental linting enabled",
             "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)",
         ]
@@ -314,8 +314,8 @@ def film_cast_text(lane: str) -> str:
         ]
     else:
         statements = [
-            "Public walkthrough: OpenTofu native and direct provider validation",
-            "OpenTofu native linting: valid",
+            "Public walkthrough: OpenTofu experimental lint and direct provider validation",
+            "OpenTofu experimental lint validation: valid",
             "Direct provider validation: 7/7 cases",
         ]
     return "\n".join([*(f"$ {command}" for command in commands), *statements]) + "\n"
@@ -368,22 +368,22 @@ def verify_films(module: ModuleType, manifest: Path, casts: dict[str, Path]) -> 
     module.verify_split_proof(manifest, casts["opentofu"], casts["direct"], casts["walkthrough"])
 
 
-def test_provider_0_6_proof_requires_beta_validation_wording() -> None:
-    module = load_script(PROOF_LIBRARY, "provider_linting_proof_beta_wording")
+def test_provider_0_6_proof_requires_experimental_validation_wording() -> None:
+    module = load_script(PROOF_LIBRARY, "provider_linting_proof_experimental_wording")
     manifest = {"components": {"terraform-provider-pyvider": {"version": "0.6.0"}}}
     output = "\n".join(
         [
             *(f"$ {command}" for command in OPENTOFU_COMMANDS),
             "Direct provider validation: not requested",
-            "OpenTofu beta validation: valid",
+            "OpenTofu experimental lint validation: valid",
             "Experimental linting enabled",
         ]
     )
 
     module._validate_opentofu_cast(output, manifest=manifest)
-    with pytest.raises(ValueError, match="OpenTofu beta validation"):
+    with pytest.raises(ValueError, match="OpenTofu experimental lint validation"):
         module._validate_opentofu_cast(
-            output.replace("OpenTofu beta validation", "OpenTofu native linting"),
+            output.replace("OpenTofu experimental lint validation", "OpenTofu native linting"),
             manifest=manifest,
         )
 
@@ -422,7 +422,7 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
             [
                 *(f"$ {command}" for command in OPENTOFU_COMMANDS),
                 "Direct provider validation: not requested",
-                "OpenTofu native linting: valid",
+                "OpenTofu experimental lint validation: valid",
                 "Experimental linting enabled",
             ]
         ),
@@ -594,14 +594,14 @@ def test_schema_v3_opentofu_film_rejects_direct_provider_evidence(tmp_path: Path
         verify_films(verifier, manifest, casts)
 
 
-def test_schema_v3_opentofu_film_requires_the_pinned_beta_version(tmp_path: Path) -> None:
-    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_beta_version")
+def test_schema_v3_opentofu_film_requires_the_pinned_prerelease_version(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_prerelease_version")
     manifest, casts = write_film_proof(tmp_path)
     data = json.loads(manifest.read_text(encoding="utf-8"))
     write_film_cast(
         casts["opentofu"],
         lane="opentofu",
-        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-beta1\n", ""),
+        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-rc1\n", ""),
     )
     refresh_film_cast_hash(data, "opentofu", casts["opentofu"])
     write_film_manifest(manifest, data)
@@ -610,14 +610,14 @@ def test_schema_v3_opentofu_film_requires_the_pinned_beta_version(tmp_path: Path
         verify_films(verifier, manifest, casts)
 
 
-def test_schema_v3_opentofu_film_rejects_a_hash_refreshed_beta10_version(tmp_path: Path) -> None:
-    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_beta10")
+def test_schema_v3_opentofu_film_rejects_a_hash_refreshed_rc2_version(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_three_films_rc2")
     manifest, casts = write_film_proof(tmp_path)
     data = json.loads(manifest.read_text(encoding="utf-8"))
     write_film_cast(
         casts["opentofu"],
         lane="opentofu",
-        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-beta1\n", "OpenTofu v1.13.0-beta10\n"),
+        text=film_cast_text("opentofu").replace("OpenTofu v1.13.0-rc1\n", "OpenTofu v1.13.0-rc2\n"),
     )
     refresh_film_cast_hash(data, "opentofu", casts["opentofu"])
     write_film_manifest(manifest, data)
@@ -1013,7 +1013,7 @@ def test_proof_rejects_token_like_key_leakage(tmp_path: Path, key: str) -> None:
         verify(verifier, manifest, cast)
 
 
-def test_proof_rejects_non_beta_tofu_version(tmp_path: Path) -> None:
+def test_proof_rejects_unpinned_tofu_version(tmp_path: Path) -> None:
     verifier = load_script(VERIFIER, "provider_linting_verifier_version")
     manifest, cast = write_valid_proof(tmp_path)
     data = manifest_for(cast)
@@ -1024,10 +1024,10 @@ def test_proof_rejects_non_beta_tofu_version(tmp_path: Path) -> None:
         verify(verifier, manifest, cast)
 
 
-def test_proof_rejects_beta10_spoof_in_cast(tmp_path: Path) -> None:
-    verifier = load_script(VERIFIER, "provider_linting_verifier_beta10")
+def test_proof_rejects_rc2_spoof_in_cast(tmp_path: Path) -> None:
+    verifier = load_script(VERIFIER, "provider_linting_verifier_rc2")
     manifest, cast = write_valid_proof(tmp_path)
-    write_cast(cast, cast_text().replace("OpenTofu v1.13.0-beta1\n", "OpenTofu v1.13.0-beta10\n"))
+    write_cast(cast, cast_text().replace("OpenTofu v1.13.0-rc1\n", "OpenTofu v1.13.0-rc2\n"))
     manifest.write_text(json.dumps(manifest_for(cast)), encoding="utf-8")
 
     with pytest.raises(ValueError, match="exact OpenTofu version"):
@@ -1072,7 +1072,7 @@ def test_proof_generator_uses_build_provenance_and_exact_schema(tmp_path: Path) 
         build_provenance_path=provenance,
         output_path=output,
         provider_version="0.5.0",
-        opentofu_archive="tofu_1.13.0-beta1_linux_amd64.zip",
+        opentofu_archive="tofu_1.13.0-rc1_linux_amd64.zip",
         opentofu_archive_sha256="6" * 64,
         generated_at="2026-09-14T07:00:00Z",
         ci_environment={},
@@ -1147,7 +1147,7 @@ def test_film_generator_rejects_invalid_walkthrough_without_overwriting_output(t
             build_provenance_path=provenance,
             output_path=output,
             provider_version="0.5.0",
-            opentofu_archive="tofu_1.13.0-beta1_linux_amd64.zip",
+            opentofu_archive="tofu_1.13.0-rc1_linux_amd64.zip",
             opentofu_archive_sha256="6" * 64,
             generated_at="2026-09-14T07:00:00Z",
             ci_environment={},
@@ -1219,8 +1219,8 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "test-linting-opentofu-binary" in workflow
     assert "provider-linting-proof" in workflow
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
-    assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in recorder
-    assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
+    assert "grep -Fxq 'OpenTofu v1.13.0-rc1'" in recorder
+    assert "grep -Fxq 'OpenTofu v1.13.0-rc1'" in workflow
     assert "uv tool install --refresh tofusoup==0.8.2" in workflow
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]

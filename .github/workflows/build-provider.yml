@@ -145,15 +145,15 @@ jobs:
           test -x "$lint_binary"
           echo "PYVIDER_CONFORMANCE_PSP=$lint_binary" >> "$GITHUB_ENV"
 
-      - name: 🪣 Install pinned OpenTofu beta
+      - name: 🪣 Install pinned OpenTofu prerelease
         shell: bash
         run: |
           install_log=$(mktemp)
           tofu=$(ci/install-opentofu-beta.sh \
-            --version 1.13.0-beta1 --cache-dir "$PWD/.cache/opentofu-beta" 2>"$install_log")
+            --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease" 2>"$install_log")
           archive_sha=$(awk '/^verified [0-9a-f]{64}$/ { print $2 }' "$install_log")
           [[ "$archive_sha" =~ ^[0-9a-f]{64}$ ]]
-          "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-beta1'
+          "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-rc1'
           echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
           echo "PYVIDER_OPENTOFU_ARCHIVE_SHA256=$archive_sha" >> "$GITHUB_ENV"
 

@@ -7,7 +7,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 : "${PYVIDER_CONFORMANCE_PSP:?PYVIDER_CONFORMANCE_PSP is required}"
 provenance=${PYVIDER_LINTING_PROVENANCE:-$repo_root/dist/provider-linting-build-provenance.json}
-cache_dir=${OPENTOFU_LINTING_CACHE_DIR:-$repo_root/.cache/opentofu-beta}
+cache_dir=${OPENTOFU_LINTING_CACHE_DIR:-$repo_root/.cache/opentofu-prerelease}
 staging=$(mktemp -d "$repo_root/.provider-linting-proof.XXXXXX")
 trap 'rm -rf "$staging"' EXIT HUP INT TERM
 
@@ -34,15 +34,15 @@ if [[ -n "${PYVIDER_OPENTOFU_BINARY:-}" || -n "${PYVIDER_OPENTOFU_ARCHIVE_SHA256
 else
     install_log=$staging/opentofu-install.log
     tofu=$("$repo_root/ci/install-opentofu-beta.sh" \
-        --version 1.13.0-beta1 --cache-dir "$cache_dir" 2>"$install_log")
+        --version 1.13.0-rc1 --cache-dir "$cache_dir" 2>"$install_log")
     archive_sha=$(awk '/^verified [0-9a-f]{64}$/ { print $2 }' "$install_log")
 fi
 if [[ ! -x "$tofu" || ! "$archive_sha" =~ ^[0-9a-f]{64}$ ]]; then
     printf '%s\n' 'error: pinned OpenTofu binary/checksum is unavailable' >&2
     exit 2
 fi
-if ! "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-beta1'; then
-    printf '%s\n' 'error: OpenTofu v1.13.0-beta1 is required' >&2
+if ! "$tofu" version | grep -Fxq 'OpenTofu v1.13.0-rc1'; then
+    printf '%s\n' 'error: OpenTofu v1.13.0-rc1 is required' >&2
     exit 2
 fi
 

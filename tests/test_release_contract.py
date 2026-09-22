@@ -249,7 +249,7 @@ def test_user_facing_proof_copy_does_not_claim_opentofu_native_provider_linting(
     assert "opentofu native linting" not in combined
     assert "opentofu-native validation" not in combined
     assert "opentofu demonstrates native validation" not in combined
-    assert "opentofu beta validation lane" in combined
+    assert "opentofu experimental lint validation" in combined
 
 
 def test_superseded_legacy_casts_are_removed() -> None:

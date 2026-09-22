@@ -4,7 +4,7 @@
 # `TF_BIN` names it -- `tofu` or `terraform` -- because the two are not
 # interchangeable for this provider. Only Terraform has a `query` command, and
 # it is the only path that reaches a list resource; OpenTofu has no `action` or
-# `state_store` block at any version, 1.13.0-beta1 included. A suite that runs
+# `state_store` block at any version, 1.13.0-rc1 included. A suite that runs
 # one engine cannot see what the other refuses, and this one ran OpenTofu only.
 #
 # Extracted from test-conformance.yml rather than parameterised in place: the

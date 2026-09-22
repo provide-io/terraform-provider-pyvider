@@ -40,7 +40,7 @@ jobs:
         #
         # Only Terraform has a `query` command, and it is the only path that
         # reaches a list resource; OpenTofu has no `action` or `state_store`
-        # block at any version, 1.13.0-beta1 included. Running one engine could
+        # block at any version, 1.13.0-rc1 included. Running one engine could
         # not see what the other refuses, and this suite ran OpenTofu alone.
         #
         # windows_arm64 is still absent, and correctly: grpcio publishes no

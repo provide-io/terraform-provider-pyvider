@@ -313,8 +313,8 @@ test-conformance: build clean-workenv warm-workenv ## Drive the packaged provide
 
 PYVIDER_CONFORMANCE_TESTS ?= tests/conformance
 PYVIDER_LINTING_PROVENANCE ?= dist/provider-linting-build-provenance.json
-OPENTOFU_LINTING_CACHE_DIR ?= $(CURDIR)/.cache/opentofu-beta
-OPENTOFU_LINTING_BINARY := $(OPENTOFU_LINTING_CACHE_DIR)/1.13.0-beta1/$(CURRENT_PLATFORM)/tofu
+OPENTOFU_LINTING_CACHE_DIR ?= $(CURDIR)/.cache/opentofu-prerelease
+OPENTOFU_LINTING_BINARY := $(OPENTOFU_LINTING_CACHE_DIR)/1.13.0-rc1/$(CURRENT_PLATFORM)/tofu
 
 .PHONY: test-conformance-binary
 test-conformance-binary:
@@ -332,8 +332,8 @@ test-linting-opentofu-binary:
 	@expected_sha=$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["artifacts"]["binary"]["sha256"])' "$(PYVIDER_LINTING_PROVENANCE)"); \
 	actual_sha=$$(python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$(PYVIDER_CONFORMANCE_PSP)"); \
 	test "$$actual_sha" = "$$expected_sha" || (echo "provider binary checksum does not match build provenance" >&2; exit 2)
-	@ci/install-opentofu-beta.sh --cache-dir "$(OPENTOFU_LINTING_CACHE_DIR)" --version 1.13.0-beta1 >/dev/null
-	@"$(OPENTOFU_LINTING_BINARY)" version | grep 'OpenTofu v1.13.0-beta1'
+	@ci/install-opentofu-beta.sh --cache-dir "$(OPENTOFU_LINTING_CACHE_DIR)" --version 1.13.0-rc1 >/dev/null
+	@"$(OPENTOFU_LINTING_BINARY)" version | grep 'OpenTofu v1.13.0-rc1'
 	@PYVIDER_CONFORMANCE_REQUIRED=1 PYVIDER_CONFORMANCE_PSP="$(PYVIDER_CONFORMANCE_PSP)" PYVIDER_OPENTOFU_BINARY="$(OPENTOFU_LINTING_BINARY)" uv run pytest tests/e2e/test_provider_linting_opentofu.py -q
 	@expected_sha=$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["artifacts"]["binary"]["sha256"])' "$(PYVIDER_LINTING_PROVENANCE)"); \
 	actual_sha=$$(python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$(PYVIDER_CONFORMANCE_PSP)"); \

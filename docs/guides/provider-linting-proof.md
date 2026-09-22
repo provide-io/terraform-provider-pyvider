@@ -6,13 +6,13 @@ one coordinated provider binary throughout; it does not substitute editable
 Python imports for the packaged artifact.
 
 Pyvider's author-facing lint API is supported. OpenTofu describes its built-in
-linting feature as experimental in v1.13.0-beta1. The proof keeps Pyvider's
+linting feature as experimental in v1.13.0-rc1. The proof keeps Pyvider's
 rules independently selectable while following the upstream implementation as
 it evolves.
 
 ## What the proof covers
 
-[OpenTofu v1.13.0-beta1][beta] validates the real configuration in
+[OpenTofu v1.13.0-rc1][prerelease] validates the real configuration in
 [`tests/e2e/provider-linting/main.tf`][opentofu-fixture].
 OpenTofu core reaches 4/7 provider validation paths: provider configuration, managed resource, data
 source, and ephemeral resource. Its JSON diagnostics are checked for the exact
@@ -100,12 +100,12 @@ export PYVIDER_CONFORMANCE_PSP="$lint_binary"
 ```
 
 Do not rebuild between the following layers. Each target accepts the explicit
-binary, and the OpenTofu beta validation and recording paths check its SHA-256
+binary, and the OpenTofu experimental lint validation and recording paths check its SHA-256
 against the build provenance before and after execution.
 
 ## Run the OpenTofu JSON suite
 
-The target installs the pinned, checksum-verified v1.13.0-beta1 executable into
+The target installs the pinned, checksum-verified v1.13.0-rc1 executable into
 the repository cache, prints the exact version, and runs the JSON assertions
 against [`tests/e2e/provider-linting/main.tf`][opentofu-fixture].
 
@@ -166,9 +166,10 @@ uv run pytest tests/proof -q
 ```
 
 The verifier parses all three complete casts after stripping terminal controls.
-It requires the public `soup lint` commands, the separate OpenTofu beta/direct lane
+It requires the public `soup lint` commands, separate OpenTofu experimental lint validation,
+and the direct lane
 results, the released TofuSoup walkthrough, all seven readable direct-provider
-observations, matching artifact checksums, the pinned beta, and provenance
+observations, matching artifact checksums, the pinned prerelease, and provenance
 without secrets or local paths. The manifest's provider revision names the exact
 source tree used to build the checked binary; a later repository commit may add
 only the generated proof metadata, so compare the recorded revision and hashes
@@ -208,7 +209,7 @@ SHA-256 values with the public releases, and compare its provider-binary checksu
 
 The selection model and user-facing semantics follow OpenTofu's accepted
 [built-in linter RFC][rfc], [implementation tracker][tracker], [initial
-implementation][implementation], and the pinned [v1.13.0-beta1 release][beta].
+implementation][implementation], and the pinned [v1.13.0-rc1 release][prerelease].
 Pyvider does not invent protocol fields. When an official provider-lint protocol
 exists, the compatibility adapter can be replaced while rule implementations,
 IDs, groups, selectors, and documentation remain stable.
@@ -222,4 +223,4 @@ IDs, groups, selectors, and documentation remain stable.
 [rfc]: https://github.com/opentofu/opentofu/blob/main/rfc/20260406-linting.md
 [tracker]: https://github.com/opentofu/opentofu/issues/4310
 [implementation]: https://github.com/opentofu/opentofu/pull/4337
-[beta]: https://github.com/opentofu/opentofu/releases/tag/v1.13.0-beta1
+[prerelease]: https://github.com/opentofu/opentofu/releases/tag/v1.13.0-rc1
