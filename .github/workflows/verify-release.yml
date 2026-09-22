@@ -78,15 +78,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release download "v${{ inputs.version }}" --dir released
 
-      # Checksums, signature, tag, and proof/build binding; outputs the binary.
+      # Checksums, signature, tag, and proof/build binding; unpacks released/dist/.
       - name: 🔐 Verify checksums, signature, tag, and proof binding
-        id: verify
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: |
-          binary=$(.release-tooling/ci/verify-release-assets.sh "${{ inputs.version }}" "${{ inputs.release_target_sha }}" released)
-          echo "binary=$binary" >> "$GITHUB_OUTPUT"
+        run: .release-tooling/ci/verify-release-assets.sh "${{ inputs.version }}" "${{ inputs.release_target_sha }}" released
 
       # The OpenTofu prerelease the proof pins, checksum-verified.
       - name: 🪣 Install pinned OpenTofu prerelease
@@ -96,4 +93,4 @@ jobs:
 
       # Conformance, the OpenTofu lint lane, and the proof films against the released binary.
       - name: 🧪 Re-run the released linux_amd64 proof
-        run: .release-tooling/ci/rerun-released-proof.sh released "${{ steps.verify.outputs.binary }}" "$PYVIDER_OPENTOFU_BINARY"
+        run: .release-tooling/ci/rerun-released-proof.sh released "$PYVIDER_OPENTOFU_BINARY"

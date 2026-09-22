@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -116,11 +117,70 @@ def test_binding_rejects_a_proof_that_names_other_dependency_wheels(tmp_path: Pa
     assert bind(released).returncode != 0
 
 
-def test_released_proof_rerun_reads_the_released_provenance() -> None:
-    """The checkout has no dist/, so the Makefile's default provenance path is absent."""
-    rerun = (ROOT / "ci" / "rerun-released-proof.sh").read_text(encoding="utf-8")
+RERUN = ROOT / "ci" / "rerun-released-proof.sh"
 
-    assert 'PYVIDER_LINTING_PROVENANCE="${RELEASED}/dist/provider-linting-build-provenance.json"' in rerun
+
+def stub_tools(tmp_path: Path) -> tuple[dict[str, str], Path]:
+    """`make` and `uv` stand-ins that record their arguments instead of running."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log = tmp_path / "calls.log"
+    for tool in ("make", "uv"):
+        stub = bin_dir / tool
+        stub.write_text(f'#!/usr/bin/env bash\necho "{tool} $*" >> "{log}"\n', encoding="utf-8")
+        stub.chmod(0o755)
+    env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}"}
+    return env, log
+
+
+def test_released_proof_rerun_reproduces_the_build_layout_in_the_checkout(tmp_path: Path) -> None:
+    """Released conformance reads <repo>/dist/ and wants the binary beside that provenance."""
+    released = tmp_path / "released"
+    write_release(released)
+    assert bind(released).returncode == 0
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    env, log = stub_tools(tmp_path)
+
+    result = subprocess.run(
+        [str(RERUN), str(released), "/opt/tofu"],
+        cwd=checkout,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    binary = (checkout / "dist" / "linux_amd64" / BINARY).resolve()
+    provenance = (checkout / "dist" / "provider-linting-build-provenance.json").resolve()
+    assert binary.read_bytes() == b"provider"
+    calls = log.read_text(encoding="utf-8")
+    assert f"make test-conformance-binary PYVIDER_CONFORMANCE_PSP={binary}" in calls
+    assert f"PYVIDER_LINTING_PROVENANCE={provenance}" in calls
+    assert "PYVIDER_OPENTOFU_BINARY=/opt/tofu" in calls
+
+
+def test_released_proof_rerun_refuses_a_checkout_with_its_own_build(tmp_path: Path) -> None:
+    released = tmp_path / "released"
+    write_release(released)
+    assert bind(released).returncode == 0
+    checkout = tmp_path / "checkout"
+    (checkout / "dist").mkdir(parents=True)
+    (checkout / "dist" / "stale").write_text("local build", encoding="utf-8")
+    env, log = stub_tools(tmp_path)
+
+    result = subprocess.run(
+        [str(RERUN), str(released), "/opt/tofu"],
+        cwd=checkout,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert not log.exists()
 
 
 def test_release_and_manual_verification_share_one_workflow() -> None:
