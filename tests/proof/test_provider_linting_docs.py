@@ -21,11 +21,9 @@ def guide_text() -> str:
         "provider-linting-opentofu.cast",
         "provider-linting-direct.cast",
         "provider-linting-walkthrough.cast",
-        "tutorial-part7-provider-linting.cast",
-        "examples/tutorials/part7-provider-linting",
         "provider-linting-proof.json",
         "schema-v3 manifest",
-        "four checked films",
+        "three checked films",
         "v1.13.0-rc1",
         "OpenTofu core reaches 4/7",
         "TofuSoup 0.8.2 directly proves 7/7",
@@ -51,7 +49,7 @@ def guide_text() -> str:
         "Pyvider's author-facing lint API is supported",
         "built-in\nlinting feature as experimental",
         "rules independently selectable",
-        "publishes four checked films\nonly after verification and rolls back ordinary publication failures",
+        "publishes three checked films\nonly after verification and rolls back ordinary publication failures",
     ],
 )
 def test_provider_linting_guide_covers_reproduction_contract(required_text: str) -> None:

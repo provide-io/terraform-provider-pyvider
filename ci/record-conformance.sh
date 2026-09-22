@@ -14,7 +14,7 @@ cd "${REPO_ROOT}/examples"
 # captured output, so the player scrolls smoothly without flashing.
 # Capture the test exit code so we can retime before propagating it.
 python3 "${REPO_ROOT}/ci/record-to-cast.py" "${RAW}" \
-    soup stir --recursive --filter '!*tutorials*'
+    soup stir --recursive
 RECORD_EXIT=$?
 
 # retime-cast.py proportionally scales to a target duration for the website.

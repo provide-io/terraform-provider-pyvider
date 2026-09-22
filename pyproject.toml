@@ -247,7 +247,7 @@ pretty = true
 show_error_codes = true
 warn_unused_ignores = true
 # Don't descend into virtualenvs or build artifacts.
-exclude = ["(^|/)(workenv|\\.venv|build|dist)/"]
+exclude = ["^(workenv|\\.venv|build|dist)/"]
 
 [[tool.mypy.overrides]]
 module = ["pyvider.*", "flavorpack.*", "plating.*"]
