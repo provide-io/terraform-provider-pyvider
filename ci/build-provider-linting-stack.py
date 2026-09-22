@@ -17,7 +17,7 @@ from pathlib import Path
 import platform
 import re
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tarfile
 import tempfile
@@ -99,21 +99,23 @@ def inspect_source(path: Path, *, label: str, allowed_dirty: Iterable[str] = ())
     if not path.exists():
         raise ValueError(f"{label} source repository does not exist: {path}")
     try:
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["git", "rev-parse", "--show-toplevel"],
             cwd=path,
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
         )
     except subprocess.CalledProcessError as exc:
         raise ValueError(f"{label} source is not a Git repository: {path}") from exc
-    lines = subprocess.run(
+    lines = subprocess.run(  # nosec B603, B607
         ["git", "status", "--porcelain=v1", "--untracked-files=all"],
         cwd=path,
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     ).stdout.splitlines()
     allowed = set(allowed_dirty)
     dirty = set()
@@ -125,12 +127,13 @@ def inspect_source(path: Path, *, label: str, allowed_dirty: Iterable[str] = ())
     unexpected = sorted(dirty - allowed)
     if unexpected:
         raise ValueError(f"{label} source repository has unexpected dirty paths: {', '.join(unexpected)}")
-    return subprocess.run(
+    return subprocess.run(  # nosec B603, B607
         ["git", "rev-parse", "HEAD"],
         cwd=path,
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     ).stdout.strip()
 
 
@@ -213,7 +216,7 @@ def packaged_wheel_inventory(archive: Path) -> list[str]:
 
 
 def resolve_github_tag_commit(repository: str, tag: str) -> str:
-    result = subprocess.run(
+    result = subprocess.run(  # nosec B603, B607
         [
             "git",
             "ls-remote",
@@ -224,6 +227,7 @@ def resolve_github_tag_commit(repository: str, tag: str) -> str:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     refs = {line.split("\t", 1)[1]: line.split("\t", 1)[0] for line in result.stdout.splitlines()}
     commit = refs.get(f"refs/tags/{tag}^{{}}") or refs.get(f"refs/tags/{tag}")
@@ -272,10 +276,10 @@ def materialize_revision(source: Path, revision: str, destination: Path) -> str:
     tar_process: subprocess.Popen[bytes] | None = None
     succeeded = False
     try:
-        archive_process = subprocess.Popen(
+        archive_process = subprocess.Popen(  # nosec B603, B607
             ["git", "archive", revision], cwd=source, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
         )
-        tar_process = subprocess.Popen(
+        tar_process = subprocess.Popen(  # nosec B603, B607
             ["tar", "-x", "-C", str(destination)],
             stdin=subprocess.PIPE,
             stdout=subprocess.DEVNULL,
@@ -298,7 +302,8 @@ def materialize_revision(source: Path, revision: str, destination: Path) -> str:
 
 
 def _run_command(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True)
+    print(f"📦 {command}", file=sys.stderr)
+    return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True, encoding="utf-8")  # nosec B603, B607
 
 
 def publish_outputs_atomically(publications: list[tuple[Path, Path]], *, staging_directory: Path) -> None:
