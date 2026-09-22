@@ -68,7 +68,7 @@ DIRECT_RPC_COMMAND = (
     'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 )
 WALKTHROUGH_COMMANDS = [
-    "uv tool install --refresh tofusoup==0.8.2",
+    "uv tool install --refresh --quiet tofusoup==0.8.2",
     "soup --version",
     (
         "provider=$(uv run python ci/provider-linting-artifact-path.py "
@@ -1278,6 +1278,9 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "grep -Fxq 'OpenTofu v1.13.0-rc1'" in recorder
     assert "grep -Fxq 'OpenTofu v1.13.0-rc1'" in workflow
     assert "uv tool install --refresh tofusoup==0.8.2" in workflow
+    assert recorder.index("uv tool install --refresh --quiet tofusoup==0.8.2") < recorder.index(
+        "record_lane opentofu"
+    )
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
     assert "provider-linting-proof.json" in proof_job

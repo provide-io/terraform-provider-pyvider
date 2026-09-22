@@ -230,6 +230,14 @@ def test_proof_workflows_verify_tofusoup_cli_and_imported_version() -> None:
         assert 'assert tofusoup.__version__ == "0.8.2"' in workflow
 
 
+def test_recorder_pins_tofusoup_before_the_first_film() -> None:
+    recorder = (ROOT / "ci" / "record-provider-linting.sh").read_text(encoding="utf-8")
+
+    assert recorder.index("uv tool install --refresh --quiet tofusoup==0.8.2") < recorder.index(
+        "record_lane opentofu"
+    )
+
+
 def test_0_6_changelog_documents_the_release_proof_contract() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     section = changelog.split("## [0.6.0]", 1)[1]

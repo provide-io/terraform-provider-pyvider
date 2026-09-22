@@ -51,7 +51,7 @@ FILM_COMMANDS = {
     "opentofu": SPLIT_COMMANDS["opentofu"],
     "direct": SPLIT_COMMANDS["direct_rpc"],
     "walkthrough": [
-        f"uv tool install --refresh tofusoup=={TOFUSOUP_VERSION}",
+        f"uv tool install --refresh --quiet tofusoup=={TOFUSOUP_VERSION}",
         "soup --version",
         (
             "provider=$(uv run python ci/provider-linting-artifact-path.py "

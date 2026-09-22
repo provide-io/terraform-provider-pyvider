@@ -109,6 +109,9 @@ record_lane() {
 
 }
 
+uv tool install --refresh --quiet tofusoup==0.8.2
+test "$(soup --version)" = "soup, version 0.8.2"
+
 record_lane opentofu 110 26
 record_lane direct 110 26
 record_lane walkthrough 110 26

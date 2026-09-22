@@ -13,11 +13,10 @@ show_command() {
 
 printf '%s\n' 'Public walkthrough: OpenTofu experimental lint and direct provider validation'
 printf '%s\n' 'This uses the released TofuSoup CLI and the packaged provider from the release candidate.'
-printf '%s\n' 'OpenTofu reaches four paths; direct provider validation reaches all seven.'
 
 printf '\n'
-show_command 'uv tool install --refresh tofusoup==0.8.2'
-uv tool install --refresh tofusoup==0.8.2
+show_command 'uv tool install --refresh --quiet tofusoup==0.8.2'
+uv tool install --refresh --quiet tofusoup==0.8.2
 printf '\n'
 show_command 'soup --version'
 soup --version
