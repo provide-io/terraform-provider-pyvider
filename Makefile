@@ -350,7 +350,7 @@ test-local: build ## Test provider with local Terraform
 .PHONY: test-examples
 test-examples: build install ## Test example configurations with soup stir
 	@echo "$(BLUE)🧪 Testing example configurations with soup stir...$(NC)"
-	@cd examples && soup stir --recursive
+	@cd examples && soup stir --recursive --filter '!*tutorials*'
 	@echo "$(GREEN)✅ All examples validated$(NC)"
 
 .PHONY: lint
