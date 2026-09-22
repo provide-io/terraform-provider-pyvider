@@ -68,6 +68,8 @@ BUILD_COMMANDS = [
         "run",
         "flavor",
         "pack",
+        "--output",
+        "dist/terraform-provider-pyvider.psp",
         "--private-key",
         "keys/flavor-private.key",
         "--public-key",
