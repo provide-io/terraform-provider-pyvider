@@ -68,12 +68,12 @@ This project uses `wrknv` for task automation. Run `we tasks` to see all availab
 - `we run lint` - Check code quality
 - `we run lint.fix` - Auto-fix linting issues
 - `we run format` - Format code
-- `we typecheck` - Run type checker
+- `we run typecheck` - Run type checker
 
-See [CLAUDE.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/CLAUDE.md) for detailed development instructions and architecture information.
+See [AGENTS.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/AGENTS.md) for development, testing, and release instructions.
 
 ## Contributing
-See [CLAUDE.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/CLAUDE.md) for contribution guidance.
+See [CONTRIBUTING.md](https://github.com/provide-io/terraform-provider-pyvider/blob/main/CONTRIBUTING.md) for contribution guidance.
 
 ## License
 See [LICENSE](https://github.com/provide-io/terraform-provider-pyvider/blob/main/LICENSE) for license details.

@@ -399,13 +399,15 @@ bump-major: ## Bump major version (0.0.3 -> 1.0.0)
 	echo "$(GREEN)✅ Version bumped from $$current to $$new$(NC)"
 
 .PHONY: release
-release: ## Dispatch the release workflow for the version in VERSION
-	@# The version comes from the VERSION file, which pyproject reads through
-	@# `version = {file = "VERSION"}`. Bump and commit it first; this only
-	@# dispatches. The workflow is release.yml -- build-release.yml has not
-	@# existed for as long as the scripts/ directory has not.
-	@echo "$(BLUE)🚀 Releasing v$(VERSION)...$(NC)"
-	@gh workflow run "release.yml" -f prerelease=false
+release: ## Dispatch release.yml for BUILD_RUN_ID on RELEASE_REF (see AGENTS.md)
+	@# release.yml publishes only the artifacts of one successful build-provider.yml
+	@# run whose head SHA is the release commit, so the build comes first:
+	@#   gh workflow run build-provider.yml --ref <ref> -f provider_linting_proof=true
+	@# then pass that run's numeric ID here. VERSION must already name the release.
+	@test -n "$(BUILD_RUN_ID)" || (echo "BUILD_RUN_ID is required (a successful build-provider.yml run)" >&2; exit 2)
+	@test -n "$(RELEASE_REF)" || (echo "RELEASE_REF is required (the branch whose head is the release commit)" >&2; exit 2)
+	@echo "$(BLUE)🚀 Releasing v$(VERSION) from build $(BUILD_RUN_ID) on $(RELEASE_REF)...$(NC)"
+	@gh workflow run release.yml --ref "$(RELEASE_REF)" -f build_run_id="$(BUILD_RUN_ID)" -f prerelease=false
 	@echo "$(GREEN)✅ Release v$(VERSION) dispatched$(NC)"
 
 .PHONY: release-status
