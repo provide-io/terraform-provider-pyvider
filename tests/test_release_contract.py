@@ -5,9 +5,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
+import sys
 import tomllib
 from types import ModuleType
 
@@ -254,6 +257,49 @@ def test_user_facing_proof_copy_does_not_claim_opentofu_native_provider_linting(
     assert "opentofu-native validation" not in combined
     assert "opentofu demonstrates native validation" not in combined
     assert "opentofu experimental lint validation" in combined
+
+
+def test_public_walkthrough_discovers_the_current_platform_artifact() -> None:
+    walkthrough = (ROOT / "ci" / "provider-linting-walkthrough.sh").read_text(encoding="utf-8")
+
+    assert "dist/linux_amd64" not in walkthrough
+    assert "provider=$(uv run python ci/provider-linting-artifact-path.py" in walkthrough
+    assert '--provider "$provider"' in walkthrough
+
+
+def test_public_artifact_path_helper_verifies_the_provenance_hash(tmp_path: Path) -> None:
+    binary = tmp_path / "darwin_arm64" / "terraform-provider-pyvider_v0.6.0"
+    binary.parent.mkdir()
+    binary.write_bytes(b"provider")
+    provenance = tmp_path / "provider-linting-build-provenance.json"
+    provenance.write_text(
+        json.dumps(
+            {
+                "artifacts": {
+                    "binary": {
+                        "path": "darwin_arm64/terraform-provider-pyvider_v0.6.0",
+                        "sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    helper = ROOT / "ci" / "provider-linting-artifact-path.py"
+
+    valid = subprocess.run(
+        [sys.executable, str(helper), str(provenance)], capture_output=True, text=True, check=False
+    )
+    assert valid.returncode == 0, valid.stderr
+    assert valid.stdout == f"{binary.resolve()}\n"
+
+    binary.write_bytes(b"tampered")
+    invalid = subprocess.run(
+        [sys.executable, str(helper), str(provenance)], capture_output=True, text=True, check=False
+    )
+    assert invalid.returncode == 2
+    assert invalid.stdout == ""
+    assert "checksum" in invalid.stderr
 
 
 def test_superseded_legacy_casts_are_removed() -> None:

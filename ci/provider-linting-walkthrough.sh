@@ -22,17 +22,20 @@ printf '\n'
 show_command 'soup --version'
 soup --version
 printf '\n'
+show_command 'provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)'
+provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)
+printf '\n'
 show_command 'tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")'
 tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
 printf '\n'
 show_command '"$tofu" version'
 "$tofu" version
 printf '\n'
-show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" --opentofu "$tofu" --lane opentofu'
+show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --opentofu "$tofu" --lane opentofu'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
-    --provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" \
+    --provider "$provider" \
     --opentofu "$tofu" --lane opentofu
 printf '\n'
-show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" --lane direct'
+show_command 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'
 soup lint tests/e2e/provider-linting/lint.soup.toml \
-    --provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" --lane direct
+    --provider "$provider" --lane direct

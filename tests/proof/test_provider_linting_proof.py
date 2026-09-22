@@ -70,17 +70,18 @@ DIRECT_RPC_COMMAND = (
 WALKTHROUGH_COMMANDS = [
     "uv tool install --refresh tofusoup==0.8.2",
     "soup --version",
+    (
+        "provider=$(uv run python ci/provider-linting-artifact-path.py "
+        "dist/provider-linting-build-provenance.json)"
+    ),
     'tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")',
     '"$tofu" version',
     (
         "soup lint tests/e2e/provider-linting/lint.soup.toml "
-        '--provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" '
+        '--provider "$provider" '
         '--opentofu "$tofu" --lane opentofu'
     ),
-    (
-        "soup lint tests/e2e/provider-linting/lint.soup.toml "
-        '--provider "$PWD/dist/linux_amd64/terraform-provider-pyvider_v0.6.0" --lane direct'
-    ),
+    ('soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'),
 ]
 TUTORIAL_COMMANDS = [
     "uv sync --frozen",
