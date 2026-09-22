@@ -34,7 +34,6 @@ PROFILES = {
     "opentofu": PaceProfile(target_seconds=34.0),
     "direct": PaceProfile(target_seconds=37.0),
     "walkthrough": PaceProfile(target_seconds=40.0),
-    "tutorial": PaceProfile(target_seconds=40.0),
 }
 
 

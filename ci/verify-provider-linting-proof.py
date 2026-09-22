@@ -29,16 +29,8 @@ def main() -> int:
             rule_ids = verify_split_proof(args.manifest, args.casts[0], args.casts[1])
         elif len(args.casts) == 3:
             rule_ids = verify_split_proof(args.manifest, args.casts[0], args.casts[1], args.casts[2])
-        elif len(args.casts) == 4:
-            rule_ids = verify_split_proof(
-                args.manifest,
-                args.casts[0],
-                args.casts[1],
-                args.casts[2],
-                args.casts[3],
-            )
         else:
-            raise ValueError("provide one legacy cast, two split casts, or all four public proof films")
+            raise ValueError("provide one legacy cast, two split casts, or all three public proof films")
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

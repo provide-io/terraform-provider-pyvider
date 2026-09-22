@@ -97,47 +97,25 @@ WALKTHROUGH_COMMANDS = [
     ),
     ('soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'),
 ]
-TUTORIAL_COMMANDS = [
-    "uv sync --frozen",
-    "uv run pytest tests/test_linting.py -q",
-    "uv run flavor pack --quiet --manifest pyproject.toml",
-    "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
-    (
-        "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
-        '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
-    ),
-    "./install-opentofu.sh 1.13.0-rc1",
-    'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"',
-    '"$opentofu_rc1" version',
-    (
-        "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
-        '--provider "$PWD/dist/terraform-provider-mycloud" '
-        '--opentofu "$opentofu_rc1" --lane opentofu'
-    ),
-]
 FILM_CASTS = {
     "opentofu": "provider-linting-opentofu.cast",
     "direct": "provider-linting-direct.cast",
     "walkthrough": "provider-linting-walkthrough.cast",
-    "tutorial": "tutorial-part7-provider-linting.cast",
 }
 FILM_COMMANDS = {
     "opentofu": OPENTOFU_COMMANDS,
     "direct": DIRECT_COMMANDS,
     "walkthrough": WALKTHROUGH_COMMANDS,
-    "tutorial": TUTORIAL_COMMANDS,
 }
 FILM_DURATION_RANGES = {
     "opentofu": (30, 36),
     "direct": (33, 39),
     "walkthrough": (36, 40),
-    "tutorial": (36, 40),
 }
 FILM_CAPTURE_GEOMETRIES = {
     "opentofu": (110, 26),
     "direct": (110, 26),
     "walkthrough": (110, 26),
-    "tutorial": (110, 26),
 }
 
 
@@ -149,7 +127,6 @@ def test_public_film_pace_profiles_are_readable_and_fit_the_short_showcase_windo
         "opentofu": {"target": 34.0, "range": (30.0, 36.0)},
         "direct": {"target": 37.0, "range": (33.0, 39.0)},
         "walkthrough": {"target": 40.0, "range": (36.0, 40.0)},
-        "tutorial": {"target": 40.0, "range": (36.0, 40.0)},
     }
 
     assert {
@@ -359,21 +336,11 @@ def film_cast_text(lane: str) -> str:
             "Direct provider validation: 7/7 cases",
             *(rule_id for rule_id, _kind, _observed_via, _attribute in RULES),
         ]
-    elif lane == "walkthrough":
+    else:
         statements = [
             "Public walkthrough: OpenTofu experimental lint and direct provider validation",
             "OpenTofu experimental lint validation: valid",
             "Direct provider validation: 7/7 cases",
-        ]
-    else:
-        statements = [
-            "Part 7: author and verify one provider lint rule.",
-            "9 passed",
-            "Built and verified dist/terraform-provider-mycloud.psp",
-            "Direct provider validation: 1/1 cases",
-            "OpenTofu v1.13.0-rc1",
-            "OpenTofu experimental lint validation: valid",
-            "example/mycloud:production-name",
         ]
     return "\n".join([*(f"$ {command}" for command in commands), *statements]) + "\n"
 
@@ -385,7 +352,6 @@ def write_film_cast(path: Path, *, lane: str, timestamp: float = 0.5, text: str 
             "opentofu": "Pyvider linting — OpenTofu demonstration",
             "direct": "Pyvider linting — direct provider validation",
             "walkthrough": "Pyvider provider-native linting proof",
-            "tutorial": "Part 7 — author and verify a provider lint rule",
         }[lane],
         text=text or film_cast_text(lane),
     )
@@ -428,7 +394,6 @@ def verify_films(module: ModuleType, manifest: Path, casts: dict[str, Path]) -> 
         casts["opentofu"],
         casts["direct"],
         casts["walkthrough"],
-        casts["tutorial"],
     )
 
 
@@ -449,19 +414,6 @@ def test_provider_0_6_proof_requires_experimental_validation_wording() -> None:
         module._validate_opentofu_cast(
             output.replace("OpenTofu experimental lint validation", "OpenTofu native linting"),
             manifest=manifest,
-        )
-
-
-def test_tutorial_proof_requires_a_verified_package_result() -> None:
-    module = load_script(PROOF_LIBRARY, "provider_linting_proof_tutorial_package")
-    output = film_cast_text("tutorial")
-    manifest = {"commands": {"tutorial": TUTORIAL_COMMANDS}}
-
-    module._validate_tutorial_cast(output, manifest)
-    with pytest.raises(ValueError, match="Built and verified"):
-        module._validate_tutorial_cast(
-            output.replace("Built and verified dist/terraform-provider-mycloud.psp\n", ""),
-            manifest,
         )
 
 
@@ -537,12 +489,12 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
         verifier.verify_split_proof(manifest, opentofu, direct_rpc)
 
 
-def test_schema_v3_fixture_declares_four_public_proof_films(tmp_path: Path) -> None:
+def test_schema_v3_fixture_declares_three_public_proof_films(tmp_path: Path) -> None:
     manifest, casts = write_film_proof(tmp_path)
     data = json.loads(manifest.read_text(encoding="utf-8"))
 
     assert data["schema_version"] == 3
-    assert set(data["casts"]) == {"opentofu", "direct", "walkthrough", "tutorial"}
+    assert set(data["casts"]) == {"opentofu", "direct", "walkthrough"}
     assert data["commands"] == FILM_COMMANDS
     for lane, cast in casts.items():
         assert data["casts"][lane] == {
@@ -572,11 +524,9 @@ def test_schema_v3_proof_accepts_an_unmodified_valid_three_film_fixture(tmp_path
         ("cast", "opentofu"),
         ("cast", "direct"),
         ("cast", "walkthrough"),
-        ("cast", "tutorial"),
         ("hash", "opentofu"),
         ("hash", "direct"),
         ("hash", "walkthrough"),
-        ("hash", "tutorial"),
     ],
 )
 def test_schema_v3_proof_requires_each_checked_cast_and_hash(
@@ -715,8 +665,6 @@ def test_schema_v3_opentofu_film_rejects_a_hash_refreshed_rc2_version(tmp_path: 
         ("direct", 40),
         ("walkthrough", 35),
         ("walkthrough", 41),
-        ("tutorial", 35),
-        ("tutorial", 41),
     ],
 )
 def test_schema_v3_proof_rejects_out_of_range_film_duration(
@@ -769,7 +717,6 @@ def test_schema_v3_verifier_cli_rejects_each_checked_film_mutation_independently
             str(casts["opentofu"]),
             str(casts["direct"]),
             str(casts["walkthrough"]),
-            str(casts["tutorial"]),
         ],
         check=False,
         capture_output=True,
@@ -789,8 +736,6 @@ def test_schema_v3_verifier_cli_rejects_each_checked_film_mutation_independently
         ("direct", 39),
         ("walkthrough", 36),
         ("walkthrough", 40),
-        ("tutorial", 36),
-        ("tutorial", 40),
     ],
 )
 def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
@@ -806,7 +751,7 @@ def test_schema_v3_proof_accepts_inclusive_film_duration_boundaries(
 
 @pytest.mark.parametrize(
     ("lane", "target"),
-    [("opentofu", 34), ("direct", 37), ("walkthrough", 40), ("tutorial", 40)],
+    [("opentofu", 34), ("direct", 37), ("walkthrough", 40)],
 )
 def test_pacer_preserves_ansi_wrapped_cast_bytes_and_lane_duration(
     tmp_path: Path, lane: str, target: float
@@ -1229,7 +1174,6 @@ def test_film_generator_rejects_invalid_walkthrough_without_overwriting_output(t
             opentofu_cast_path=casts["opentofu"],
             direct_cast_path=casts["direct"],
             walkthrough_cast_path=casts["walkthrough"],
-            tutorial_cast_path=casts["tutorial"],
             build_provenance_path=provenance,
             output_path=output,
             provider_version="0.5.0",
@@ -1294,7 +1238,6 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "provider-linting-opentofu.cast" in recorder
     assert "provider-linting-direct.cast" in recorder
     assert "provider-linting-walkthrough.cast" in recorder
-    assert "tutorial-part7-provider-linting.cast" in recorder
     assert "--opentofu-cast" in recorder and "--direct-rpc-cast" in recorder
     assert "flavor pack" not in opentofu_demo + direct_rpc_demo + recorder
     assert "provider_linting_proof:" in workflow
@@ -1321,7 +1264,6 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "            provider-linting-opentofu.cast" in proof_job
     assert "            provider-linting-direct.cast" in proof_job
     assert "            provider-linting-walkthrough.cast" in proof_job
-    assert "            tutorial-part7-provider-linting.cast" in proof_job
     assert "            provider-linting.cast" not in proof_job
     assert "ci/build-provider-linting-stack.py" not in proof_job
     assert ".stack/pyvider" not in proof_job
@@ -1333,7 +1275,6 @@ def test_recording_scripts_preserve_all_public_films_without_the_private_driver(
         "opentofu": (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8"),
         "direct": (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8"),
         "walkthrough": (ROOT / "ci" / "provider-linting-walkthrough.sh").read_text(encoding="utf-8"),
-        "tutorial": (ROOT / "ci" / "provider-linting-tutorial.sh").read_text(encoding="utf-8"),
     }
     recorder = (ROOT / "ci" / "record-provider-linting.sh").read_text(encoding="utf-8")
 
@@ -1341,7 +1282,7 @@ def test_recording_scripts_preserve_all_public_films_without_the_private_driver(
         for command in commands:
             assert command in scripts[lane]
         assert "run-provider-linting-rpcs.py" not in scripts[lane]
-        cast_stem = "tutorial-part7-provider-linting" if lane == "tutorial" else f"provider-linting-{lane}"
+        cast_stem = f"provider-linting-{lane}"
         assert f"{cast_stem}.raw.cast" in recorder
         assert f"{cast_stem}.cast" in recorder
         assert f"--lane {lane}" in recorder
@@ -1351,7 +1292,6 @@ def test_recording_scripts_preserve_all_public_films_without_the_private_driver(
         assert all("PYVIDER_OPENTOFU_BINARY" not in command for command in commands)
 
     assert "provider-linting-walkthrough.sh" in recorder
-    assert "provider-linting-tutorial.sh" in recorder
     assert "pace-provider-linting-cast.py" in recorder
     assert "retime-cast.py" not in recorder
     assert "run-provider-linting-rpcs.py" not in recorder
@@ -1362,14 +1302,12 @@ def test_public_recording_commands_have_a_real_blank_line_before_them() -> None:
         "opentofu": (ROOT / "ci" / "provider-linting-demo.sh").read_text(encoding="utf-8"),
         "direct": (ROOT / "ci" / "provider-linting-direct-rpc-demo.sh").read_text(encoding="utf-8"),
         "walkthrough": (ROOT / "ci" / "provider-linting-walkthrough.sh").read_text(encoding="utf-8"),
-        "tutorial": (ROOT / "ci" / "provider-linting-tutorial.sh").read_text(encoding="utf-8"),
     }
 
     public_commands = {
         "opentofu": OPENTOFU_COMMANDS,
         "direct": DIRECT_COMMANDS,
         "walkthrough": WALKTHROUGH_COMMANDS,
-        "tutorial": TUTORIAL_COMMANDS,
     }
 
     for lane, commands in public_commands.items():

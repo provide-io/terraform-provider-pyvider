@@ -52,8 +52,6 @@ raw_direct_cast=$staging/provider-linting-direct.raw.cast
 checked_direct_cast=$staging/provider-linting-direct.cast
 raw_walkthrough_cast=$staging/provider-linting-walkthrough.raw.cast
 checked_walkthrough_cast=$staging/provider-linting-walkthrough.cast
-raw_tutorial_cast=$staging/tutorial-part7-provider-linting.raw.cast
-checked_tutorial_cast=$staging/tutorial-part7-provider-linting.cast
 checked_manifest=$staging/provider-linting-proof.json
 opentofu_demo_root=$staging/opentofu-demo
 direct_demo_root=$staging/direct-demo
@@ -64,10 +62,6 @@ record_lane() {
     local height=$3
     local raw_cast=$staging/provider-linting-${lane}.raw.cast
     local checked_cast=$staging/provider-linting-${lane}.cast
-    if [[ "$lane" == tutorial ]]; then
-        raw_cast=$raw_tutorial_cast
-        checked_cast=$checked_tutorial_cast
-    fi
 
     case "$lane" in
         opentofu)
@@ -94,13 +88,6 @@ record_lane() {
             python3 "$repo_root/ci/pace-provider-linting-cast.py" \
                 --lane walkthrough "$raw_cast" "$checked_cast"
             ;;
-        tutorial)
-            python3 "$repo_root/ci/record-to-cast.py" \
-                --title 'Part 7 — author and verify a provider lint rule' --width "$width" --height "$height" \
-                "$raw_cast" "$repo_root/ci/provider-linting-tutorial.sh"
-            python3 "$repo_root/ci/pace-provider-linting-cast.py" \
-                --lane tutorial "$raw_cast" "$checked_cast"
-            ;;
         *)
             printf 'error: unknown proof film lane: %s\n' "$lane" >&2
             return 2
@@ -115,17 +102,14 @@ test "$(soup --version)" = "soup, version 0.8.2"
 record_lane opentofu 110 26
 record_lane direct 110 26
 record_lane walkthrough 110 26
-record_lane tutorial 110 26
 
 PYVIDER_OPENTOFU_ARCHIVE_SHA256="$archive_sha" \
 uv run python "$repo_root/ci/generate-provider-linting-proof.py" \
     --opentofu-cast "$checked_opentofu_cast" --direct-rpc-cast "$checked_direct_cast" \
     --walkthrough-cast "$checked_walkthrough_cast" \
-    --tutorial-cast "$checked_tutorial_cast" \
     --build-provenance "$provenance" --output "$checked_manifest"
 uv run python "$repo_root/ci/verify-provider-linting-proof.py" \
-    "$checked_manifest" "$checked_opentofu_cast" "$checked_direct_cast" "$checked_walkthrough_cast" \
-    "$checked_tutorial_cast"
+    "$checked_manifest" "$checked_opentofu_cast" "$checked_direct_cast" "$checked_walkthrough_cast"
 
 if [[ "$(binary_sha)" != "$expected_sha" ]]; then
     printf '%s\n' 'error: provider binary checksum changed during recording' >&2
@@ -135,17 +119,14 @@ fi
 backup_opentofu_cast=$staging/original-opentofu.cast
 backup_direct_cast=$staging/original-direct.cast
 backup_walkthrough_cast=$staging/original-walkthrough.cast
-backup_tutorial_cast=$staging/original-tutorial.cast
 backup_manifest=$staging/original.json
 [[ ! -e "$repo_root/provider-linting-opentofu.cast" ]] || cp "$repo_root/provider-linting-opentofu.cast" "$backup_opentofu_cast"
 [[ ! -e "$repo_root/provider-linting-direct.cast" ]] || cp "$repo_root/provider-linting-direct.cast" "$backup_direct_cast"
 [[ ! -e "$repo_root/provider-linting-walkthrough.cast" ]] || cp "$repo_root/provider-linting-walkthrough.cast" "$backup_walkthrough_cast"
-[[ ! -e "$repo_root/tutorial-part7-provider-linting.cast" ]] || cp "$repo_root/tutorial-part7-provider-linting.cast" "$backup_tutorial_cast"
 [[ ! -e "$repo_root/provider-linting-proof.json" ]] || cp "$repo_root/provider-linting-proof.json" "$backup_manifest"
 published_opentofu_cast=false
 published_direct_cast=false
 published_walkthrough_cast=false
-published_tutorial_cast=false
 published_manifest=false
 rollback() {
     if [[ "$published_manifest" == true ]]; then
@@ -153,9 +134,6 @@ rollback() {
     fi
     if [[ "$published_walkthrough_cast" == true ]]; then
         if [[ -e "$backup_walkthrough_cast" ]]; then cp "$backup_walkthrough_cast" "$repo_root/provider-linting-walkthrough.cast"; else rm -f "$repo_root/provider-linting-walkthrough.cast"; fi
-    fi
-    if [[ "$published_tutorial_cast" == true ]]; then
-        if [[ -e "$backup_tutorial_cast" ]]; then cp "$backup_tutorial_cast" "$repo_root/tutorial-part7-provider-linting.cast"; else rm -f "$repo_root/tutorial-part7-provider-linting.cast"; fi
     fi
     if [[ "$published_direct_cast" == true ]]; then
         if [[ -e "$backup_direct_cast" ]]; then cp "$backup_direct_cast" "$repo_root/provider-linting-direct.cast"; else rm -f "$repo_root/provider-linting-direct.cast"; fi
@@ -171,10 +149,8 @@ mv "$checked_direct_cast" "$repo_root/provider-linting-direct.cast"
 published_direct_cast=true
 mv "$checked_walkthrough_cast" "$repo_root/provider-linting-walkthrough.cast"
 published_walkthrough_cast=true
-mv "$checked_tutorial_cast" "$repo_root/tutorial-part7-provider-linting.cast"
-published_tutorial_cast=true
 mv "$checked_manifest" "$repo_root/provider-linting-proof.json"
 published_manifest=true
 trap - ERR
 
-printf 'Published checked proof: provider-linting-opentofu.cast + provider-linting-direct.cast + provider-linting-walkthrough.cast + tutorial-part7-provider-linting.cast + provider-linting-proof.json\n'
+printf 'Published checked proof: provider-linting-opentofu.cast + provider-linting-direct.cast + provider-linting-walkthrough.cast + provider-linting-proof.json\n'

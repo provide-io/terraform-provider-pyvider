@@ -24,7 +24,6 @@ PROOF_OUTPUTS = {
     "provider-linting-direct.cast",
     "provider-linting-opentofu.cast",
     "provider-linting-walkthrough.cast",
-    "tutorial-part7-provider-linting.cast",
     "provider-linting-proof.json",
 }
 
@@ -135,7 +134,6 @@ def test_release_workflow_binds_numeric_build_to_exact_release_sha_and_proof_ass
         "provider-linting-opentofu.cast",
         "provider-linting-direct.cast",
         "provider-linting-walkthrough.cast",
-        "tutorial-part7-provider-linting.cast",
         "provider-linting-build-provenance.json",
         "windows_amd64",
     ):
@@ -273,7 +271,6 @@ def test_public_recordings_do_not_expose_internal_proof_variables() -> None:
         "ci/provider-linting-demo.sh",
         "ci/provider-linting-direct-rpc-demo.sh",
         "ci/provider-linting-walkthrough.sh",
-        "ci/provider-linting-tutorial.sh",
     ):
         text = (ROOT / relative).read_text(encoding="utf-8")
         displayed_commands = "\n".join(

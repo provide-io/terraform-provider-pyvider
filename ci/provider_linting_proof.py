@@ -92,24 +92,6 @@ FILM_COMMANDS = {
         ),
         ('soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'),
     ],
-    "tutorial": [
-        "uv sync --frozen",
-        "uv run pytest tests/test_linting.py -q",
-        "uv run flavor pack --quiet --manifest pyproject.toml",
-        "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
-        (
-            "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
-            '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
-        ),
-        "./install-opentofu.sh 1.13.0-rc1",
-        'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"',
-        '"$opentofu_rc1" version',
-        (
-            "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
-            '--provider "$PWD/dist/terraform-provider-mycloud" '
-            '--opentofu "$opentofu_rc1" --lane opentofu'
-        ),
-    ],
 }
 LEGACY_FILM_COMMANDS = {
     "opentofu": LEGACY_SPLIT_COMMANDS["opentofu"],
@@ -125,14 +107,11 @@ FILM_CASTS = {
     "opentofu": "provider-linting-opentofu.cast",
     "direct": "provider-linting-direct.cast",
     "walkthrough": "provider-linting-walkthrough.cast",
-    "tutorial": "tutorial-part7-provider-linting.cast",
 }
-LEGACY_FILM_CASTS = {name: path for name, path in FILM_CASTS.items() if name != "tutorial"}
 FILM_DURATION_RANGES = {
     "opentofu": (30.0, 36.0),
     "direct": (33.0, 39.0),
     "walkthrough": (36.0, 40.0),
-    "tutorial": (36.0, 40.0),
 }
 RULES: list[dict[str, Any]] = [
     {
@@ -460,11 +439,10 @@ def _validate_split_casts(value: Any) -> None:
         _assert_hash(metadata["sha256"], label=f"{name} cast checksum")
 
 
-def _validate_film_casts(value: Any, *, legacy_release: bool) -> None:
-    expected_casts = LEGACY_FILM_CASTS if legacy_release else FILM_CASTS
-    if not isinstance(value, dict) or set(value) != set(expected_casts):
+def _validate_film_casts(value: Any) -> None:
+    if not isinstance(value, dict) or set(value) != set(FILM_CASTS):
         raise ValueError("film cast metadata is incomplete")
-    for name, expected_path in expected_casts.items():
+    for name, expected_path in FILM_CASTS.items():
         metadata = value[name]
         if not isinstance(metadata, dict) or set(metadata) != {"path", "sha256"}:
             raise ValueError("film cast metadata is invalid")
@@ -569,7 +547,7 @@ def _validate_film_manifest(manifest: dict[str, Any]) -> None:
     if commands != FILM_COMMANDS and not (legacy_release and commands == LEGACY_FILM_COMMANDS):
         raise ValueError("command catalog does not match the checked proof films")
     _validate_rules(manifest["rules"])
-    _validate_film_casts(manifest["casts"], legacy_release=legacy_release)
+    _validate_film_casts(manifest["casts"])
 
 
 def _parse_observations(output: str) -> list[dict[str, Any]]:
@@ -686,27 +664,6 @@ def _validate_walkthrough_cast(output: str, manifest: Mapping[str, Any]) -> None
         raise ValueError("walkthrough recording contains an internal proof command")
 
 
-def _validate_tutorial_cast(output: str, manifest: Mapping[str, Any]) -> None:
-    for command in manifest["commands"]["tutorial"]:
-        if f"$ {command}" not in output:
-            raise ValueError(f"missing command from tutorial recording: {command}")
-    for statement in (
-        "Part 7: author and verify one provider lint rule.",
-        "9 passed",
-        "Built and verified dist/terraform-provider-mycloud.psp",
-        "Direct provider validation: 1/1 cases",
-        "OpenTofu v1.13.0-rc1",
-        "OpenTofu experimental lint validation: valid",
-        "example/mycloud:production-name",
-    ):
-        if statement not in output:
-            raise ValueError(f"missing proof statement from tutorial recording: {statement}")
-    if "PYVIDER_CONFORMANCE_PSP" in output or "PYVIDER_OPENTOFU_BINARY" in output:
-        raise ValueError("tutorial recording contains an internal proof variable")
-    if "run-provider-linting-rpcs.py" in output:
-        raise ValueError("tutorial recording contains an internal proof command")
-
-
 def _validate_film_opentofu_cast(output: str, manifest: Mapping[str, Any]) -> None:
     _validate_opentofu_cast(output, manifest=manifest, require_four_paths=True)
     expected_version = manifest["opentofu"]["version"]
@@ -733,7 +690,6 @@ def verify_split_proof(
     opentofu_cast_path: Path,
     direct_rpc_cast_path: Path,
     walkthrough_cast_path: Path | None = None,
-    tutorial_cast_path: Path | None = None,
 ) -> list[str]:
     """Validate legacy split casts or the schema-v3 public proof films."""
     if walkthrough_cast_path is not None:
@@ -742,7 +698,6 @@ def verify_split_proof(
             opentofu_cast_path,
             direct_rpc_cast_path,
             walkthrough_cast_path,
-            tutorial_cast_path,
         )
     manifest = _load_json_object(manifest_path, label="split proof manifest")
     _validate_split_manifest(manifest)
@@ -761,24 +716,15 @@ def verify_film_proof(
     opentofu_cast_path: Path,
     direct_cast_path: Path,
     walkthrough_cast_path: Path,
-    tutorial_cast_path: Path | None = None,
 ) -> list[str]:
     """Validate all release-blocking schema-v3 public proof films."""
     manifest = _load_json_object(manifest_path, label="proof manifest")
     _validate_film_manifest(manifest)
-    legacy_release = (
-        manifest["components"]["terraform-provider-pyvider"]["version"] == "0.5.0"
-        and manifest["commands"] == LEGACY_FILM_COMMANDS
-    )
-    if not legacy_release and tutorial_cast_path is None:
-        raise ValueError("tutorial cast is required for provider 0.6 proof")
     paths = {
         "opentofu": opentofu_cast_path,
         "direct": direct_cast_path,
         "walkthrough": walkthrough_cast_path,
     }
-    if tutorial_cast_path is not None:
-        paths["tutorial"] = tutorial_cast_path
     for lane, path in paths.items():
         if sha256_file(path) != manifest["casts"][lane]["sha256"]:
             raise ValueError(f"{lane} cast checksum does not match manifest")
@@ -790,8 +736,6 @@ def verify_film_proof(
     _validate_film_opentofu_cast(outputs["opentofu"], manifest)
     rule_ids = _validate_direct_rpc_cast(outputs["direct"], manifest)
     _validate_walkthrough_cast(outputs["walkthrough"], manifest)
-    if "tutorial" in outputs:
-        _validate_tutorial_cast(outputs["tutorial"], manifest)
     for lane, path in paths.items():
         _validate_film_duration(lane, path)
     return rule_ids
@@ -1107,7 +1051,6 @@ def generate_film_proof(
     opentofu_cast_path: Path,
     direct_cast_path: Path,
     walkthrough_cast_path: Path,
-    tutorial_cast_path: Path | None = None,
     build_provenance_path: Path,
     output_path: Path,
     provider_version: str,
@@ -1116,7 +1059,7 @@ def generate_film_proof(
     generated_at: str,
     ci_environment: Mapping[str, str],
 ) -> dict[str, Any]:
-    """Generate a schema-v3 manifest for the four paced public proof films."""
+    """Generate a schema-v3 manifest for the three paced public proof films."""
     legacy = _build_split_manifest(
         opentofu_cast_path=opentofu_cast_path,
         direct_rpc_cast_path=direct_cast_path,
@@ -1127,15 +1070,11 @@ def generate_film_proof(
         generated_at=generated_at,
         ci_environment=ci_environment,
     )
-    if provider_version != "0.5.0" and tutorial_cast_path is None:
-        raise ValueError("tutorial cast is required for provider 0.6 proof")
     cast_paths: tuple[tuple[str, Path], ...] = (
         ("opentofu", opentofu_cast_path),
         ("direct", direct_cast_path),
         ("walkthrough", walkthrough_cast_path),
     )
-    if tutorial_cast_path is not None:
-        cast_paths += (("tutorial", tutorial_cast_path),)
     manifest = legacy | {
         "schema_version": SCHEMA_VERSION,
         "commands": FILM_COMMANDS,
@@ -1149,8 +1088,6 @@ def generate_film_proof(
     _validate_film_opentofu_cast(outputs["opentofu"], manifest)
     _validate_direct_rpc_cast(outputs["direct"], manifest)
     _validate_walkthrough_cast(outputs["walkthrough"], manifest)
-    if "tutorial" in outputs:
-        _validate_tutorial_cast(outputs["tutorial"], manifest)
     _write_json_atomically(output_path, manifest)
     return manifest
 
