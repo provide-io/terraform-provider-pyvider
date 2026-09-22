@@ -38,14 +38,14 @@ classifiers = [
 dependencies = [
     # Floors track the suite releases this provider is built and tested against.
     #
-    # pyvider 0.7.0 is the wire contract these examples and the conformance
+    # pyvider 0.8.1 is the wire contract these examples and the conformance
     # suite assert against: the a_obj nested_type encoding, the declarations
     # that are hard errors rather than inert, and a dev-mode wrapper that leaves
     # the working directory alone, so a relative path an example passes -- and
     # the filesystem state store's default root -- resolves against the caller
     # rather than this checkout.
     #
-    # pyvider-components 0.7.1 names the file-content resource and its list
+    # pyvider-components 0.8.0 names the file-content resource and its list
     # resource `pyvider_file_content`, which tests/conformance asserts: an older
     # resolution publishes `pyvider_directory_entry` and fails the list-resource
     # suite. 0.7.1 is also where both actions defer only for the reason
@@ -77,8 +77,8 @@ dependencies = [
     # handshake that succeeded. Windows is the only platform that defaults to
     # TCP, so it is the only one that sees it.
     "provide-foundation>=0.4.4",
-    "pyvider>=0.7.0",
-    "pyvider-components>=0.7.2",
+    "pyvider>=0.8.1",
+    "pyvider-components>=0.8.0",
     # 0.5.4 issues a server certificate that vouches for the address it is
     # served on, rather than DNS:localhost alone. The client-side override in
     # 0.5.3 is what makes the leg green; this is the same fix at the source, so
@@ -182,7 +182,7 @@ dev = [
     # 0.7.6 keeps the PATH scrub when SYSTEMROOT is absent. Below it the driver
     # falls back to the caller's PATH, which is what the scrub exists to
     # withhold -- an active virtualenv there can shadow the bundled runtime.
-    "tofusoup>=0.7.6",
+    "tofusoup==0.8.2",
     # Bounds the conformance suite: see timeout_method in [tool.pytest.ini_options].
     "pytest-timeout>=2.3.1",
     "ty>=0.0.8",

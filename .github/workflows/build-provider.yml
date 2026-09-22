@@ -1,14 +1,5 @@
 name: 🏗️ Build Provider Binary
 
-# `pull_request` catches a break before it lands; `push` to main catches what a
-# merge produced. Neither waits on a human to click. Both repositories are
-# public, so the runners are free and the only real cost is wall-clock on the
-# pull request.
-#
-# This workflow also runs the conformance suite, as a called workflow rather
-# than a separate one chained off it -- see the note at the top of
-# test-conformance.yml for why that placement is what lets a pull request
-# validate a conformance change.
 on:
   push:
     branches: [main]
@@ -17,26 +8,16 @@ on:
   workflow_dispatch:
     inputs:
       upload_retention_days:
-        description: 'Artifact retention days'
+        description: Artifact retention days
         required: false
         type: number
         default: 7
       provider_linting_proof:
-        description: 'Build and verify the provider-linting proof artifact'
+        description: Build and verify the provider-linting proof artifact
         required: false
         type: boolean
         default: false
-      pyvider_ref:
-        description: 'Exact public Pyvider commit SHA used by the lint proof build'
-        required: false
-        type: string
-      components_ref:
-        description: 'Exact public pyvider-components commit SHA used by the lint proof build'
-        required: false
-        type: string
 
-# A second push supersedes the first on a pull request; nothing else is
-# cancelled, so a merge to main always produces a complete result.
 concurrency:
   group: build-provider-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -44,32 +25,20 @@ concurrency:
 env:
   PYTHON_VERSION: '3.11'
   PYTHONIOENCODING: utf-8
+  PYVIDER_VERSION: '0.8.1'
+  COMPONENTS_VERSION: '0.8.0'
 
 jobs:
   build:
     name: 📦 Build for ${{ matrix.target }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson((github.actor == 'nektos/act') && '{"include":[{"os":"ubuntu-24.04","platform":"linux","arch":"amd64","target":"linux_amd64"}]}' || '{"include":[{"os":"ubuntu-24.04","platform":"linux","arch":"amd64","target":"linux_amd64"},{"os":"ubuntu-24.04-arm","platform":"linux","arch":"arm64","target":"linux_arm64"},{"os":"macos-15","platform":"darwin","arch":"arm64","target":"darwin_arm64"},{"os":"macos-15-intel","platform":"darwin","arch":"amd64","target":"darwin_amd64"},{"os":"windows-2025","platform":"windows","arch":"amd64","target":"windows_amd64"}]}') }}
-
+      matrix: ${{ fromJson((github.actor == 'nektos/act') && '{"include":[{"os":"ubuntu-24.04","target":"linux_amd64"}]}' || '{"include":[{"os":"ubuntu-24.04","target":"linux_amd64"},{"os":"ubuntu-24.04-arm","target":"linux_arm64"},{"os":"macos-15","target":"darwin_arm64"},{"os":"macos-15-intel","target":"darwin_amd64"},{"os":"windows-2025","target":"windows_amd64"}]}') }}
     runs-on: ${{ matrix.os }}
-    # No continue-on-error. A non-gating Windows build means a Windows-only
-    # break produces a zip nobody looks at and a green run; the artifact is
-    # still uploaded and still released. It builds cleanly today, checked
-    # step by step rather than by the job's own conclusion, which
-    # continue-on-error makes meaningless.
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-
-      - name: 📖 Read VERSION
-        id: version
-        shell: bash
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "📦 Building version: ${VERSION}"
 
       - name: 🐍 Setup Python
         if: env.ACT != 'true' && github.actor != 'nektos/act'
@@ -79,147 +48,64 @@ jobs:
 
       - name: 📦 Install UV
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
-        continue-on-error: true
         with:
           enable-cache: false
 
-      - name: 🧰 Setup Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
-        with:
-          go-version: '1.24.x'
-
-      - name: 🔧 Install dependencies
+      - name: 🔧 Install build dependencies
         shell: bash
-        run: uv sync --group dev
+        run: uv sync --frozen --group dev
 
-      - name: 📥 Checkout Flavorpack Helpers
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          repository: provide-io/flavorpack
-          # v0.4.4's Go module required github.com/provide-io/provide-telemetry/go/logger
-          # at v0.3.1, a submodule tag that does not exist in that repository, so
-          # `go build` of the launcher failed on every platform before the provider
-          # was even packaged. v0.4.5 depends on provide-telemetry/go v0.7.0, which
-          # the module proxy does serve, and matches the flavorpack the lock resolves.
-          ref: v0.4.5
-          path: .deps/flavorpack
-
-      - name: 🔨 Build Flavor Helpers
+      - name: 🏗️ Build public-dependency release candidate once
         shell: bash
         run: |
-          cd .deps/flavorpack
-          uv sync --group dev
-          uv run flavor helpers build --lang go
-          # Windows: external Go builder produces an invalid PSPF; leave the env
-          # vars unset so flavorpack falls back to its in-process Python builder.
-          if [[ "${{ matrix.platform }}" != "windows" ]]; then
-            echo "FLAVOR_BUILDER_BIN=$PWD/dist/bin/flavor-go-builder-${{ matrix.target }}" >> "$GITHUB_ENV"
-            echo "FLAVOR_LAUNCHER_BIN=$PWD/dist/bin/flavor-go-launcher-${{ matrix.target }}" >> "$GITHUB_ENV"
-          fi
+          uv run python ci/build-provider-linting-stack.py \
+            --provider-repository . \
+            --pyvider-version "$PYVIDER_VERSION" \
+            --components-version "$COMPONENTS_VERSION" \
+            --output-dir dist
+          test -f "dist/terraform-provider-pyvider_$(cat VERSION)_${{ matrix.target }}.zip"
 
-      - name: 🔑 Generate temporary signing keys
+      - name: 🔒 Require artifact platform identity
         shell: bash
         run: |
-          uv run flavor keygen --out-dir keys
-          echo "✅ Generated temporary signing keys"
-          ls -la keys/
+          uv run python - "${{ matrix.target }}" <<'PY'
+          import json, pathlib, sys
+          provenance = json.loads(pathlib.Path("dist/provider-linting-build-provenance.json").read_text(encoding="utf-8"))
+          assert provenance["schema_version"] == 2
+          assert provenance["release_candidate"]["platform"] == sys.argv[1]
+          assert provenance["release_candidate"]["github_artifact"] == f"provider-{sys.argv[1]}"
+          assert provenance["artifacts"]["binary"]["platform"] == sys.argv[1]
+          PY
 
-      - name: 🧹 Clear package caches
-        shell: bash
-        run: |
-          pip cache purge 2>/dev/null || echo "No pip cache to clear"
-          uv cache clean 2>/dev/null || echo "No uv cache to clear"
-
-      - name: 🏗️ Build PSP package
-        shell: bash
-        run: |
-          echo "🏗️ Building PSP package (with retry on failure)..."
-          if ! uv run flavor pack \
-            --manifest pyproject.toml \
-            --output "terraform-provider-pyvider.psp"; then
-            echo "⚠️ First build attempt failed, waiting 30s and retrying..."
-            sleep 30
-            python3 -m pip index versions flavorpack 2>/dev/null || true
-            uv run flavor pack \
-              --manifest pyproject.toml \
-              --output "terraform-provider-pyvider.psp"
-          fi
-          echo "✅ Built PSP package:"
-          ls -la terraform-provider-pyvider.psp
-
-      - name: 📦 Package for Terraform
-        shell: bash
-        run: |
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}.exe"
-          else
-            BINARY_NAME="terraform-provider-pyvider_v${{ steps.version.outputs.VERSION }}"
-          fi
-
-          cp terraform-provider-pyvider.psp "$BINARY_NAME"
-          chmod +x "$BINARY_NAME" 2>/dev/null || true
-
-          echo "🧪 Testing provider binary execution..."
-          time ./"$BINARY_NAME" launch-context || true
-
-          ZIP_NAME="terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip"
-          if command -v zip &>/dev/null; then
-            zip "$ZIP_NAME" "$BINARY_NAME"
-          else
-            7z a "$ZIP_NAME" "$BINARY_NAME"
-          fi
-
-          echo "📦 Created Terraform provider package:"
-          ls -la "$ZIP_NAME"
-          unzip -l "$ZIP_NAME" 2>/dev/null || 7z l "$ZIP_NAME" 2>/dev/null || true
-
-      - name: 📤 Upload artifact
+      - name: 📤 Upload required provider artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: provider-${{ matrix.target }}
-          path: |
-            terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_${{ matrix.target }}.zip
+          path: dist/
+          if-no-files-found: error
           retention-days: ${{ inputs.upload_retention_days || 7 }}
 
-  # In this run, so the suite reads the artifacts the job above just uploaded
-  # and both workflow files come from the commit under test.
   conformance:
     name: 🧪 Conformance
     needs: build
     uses: ./.github/workflows/test-conformance.yml
     permissions:
       contents: read
-      # download-artifact reads another job's artifact through the API.
       actions: read
     secrets: inherit
 
   provider-linting-proof:
     name: 🔎 Provider linting proof
     if: github.event_name == 'workflow_dispatch' && inputs.provider_linting_proof
+    needs: build
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    env:
-      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider
-      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components
+      actions: read
 
     steps:
       - name: 📥 Checkout provider
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-
-      - name: 📥 Checkout exact Pyvider revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          repository: provide-io/pyvider
-          ref: ${{ inputs.pyvider_ref }}
-          path: .stack/pyvider
-
-      - name: 📥 Checkout exact components revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          repository: provide-io/pyvider-components
-          ref: ${{ inputs.components_ref }}
-          path: .stack/pyvider-components
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -231,40 +117,33 @@ jobs:
         with:
           enable-cache: false
 
-      - name: 🔒 Require immutable coordinated refs
-        shell: bash
-        env:
-          PYVIDER_REF: ${{ inputs.pyvider_ref }}
-          COMPONENTS_REF: ${{ inputs.components_ref }}
-        run: |
-          [[ "$PYVIDER_REF" =~ ^[0-9a-f]{40}$ ]] || { echo 'pyvider_ref must be a full commit SHA' >&2; exit 2; }
-          [[ "$COMPONENTS_REF" =~ ^[0-9a-f]{40}$ ]] || { echo 'components_ref must be a full commit SHA' >&2; exit 2; }
-          test "$(git -C .stack/pyvider rev-parse HEAD)" = "$PYVIDER_REF"
-          test "$(git -C .stack/pyvider-components rev-parse HEAD)" = "$COMPONENTS_REF"
+      - name: 📥 Download this run's linux_amd64 release candidate
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: provider-linux_amd64
+          path: dist
 
-      - name: 🍲 Install released TofuSoup lint runner
-        run: uv tool install --refresh tofusoup==0.8.0
-
-      - name: 🔧 Install proof dependencies
-        run: uv sync --group dev
-
-      - name: 🏗️ Build exact coordinated provider once
-        run: |
-          uv run python ci/build-provider-linting-stack.py \
-            --pyvider-source .stack/pyvider \
-            --components-source .stack/pyvider-components \
-            --output-dir dist
-
-      - name: 🔏 Capture the one provider binary and checksum
+      - name: 🔏 Verify public wheels and release-candidate bytes
         shell: bash
         run: |
+          archive="dist/terraform-provider-pyvider_$(cat VERSION)_linux_amd64.zip"
+          uv run python - "$archive" <<'PY'
+          import hashlib, json, pathlib, sys
+          root = pathlib.Path("dist")
+          provenance = json.loads((root / "provider-linting-build-provenance.json").read_text(encoding="utf-8"))
+          archive = pathlib.Path(sys.argv[1])
+          assert provenance["release_candidate"]["github_artifact"] == "provider-linux_amd64"
+          assert provenance["release_candidate"]["platform"] == "linux_amd64"
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == provenance["release_candidate"]["sha256"]
+          for name in ("pyvider", "pyvider-components"):
+              dependency = provenance["dependencies"][name]
+              assert dependency["registry"] == "https://pypi.org/simple"
+              assert len(dependency["sha256"]) == 64
+          PY
+          unzip -oq "$archive" -d dist/linux_amd64
           lint_binary="$PWD/dist/linux_amd64/terraform-provider-pyvider_v$(cat VERSION)"
           test -x "$lint_binary"
-          expected_sha=$(uv run python -c 'import json; print(json.load(open("dist/provider-linting-build-provenance.json", encoding="utf-8"))["artifacts"]["binary"]["sha256"])')
-          actual_sha=$(shasum -a 256 "$lint_binary" | awk '{print $1}')
-          test "$actual_sha" = "$expected_sha"
           echo "PYVIDER_CONFORMANCE_PSP=$lint_binary" >> "$GITHUB_ENV"
-          echo "PYVIDER_LINTING_BINARY_SHA256=$actual_sha" >> "$GITHUB_ENV"
 
       - name: 🪣 Install pinned OpenTofu beta
         shell: bash
@@ -278,23 +157,28 @@ jobs:
           echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
           echo "PYVIDER_OPENTOFU_ARCHIVE_SHA256=$archive_sha" >> "$GITHUB_ENV"
 
-      - name: 🧪 Prove the same binary through both no-rebuild targets
+      - name: 🍲 Install released TofuSoup and proof dependencies
+        run: |
+          uv tool install --refresh tofusoup==0.8.2
+          uv sync --frozen --group dev
+          test "$(soup --version)" = "soup, version 0.8.2"
+          uv run python -c 'import tofusoup; assert tofusoup.__version__ == "0.8.2"'
+
+      - name: 🧪 Prove the downloaded binary through both lanes
         run: |
           before=$(shasum -a 256 "$PYVIDER_CONFORMANCE_PSP" | awk '{print $1}')
-          test "$before" = "$PYVIDER_LINTING_BINARY_SHA256"
           make test-conformance-binary PYVIDER_CONFORMANCE_PSP="$PYVIDER_CONFORMANCE_PSP"
-          make test-linting-opentofu-binary PYVIDER_CONFORMANCE_PSP="$PYVIDER_CONFORMANCE_PSP"
-          after=$(shasum -a 256 "$PYVIDER_CONFORMANCE_PSP" | awk '{print $1}')
-          test "$after" = "$before"
+          make test-linting-opentofu-binary PYVIDER_CONFORMANCE_PSP="$PYVIDER_CONFORMANCE_PSP" \
+            PYVIDER_OPENTOFU_BINARY="$PYVIDER_OPENTOFU_BINARY"
+          test "$(shasum -a 256 "$PYVIDER_CONFORMANCE_PSP" | awk '{print $1}')" = "$before"
 
       - name: 🎬 Record and verify checked proof
         run: |
           PYVIDER_CONFORMANCE_PSP="$PYVIDER_CONFORMANCE_PSP" ci/record-provider-linting.sh
           uv run python ci/verify-provider-linting-proof.py \
-            provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct.cast \
-            provider-linting-walkthrough.cast
-          uv run pytest tests/proof/test_provider_linting_proof.py -q
-          test "$(shasum -a 256 "$PYVIDER_CONFORMANCE_PSP" | awk '{print $1}')" = "$PYVIDER_LINTING_BINARY_SHA256"
+            provider-linting-proof.json provider-linting-opentofu.cast \
+            provider-linting-direct.cast provider-linting-walkthrough.cast
+          uv run pytest tests/proof -q
 
       - name: 📤 Upload checked provider linting proof
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -311,29 +195,10 @@ jobs:
 
   summary:
     name: 📋 Build Summary
-    needs: build
+    needs: [build, conformance]
     runs-on: ubuntu-24.04
-
     steps:
-      - name: 📥 Checkout (for VERSION file)
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-
-      - name: 📖 Read VERSION
-        id: version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: 📊 Summary
         run: |
-          echo "## 🎉 Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Built Packages" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          for target in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do
-            echo "- ✅ $target" >> $GITHUB_STEP_SUMMARY
-          done
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The conformance suite runs on these artifacts in this same run." >> $GITHUB_STEP_SUMMARY
+          echo '## Provider release candidates built' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Linux amd64/arm64, Darwin amd64/arm64, and required Windows amd64 artifacts passed the build.' >> "$GITHUB_STEP_SUMMARY"

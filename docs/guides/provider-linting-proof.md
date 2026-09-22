@@ -20,7 +20,7 @@ rule, severity, detail, attribute path, source range, default-off behavior,
 configuration and environment selection, and exact exclusion. Validation also
 proves that the deliberately unreachable HTTP data source is never contacted.
 
-TofuSoup 0.8.0 directly proves 7/7 paths against the same packaged binary. Its
+TofuSoup 0.8.2 directly proves 7/7 paths against the same packaged binary. Its
 direct provider-validation lane covers the preceding four paths plus list
 resource, action, and state store.
 
@@ -84,30 +84,24 @@ enable each layer explicitly:
 PYVIDER_LINT=provide-io/pyvider:all tofu validate -lint=all
 ```
 
-## Build one coordinated package
+## Build one release candidate from public packages
 
-Start from clean checkouts of this repository, Pyvider, and
-`pyvider-components`. The stack builder records each exact Git revision and
-source-archive hash, inventories the packaged wheels, and writes
-`dist/provider-linting-build-provenance.json` beside the binary.
+Start from a clean checkout of this repository. The stack builder pins
+Pyvider 0.8.1 and `pyvider-components` 0.8.0 from public PyPI, verifies the
+disposable lock contains only registry sources, hashes the exact wheels packed
+by Flavorpack, resolves their public release tags to commits, and writes
+`dist/provider-linting-build-provenance.json` beside the candidate archive.
 
 ```shell
-export PYVIDER_SOURCE="$(cd ../pyvider && pwd -P)"
-export COMPONENTS_SOURCE="$(cd ../pyvider-components && pwd -P)"
-
-make build-linting-stack \
-  PYVIDER_SOURCE="$PYVIDER_SOURCE" \
-  COMPONENTS_SOURCE="$COMPONENTS_SOURCE"
+make build-linting-stack
 
 lint_binary="$PWD/dist/$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/terraform-provider-pyvider_v$(cat VERSION)"
 export PYVIDER_CONFORMANCE_PSP="$lint_binary"
 ```
 
-The exported, canonical source paths remain available to the later conformance
-targets so their provenance checks inspect the exact coordinated checkouts.
 Do not rebuild between the following layers. Each target accepts the explicit
-binary, and the OpenTofu and recording paths check its SHA-256 against the build
-provenance before and after execution.
+binary, and the OpenTofu beta validation and recording paths check its SHA-256
+against the build provenance before and after execution.
 
 ## Run the OpenTofu JSON suite
 
@@ -135,7 +129,7 @@ For the deterministic direct-provider result used by the recording, install the
 released runner and run the public suite command:
 
 ```shell
-uv tool install --refresh tofusoup==0.8.0
+uv tool install --refresh tofusoup==0.8.2
 soup lint tests/e2e/provider-linting/lint.soup.toml \
   --provider "$PYVIDER_CONFORMANCE_PSP" \
   --lane direct
@@ -153,9 +147,9 @@ only after verification and rolls back ordinary publication failures:
 - [`provider-linting-direct.cast`][direct-cast] — the deterministic
   seven-path direct-provider recording.
 - [`provider-linting-walkthrough.cast`][walkthrough-cast] — the public
-  walkthrough that installs released TofuSoup 0.8.0 and shows both lanes.
+  walkthrough that installs released TofuSoup 0.8.2 and shows both lanes.
 - [`provider-linting-proof.json`][manifest] — the schema-v3 manifest that
-  records versions, exact source revisions and archive hashes, the binary and
+  records versions, public tag commits and exact wheel hashes, the binary and
   all three recording checksums, the command list, the seven-rule catalog,
   observation channels, the OpenTofu archive checksum, and CI identity.
 
@@ -172,7 +166,7 @@ uv run pytest tests/proof -q
 ```
 
 The verifier parses all three complete casts after stripping terminal controls.
-It requires the public `soup lint` commands, the separate native/direct lane
+It requires the public `soup lint` commands, the separate OpenTofu beta/direct lane
 results, the released TofuSoup walkthrough, all seven readable direct-provider
 observations, matching artifact checksums, the pinned beta, and provenance
 without secrets or local paths. The manifest's provider revision names the exact
@@ -182,11 +176,12 @@ rather than inferring provenance from a filename or a “latest” build.
 
 ## Retrieve the exact CI proof
 
-The opt-in `provider-linting-proof` job in `build-provider.yml` builds from
-explicit public Pyvider and component Git refs and uploads one artifact also
-named `provider-linting-proof`. Identify the unique successful numeric run ID
-for the intended provider commit; never substitute “latest successful”. Then
-download and verify only that run:
+The opt-in `provider-linting-proof` job in `build-provider.yml` downloads that
+same run's `provider-linux_amd64` matrix artifact and never invokes Flavorpack
+again. It uploads one checked artifact named `provider-linting-proof`.
+Identify the unique successful numeric run ID for the intended provider
+commit; never substitute another successful run. Then download and verify only
+that run:
 
 ```shell
 proof_run_id=1234567890
@@ -204,9 +199,9 @@ uv run python ci/verify-provider-linting-proof.py \
   "$proof_dir/provider-linting-walkthrough.cast"
 ```
 
-Before publishing the downloaded files, also compare the manifest's provider,
-Pyvider, and `pyvider-components` revisions with the refs used for that workflow
-dispatch, and compare its provider-binary checksum with
+Before publishing the downloaded files, compare the manifest's provider commit
+with the workflow head SHA, compare both dependency tag commits and wheel
+SHA-256 values with the public releases, and compare its provider-binary checksum with
 `provider-linting-build-provenance.json` from the same artifact.
 
 ## Upstream basis and migration boundary

@@ -19,6 +19,8 @@ from typing import Any
 SCHEMA_VERSION = 3
 LEGACY_SCHEMA_VERSION = 1
 OPENTOFU_VERSION = "1.13.0-beta1"
+TOFUSOUP_VERSION = "0.8.2"
+PYPI_REGISTRY = "https://pypi.org/simple"
 COMMANDS = [
     "tofu version",
     "tofu validate",
@@ -47,6 +49,15 @@ SPLIT_CASTS = {
 FILM_COMMANDS = {
     "opentofu": SPLIT_COMMANDS["opentofu"],
     "direct": SPLIT_COMMANDS["direct_rpc"],
+    "walkthrough": [
+        f"uv tool install --refresh tofusoup=={TOFUSOUP_VERSION}",
+        "soup --version",
+        *SPLIT_COMMANDS["opentofu"],
+        *SPLIT_COMMANDS["direct_rpc"],
+    ],
+}
+LEGACY_FILM_COMMANDS = {
+    **FILM_COMMANDS,
     "walkthrough": [
         "uv tool install --refresh tofusoup==0.8.0",
         "soup --version",
@@ -274,7 +285,27 @@ def _validate_components(components: Any) -> None:
             raise ValueError(f"invalid component metadata for {name}")
         _assert_sha(component.get("sha"), label=f"{name} source SHA")
         if name != "terraform-provider-pyvider":
-            _assert_hash(component.get("archive_sha256"), label=f"{name} archive checksum")
+            if "archive_sha256" in component:
+                _assert_hash(component.get("archive_sha256"), label=f"{name} archive checksum")
+            else:
+                required = {"version", "sha", "tag", "registry", "wheel", "wheel_sha256"}
+                if set(component) != required:
+                    raise ValueError(f"invalid public wheel metadata for {name}")
+                if component["registry"] != PYPI_REGISTRY:
+                    raise ValueError(f"{name} does not use the public PyPI registry")
+                if component["tag"] != f"v{component['version']}":
+                    raise ValueError(f"{name} tag does not match its version")
+                wheel = component["wheel"]
+                normalized = name.replace("-", "[_-]")
+                if (
+                    not isinstance(wheel, str)
+                    or re.fullmatch(
+                        rf"{normalized}-{re.escape(component['version'])}-.*\.whl", wheel, re.IGNORECASE
+                    )
+                    is None
+                ):
+                    raise ValueError(f"{name} wheel does not match its version")
+                _assert_hash(component["wheel_sha256"], label=f"{name} wheel checksum")
 
 
 def _expected_manifest_rules() -> list[dict[str, Any]]:
@@ -302,12 +333,37 @@ def _validate_opentofu(value: Any) -> None:
 
 
 def _validate_provider_binary(value: Any) -> None:
-    if not isinstance(value, dict) or set(value) != {"path", "sha256"}:
+    if not isinstance(value, dict) or set(value) not in (
+        {"path", "sha256"},
+        {"path", "sha256", "platform"},
+    ):
         raise ValueError("provider binary metadata is invalid")
     path = value["path"]
     if not isinstance(path, str) or Path(path).is_absolute() or ".." in Path(path).parts:
         raise ValueError("provider binary path must be repository-relative")
     _assert_hash(value["sha256"], label="provider checksum")
+    if "platform" in value and (
+        not isinstance(value["platform"], str)
+        or re.fullmatch(r"(?:linux|darwin|windows)_(?:amd64|arm64)", value["platform"]) is None
+    ):
+        raise ValueError("provider binary platform is invalid")
+
+
+def checked_release_candidate(value: Mapping[str, Any], *, binary_platform: str) -> dict[str, Any]:
+    """Validate the named matrix archive that supplied the proved binary."""
+    required = {"github_artifact", "archive", "platform", "sha256"}
+    if set(value) != required:
+        raise ValueError("release candidate metadata is invalid")
+    platform_value = value.get("platform")
+    if platform_value != binary_platform:
+        raise ValueError("release candidate platform does not match provider binary")
+    if value.get("github_artifact") != f"provider-{platform_value}":
+        raise ValueError("release candidate artifact does not match its platform")
+    archive = value.get("archive")
+    if not isinstance(archive, str) or not archive.endswith(f"_{platform_value}.zip"):
+        raise ValueError("release candidate archive does not match its platform")
+    _assert_hash(value.get("sha256"), label="release candidate checksum")
+    return dict(value)
 
 
 def _validate_rules(value: Any) -> None:
@@ -395,7 +451,7 @@ def _validate_split_manifest(manifest: dict[str, Any]) -> None:
         "rules",
         "casts",
     }
-    if set(manifest) != required:
+    if set(manifest) not in (required, required | {"release_candidate"}):
         raise ValueError("manifest schema keys do not match version 2")
     if manifest["schema_version"] != 2:
         raise ValueError("manifest schema version must be 2")
@@ -405,6 +461,11 @@ def _validate_split_manifest(manifest: dict[str, Any]) -> None:
     _validate_components(manifest["components"])
     _validate_opentofu(manifest["opentofu"])
     _validate_provider_binary(manifest["provider_binary"])
+    if "release_candidate" in manifest:
+        checked_release_candidate(
+            manifest["release_candidate"],
+            binary_platform=manifest["provider_binary"].get("platform", "linux_amd64"),
+        )
     if manifest["commands"] != SPLIT_COMMANDS:
         raise ValueError("command catalog does not match the split proof")
     _validate_rules(manifest["rules"])
@@ -423,7 +484,7 @@ def _validate_film_manifest(manifest: dict[str, Any]) -> None:
         "rules",
         "casts",
     }
-    if set(manifest) != required:
+    if set(manifest) not in (required, required | {"release_candidate"}):
         raise ValueError("manifest schema keys do not match version 3")
     if manifest["schema_version"] != SCHEMA_VERSION:
         raise ValueError("manifest schema version must be 3")
@@ -433,7 +494,14 @@ def _validate_film_manifest(manifest: dict[str, Any]) -> None:
     _validate_components(manifest["components"])
     _validate_opentofu(manifest["opentofu"])
     _validate_provider_binary(manifest["provider_binary"])
-    if manifest["commands"] != FILM_COMMANDS:
+    if "release_candidate" in manifest:
+        checked_release_candidate(
+            manifest["release_candidate"],
+            binary_platform=manifest["provider_binary"].get("platform", "linux_amd64"),
+        )
+    commands = manifest["commands"]
+    legacy_release = manifest["components"]["terraform-provider-pyvider"]["version"] == "0.5.0"
+    if commands != FILM_COMMANDS and not (legacy_release and commands == LEGACY_FILM_COMMANDS):
         raise ValueError("command catalog does not match the checked proof films")
     _validate_rules(manifest["rules"])
     _validate_film_casts(manifest["casts"])
@@ -490,13 +558,22 @@ def _validate_cast(output: str, manifest: dict[str, Any]) -> list[str]:
     return [record["rule_id"] for record in observations]
 
 
-def _validate_opentofu_cast(output: str, *, require_four_paths: bool = False) -> None:
+def _opentofu_status_statement(manifest: Mapping[str, Any]) -> str:
+    provider = manifest.get("components", {}).get("terraform-provider-pyvider", {})
+    if provider.get("version") == "0.5.0":
+        return "OpenTofu native linting: valid"
+    return "OpenTofu beta validation: valid"
+
+
+def _validate_opentofu_cast(
+    output: str, *, manifest: Mapping[str, Any], require_four_paths: bool = False
+) -> None:
     for command in SPLIT_COMMANDS["opentofu"]:
         if f"$ {command}" not in output:
             raise ValueError(f"missing command from OpenTofu recording: {command}")
     statements: tuple[str, ...] = (
         "Direct provider validation: not requested",
-        "OpenTofu native linting: valid",
+        _opentofu_status_statement(manifest),
         "Experimental linting enabled",
     )
     if require_four_paths:
@@ -530,12 +607,12 @@ def _validate_film_duration(lane: str, path: Path) -> None:
         raise ValueError(f"{lane} cast duration must be between {lower:g} and {upper:g} seconds")
 
 
-def _validate_walkthrough_cast(output: str) -> None:
-    for command in FILM_COMMANDS["walkthrough"]:
+def _validate_walkthrough_cast(output: str, manifest: Mapping[str, Any]) -> None:
+    for command in manifest["commands"]["walkthrough"]:
         if f"$ {command}" not in output:
             raise ValueError(f"missing command from walkthrough recording: {command}")
     for statement in (
-        "OpenTofu native linting: valid",
+        _opentofu_status_statement(manifest),
         "Direct provider validation: 7/7 cases",
     ):
         if statement not in output:
@@ -544,8 +621,8 @@ def _validate_walkthrough_cast(output: str) -> None:
         raise ValueError("walkthrough recording contains an internal proof command")
 
 
-def _validate_film_opentofu_cast(output: str) -> None:
-    _validate_opentofu_cast(output, require_four_paths=True)
+def _validate_film_opentofu_cast(output: str, manifest: Mapping[str, Any]) -> None:
+    _validate_opentofu_cast(output, manifest=manifest, require_four_paths=True)
     if f"OpenTofu v{OPENTOFU_VERSION}" not in output.splitlines():
         raise ValueError(f"cast does not show the exact OpenTofu version v{OPENTOFU_VERSION}")
     if f"$ {FILM_COMMANDS['direct'][0]}" in output or "Direct provider validation: 7/7 cases" in output:
@@ -585,7 +662,7 @@ def verify_split_proof(
     opentofu_output = _cast_output(opentofu_cast_path)
     direct_rpc_output = _cast_output(direct_rpc_cast_path)
     _assert_no_leaks(manifest, opentofu_output + "\n" + direct_rpc_output)
-    _validate_opentofu_cast(opentofu_output)
+    _validate_opentofu_cast(opentofu_output, manifest=manifest)
     return _validate_direct_rpc_cast(direct_rpc_output, manifest)
 
 
@@ -611,9 +688,9 @@ def verify_film_proof(
     for lane in paths:
         if "run-provider-linting-rpcs.py" in outputs[lane]:
             raise ValueError(f"{lane} recording contains an internal proof command")
-    _validate_film_opentofu_cast(outputs["opentofu"])
+    _validate_film_opentofu_cast(outputs["opentofu"], manifest)
     rule_ids = _validate_direct_rpc_cast(outputs["direct"], manifest)
-    _validate_walkthrough_cast(outputs["walkthrough"])
+    _validate_walkthrough_cast(outputs["walkthrough"], manifest)
     for lane, path in paths.items():
         _validate_film_duration(lane, path)
     return rule_ids
@@ -637,6 +714,71 @@ def _provenance_source(sources: dict[str, Any], name: str) -> dict[str, Any]:
     if not isinstance(source, dict):
         raise ValueError(f"build provenance {name} source must be an object")
     return source
+
+
+def public_dependency_component(record: Mapping[str, Any], *, name: str) -> dict[str, Any]:
+    """Translate checked schema-v2 build provenance into proof metadata."""
+    version = record.get("version")
+    tag = record.get("tag")
+    registry = record.get("registry")
+    wheel = record.get("wheel")
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"build provenance {name} version is invalid")
+    if tag != f"v{version}":
+        raise ValueError(f"build provenance {name} tag does not match its version")
+    if registry != PYPI_REGISTRY:
+        raise ValueError(f"build provenance {name} must use the public PyPI registry")
+    normalized = name.replace("-", "[_-]")
+    if (
+        not isinstance(wheel, str)
+        or re.fullmatch(rf"{normalized}-{re.escape(version)}-.*\.whl", wheel, re.IGNORECASE) is None
+    ):
+        raise ValueError(f"build provenance {name} wheel does not match its version")
+    commit = _assert_sha(record.get("commit"), label=f"{name} tag commit")
+    wheel_sha = _assert_hash(record.get("sha256"), label=f"{name} wheel checksum")
+    return {
+        "version": version,
+        "sha": commit,
+        "tag": tag,
+        "registry": registry,
+        "wheel": wheel,
+        "wheel_sha256": wheel_sha,
+    }
+
+
+def _proof_dependency_components(provenance: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Read public schema-v2 dependencies or the legacy source archive shape."""
+    dependencies = provenance.get("dependencies")
+    if dependencies is not None:
+        if provenance.get("schema_version") != 2 or not isinstance(dependencies, dict):
+            raise ValueError("public build provenance must use schema version 2")
+        return (
+            public_dependency_component(_provenance_source(dependencies, "pyvider"), name="pyvider"),
+            public_dependency_component(
+                _provenance_source(dependencies, "pyvider-components"), name="pyvider-components"
+            ),
+        )
+
+    sources = provenance.get("sources")
+    if not isinstance(sources, dict):
+        raise ValueError("build provenance dependencies must be an object")
+    pyvider_source = _provenance_source(sources, "pyvider")
+    components_source = _provenance_source(sources, "pyvider-components")
+    wheels = provenance.get("packaged_wheels")
+    if not isinstance(wheels, list):
+        raise ValueError("build provenance has no packaged wheel inventory")
+    return (
+        {
+            "version": _wheel_version(wheels, "pyvider"),
+            "sha": pyvider_source.get("sha"),
+            "archive_sha256": pyvider_source.get("archive_sha256"),
+        },
+        {
+            "version": _wheel_version(wheels, "pyvider-components"),
+            "sha": components_source.get("sha"),
+            "archive_sha256": components_source.get("archive_sha256"),
+        },
+    )
 
 
 def generate_proof(
@@ -667,14 +809,37 @@ def generate_proof(
     expected_binary_sha = _assert_hash(binary_metadata.get("sha256"), label="provider checksum")
     if sha256_file(binary_path) != expected_binary_sha:
         raise ValueError("provider checksum does not match build provenance")
-    sources = provenance.get("sources")
-    if not isinstance(sources, dict):
-        raise ValueError("build provenance sources must be an object")
-    pyvider_source = _provenance_source(sources, "pyvider")
-    components_source = _provenance_source(sources, "pyvider-components")
-    wheels = provenance.get("packaged_wheels")
-    if not isinstance(wheels, list):
-        raise ValueError("build provenance has no packaged wheel inventory")
+    dependencies = provenance.get("dependencies")
+    if dependencies is not None:
+        if provenance.get("schema_version") != 2 or not isinstance(dependencies, dict):
+            raise ValueError("public build provenance must use schema version 2")
+        pyvider_component = public_dependency_component(
+            _provenance_source(dependencies, "pyvider"), name="pyvider"
+        )
+        components_component = public_dependency_component(
+            _provenance_source(dependencies, "pyvider-components"), name="pyvider-components"
+        )
+    else:
+        # Legacy schema-v1 proof remains readable so previously published proof
+        # can still be verified. New release proof always takes the branch above.
+        sources = provenance.get("sources")
+        if not isinstance(sources, dict):
+            raise ValueError("build provenance dependencies must be an object")
+        pyvider_source = _provenance_source(sources, "pyvider")
+        components_source = _provenance_source(sources, "pyvider-components")
+        wheels = provenance.get("packaged_wheels")
+        if not isinstance(wheels, list):
+            raise ValueError("build provenance has no packaged wheel inventory")
+        pyvider_component = {
+            "version": _wheel_version(wheels, "pyvider"),
+            "sha": pyvider_source.get("sha"),
+            "archive_sha256": pyvider_source.get("archive_sha256"),
+        }
+        components_component = {
+            "version": _wheel_version(wheels, "pyvider-components"),
+            "sha": components_source.get("sha"),
+            "archive_sha256": components_source.get("archive_sha256"),
+        }
     manifest: dict[str, Any] = {
         "schema_version": LEGACY_SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -689,16 +854,8 @@ def generate_proof(
                 "version": provider_version,
                 "sha": provider_source_sha,
             },
-            "pyvider": {
-                "version": _wheel_version(wheels, "pyvider"),
-                "sha": pyvider_source.get("sha"),
-                "archive_sha256": pyvider_source.get("archive_sha256"),
-            },
-            "pyvider-components": {
-                "version": _wheel_version(wheels, "pyvider-components"),
-                "sha": components_source.get("sha"),
-                "archive_sha256": components_source.get("archive_sha256"),
-            },
+            "pyvider": pyvider_component,
+            "pyvider-components": components_component,
         },
         "opentofu": {
             "version": OPENTOFU_VERSION,
@@ -752,14 +909,15 @@ def _build_split_manifest(
     expected_binary_sha = _assert_hash(binary_metadata.get("sha256"), label="provider checksum")
     if sha256_file(binary_path) != expected_binary_sha:
         raise ValueError("provider checksum does not match build provenance")
-    sources = provenance.get("sources")
-    if not isinstance(sources, dict):
-        raise ValueError("build provenance sources must be an object")
-    pyvider_source = _provenance_source(sources, "pyvider")
-    components_source = _provenance_source(sources, "pyvider-components")
-    wheels = provenance.get("packaged_wheels")
-    if not isinstance(wheels, list):
-        raise ValueError("build provenance has no packaged wheel inventory")
+    pyvider_component, components_component = _proof_dependency_components(provenance)
+    binary_platform = binary_metadata.get("platform")
+    provider_binary = {"path": f"dist/{relative_binary}", "sha256": expected_binary_sha}
+    release_candidate = provenance.get("release_candidate")
+    if release_candidate is not None:
+        if not isinstance(binary_platform, str) or not isinstance(release_candidate, dict):
+            raise ValueError("build provenance release candidate is invalid")
+        provider_binary["platform"] = binary_platform
+        release_candidate = checked_release_candidate(release_candidate, binary_platform=binary_platform)
     manifest: dict[str, Any] = {
         "schema_version": 2,
         "generated_at": generated_at,
@@ -771,23 +929,15 @@ def _build_split_manifest(
         },
         "components": {
             "terraform-provider-pyvider": {"version": provider_version, "sha": provider_source_sha},
-            "pyvider": {
-                "version": _wheel_version(wheels, "pyvider"),
-                "sha": pyvider_source.get("sha"),
-                "archive_sha256": pyvider_source.get("archive_sha256"),
-            },
-            "pyvider-components": {
-                "version": _wheel_version(wheels, "pyvider-components"),
-                "sha": components_source.get("sha"),
-                "archive_sha256": components_source.get("archive_sha256"),
-            },
+            "pyvider": pyvider_component,
+            "pyvider-components": components_component,
         },
         "opentofu": {
             "version": OPENTOFU_VERSION,
             "archive": opentofu_archive,
             "archive_sha256": opentofu_archive_sha256,
         },
-        "provider_binary": {"path": f"dist/{relative_binary}", "sha256": expected_binary_sha},
+        "provider_binary": provider_binary,
         "commands": SPLIT_COMMANDS,
         "rules": _expected_manifest_rules(),
         "casts": {
@@ -798,6 +948,8 @@ def _build_split_manifest(
             )
         },
     }
+    if release_candidate is not None:
+        manifest["release_candidate"] = release_candidate
     return manifest
 
 
@@ -828,7 +980,7 @@ def generate_split_proof(
     opentofu_output = _cast_output(opentofu_cast_path)
     direct_rpc_output = _cast_output(direct_rpc_cast_path)
     _assert_no_leaks(manifest, opentofu_output + "\n" + direct_rpc_output)
-    _validate_opentofu_cast(opentofu_output)
+    _validate_opentofu_cast(opentofu_output, manifest=manifest)
     _validate_direct_rpc_cast(direct_rpc_output, manifest)
     output_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest
@@ -898,9 +1050,9 @@ def generate_film_proof(
         ("walkthrough", walkthrough_cast_path),
     ):
         _validate_film_duration(lane, path)
-    _validate_film_opentofu_cast(outputs["opentofu"])
+    _validate_film_opentofu_cast(outputs["opentofu"], manifest)
     _validate_direct_rpc_cast(outputs["direct"], manifest)
-    _validate_walkthrough_cast(outputs["walkthrough"])
+    _validate_walkthrough_cast(outputs["walkthrough"], manifest)
     _write_json_atomically(output_path, manifest)
     return manifest
 

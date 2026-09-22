@@ -2,7 +2,7 @@ version = 1
 
 [provider]
 source = "registry.opentofu.org/provide-io/pyvider"
-version = "0.5.0"
+version = "0.6.0"
 
 [provider.environment]
 PYVIDER_TESTMODE = "true"

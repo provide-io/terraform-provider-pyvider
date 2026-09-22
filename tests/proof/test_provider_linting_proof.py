@@ -68,7 +68,7 @@ DIRECT_RPC_COMMAND = (
     'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
 )
 WALKTHROUGH_COMMANDS = [
-    "uv tool install --refresh tofusoup==0.8.0",
+    "uv tool install --refresh tofusoup==0.8.2",
     "soup --version",
     *OPENTOFU_COMMANDS,
     DIRECT_RPC_COMMAND,
@@ -366,6 +366,26 @@ def write_film_proof(tmp_path: Path) -> tuple[Path, dict[str, Path]]:
 
 def verify_films(module: ModuleType, manifest: Path, casts: dict[str, Path]) -> None:
     module.verify_split_proof(manifest, casts["opentofu"], casts["direct"], casts["walkthrough"])
+
+
+def test_provider_0_6_proof_requires_beta_validation_wording() -> None:
+    module = load_script(PROOF_LIBRARY, "provider_linting_proof_beta_wording")
+    manifest = {"components": {"terraform-provider-pyvider": {"version": "0.6.0"}}}
+    output = "\n".join(
+        [
+            *(f"$ {command}" for command in OPENTOFU_COMMANDS),
+            "Direct provider validation: not requested",
+            "OpenTofu beta validation: valid",
+            "Experimental linting enabled",
+        ]
+    )
+
+    module._validate_opentofu_cast(output, manifest=manifest)
+    with pytest.raises(ValueError, match="OpenTofu beta validation"):
+        module._validate_opentofu_cast(
+            output.replace("OpenTofu beta validation", "OpenTofu native linting"),
+            manifest=manifest,
+        )
 
 
 def write_film_manifest(path: Path, manifest: dict[str, Any]) -> None:
@@ -717,7 +737,7 @@ def test_pacer_preserves_ansi_wrapped_cast_bytes_and_lane_duration(
     write_cast_events(source, source_events)
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", lane, str(source), str(paced)],
+        [sys.executable, str(PACER), "--lane", lane, str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -760,7 +780,7 @@ def test_pacer_rejects_unsafe_cast_inputs(
     rewrite_cast_header(source, version=header_version)
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        [sys.executable, str(PACER), "--lane", "opentofu", str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -774,9 +794,7 @@ def test_pacer_rejects_unsafe_cast_inputs(
 def test_pacer_rejects_an_unknown_lane(tmp_path: Path) -> None:
     completed = subprocess.run(
         [
-            "uv",
-            "run",
-            "python",
+            sys.executable,
             str(PACER),
             "--lane",
             "not-a-lane",
@@ -800,7 +818,7 @@ def test_pacer_preserves_a_literal_unicode_line_separator_in_output(tmp_path: Pa
     source.write_text(source.read_text(encoding="utf-8").replace("\\u2028", "\u2028"), encoding="utf-8")
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        [sys.executable, str(PACER), "--lane", "opentofu", str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -821,7 +839,7 @@ def test_pacer_rejects_a_surrogate_header_without_overwriting_its_input(tmp_path
     original = source.read_bytes()
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(source)],
+        [sys.executable, str(PACER), "--lane", "opentofu", str(source), str(source)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -839,7 +857,7 @@ def test_pacer_rejects_an_unrepresentably_large_timestamp(tmp_path: Path) -> Non
     write_cast_events(source, [[int("9" * 400), "o", "line\n"]])
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        [sys.executable, str(PACER), "--lane", "opentofu", str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -860,7 +878,7 @@ def test_pacer_preserves_input_event_order_after_complete_output_lines(tmp_path:
     )
 
     completed = subprocess.run(
-        ["uv", "run", "python", str(PACER), "--lane", "opentofu", str(source), str(paced)],
+        [sys.executable, str(PACER), "--lane", "opentofu", str(source), str(paced)],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -1192,8 +1210,10 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "--opentofu-cast" in recorder and "--direct-rpc-cast" in recorder
     assert "flavor pack" not in opentofu_demo + direct_rpc_demo + recorder
     assert "provider_linting_proof:" in workflow
-    assert "pyvider_ref:" in workflow
-    assert "components_ref:" in workflow
+    assert "pyvider_ref:" not in workflow
+    assert "components_ref:" not in workflow
+    assert "provider-linux_amd64" in workflow
+    assert "actions/download-artifact" in workflow
     assert "ci/build-provider-linting-stack.py" in workflow
     assert "test-conformance-binary" in workflow
     assert "test-linting-opentofu-binary" in workflow
@@ -1201,18 +1221,19 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in recorder
     assert "grep -Fxq 'OpenTofu v1.13.0-beta1'" in workflow
-    assert "uv tool install --refresh tofusoup==0.8.0" in workflow
+    assert "uv tool install --refresh tofusoup==0.8.2" in workflow
 
     proof_job = workflow.split("  provider-linting-proof:", 1)[1].split("\n  summary:", 1)[0]
-    assert (
-        "provider-linting-proof.json provider-linting-opentofu.cast provider-linting-direct.cast" in proof_job
-    )
+    assert "provider-linting-proof.json" in proof_job
+    assert "provider-linting-opentofu.cast" in proof_job
+    assert "provider-linting-direct.cast" in proof_job
     assert "            provider-linting-opentofu.cast" in proof_job
     assert "            provider-linting-direct.cast" in proof_job
     assert "            provider-linting-walkthrough.cast" in proof_job
     assert "            provider-linting.cast" not in proof_job
-    assert "    env:\n      PYVIDER_SOURCE: ${{ github.workspace }}/.stack/pyvider" in proof_job
-    assert "      COMPONENTS_SOURCE: ${{ github.workspace }}/.stack/pyvider-components" in proof_job
+    assert "ci/build-provider-linting-stack.py" not in proof_job
+    assert ".stack/pyvider" not in proof_job
+    assert ".stack/pyvider-components" not in proof_job
 
 
 def test_recording_scripts_preserve_all_public_films_without_the_private_driver() -> None:
@@ -1286,7 +1307,7 @@ def test_recording_utilities_keep_the_existing_conformance_interface(tmp_path: P
     retimed_cast = tmp_path / "legacy-retimed.cast"
 
     completed = subprocess.run(
-        ["uv", "run", "python", "ci/record-to-cast.py", str(legacy_cast), "printf", "legacy-proof"],
+        [sys.executable, "ci/record-to-cast.py", str(legacy_cast), "printf", "legacy-proof"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -1297,7 +1318,7 @@ def test_recording_utilities_keep_the_existing_conformance_interface(tmp_path: P
         "pyvider conformance suite"
     )
     subprocess.run(
-        ["uv", "run", "python", "ci/retime-cast.py", str(legacy_cast), str(retimed_cast), "15"],
+        [sys.executable, "ci/retime-cast.py", str(legacy_cast), str(retimed_cast), "15"],
         cwd=ROOT,
         check=True,
         capture_output=True,

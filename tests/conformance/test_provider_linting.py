@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 from types import ModuleType
 from typing import Any
@@ -205,7 +206,7 @@ def test_rpc_driver_is_importable() -> None:
 
 def test_rpc_driver_cli_documents_the_proof_interface() -> None:
     completed = subprocess.run(
-        [str(DRIVER), "--help"],
+        [sys.executable, str(DRIVER), "--help"],
         check=True,
         close_fds=False,
         capture_output=True,
@@ -222,6 +223,7 @@ def test_rpc_driver_cli_emits_machine_readable_real_provider_findings(
 ) -> None:
     completed = subprocess.run(
         [
+            sys.executable,
             str(DRIVER),
             "--binary",
             str(packaged_provider_path),
@@ -254,6 +256,7 @@ def test_rpc_driver_cli_emits_readable_real_provider_findings(
 ) -> None:
     completed = subprocess.run(
         [
+            sys.executable,
             str(DRIVER),
             "--binary",
             str(packaged_provider_path),
@@ -282,6 +285,7 @@ def test_rpc_driver_cli_rejects_a_missing_binary_without_traceback(tmp_path: Pat
 
     completed = subprocess.run(
         [
+            sys.executable,
             str(DRIVER),
             "--binary",
             str(missing),
@@ -307,6 +311,7 @@ def test_rpc_driver_cli_rejects_an_invalid_executable_without_traceback(tmp_path
 
     completed = subprocess.run(
         [
+            sys.executable,
             str(DRIVER),
             "--binary",
             str(invalid),
@@ -329,6 +334,7 @@ def test_rpc_driver_cli_rejects_an_invalid_executable_without_traceback(tmp_path
 def test_rpc_driver_cli_rejects_an_empty_proof_catalog(packaged_provider_path: Path) -> None:
     completed = subprocess.run(
         [
+            sys.executable,
             str(DRIVER),
             "--binary",
             str(packaged_provider_path),

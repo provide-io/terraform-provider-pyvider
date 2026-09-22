@@ -19,11 +19,11 @@ show_command() {
 
 printf '%s\n' 'Fixture: a temporary working directory links the repository provider-linting suite for this walkthrough.'
 printf '%s\n' 'Warnings are lint findings from the documented fixture; any nonzero lint result stops the walkthrough.'
-printf '%s\n' 'Coverage boundary: OpenTofu demonstrates native validation and direct demonstrates provider validation.'
+printf '%s\n' 'Coverage boundary: the OpenTofu beta validation lane reaches four paths; direct reaches all seven.'
 
 printf '\n'
-show_command 'uv tool install --refresh tofusoup==0.8.0'
-uv tool install --refresh tofusoup==0.8.0
+show_command 'uv tool install --refresh tofusoup==0.8.2'
+uv tool install --refresh tofusoup==0.8.2
 printf '\n'
 show_command 'soup --version'
 soup --version
