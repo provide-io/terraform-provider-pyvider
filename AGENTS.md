@@ -103,11 +103,17 @@ rebuilt at release time, and nothing is attached by hand.
    ```
    `release.yml` validates the run, stages its artifacts
    (`ci/stage-release-assets.sh`), signs the SHA256SUMS, publishes the GitHub
-   release at the validated SHA (`ci/publish-release.sh`), then
-   `verify-release-proof` re-downloads the release and re-runs the
-   `linux_amd64` proof against the published bytes.
+   release at the validated SHA (`ci/publish-release.sh`), then calls
+   `verify-release.yml`, which re-downloads the release, checks checksums,
+   signature, tag and proof binding (`ci/verify-release-assets.sh`), and
+   re-runs the `linux_amd64` proof against the published bytes
+   (`ci/rerun-released-proof.sh`).
 4. If the release job fails before publishing, fix forward and repeat from
    step 2 on the new merge commit; a build run is bound to one SHA.
+5. To re-verify a release that is already published, without republishing:
+   ```bash
+   gh workflow run verify-release.yml -f version=<VERSION> -f release_target_sha=<release-commit>
+   ```
 
 The remote is `gh-origin`.
 
