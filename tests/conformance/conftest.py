@@ -32,21 +32,10 @@ VERSION = (Path(__file__).resolve().parents[2] / "VERSION").read_text(encoding="
 DEFAULT_PSP = (
     Path(__file__).resolve().parents[2] / "dist" / "darwin_arm64" / f"terraform-provider-pyvider_v{VERSION}"
 )
-WORKTREE_ROOT = Path(__file__).resolve().parents[2].parents[1]
-DEFAULT_PYVIDER_SOURCE = WORKTREE_ROOT / "pyvider" / "provider-linting"
-DEFAULT_COMPONENTS_SOURCE = WORKTREE_ROOT / "pyvider-components" / "provider-linting"
 
 
 def psp_path() -> Path:
     return Path(os.environ.get("PYVIDER_CONFORMANCE_PSP", str(DEFAULT_PSP)))
-
-
-def provenance_source_paths() -> dict[str, Path]:
-    """Return the exact reviewed source checkouts used for the coordinated build."""
-    return {
-        "pyvider": Path(os.environ.get("PYVIDER_SOURCE", str(DEFAULT_PYVIDER_SOURCE))),
-        "pyvider-components": Path(os.environ.get("COMPONENTS_SOURCE", str(DEFAULT_COMPONENTS_SOURCE))),
-    }
 
 
 def child_env(extra: dict[str, str] | None = None) -> dict[str, str]:

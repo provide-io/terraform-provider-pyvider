@@ -23,7 +23,7 @@ from tofusoup.tfplugin import TfPluginProvider, start_provider, unpack
 
 from pyvider.protocols.tfprotov6.protobuf import tfplugin6_pb2 as pb
 
-from .conftest import CLAIMED_TERRAFORM_VERSION, child_env, provenance_source_paths
+from .conftest import CLAIMED_TERRAFORM_VERSION, child_env
 
 DRIVER = Path(__file__).resolve().parents[2] / "ci" / "run-provider-linting-rpcs.py"
 RULE_SUMMARIES = {
@@ -150,16 +150,24 @@ PROVIDER_BUILD_INPUTS = (
     "uv.lock",
     "ci/build-provider-linting-stack.py",
 )
-STACK_SOURCE_BUILD_INPUTS = (
-    ".gitattributes",
-    ".python-version",
-    "LICENSE",
-    "README.md",
-    "VERSION",
-    "pyproject.toml",
-    "uv.lock",
-    "src",
-)
+PUBLIC_LINT_DEPENDENCIES = {
+    "pyvider": {
+        "version": "0.8.1",
+        "tag": "v0.8.1",
+        "commit": "5251ac421b5d57a5c2ed8a81853db48c7b101652",
+        "registry": "https://pypi.org/simple",
+        "wheel": "pyvider-0.8.1-py3-none-any.whl",
+        "sha256": "940d081d7301590952990d8ca6f1f6a89648d6743c1984bbfdb275f7912d3f83",
+    },
+    "pyvider-components": {
+        "version": "0.8.0",
+        "tag": "v0.8.0",
+        "commit": "5855ce5bb83e2958835183348ee23da96ae797aa",
+        "registry": "https://pypi.org/simple",
+        "wheel": "pyvider_components-0.8.0-py3-none-any.whl",
+        "sha256": "76e003f6379112765c9d42779e58ea2c15ce955f214d3dd8b9a77907340822ce",
+    },
+}
 
 
 def load_driver() -> ModuleType:
@@ -445,20 +453,6 @@ def test_config_values_are_shaped_from_the_returned_schema() -> None:
     assert unpack(dynamic) == {"required": "configured", "computed": None}
 
 
-def test_provenance_source_paths_follow_the_build_environment(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    pyvider = tmp_path / "configured-pyvider"
-    components = tmp_path / "configured-components"
-    monkeypatch.setenv("PYVIDER_SOURCE", str(pyvider))
-    monkeypatch.setenv("COMPONENTS_SOURCE", str(components))
-
-    assert provenance_source_paths() == {
-        "pyvider": pyvider,
-        "pyvider-components": components,
-    }
-
-
 def _git(repo: Path, *args: str) -> str:
     return subprocess.run(
         ["git", *args],
@@ -646,8 +640,6 @@ def test_provenance_allows_dirty_non_build_files(tmp_path: Path) -> None:
     [
         pytest.param(PROVIDER_BUILD_INPUTS, "buildconfig.toml", id="provider-buildconfig"),
         pytest.param(PROVIDER_BUILD_INPUTS, "LICENSE", id="provider-license"),
-        pytest.param(STACK_SOURCE_BUILD_INPUTS, "VERSION", id="source-version"),
-        pytest.param(STACK_SOURCE_BUILD_INPUTS, "LICENSE", id="source-license"),
     ],
 )
 def test_provenance_scopes_cover_root_packaging_inputs(
@@ -672,10 +664,7 @@ def test_provenance_scopes_cover_root_packaging_inputs(
 
 @pytest.mark.parametrize(
     "build_inputs",
-    [
-        pytest.param(PROVIDER_BUILD_INPUTS, id="provider"),
-        pytest.param(STACK_SOURCE_BUILD_INPUTS, id="source"),
-    ],
+    [pytest.param(PROVIDER_BUILD_INPUTS, id="provider")],
 )
 def test_provenance_rejects_gitattributes_export_ignore_drift(
     tmp_path: Path,
@@ -772,17 +761,12 @@ def test_packaged_binary_has_coordinated_build_provenance(packaged_provider_path
         "dist/terraform-provider-pyvider.psp",
     ] in data["commands"]
 
-    for name, source in provenance_source_paths().items():
-        assert_revision_compatible(
-            source,
-            label=name,
-            recorded_sha=data["sources"][name]["sha"],
-            recorded_archive_sha256=data["sources"][name]["archive_sha256"],
-            build_inputs=STACK_SOURCE_BUILD_INPUTS,
-        )
-
-    assert any(wheel.startswith("pyvider-") for wheel in data["packaged_wheels"])
-    assert any(wheel.startswith("pyvider_components-") for wheel in data["packaged_wheels"])
+    assert data["schema_version"] == 2
+    assert data["dependencies"] == PUBLIC_LINT_DEPENDENCIES
+    assert "sources" not in data
+    packaged_wheels = set(data["packaged_wheels"])
+    assert PUBLIC_LINT_DEPENDENCIES["pyvider"]["wheel"] in packaged_wheels
+    assert PUBLIC_LINT_DEPENDENCIES["pyvider-components"]["wheel"] in packaged_wheels
 
 
 async def run_selected_lints(
