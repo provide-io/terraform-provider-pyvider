@@ -60,7 +60,7 @@ nav:
   - 02) Getting Started with Pyvider: guides/02-getting-started.md
   - 03) Troubleshooting: guides/03-troubleshooting.md
   - 04) Build Your Own Provider with Pyvider: guides/04-build-your-own-provider.md
-  - Provider linting proof: guides/provider-linting-proof.md
+  - Provider Linting Proof: guides/provider-linting-proof.md
 - Resources:
   - timed_token: resources/timed_token.md
   - warning_example: resources/warning_example.md

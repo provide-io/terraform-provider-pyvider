@@ -18,10 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added separate OpenTofu experimental lint validation that reaches four OpenTofu
   paths through ordinary validation RPCs. It does not claim that OpenTofu has
   shipped a provider-lint transport.
-- Added four paced, user-runnable recordings and
-  `provider-linting-proof.json`: separate direct and OpenTofu lanes, a released
-  provider overview, and a Part 7 tutorial that tests, packages, and verifies a
-  provider-authored lint rule end to end.
+- Added three paced, user-runnable recordings and
+  `provider-linting-proof.json`: separate direct and OpenTofu lanes and a
+  released provider walkthrough. The Part 7 tutorial, which tests, packages, and
+  verifies a provider-authored lint rule end to end, lives in
+  [provide-io/pyvider-tutorial](https://github.com/provide-io/pyvider-tutorial).
 
 ### Supply chain
 

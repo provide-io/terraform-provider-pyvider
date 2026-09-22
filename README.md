@@ -28,7 +28,7 @@
 
 **New to the pyvider provider?** Check out our comprehensive tutorial:
 
-**[→ Getting Started Tutorial](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)** - Complete walkthrough in 10-15 minutes
+**[→ Getting Started Tutorial](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/02-getting-started.md)** - Complete walkthrough in 10-15 minutes
 
 The tutorial covers:
 - Installing and configuring the provider
@@ -38,7 +38,7 @@ The tutorial covers:
 
 ## Documentation
 - [Documentation index](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/index.md)
-- [Getting started](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)
+- [Getting started](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/02-getting-started.md)
 - [Provider linting proof](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/provider-linting-proof.md)
 - [Examples](https://github.com/provide-io/terraform-provider-pyvider/tree/main/examples)
 

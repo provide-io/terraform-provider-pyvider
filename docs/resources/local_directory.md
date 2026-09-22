@@ -256,3 +256,16 @@ output "directory_contents" {
   value = "Directory has ${pyvider_local_directory.monitored.file_count} items"
 }
 ```
+
+## Provider linting
+
+`provide-io/pyvider:world-writable-directory` belongs to
+`provide-io/pyvider:all` and `provide-io/pyvider:security`.
+
+- **Trigger:** `permissions` has the POSIX other-write bit (`& 0o002`).
+- **Remediation:** Set `permissions` to a mode without the POSIX other-write bit, such as `0o755`.
+- **Suppress this rule:**
+
+    ```shell
+    PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:world-writable-directory' tofu validate
+    ```

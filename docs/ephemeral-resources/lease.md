@@ -49,3 +49,17 @@ ephemeral "pyvider_lease" "example" {
 
 - `lease_id` (String) - Identifier issued when the lease opened.
 - `expires_at` (String) - When the current lease expires (UTC).
+
+
+## Provider linting
+
+`provide-io/pyvider:long-lived-lease` belongs to `provide-io/pyvider:all` and
+`provide-io/pyvider:reliability`.
+
+- **Trigger:** `ttl_seconds` is greater than `3600`.
+- **Remediation:** Set `ttl_seconds` to `3600` or less.
+- **Suppress this rule:**
+
+    ```shell
+    PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:long-lived-lease' tofu validate
+    ```

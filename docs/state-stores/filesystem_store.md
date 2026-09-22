@@ -41,3 +41,17 @@ terraform {
 ### Required
 
 - `path` (String) - Directory holding state for this store; created if absent. A relative path resolves against the provider process's working directory, which is not necessarily the one you ran Terraform from.
+
+
+## Provider linting
+
+`provide-io/pyvider:relative-state-store-path` belongs to
+`provide-io/pyvider:all` and `provide-io/pyvider:reliability`.
+
+- **Trigger:** `path` is relative after `~` expansion.
+- **Remediation:** Use an absolute `path`.
+- **Suppress this rule:**
+
+    ```shell
+    PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:relative-state-store-path' tofu validate
+    ```

@@ -246,8 +246,8 @@ def test_0_6_changelog_documents_the_release_proof_contract() -> None:
         "provider-linting-proof.json",
         "public PyPI",
         "wheel SHA-256",
-        "four paced",
-        "Part 7",
+        "three paced",
+        "pyvider-tutorial",
     ):
         assert phrase in section
 
