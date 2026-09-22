@@ -102,7 +102,7 @@ full_suite() {
   echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
   echo "   TOFUSOUP_TF_COMMAND=${TOFUSOUP_TF_COMMAND}"; echo
   cd examples
-  soup stir --recursive --filter '!tutorials/*'
+  soup stir --recursive --filter '!*tutorials*'
   echo; echo "✅ All provider conformance tests passed"; rule
 }
 
