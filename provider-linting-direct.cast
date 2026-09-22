@@ -1,4 +1,4 @@
-{"version": 2, "width": 110, "height": 26, "timestamp": 1790091080, "title": "Pyvider linting — direct provider validation", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
+{"version": 2, "width": 110, "height": 26, "timestamp": 1790102231, "title": "Pyvider linting — direct provider validation", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
 [1.746, "o", "Lane: direct runs the public suite against the checked provider without OpenTofu orchestration.\r\n"]
 [4.147, "o", "Warnings are lint findings from this fixture; any nonzero lint result stops the recording.\r\n"]
 [5.893, "o", "Coverage boundary: direct validation is separate from the OpenTofu experimental lint lane.\r\n\r\n"]
