@@ -35,6 +35,32 @@ COMMANDS = [
 ]
 SPLIT_COMMANDS = {
     "opentofu": [
+        f"uv tool install --refresh --quiet tofusoup=={TOFUSOUP_VERSION}",
+        (
+            "provider=$(uv run python ci/provider-linting-artifact-path.py "
+            "dist/provider-linting-build-provenance.json)"
+        ),
+        (
+            "tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 "
+            '--cache-dir "$PWD/.cache/opentofu-prerelease")'
+        ),
+        '"$tofu" version',
+        (
+            "soup lint tests/e2e/provider-linting/lint.soup.toml "
+            '--provider "$provider" --opentofu "$tofu" --lane opentofu'
+        ),
+    ],
+    "direct_rpc": [
+        f"uv tool install --refresh --quiet tofusoup=={TOFUSOUP_VERSION}",
+        (
+            "provider=$(uv run python ci/provider-linting-artifact-path.py "
+            "dist/provider-linting-build-provenance.json)"
+        ),
+        ('soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'),
+    ],
+}
+LEGACY_SPLIT_COMMANDS = {
+    "opentofu": [
         'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" '
         '--opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
     ],
@@ -57,7 +83,7 @@ FILM_COMMANDS = {
             "provider=$(uv run python ci/provider-linting-artifact-path.py "
             "dist/provider-linting-build-provenance.json)"
         ),
-        'tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")',
+        'tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")',
         '"$tofu" version',
         (
             "soup lint tests/e2e/provider-linting/lint.soup.toml "
@@ -70,11 +96,13 @@ FILM_COMMANDS = {
         "uv sync --frozen",
         "uv run pytest tests/test_linting.py -q",
         "uv run flavor pack --quiet --manifest pyproject.toml",
+        "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
         (
             "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
             '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
         ),
         "./install-opentofu.sh 1.13.0-rc1",
+        'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"',
         '"$opentofu_rc1" version',
         (
             "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
@@ -84,13 +112,13 @@ FILM_COMMANDS = {
     ],
 }
 LEGACY_FILM_COMMANDS = {
-    "opentofu": SPLIT_COMMANDS["opentofu"],
-    "direct": SPLIT_COMMANDS["direct_rpc"],
+    "opentofu": LEGACY_SPLIT_COMMANDS["opentofu"],
+    "direct": LEGACY_SPLIT_COMMANDS["direct_rpc"],
     "walkthrough": [
         "uv tool install --refresh tofusoup==0.8.0",
         "soup --version",
-        *SPLIT_COMMANDS["opentofu"],
-        *SPLIT_COMMANDS["direct_rpc"],
+        *LEGACY_SPLIT_COMMANDS["opentofu"],
+        *LEGACY_SPLIT_COMMANDS["direct_rpc"],
     ],
 }
 FILM_CASTS = {
@@ -625,9 +653,9 @@ def _validate_opentofu_cast(
 
 
 def _validate_direct_rpc_cast(output: str, manifest: dict[str, Any]) -> list[str]:
-    command = SPLIT_COMMANDS["direct_rpc"][0]
-    if f"$ {command}" not in output:
-        raise ValueError(f"missing command from direct RPC recording: {command}")
+    for command in SPLIT_COMMANDS["direct_rpc"]:
+        if f"$ {command}" not in output:
+            raise ValueError(f"missing command from direct RPC recording: {command}")
     if "Direct provider validation: 7/7 cases" not in output:
         raise ValueError("direct provider recording has no coverage heading")
     if any(rule["id"] not in output for rule in RULES):
@@ -684,7 +712,8 @@ def _validate_film_opentofu_cast(output: str, manifest: Mapping[str, Any]) -> No
     expected_version = manifest["opentofu"]["version"]
     if f"OpenTofu v{expected_version}" not in output.splitlines():
         raise ValueError(f"cast does not show the exact OpenTofu version v{expected_version}")
-    if f"$ {FILM_COMMANDS['direct'][0]}" in output or "Direct provider validation: 7/7 cases" in output:
+    direct_lint_command = FILM_COMMANDS["direct"][-1]
+    if f"$ {direct_lint_command}" in output or "Direct provider validation: 7/7 cases" in output:
         raise ValueError("OpenTofu recording contains direct provider evidence")
 
 

@@ -33,7 +33,7 @@ if [[ -n "${PYVIDER_OPENTOFU_BINARY:-}" || -n "${PYVIDER_OPENTOFU_ARCHIVE_SHA256
     archive_sha=$PYVIDER_OPENTOFU_ARCHIVE_SHA256
 else
     install_log=$staging/opentofu-install.log
-    tofu=$("$repo_root/ci/install-opentofu-beta.sh" \
+    tofu=$("$repo_root/ci/install-opentofu-experimental.sh" \
         --version 1.13.0-rc1 --cache-dir "$cache_dir" 2>"$install_log")
     archive_sha=$(awk '/^verified [0-9a-f]{64}$/ { print $2 }' "$install_log")
 fi

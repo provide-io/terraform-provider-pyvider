@@ -61,12 +61,26 @@ RULES = [
 ]
 PROVIDER_SHA = "a" * 64
 OPENTOFU_COMMANDS = [
-    'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" '
-    '--opentofu "$PYVIDER_OPENTOFU_BINARY" --lane opentofu'
+    "uv tool install --refresh --quiet tofusoup==0.8.2",
+    (
+        "provider=$(uv run python ci/provider-linting-artifact-path.py "
+        "dist/provider-linting-build-provenance.json)"
+    ),
+    "tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 "
+    '--cache-dir "$PWD/.cache/opentofu-prerelease")',
+    '"$tofu" version',
+    'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" '
+    '--opentofu "$tofu" --lane opentofu',
 ]
-DIRECT_RPC_COMMAND = (
-    'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$PYVIDER_CONFORMANCE_PSP" --lane direct'
-)
+DIRECT_RPC_COMMAND = 'soup lint tests/e2e/provider-linting/lint.soup.toml --provider "$provider" --lane direct'
+DIRECT_COMMANDS = [
+    "uv tool install --refresh --quiet tofusoup==0.8.2",
+    (
+        "provider=$(uv run python ci/provider-linting-artifact-path.py "
+        "dist/provider-linting-build-provenance.json)"
+    ),
+    DIRECT_RPC_COMMAND,
+]
 WALKTHROUGH_COMMANDS = [
     "uv tool install --refresh --quiet tofusoup==0.8.2",
     "soup --version",
@@ -74,7 +88,7 @@ WALKTHROUGH_COMMANDS = [
         "provider=$(uv run python ci/provider-linting-artifact-path.py "
         "dist/provider-linting-build-provenance.json)"
     ),
-    'tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")',
+    'tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")',
     '"$tofu" version',
     (
         "soup lint tests/e2e/provider-linting/lint.soup.toml "
@@ -87,11 +101,13 @@ TUTORIAL_COMMANDS = [
     "uv sync --frozen",
     "uv run pytest tests/test_linting.py -q",
     "uv run flavor pack --quiet --manifest pyproject.toml",
+    "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
     (
         "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
         '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
     ),
     "./install-opentofu.sh 1.13.0-rc1",
+    'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"',
     '"$opentofu_rc1" version',
     (
         "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
@@ -107,7 +123,7 @@ FILM_CASTS = {
 }
 FILM_COMMANDS = {
     "opentofu": OPENTOFU_COMMANDS,
-    "direct": [DIRECT_RPC_COMMAND],
+    "direct": DIRECT_COMMANDS,
     "walkthrough": WALKTHROUGH_COMMANDS,
     "tutorial": TUTORIAL_COMMANDS,
 }
@@ -177,8 +193,8 @@ def test_public_tofusoup_lint_suite_replaces_the_private_rpc_driver() -> None:
     assert (
         "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)"
     ) in native_demo
-    assert "show_command 'tofu version'" in native_demo
-    assert '"$PYVIDER_OPENTOFU_BINARY" version' in native_demo
+    assert "show_command '\"$tofu\" version'" in native_demo
+    assert '"$tofu" version' in native_demo
     assert "run-provider-linting-rpcs.py" not in direct_demo + native_demo
 
 
@@ -313,7 +329,7 @@ def write_split_cast(path: Path, *, title: str, text: str) -> None:
 def split_manifest_for(opentofu: Path, direct_rpc: Path) -> dict[str, Any]:
     manifest = manifest_for(opentofu)
     manifest["schema_version"] = 2
-    manifest["commands"] = {"opentofu": OPENTOFU_COMMANDS, "direct_rpc": [DIRECT_RPC_COMMAND]}
+    manifest["commands"] = {"opentofu": OPENTOFU_COMMANDS, "direct_rpc": DIRECT_COMMANDS}
     manifest.pop("cast")
     manifest["casts"] = {
         "opentofu": {
@@ -494,7 +510,7 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
         title="Pyvider linting — direct provider validation",
         text="\n".join(
             [
-                f"$ {DIRECT_RPC_COMMAND}",
+                *(f"$ {command}" for command in DIRECT_COMMANDS),
                 "Direct provider validation: 7/7 cases",
                 *direct_rows,
             ]
@@ -511,7 +527,7 @@ def test_split_proof_requires_a_complete_direct_rpc_recording(tmp_path: Path) ->
         title="Pyvider linting — direct provider validation",
         text="\n".join(
             [
-                f"$ {DIRECT_RPC_COMMAND}",
+                *(f"$ {command}" for command in DIRECT_COMMANDS),
                 *incomplete,
             ]
         ),
@@ -615,6 +631,7 @@ def test_schema_v3_checked_films_require_each_exact_public_command(
     write_film_cast(
         casts[lane],
         lane=lane,
+        timestamp=sum(FILM_DURATION_RANGES[lane]) / 2,
         text=film_cast_text(lane).replace(f"$ {command}", "$ command intentionally omitted"),
     )
     refresh_film_cast_hash(data, lane, casts[lane])
@@ -1269,7 +1286,8 @@ def test_proof_scripts_and_workflow_preserve_the_one_binary_contract() -> None:
 
     for command in OPENTOFU_COMMANDS:
         assert command in opentofu_demo
-    assert DIRECT_RPC_COMMAND in direct_rpc_demo
+    for command in DIRECT_COMMANDS:
+        assert command in direct_rpc_demo
     assert "soup stir provider-linting" not in opentofu_demo + direct_rpc_demo
     assert "run-provider-linting-rpcs.py" not in opentofu_demo + direct_rpc_demo
     assert "soup lint tests/e2e/provider-linting/lint.soup.toml" in opentofu_demo + direct_rpc_demo
@@ -1328,6 +1346,10 @@ def test_recording_scripts_preserve_all_public_films_without_the_private_driver(
         assert f"{cast_stem}.cast" in recorder
         assert f"--lane {lane}" in recorder
 
+    for commands in FILM_COMMANDS.values():
+        assert all("PYVIDER_CONFORMANCE_PSP" not in command for command in commands)
+        assert all("PYVIDER_OPENTOFU_BINARY" not in command for command in commands)
+
     assert "provider-linting-walkthrough.sh" in recorder
     assert "provider-linting-tutorial.sh" in recorder
     assert "pace-provider-linting-cast.py" in recorder
@@ -1344,8 +1366,8 @@ def test_public_recording_commands_have_a_real_blank_line_before_them() -> None:
     }
 
     public_commands = {
-        "opentofu": ["tofu version", *OPENTOFU_COMMANDS],
-        "direct": [DIRECT_RPC_COMMAND],
+        "opentofu": OPENTOFU_COMMANDS,
+        "direct": DIRECT_COMMANDS,
         "walkthrough": WALKTHROUGH_COMMANDS,
         "tutorial": TUTORIAL_COMMANDS,
     }

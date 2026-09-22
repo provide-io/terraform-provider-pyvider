@@ -30,8 +30,9 @@ if ! uv run flavor pack --quiet --manifest pyproject.toml >"$pack_log" 2>&1; the
 fi
 rm -f "$pack_log"
 printf '%s\n' 'Built and verified dist/terraform-provider-mycloud.psp'
-mv dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
-chmod +x dist/terraform-provider-mycloud
+printf '\n'
+show_command 'install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud'
+install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
 printf '\n'
 show_command 'uvx --from tofusoup==0.8.2 soup lint lint.soup.toml --provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
 uvx --from tofusoup==0.8.2 soup lint lint.soup.toml \
@@ -39,6 +40,8 @@ uvx --from tofusoup==0.8.2 soup lint lint.soup.toml \
 printf '\n'
 show_command './install-opentofu.sh 1.13.0-rc1'
 ./install-opentofu.sh 1.13.0-rc1
+printf '\n'
+show_command 'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"'
 opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"
 printf '\n'
 show_command '"$opentofu_rc1" version'

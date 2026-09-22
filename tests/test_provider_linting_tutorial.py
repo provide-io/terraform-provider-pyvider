@@ -109,7 +109,9 @@ def test_part7_recording_uses_only_checked_in_user_commands() -> None:
         "uv sync --frozen",
         "uv run pytest tests/test_linting.py -q",
         "uv run flavor pack --quiet --manifest pyproject.toml",
+        "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
         "./install-opentofu.sh 1.13.0-rc1",
+        'opentofu_rc1="$PWD/.cache/opentofu/1.13.0-rc1/tofu"',
         "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml",
     ):
         assert command in recorder

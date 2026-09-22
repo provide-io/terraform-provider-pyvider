@@ -265,6 +265,39 @@ def test_user_facing_proof_copy_does_not_claim_opentofu_native_provider_linting(
     assert "opentofu-native validation" not in combined
     assert "opentofu demonstrates native validation" not in combined
     assert "opentofu experimental lint validation" in combined
+    assert "opentofu-native" not in combined
+
+
+def test_public_recordings_do_not_expose_internal_proof_variables() -> None:
+    for relative in (
+        "ci/provider-linting-demo.sh",
+        "ci/provider-linting-direct-rpc-demo.sh",
+        "ci/provider-linting-walkthrough.sh",
+        "ci/provider-linting-tutorial.sh",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        displayed_commands = "\n".join(
+            line for line in text.splitlines() if line.lstrip().startswith("show_command ")
+        )
+        for internal in ("PYVIDER_CONFORMANCE_PSP", "PYVIDER_OPENTOFU_BINARY"):
+            assert internal not in displayed_commands
+
+
+def test_public_opentofu_installer_has_capability_based_name() -> None:
+    assert (ROOT / "ci" / "install-opentofu-experimental.sh").is_file()
+    assert not (ROOT / "ci" / "install-opentofu-beta.sh").exists()
+    for relative in (
+        "Makefile",
+        ".github/workflows/build-provider.yml",
+        ".github/workflows/release.yml",
+        "ci/provider-linting-demo.sh",
+        "ci/provider-linting-walkthrough.sh",
+        "ci/provider_linting_proof.py",
+        "ci/record-provider-linting.sh",
+        "tests/e2e/test_provider_linting_opentofu.py",
+        "tests/test_install_opentofu_experimental.py",
+    ):
+        assert "install-opentofu-beta.sh" not in (ROOT / relative).read_text(encoding="utf-8")
 
 
 def test_public_walkthrough_discovers_the_current_platform_artifact() -> None:

@@ -149,7 +149,7 @@ jobs:
         shell: bash
         run: |
           install_log=$(mktemp)
-          tofu=$(ci/install-opentofu-beta.sh \
+          tofu=$(ci/install-opentofu-experimental.sh \
             --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease" 2>"$install_log")
           archive_sha=$(awk '/^verified [0-9a-f]{64}$/ { print $2 }' "$install_log")
           [[ "$archive_sha" =~ ^[0-9a-f]{64}$ ]]

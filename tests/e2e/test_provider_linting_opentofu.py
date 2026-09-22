@@ -25,7 +25,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = Path(__file__).resolve().parent / "provider-linting"
-INSTALLER = ROOT / "ci" / "install-opentofu-beta.sh"
+INSTALLER = ROOT / "ci" / "install-opentofu-experimental.sh"
 PROVENANCE = ROOT / "dist" / "provider-linting-build-provenance.json"
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 EXPECTED_RULES = {

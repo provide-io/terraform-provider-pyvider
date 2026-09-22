@@ -24,8 +24,8 @@ printf '\n'
 show_command 'provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)'
 provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)
 printf '\n'
-show_command 'tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")'
-tofu=$(ci/install-opentofu-beta.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
+show_command 'tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")'
+tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
 printf '\n'
 show_command '"$tofu" version'
 "$tofu" version

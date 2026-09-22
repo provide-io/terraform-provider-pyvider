@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 provide.io llc. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Contract tests for the pinned OpenTofu prerelease installer."""
+"""Contract tests for the pinned OpenTofu experimental-lint installer."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ import zipfile
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "ci" / "install-opentofu-beta.sh"
+SCRIPT = Path(__file__).resolve().parents[1] / "ci" / "install-opentofu-experimental.sh"
 ROOT = SCRIPT.parents[1]
 VERSION = "1.13.0-rc1"
 
@@ -286,7 +286,7 @@ def test_opentofu_make_target_is_a_no_rebuild_dry_run(tmp_path: Path) -> None:
 
     assert "flavor pack" not in result.stdout
     assert "make build" not in result.stdout
-    assert "ci/install-opentofu-beta.sh --cache-dir" in result.stdout
+    assert "ci/install-opentofu-experimental.sh --cache-dir" in result.stdout
     assert "--version 1.13.0-rc1" in result.stdout
     assert "OpenTofu v1.13.0-rc1" in result.stdout
     assert "tests/e2e/test_provider_linting_opentofu.py" in result.stdout

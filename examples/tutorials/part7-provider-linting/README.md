@@ -9,8 +9,7 @@ validation.
 uv sync --frozen
 uv run pytest tests/test_linting.py -q
 uv run flavor pack --quiet --manifest pyproject.toml
-mv dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
-chmod +x dist/terraform-provider-mycloud
+install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
 
 uvx --from tofusoup==0.8.2 soup lint lint.soup.toml \
   --provider "$PWD/dist/terraform-provider-mycloud" --lane direct
