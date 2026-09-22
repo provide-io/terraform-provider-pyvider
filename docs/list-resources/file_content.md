@@ -18,7 +18,9 @@ rather than planned or applied. The schema below is the `config` block of the
 ## Example Usage
 
 ```terraform
-# Save as example.tfquery.hcl and run `tofu query`.
+# Save as example.tfquery.hcl and run `terraform query`, which reads these
+# files. It arrived in Terraform 1.14, alongside list resources themselves;
+# OpenTofu has no query command, so this file is inert under `tofu`.
 list "pyvider_file_content" "example" {
   provider = pyvider
 
@@ -45,3 +47,17 @@ list "pyvider_file_content" "example" {
 
 - `suffix` (String) - Only return files ending with this.
 - `include_hidden` (Boolean) - Include dotfiles. Defaults to false.
+
+
+## Provider linting
+
+`provide-io/pyvider:include-hidden-files` belongs to
+`provide-io/pyvider:all` and `provide-io/pyvider:security`.
+
+- **Trigger:** `include_hidden` is explicitly `true`.
+- **Remediation:** Set `include_hidden` to `false`.
+- **Suppress this rule:**
+
+    ```shell
+    PYVIDER_LINT='provide-io/pyvider:all,!provide-io/pyvider:include-hidden-files' tofu validate
+    ```

@@ -66,7 +66,7 @@ def test_provider_linting_guide_does_not_advertise_the_superseded_direct_rpc_cas
 
 def test_provider_linting_guide_is_in_documentation_navigation() -> None:
     mkdocs = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
-    assert "Provider linting proof: guides/provider-linting-proof.md" in mkdocs
+    assert "Provider Linting Proof: guides/provider-linting-proof.md" in mkdocs
 
 
 def test_documentation_navigation_names_the_existing_list_resource_page() -> None:

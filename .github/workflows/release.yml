@@ -79,25 +79,11 @@ jobs:
           run-id: ${{ needs.validate-build.outputs.build_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Copy the validated run's platform archives, proof assets, and registry
+      # manifest into release/, refusing a build that is missing any of them.
       - name: 📁 Stage release archives and proof assets
         shell: bash
-        run: |
-          mkdir release
-          find artifacts/provider-* -maxdepth 1 -name 'terraform-provider-pyvider_*.zip' \
-            -type f -exec cp {} release/ \;
-          for name in \
-            provider-linting-proof.json \
-            provider-linting-opentofu.cast \
-            provider-linting-direct.cast \
-            provider-linting-walkthrough.cast \
-            provider-linting-build-provenance.json; do
-            cp "artifacts/provider-linting-proof/$name" "release/$name"
-          done
-          cp terraform-registry-manifest.json \
-            "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_manifest.json"
-          for target in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do
-            test -f "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_${target}.zip"
-          done
+        run: ci/stage-release-assets.sh artifacts release "${{ steps.version.outputs.version }}"
 
       - name: 🔧 Generate release checksums
         shell: bash
