@@ -21,8 +21,15 @@ printf '\n'
 show_command 'uv run pytest tests/test_linting.py -q'
 uv run pytest tests/test_linting.py -q
 printf '\n'
-show_command 'uv run flavor pack --manifest pyproject.toml'
-uv run flavor pack --manifest pyproject.toml | sed "s|$tutorial/||g"
+show_command 'uv run flavor pack --quiet --manifest pyproject.toml'
+pack_log=$(mktemp "${TMPDIR:-/tmp}/pyvider-tutorial-pack.XXXXXX")
+if ! uv run flavor pack --quiet --manifest pyproject.toml >"$pack_log" 2>&1; then
+    cat "$pack_log" >&2
+    rm -f "$pack_log"
+    exit 1
+fi
+rm -f "$pack_log"
+printf '%s\n' 'Built and verified dist/terraform-provider-mycloud.psp'
 mv dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
 chmod +x dist/terraform-provider-mycloud
 printf '\n'

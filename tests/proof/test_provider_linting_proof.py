@@ -86,7 +86,7 @@ WALKTHROUGH_COMMANDS = [
 TUTORIAL_COMMANDS = [
     "uv sync --frozen",
     "uv run pytest tests/test_linting.py -q",
-    "uv run flavor pack --manifest pyproject.toml",
+    "uv run flavor pack --quiet --manifest pyproject.toml",
     (
         "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
         '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
@@ -353,6 +353,7 @@ def film_cast_text(lane: str) -> str:
         statements = [
             "Part 7: author and verify one provider lint rule.",
             "9 passed",
+            "Built and verified dist/terraform-provider-mycloud.psp",
             "Direct provider validation: 1/1 cases",
             "OpenTofu v1.13.0-rc1",
             "OpenTofu experimental lint validation: valid",
@@ -432,6 +433,19 @@ def test_provider_0_6_proof_requires_experimental_validation_wording() -> None:
         module._validate_opentofu_cast(
             output.replace("OpenTofu experimental lint validation", "OpenTofu native linting"),
             manifest=manifest,
+        )
+
+
+def test_tutorial_proof_requires_a_verified_package_result() -> None:
+    module = load_script(PROOF_LIBRARY, "provider_linting_proof_tutorial_package")
+    output = film_cast_text("tutorial")
+    manifest = {"commands": {"tutorial": TUTORIAL_COMMANDS}}
+
+    module._validate_tutorial_cast(output, manifest)
+    with pytest.raises(ValueError, match="Built and verified"):
+        module._validate_tutorial_cast(
+            output.replace("Built and verified dist/terraform-provider-mycloud.psp\n", ""),
+            manifest,
         )
 
 

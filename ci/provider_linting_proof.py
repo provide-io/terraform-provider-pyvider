@@ -69,7 +69,7 @@ FILM_COMMANDS = {
     "tutorial": [
         "uv sync --frozen",
         "uv run pytest tests/test_linting.py -q",
-        "uv run flavor pack --manifest pyproject.toml",
+        "uv run flavor pack --quiet --manifest pyproject.toml",
         (
             "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml "
             '--provider "$PWD/dist/terraform-provider-mycloud" --lane direct'
@@ -665,6 +665,7 @@ def _validate_tutorial_cast(output: str, manifest: Mapping[str, Any]) -> None:
     for statement in (
         "Part 7: author and verify one provider lint rule.",
         "9 passed",
+        "Built and verified dist/terraform-provider-mycloud.psp",
         "Direct provider validation: 1/1 cases",
         "OpenTofu v1.13.0-rc1",
         "OpenTofu experimental lint validation: valid",

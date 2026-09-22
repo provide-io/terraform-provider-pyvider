@@ -8,7 +8,7 @@ validation.
 ```sh
 uv sync --frozen
 uv run pytest tests/test_linting.py -q
-uv run flavor pack --manifest pyproject.toml
+uv run flavor pack --quiet --manifest pyproject.toml
 mv dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud
 chmod +x dist/terraform-provider-mycloud
 

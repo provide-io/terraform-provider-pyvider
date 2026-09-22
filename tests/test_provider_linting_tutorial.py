@@ -108,13 +108,14 @@ def test_part7_recording_uses_only_checked_in_user_commands() -> None:
     for command in (
         "uv sync --frozen",
         "uv run pytest tests/test_linting.py -q",
-        "uv run flavor pack --manifest pyproject.toml",
+        "uv run flavor pack --quiet --manifest pyproject.toml",
         "./install-opentofu.sh 1.13.0-rc1",
         "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml",
     ):
         assert command in recorder
     assert "PYVIDER_CONFORMANCE_PSP" not in recorder
     assert "PYVIDER_OPENTOFU_BINARY" not in recorder
+    assert "Built and verified dist/terraform-provider-mycloud.psp" in recorder
     assert "printf '\\n'" in recorder
 
 
