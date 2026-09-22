@@ -237,7 +237,7 @@ def test_proof_workflows_verify_tofusoup_cli_and_imported_version() -> None:
 
     verify = (ROOT / ".github" / "workflows" / "verify-release.yml").read_text(encoding="utf-8")
     installer = (ROOT / "ci" / "install-released-tofusoup.sh").read_text(encoding="utf-8")
-    assert "ci/install-released-tofusoup.sh 0.8.2" in verify
+    assert ".release-tooling/ci/install-released-tofusoup.sh 0.8.2" in verify
     assert 'test "$(soup --version)" = "soup, version ${TOFUSOUP_VERSION}"' in installer
     assert "tofusoup.__version__ != '${TOFUSOUP_VERSION}'" in installer
 

@@ -3,6 +3,11 @@
 # the released binary. release.yml calls this after publishing; it can also be
 # dispatched against a release that already exists.
 #
+# The release's own source is checked out at the root, so conformance runs the
+# tests, Makefile, and lock that shipped. The verification tooling comes from
+# this workflow's commit in .release-tooling/, so a release published before a
+# tooling fix can still be verified by the fixed tooling.
+#
 # Script policy: run blocks longer than three lines live in ci/.
 name: 🔎 Verify Release
 
@@ -45,6 +50,14 @@ jobs:
         with:
           ref: ${{ inputs.release_target_sha }}
 
+      # Check out the verification tooling from this workflow's own commit.
+      - name: 🧰 Checkout verification tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-tooling
+          sparse-checkout: ci
+
       # Python for the proof tooling.
       - name: 🐍 Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -57,7 +70,7 @@ jobs:
 
       # The released TofuSoup the proof names, refusing any other version.
       - name: 🍲 Install released TofuSoup
-        run: ci/install-released-tofusoup.sh 0.8.2
+        run: .release-tooling/ci/install-released-tofusoup.sh 0.8.2
 
       # Fetch exactly what users download.
       - name: 📥 Download immutable release assets
@@ -71,12 +84,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: echo "binary=$(ci/verify-release-assets.sh "${{ inputs.version }}" "${{ inputs.release_target_sha }}" released)" >> "$GITHUB_OUTPUT"
+        run: |
+          binary=$(.release-tooling/ci/verify-release-assets.sh "${{ inputs.version }}" "${{ inputs.release_target_sha }}" released)
+          echo "binary=$binary" >> "$GITHUB_OUTPUT"
 
       # The OpenTofu prerelease the proof pins, checksum-verified.
       - name: 🪣 Install pinned OpenTofu prerelease
-        run: echo "PYVIDER_OPENTOFU_BINARY=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")" >> "$GITHUB_ENV"
+        run: |
+          tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
+          echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
 
       # Conformance, the OpenTofu lint lane, and the proof films against the released binary.
       - name: 🧪 Re-run the released linux_amd64 proof
-        run: ci/rerun-released-proof.sh released "${{ steps.verify.outputs.binary }}" "$PYVIDER_OPENTOFU_BINARY"
+        run: .release-tooling/ci/rerun-released-proof.sh released "${{ steps.verify.outputs.binary }}" "$PYVIDER_OPENTOFU_BINARY"

@@ -136,3 +136,12 @@ def test_release_and_manual_verification_share_one_workflow() -> None:
     assert job["needs"] == ["validate-build", "release"]
     triggers = verify[True] if True in verify else verify["on"]
     assert {"workflow_call", "workflow_dispatch"} <= set(triggers)
+
+
+def test_verify_workflow_never_hides_a_failure_inside_an_echo() -> None:
+    """`echo "x=$(cmd)"` exits 0 when cmd fails; only an assignment fails the step."""
+    import re
+
+    workflow = (ROOT / ".github" / "workflows" / "verify-release.yml").read_text(encoding="utf-8")
+
+    assert not re.search(r"echo [^\n]*\$\(", workflow)
