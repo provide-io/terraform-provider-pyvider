@@ -1,0 +1,155 @@
+{
+  "casts": {
+    "direct": {
+      "path": "provider-linting-direct.cast",
+      "sha256": "a4b6e0190edf012904702caabfbcfb3b38a348bad6d6fc8d2abf0c9ee9e050f2"
+    },
+    "opentofu": {
+      "path": "provider-linting-opentofu.cast",
+      "sha256": "cc85179759c9e8499daa0779d135daddff86b371bd718dffc7c77eb75c844f6b"
+    },
+    "tutorial": {
+      "path": "tutorial-part7-provider-linting.cast",
+      "sha256": "59c22904c4e7d4b12a6b10ca38200546b522b03dfb3525482dc6765f217f8479"
+    },
+    "walkthrough": {
+      "path": "provider-linting-walkthrough.cast",
+      "sha256": "cbe36d7af8eb76848931e6d021a2b44577bca959bd17ef268c876b451a8dafd3"
+    }
+  },
+  "ci": {
+    "repository": null,
+    "run_attempt": null,
+    "run_id": null,
+    "workflow": null
+  },
+  "commands": {
+    "direct": [
+      "uv tool install --refresh --quiet tofusoup==0.8.2",
+      "provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$provider\" --lane direct"
+    ],
+    "opentofu": [
+      "uv tool install --refresh --quiet tofusoup==0.8.2",
+      "provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)",
+      "tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir \"$PWD/.cache/opentofu-prerelease\")",
+      "\"$tofu\" version",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$provider\" --opentofu \"$tofu\" --lane opentofu"
+    ],
+    "tutorial": [
+      "uv sync --frozen",
+      "uv run pytest tests/test_linting.py -q",
+      "uv run flavor pack --quiet --manifest pyproject.toml",
+      "install -m 755 dist/terraform-provider-mycloud.psp dist/terraform-provider-mycloud",
+      "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml --provider \"$PWD/dist/terraform-provider-mycloud\" --lane direct",
+      "./install-opentofu.sh 1.13.0-rc1",
+      "opentofu_rc1=\"$PWD/.cache/opentofu/1.13.0-rc1/tofu\"",
+      "\"$opentofu_rc1\" version",
+      "uvx --from tofusoup==0.8.2 soup lint lint.soup.toml --provider \"$PWD/dist/terraform-provider-mycloud\" --opentofu \"$opentofu_rc1\" --lane opentofu"
+    ],
+    "walkthrough": [
+      "uv tool install --refresh --quiet tofusoup==0.8.2",
+      "soup --version",
+      "provider=$(uv run python ci/provider-linting-artifact-path.py dist/provider-linting-build-provenance.json)",
+      "tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir \"$PWD/.cache/opentofu-prerelease\")",
+      "\"$tofu\" version",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$provider\" --opentofu \"$tofu\" --lane opentofu",
+      "soup lint tests/e2e/provider-linting/lint.soup.toml --provider \"$provider\" --lane direct"
+    ]
+  },
+  "components": {
+    "pyvider": {
+      "registry": "https://pypi.org/simple",
+      "sha": "5251ac421b5d57a5c2ed8a81853db48c7b101652",
+      "tag": "v0.8.1",
+      "version": "0.8.1",
+      "wheel": "pyvider-0.8.1-py3-none-any.whl",
+      "wheel_sha256": "940d081d7301590952990d8ca6f1f6a89648d6743c1984bbfdb275f7912d3f83"
+    },
+    "pyvider-components": {
+      "registry": "https://pypi.org/simple",
+      "sha": "5855ce5bb83e2958835183348ee23da96ae797aa",
+      "tag": "v0.8.0",
+      "version": "0.8.0",
+      "wheel": "pyvider_components-0.8.0-py3-none-any.whl",
+      "wheel_sha256": "76e003f6379112765c9d42779e58ea2c15ce955f214d3dd8b9a77907340822ce"
+    },
+    "terraform-provider-pyvider": {
+      "sha": "8cd2c64df8098870a01ea6ab1889bf63717b4781",
+      "version": "0.6.0"
+    }
+  },
+  "generated_at": "2026-09-22T15:31:57.927020Z",
+  "opentofu": {
+    "archive": "tofu_1.13.0-rc1_darwin_arm64.zip",
+    "archive_sha256": "f42f3a109903704967a165a02cb2eb8b00922285a05a23aff4bf448a82fc7b9d",
+    "version": "1.13.0-rc1"
+  },
+  "provider_binary": {
+    "path": "dist/darwin_arm64/terraform-provider-pyvider_v0.6.0",
+    "platform": "darwin_arm64",
+    "sha256": "9a8869076b4a23beb672499784e478e76d52074df7131d179232d9077d5466d6"
+  },
+  "release_candidate": {
+    "archive": "terraform-provider-pyvider_0.6.0_darwin_arm64.zip",
+    "github_artifact": "provider-darwin_arm64",
+    "platform": "darwin_arm64",
+    "sha256": "b351530c26c45deb14aa3d554dd8494991bfcc202938ae0ce05d58f20fcda68b"
+  },
+  "rules": [
+    {
+      "id": "provide-io/pyvider:insecure-tls",
+      "kind": "provider",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:world-writable-directory",
+      "kind": "resource",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:insecure-http",
+      "kind": "data-source",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:long-lived-lease",
+      "kind": "ephemeral",
+      "observed_via": [
+        "opentofu",
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:include-hidden-files",
+      "kind": "list",
+      "observed_via": [
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:long-action-timeout",
+      "kind": "action",
+      "observed_via": [
+        "tofusoup"
+      ]
+    },
+    {
+      "id": "provide-io/pyvider:relative-state-store-path",
+      "kind": "state-store",
+      "observed_via": [
+        "tofusoup"
+      ]
+    }
+  ],
+  "schema_version": 3
+}

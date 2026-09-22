@@ -3,300 +3,221 @@ name: 🚀 Release Provider
 on:
   workflow_dispatch:
     inputs:
+      build_run_id:
+        description: Exact successful build workflow run ID for this commit
+        required: true
+        type: string
       prerelease:
-        description: 'Is this a pre-release?'
+        description: Is this a pre-release?
         required: false
         type: boolean
         default: false
-      build_run_id:
-        description: 'Build workflow run ID (leave empty for last successful build or to trigger new build)'
-        required: false
-        type: string
 
 env:
   PYTHON_VERSION: '3.11'
+  PYTHONIOENCODING: utf-8
 
 jobs:
-  # Optionally trigger a new build or find last successful build
-  trigger_build:
-    name: 🏗️ Trigger/Find Build
-    runs-on: ubuntu-latest
-    if: inputs.build_run_id == ''
+  validate-build:
+    name: 🔒 Validate exact build run
+    runs-on: ubuntu-24.04
     permissions:
-      actions: write
+      actions: read
       contents: read
     outputs:
-      run_id: ${{ steps.determine.outputs.run_id }}
-      use_existing: ${{ steps.determine.outputs.use_existing }}
-
+      build_run_id: ${{ steps.validate.outputs.build_run_id }}
+      release_target_sha: ${{ steps.validate.outputs.release_target_sha }}
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v7
-
-      - name: 🔧 Ensure gh CLI available
-        shell: bash
-        run: |
-          if ! command -v gh >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq gh
-          fi
-
-      - name: 🔍 Check for last successful build
-        id: determine
+      - name: Validate numeric run and exact release commit
+        id: validate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          RELEASE_TARGET_SHA: ${{ github.sha }}
         run: |
-          # Try to find last successful build first
-          RUN_LIST=$(gh run list \
-            --workflow build-provider.yml \
-            --status completed \
-            --limit 1 \
-            --json databaseId,conclusion)
-
-          RUN_ID=$(echo "$RUN_LIST" | jq '.[] | select(.conclusion=="success") | .databaseId')
-
-          if [[ -n "$RUN_ID" ]] && [[ "$RUN_ID" != "null" ]]; then
-            echo "✅ Using last successful build: ${RUN_ID}"
-            echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
-            echo "use_existing=true" >> $GITHUB_OUTPUT
-          else
-            # No successful build found, trigger a new one
-            echo "⏳ No successful build found, triggering new build..."
-            gh workflow run build-provider.yml
-
-            # Wait a bit for the workflow to start
-            sleep 5
-
-            # Get the latest run
-            RUN_ID=$(gh run list \
-              --workflow build-provider.yml \
-              --limit 1 \
-              --json databaseId \
-              --jq '.[0].databaseId')
-
-            echo "🚀 Build workflow triggered: ${RUN_ID}"
-            echo "run_id=${RUN_ID}" >> $GITHUB_OUTPUT
-            echo "use_existing=false" >> $GITHUB_OUTPUT
-          fi
-
-  # Wait for build to complete
-  wait_for_build:
-    name: ⏳ Wait for Build
-    needs: trigger_build
-    if: always()
-    runs-on: ubuntu-latest
-    outputs:
-      build_run_id: ${{ steps.wait.outputs.build_run_id }}
-
-    steps:
-      - name: 🔧 Ensure gh CLI available
-        shell: bash
-        run: |
-          if ! command -v gh >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq gh
-          fi
-
-      - name: ⏳ Wait for build completion
-        id: wait
-        run: |
-          if [[ -n "${{ inputs.build_run_id }}" ]]; then
-            RUN_ID="${{ inputs.build_run_id }}"
-          else
-            RUN_ID="${{ needs.trigger_build.outputs.run_id }}"
-          fi
-          echo "build_run_id=${RUN_ID}" >> $GITHUB_OUTPUT
-
-          # If provided or using existing successful build, skip waiting
-          if [[ -n "${{ inputs.build_run_id }}" ]]; then
-            echo "✅ Using provided build_run_id: ${RUN_ID}"
-            exit 0
-          fi
-
-          if [[ "${{ needs.trigger_build.outputs.use_existing }}" == "true" ]]; then
-            echo "✅ Using existing successful build: ${RUN_ID}"
-            exit 0
-          fi
-
-          echo "⏳ Waiting for build workflow to complete: ${RUN_ID}"
-
-          ATTEMPTS=0
-          MAX_ATTEMPTS=60  # 30 minutes max wait
-
-          while [[ $ATTEMPTS -lt $MAX_ATTEMPTS ]]; do
-            STATUS=$(gh run view $RUN_ID --json status --jq '.status')
-            CONCLUSION=$(gh run view $RUN_ID --json conclusion --jq '.conclusion')
-
-            echo "Build status: ${STATUS}, conclusion: ${CONCLUSION}"
-
-            if [[ "$STATUS" == "completed" ]]; then
-              if [[ "$CONCLUSION" != "success" ]]; then
-                echo "❌ Build workflow failed with conclusion: ${CONCLUSION}"
-                exit 1
-              fi
-              echo "✅ Build workflow completed successfully"
-              exit 0
-            fi
-
-            sleep 30  # Wait 30 seconds
-            ((ATTEMPTS++))
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]] || { echo 'build_run_id must be numeric' >&2; exit 2; }
+          [[ "$RELEASE_TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'github.sha must be a full commit SHA' >&2; exit 2; }
+          run_json=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD_RUN_ID}")
+          test "$(jq -r .path <<<"$run_json")" = ".github/workflows/build-provider.yml"
+          test "$(jq -r .conclusion <<<"$run_json")" = "success"
+          headSha=$(jq -r .head_sha <<<"$run_json")
+          test "$headSha" = "$RELEASE_TARGET_SHA"
+          artifacts=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD_RUN_ID}/artifacts")
+          for required in \
+            provider-linux_amd64 provider-linux_arm64 provider-darwin_amd64 \
+            provider-darwin_arm64 provider-windows_amd64 provider-linting-proof; do
+            jq -e --arg name "$required" '.artifacts[] | select(.name == $name and .expired == false)' \
+              <<<"$artifacts" >/dev/null
           done
-
-          echo "❌ Timeout waiting for build workflow"
-          exit 1
+          echo "build_run_id=$BUILD_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "release_target_sha=$RELEASE_TARGET_SHA" >> "$GITHUB_OUTPUT"
 
   release:
-    name: 🎉 Create Release
-    needs: wait_for_build
-    if: always() && needs.wait_for_build.result == 'success'
-    runs-on: ubuntu-latest
+    name: 🎉 Publish exact-SHA release
+    needs: validate-build
+    runs-on: ubuntu-24.04
     permissions:
+      actions: read
       contents: write
-
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: 🤖 Generate App Token
-        id: app-token
-        continue-on-error: true
-        uses: actions/create-github-app-token@v3
+      - name: 📥 Checkout exact release target
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          app-id: ${{ secrets.PROVIDE_BOT_APP_ID }}
-          private-key: ${{ secrets.PROVIDE_BOT_PRIVATE_KEY }}
+          ref: ${{ needs.validate-build.outputs.release_target_sha }}
 
-      - name: 🔐 Determine checkout token
-        id: checkout-token
-        run: |
-          if [[ -n "${{ steps.app-token.outputs.token }}" ]]; then
-            echo "token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
-          else
-            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 📥 Checkout
-        uses: actions/checkout@v7
-        with:
-          submodules: 'recursive'
-          token: ${{ steps.checkout-token.outputs.token }}
-
-      - name: 📖 Read VERSION
+      - name: 📖 Read version
         id: version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "📦 Releasing version: ${VERSION}"
+        shell: bash
+        run: echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
 
-      - name: 📦 Install UV
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
-        with:
-          enable-cache: false
-
-      - name: 🐍 Setup Python
-        if: env.ACT != 'true' && github.actor != 'nektos/act'
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📥 Download all build artifacts
-        uses: actions/download-artifact@v8
+      - name: 📥 Download all artifacts from the validated run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           path: artifacts
-          run-id: ${{ needs.wait_for_build.outputs.build_run_id }}
+          run-id: ${{ needs.validate-build.outputs.build_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📁 Organize release files
+      - name: 📁 Stage release archives and proof assets
+        shell: bash
         run: |
-          mkdir -p release
+          mkdir release
+          find artifacts/provider-* -maxdepth 1 -name 'terraform-provider-pyvider_*.zip' \
+            -type f -exec cp {} release/ \;
+          for name in \
+            provider-linting-proof.json \
+            provider-linting-opentofu.cast \
+            provider-linting-direct.cast \
+            provider-linting-walkthrough.cast \
+            tutorial-part7-provider-linting.cast \
+            provider-linting-build-provenance.json; do
+            cp "artifacts/provider-linting-proof/$name" "release/$name"
+          done
+          cp terraform-registry-manifest.json \
+            "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_manifest.json"
+          for target in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64 windows_amd64; do
+            test -f "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_${target}.zip"
+          done
 
-          # Move all zip files to release directory
-          find artifacts -name "*.zip" -type f -exec mv {} release/ \;
-
-          # Copy and rename manifest file
-          cp terraform-registry-manifest.json "release/terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_manifest.json"
-
-          echo "📦 Release files:"
-          ls -la release/
-
-      - name: 🔧 Generate checksums
+      - name: 🔧 Generate release checksums
+        shell: bash
         run: |
           cd release
+          sha256sum * > "terraform-provider-pyvider_${{ steps.version.outputs.version }}_SHA256SUMS"
+          sha256sum -c "terraform-provider-pyvider_${{ steps.version.outputs.version }}_SHA256SUMS"
 
-          # Generate SHA256 checksums for all files
-          sha256sum * > "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
-
-          echo "📝 Checksums:"
-          cat "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
-
-      - name: 🔐 Sign checksums with GPG
+      - name: 🔐 Sign and verify checksums
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          chmod +x .github/scripts/sign-release.sh
-          .github/scripts/sign-release.sh release/
+          test -n "$GPG_PRIVATE_KEY"
+          test -n "$GPG_KEY_ID"
+          .github/scripts/sign-release.sh release
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --verify \
+            "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_SHA256SUMS.sig" \
+            "release/terraform-provider-pyvider_${{ steps.version.outputs.version }}_SHA256SUMS"
 
-          echo "✅ Signatures created:"
-          ls -la release/*.sig
-
-      - name: 🔍 Verify release artifacts
-        run: |
-          cd release
-          echo "📋 Verifying release artifacts for Terraform Registry..."
-
-          # Check all required files exist
-          REQUIRED_FILES=(
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_linux_amd64.zip"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_linux_arm64.zip"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_darwin_amd64.zip"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_darwin_arm64.zip"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_manifest.json"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"
-            "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS.sig"
-          )
-
-          for file in "${REQUIRED_FILES[@]}"; do
-            if [ ! -f "$file" ]; then
-              echo "❌ Missing required file: $file"
-              exit 1
-            else
-              echo "✅ Found: $file"
-            fi
-          done
-
-          # Verify SHA256SUMS contains all required entries
-          echo -e "\n📝 Checking SHA256SUMS entries..."
-          for platform in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64; do
-            if grep -q "${platform}.zip" "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"; then
-              echo "✅ SHA256SUMS contains ${platform}"
-            else
-              echo "❌ SHA256SUMS missing ${platform}"
-              exit 1
-            fi
-          done
-
-          # Verify manifest.json
-          if grep -q "manifest.json" "terraform-provider-pyvider_${{ steps.version.outputs.VERSION }}_SHA256SUMS"; then
-            echo "✅ SHA256SUMS contains manifest.json"
-          else
-            echo "❌ SHA256SUMS missing manifest.json"
-            exit 1
-          fi
-
-          echo -e "\n✅ All release artifacts verified!"
-
-      - name: 🏷️ Create Git tag
-        run: |
-          # Configure git with providebot[bot] identity
-          git config user.name "providebot[bot]"
-          git config user.email "178697328+providebot[bot]@users.noreply.github.com"
-
-          # Create and push tag for the verified build artifacts.
-          git tag -a "v${{ steps.version.outputs.VERSION }}" -m "Release v${{ steps.version.outputs.VERSION }}" || echo "Tag might already exist"
-          git push origin "v${{ steps.version.outputs.VERSION }}" || echo "Tag already exists on remote"
-
-      # A tag ships nothing. The archives signed and verified above reach a
-      # consumer only by being attached to a release, and this job reported
-      # success without doing it -- v0.5.0 was tagged with no release behind it.
-      - name: 🎉 Publish the release
+      - name: 🎉 Publish release at the validated SHA
         env:
-          GH_TOKEN: ${{ steps.checkout-token.outputs.token }}
-        run: ci/publish-release.sh "${{ steps.version.outputs.VERSION }}"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TARGET_SHA: ${{ needs.validate-build.outputs.release_target_sha }}
+        run: ci/publish-release.sh "${{ steps.version.outputs.version }}"
+
+  verify-release-proof:
+    name: 🔎 verify-release-proof
+    needs: [validate-build, release]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Checkout exact released source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ needs.validate-build.outputs.release_target_sha }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install UV and released TofuSoup
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
+      - run: |
+          uv sync --frozen --group dev
+          uv tool install --refresh tofusoup==0.8.2
+          test "$(soup --version)" = "soup, version 0.8.2"
+          uv run python -c 'import tofusoup; assert tofusoup.__version__ == "0.8.2"'
+
+      - name: 📥 Download immutable release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir released
+          gh release download "v${{ needs.release.outputs.version }}" --dir released
+
+      - name: 🔐 Verify checksums, signature, tag, and proof binding
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          RELEASE_TARGET_SHA: ${{ needs.validate-build.outputs.release_target_sha }}
+        shell: bash
+        run: |
+          (cd released && sha256sum -c "terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS")
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --verify \
+            "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS.sig" \
+            "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS"
+          tag_sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v${{ needs.release.outputs.version }}" --jq .object.sha)
+          tag_type=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v${{ needs.release.outputs.version }}" --jq .object.type)
+          if [ "$tag_type" = tag ]; then
+            tag_sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/$tag_sha" --jq .object.sha)
+          fi
+          test "$tag_sha" = "$RELEASE_TARGET_SHA"
+          mkdir -p released/dist/linux_amd64
+          unzip -oq "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_linux_amd64.zip" \
+            -d released/dist/linux_amd64
+          cp released/provider-linting-build-provenance.json released/dist/
+          uv run python - "$RELEASE_TARGET_SHA" <<'PY'
+          import hashlib, json, pathlib, sys
+          root = pathlib.Path("released")
+          proof = json.loads((root / "provider-linting-proof.json").read_text(encoding="utf-8"))
+          build = json.loads((root / "provider-linting-build-provenance.json").read_text(encoding="utf-8"))
+          assert build["provider_repository_head"] == sys.argv[1]
+          assert build["release_candidate"]["platform"] == "linux_amd64"
+          binary = root / build["artifacts"]["binary"]["path"]
+          assert hashlib.sha256(binary.read_bytes()).hexdigest() == build["artifacts"]["binary"]["sha256"]
+          assert proof["components"]["terraform-provider-pyvider"]["sha"] == sys.argv[1]
+          assert proof["provider_binary"]["sha256"] == build["artifacts"]["binary"]["sha256"]
+          assert proof["provider_binary"]["platform"] == "linux_amd64"
+          assert proof["release_candidate"] == build["release_candidate"]
+          for name in ("pyvider", "pyvider-components"):
+              dependency = build["dependencies"][name]
+              component = proof["components"][name]
+              assert component["sha"] == dependency["commit"]
+              assert component["wheel_sha256"] == dependency["sha256"]
+          PY
+
+      - name: 🪣 Install pinned OpenTofu prerelease
+        shell: bash
+        run: |
+          tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
+          echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
+
+      - name: 🧪 Re-run the released linux_amd64 proof
+        shell: bash
+        run: |
+          binary="$PWD/released/dist/linux_amd64/terraform-provider-pyvider_v${{ needs.release.outputs.version }}"
+          chmod +x "$binary"
+          make test-conformance-binary PYVIDER_CONFORMANCE_PSP="$binary"
+          make test-linting-opentofu-binary PYVIDER_CONFORMANCE_PSP="$binary" \
+            PYVIDER_OPENTOFU_BINARY="$PYVIDER_OPENTOFU_BINARY"
+          uv run python ci/verify-provider-linting-proof.py \
+            "$PWD/released/provider-linting-proof.json" \
+            "$PWD/released/provider-linting-opentofu.cast" \
+            "$PWD/released/provider-linting-direct.cast" \
+            "$PWD/released/provider-linting-walkthrough.cast" \
+            "$PWD/released/tutorial-part7-provider-linting.cast"

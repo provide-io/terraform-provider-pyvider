@@ -12,6 +12,7 @@ Example:
     python3 ci/record-to-cast.py conformance.cast soup stir --recursive
 """
 
+import argparse
 import fcntl
 import json
 import os
@@ -38,17 +39,23 @@ _STRIP_RE = re.compile(
 
 
 def main() -> None:
-    if len(sys.argv) < 3:
-        print(f"Usage: {sys.argv[0]} OUTPUT.cast COMMAND [ARGS...]", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--title", default="pyvider conformance suite")
+    parser.add_argument("--width", type=int, default=120)
+    parser.add_argument("--height", type=int, default=40)
+    parser.add_argument("output_path")
+    parser.add_argument("command", nargs=argparse.REMAINDER)
+    arguments = parser.parse_args()
+    if not arguments.command:
+        parser.error("a command is required")
 
-    output_path = sys.argv[1]
-    command = sys.argv[2:]
+    output_path = arguments.output_path
+    command = arguments.command
 
     events: list[Any] = []
     start_time = time.time()
 
-    cols, rows = 120, 40
+    cols, rows = arguments.width, arguments.height
     master_fd, slave_fd = pty.openpty()
 
     # Set the PTY size so the child process renders at the target dimensions.
@@ -87,7 +94,7 @@ def main() -> None:
         "width": cols,
         "height": rows,
         "timestamp": int(start_time),
-        "title": "pyvider conformance suite",
+        "title": arguments.title,
         "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"},
     }
 

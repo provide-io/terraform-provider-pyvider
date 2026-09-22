@@ -16,6 +16,12 @@ set -euo pipefail
 VERSION="${1:?usage: $0 <version>}"
 TAG="v${VERSION}"
 DIR="${2:-release}"
+RELEASE_TARGET_SHA="${RELEASE_TARGET_SHA:?RELEASE_TARGET_SHA is required}"
+
+if [[ ! "${RELEASE_TARGET_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "::error::RELEASE_TARGET_SHA must be a full 40-character lowercase commit SHA"
+    exit 2
+fi
 
 if [ ! -d "${DIR}" ]; then
     echo "::error::no ${DIR}/ directory; nothing was staged to publish"
@@ -47,6 +53,7 @@ if gh release view "${TAG}" >/dev/null 2>&1; then
     gh release upload "${TAG}" "${DIR}"/* --clobber
 else
     gh release create "${TAG}" "${DIR}"/* \
+        --target "${RELEASE_TARGET_SHA}" \
         --title "${TAG}" \
         --generate-notes
 fi

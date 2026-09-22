@@ -20,6 +20,7 @@
 * **Diagnostic Data Sources:** Inspect the provider's environment (`pyvider_env_variables`), read local file metadata (`pyvider_file_info`), and test provider configuration (`pyvider_provider_config_reader`).
 * **Powerful Data Transformation:** Process JSON and other data structures using `jq` queries directly within your Terraform configuration (`pyvider_lens_jq`).
 * **Extensive Function Library:** A rich set of functions for string manipulation, numeric operations, and collection handling.
+* **Provider-native linting:** Opt-in, selectable configuration findings with a [reproducible packaged-provider proof](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/provider-linting-proof.md) through OpenTofu and TofuSoup.
 
 ## Getting Started
 
@@ -38,6 +39,7 @@ The tutorial covers:
 ## Documentation
 - [Documentation index](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/index.md)
 - [Getting started](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/getting-started.md)
+- [Provider linting proof](https://github.com/provide-io/terraform-provider-pyvider/blob/main/docs/guides/provider-linting-proof.md)
 - [Examples](https://github.com/provide-io/terraform-provider-pyvider/tree/main/examples)
 
 ## Development
