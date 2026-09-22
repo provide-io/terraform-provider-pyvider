@@ -4,7 +4,8 @@
 #
 # Verify a downloaded release: checksums, the SHA256SUMS signature, that the
 # tag names the release commit, and that the proof and build provenance bind
-# to that commit and to the linux_amd64 binary. Prints the verified binary path.
+# to that commit and to the linux_amd64 binary. Leaves the build's layout
+# unpacked under <released-dir>/dist/ and logs the verified binary path.
 #
 # Usage: ci/verify-release-assets.sh <version> <release-target-sha> <released-dir>
 # Needs GH_TOKEN, GITHUB_REPOSITORY and GPG_PRIVATE_KEY in the environment.
@@ -31,4 +32,5 @@ if [ "${tag_sha}" != "${RELEASE_TARGET_SHA}" ]; then
     exit 1
 fi
 
-python3 "$(dirname "${BASH_SOURCE[0]}")/verify-release-binding.py" "${RELEASED}" "${VERSION}" "${RELEASE_TARGET_SHA}"
+binary=$(python3 "$(dirname "${BASH_SOURCE[0]}")/verify-release-binding.py" "${RELEASED}" "${VERSION}" "${RELEASE_TARGET_SHA}")
+echo "Verified ${binary}" >&2

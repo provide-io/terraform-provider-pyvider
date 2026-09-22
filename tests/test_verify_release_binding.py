@@ -133,6 +133,12 @@ def stub_tools(tmp_path: Path) -> tuple[dict[str, str], Path]:
     return env, log
 
 
+def rerun(released: Path, checkout: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [str(RERUN), str(released)], cwd=checkout, env=env, capture_output=True, text=True, check=False
+    )
+
+
 def test_released_proof_rerun_reproduces_the_build_layout_in_the_checkout(tmp_path: Path) -> None:
     """Released conformance reads <repo>/dist/ and wants the binary beside that provenance."""
     released = tmp_path / "released"
@@ -142,23 +148,42 @@ def test_released_proof_rerun_reproduces_the_build_layout_in_the_checkout(tmp_pa
     checkout.mkdir()
     env, log = stub_tools(tmp_path)
 
-    result = subprocess.run(
-        [str(RERUN), str(released), "/opt/tofu"],
-        cwd=checkout,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = rerun(released, checkout, env)
 
     assert result.returncode == 0, result.stderr
     binary = (checkout / "dist" / "linux_amd64" / BINARY).resolve()
     provenance = (checkout / "dist" / "provider-linting-build-provenance.json").resolve()
     assert binary.read_bytes() == b"provider"
+    assert os.access(binary, os.X_OK)
     calls = log.read_text(encoding="utf-8")
     assert f"make test-conformance-binary PYVIDER_CONFORMANCE_PSP={binary}" in calls
     assert f"PYVIDER_LINTING_PROVENANCE={provenance}" in calls
-    assert "PYVIDER_OPENTOFU_BINARY=/opt/tofu" in calls
+    # The released Makefile installs its own pinned OpenTofu and would ignore one passed in.
+    assert "PYVIDER_OPENTOFU_BINARY" not in calls
+    films = " ".join(
+        str(released.resolve() / name)
+        for name in (
+            "provider-linting-proof.json",
+            "provider-linting-opentofu.cast",
+            "provider-linting-direct.cast",
+            "provider-linting-walkthrough.cast",
+        )
+    )
+    assert f"uv run python ci/verify-provider-linting-proof.py {films}" in calls
+
+
+def test_released_proof_rerun_can_be_retried_over_its_own_copy(tmp_path: Path) -> None:
+    released = tmp_path / "released"
+    write_release(released)
+    assert bind(released).returncode == 0
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    env, _log = stub_tools(tmp_path)
+
+    assert rerun(released, checkout, env).returncode == 0
+    retried = rerun(released, checkout, env)
+
+    assert retried.returncode == 0, retried.stderr
 
 
 def test_released_proof_rerun_refuses_a_checkout_with_its_own_build(tmp_path: Path) -> None:
@@ -170,16 +195,12 @@ def test_released_proof_rerun_refuses_a_checkout_with_its_own_build(tmp_path: Pa
     (checkout / "dist" / "stale").write_text("local build", encoding="utf-8")
     env, log = stub_tools(tmp_path)
 
-    result = subprocess.run(
-        [str(RERUN), str(released), "/opt/tofu"],
-        cwd=checkout,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = rerun(released, checkout, env)
 
-    assert result.returncode != 0
+    assert result.returncode == 2
+    assert "refusing to mix them with the released build" in result.stderr
+    assert sorted(path.name for path in (checkout / "dist").iterdir()) == ["stale"]
+    assert (checkout / "dist" / "stale").read_text(encoding="utf-8") == "local build"
     assert not log.exists()
 
 
