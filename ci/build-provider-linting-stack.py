@@ -37,6 +37,7 @@ PROOF_OUTPUTS = frozenset(
         "provider-linting-direct.cast",
         "provider-linting-opentofu.cast",
         "provider-linting-walkthrough.cast",
+        "tutorial-part7-provider-linting.cast",
         "provider-linting-proof.json",
     }
 )

@@ -36,6 +36,7 @@ def main() -> int:
     parser.add_argument("--opentofu-cast", type=Path, required=True)
     parser.add_argument("--direct-rpc-cast", type=Path, required=True)
     parser.add_argument("--walkthrough-cast", type=Path)
+    parser.add_argument("--tutorial-cast", type=Path)
     parser.add_argument("--build-provenance", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -52,12 +53,15 @@ def main() -> int:
             "generated_at": utc_now(),
             "ci_environment": github_environment(),
         }
-        if args.walkthrough_cast is None:
+        if args.walkthrough_cast is None and args.tutorial_cast is None:
             generate_split_proof(direct_rpc_cast_path=args.direct_rpc_cast, **common)
         else:
+            if args.walkthrough_cast is None or args.tutorial_cast is None:
+                raise ValueError("walkthrough and tutorial casts are both required for film proof")
             generate_film_proof(
                 direct_cast_path=args.direct_rpc_cast,
                 walkthrough_cast_path=args.walkthrough_cast,
+                tutorial_cast_path=args.tutorial_cast,
                 **common,
             )
     except KeyError:

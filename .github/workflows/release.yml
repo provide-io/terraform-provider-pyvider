@@ -90,6 +90,7 @@ jobs:
             provider-linting-opentofu.cast \
             provider-linting-direct.cast \
             provider-linting-walkthrough.cast \
+            tutorial-part7-provider-linting.cast \
             provider-linting-build-provenance.json; do
             cp "artifacts/provider-linting-proof/$name" "release/$name"
           done
@@ -218,4 +219,5 @@ jobs:
             "$PWD/released/provider-linting-proof.json" \
             "$PWD/released/provider-linting-opentofu.cast" \
             "$PWD/released/provider-linting-direct.cast" \
-            "$PWD/released/provider-linting-walkthrough.cast"
+            "$PWD/released/provider-linting-walkthrough.cast" \
+            "$PWD/released/tutorial-part7-provider-linting.cast"

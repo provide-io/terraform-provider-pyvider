@@ -21,6 +21,7 @@ PROOF_OUTPUTS = {
     "provider-linting-direct.cast",
     "provider-linting-opentofu.cast",
     "provider-linting-walkthrough.cast",
+    "tutorial-part7-provider-linting.cast",
     "provider-linting-proof.json",
 }
 
@@ -131,6 +132,7 @@ def test_release_workflow_binds_numeric_build_to_exact_release_sha_and_proof_ass
         "provider-linting-opentofu.cast",
         "provider-linting-direct.cast",
         "provider-linting-walkthrough.cast",
+        "tutorial-part7-provider-linting.cast",
         "provider-linting-build-provenance.json",
         "windows_amd64",
     ):
@@ -235,6 +237,8 @@ def test_0_6_changelog_documents_the_release_proof_contract() -> None:
         "provider-linting-proof.json",
         "public PyPI",
         "wheel SHA-256",
+        "four paced",
+        "Part 7",
     ):
         assert phrase in section
 
