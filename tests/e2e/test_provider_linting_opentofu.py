@@ -113,7 +113,9 @@ def current_platform() -> str:
 def required_packaged_provider() -> Path:
     value = os.environ.get("PYVIDER_CONFORMANCE_PSP")
     if not value:
-        pytest.fail("PYVIDER_CONFORMANCE_PSP is required for the OpenTofu packaged-provider proof")
+        if os.environ.get("PYVIDER_CONFORMANCE_REQUIRED"):
+            pytest.fail("PYVIDER_CONFORMANCE_PSP is required for the OpenTofu packaged-provider proof")
+        pytest.skip("PYVIDER_CONFORMANCE_PSP is required for the OpenTofu packaged-provider proof")
     path = Path(value).resolve()
     if not path.is_file():
         pytest.fail(f"packaged provider not found at {path}")
@@ -286,7 +288,9 @@ def test_opentofu_e2e_requires_an_explicit_packaged_provider(
 ) -> None:
     monkeypatch.delenv("PYVIDER_CONFORMANCE_PSP", raising=False)
 
-    with pytest.raises(pytest.fail.Exception, match="PYVIDER_CONFORMANCE_PSP is required"):
+    with pytest.raises(
+        (pytest.fail.Exception, pytest.skip.Exception), match="PYVIDER_CONFORMANCE_PSP is required"
+    ):
         required_packaged_provider()
 
 

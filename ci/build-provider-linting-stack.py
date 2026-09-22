@@ -303,7 +303,12 @@ def materialize_revision(source: Path, revision: str, destination: Path) -> str:
 
 def _run_command(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
     print(f"📦 {command}", file=sys.stderr)
-    return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True, encoding="utf-8")  # nosec B603, B607
+    try:
+        return subprocess.run(command, cwd=cwd, check=True, capture_output=True, text=True, encoding="utf-8")  # nosec B603, B607
+    except subprocess.CalledProcessError as exc:
+        if exc.stderr:
+            print(exc.stderr, file=sys.stderr)
+        raise
 
 
 def publish_outputs_atomically(publications: list[tuple[Path, Path]], *, staging_directory: Path) -> None:
