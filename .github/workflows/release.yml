@@ -112,96 +112,14 @@ jobs:
           RELEASE_TARGET_SHA: ${{ needs.validate-build.outputs.release_target_sha }}
         run: ci/publish-release.sh "${{ steps.version.outputs.version }}"
 
+  # Verify the published bytes and re-run the proof against the released binary.
   verify-release-proof:
     name: 🔎 verify-release-proof
     needs: [validate-build, release]
-    runs-on: ubuntu-24.04
     permissions:
       contents: read
-    steps:
-      - name: 📥 Checkout exact released source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          ref: ${{ needs.validate-build.outputs.release_target_sha }}
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📦 Install UV and released TofuSoup
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
-      - run: |
-          uv sync --frozen --group dev
-          uv tool install --refresh tofusoup==0.8.2
-          test "$(soup --version)" = "soup, version 0.8.2"
-          uv run python -c 'import tofusoup; assert tofusoup.__version__ == "0.8.2"'
-
-      - name: 📥 Download immutable release assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir released
-          gh release download "v${{ needs.release.outputs.version }}" --dir released
-
-      - name: 🔐 Verify checksums, signature, tag, and proof binding
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          RELEASE_TARGET_SHA: ${{ needs.validate-build.outputs.release_target_sha }}
-        shell: bash
-        run: |
-          (cd released && sha256sum -c "terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS")
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          gpg --batch --verify \
-            "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS.sig" \
-            "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_SHA256SUMS"
-          tag_sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v${{ needs.release.outputs.version }}" --jq .object.sha)
-          tag_type=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v${{ needs.release.outputs.version }}" --jq .object.type)
-          if [ "$tag_type" = tag ]; then
-            tag_sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/$tag_sha" --jq .object.sha)
-          fi
-          test "$tag_sha" = "$RELEASE_TARGET_SHA"
-          mkdir -p released/dist/linux_amd64
-          unzip -oq "released/terraform-provider-pyvider_${{ needs.release.outputs.version }}_linux_amd64.zip" \
-            -d released/dist/linux_amd64
-          cp released/provider-linting-build-provenance.json released/dist/
-          uv run python - "$RELEASE_TARGET_SHA" <<'PY'
-          import hashlib, json, pathlib, sys
-          root = pathlib.Path("released")
-          proof = json.loads((root / "provider-linting-proof.json").read_text(encoding="utf-8"))
-          build = json.loads((root / "provider-linting-build-provenance.json").read_text(encoding="utf-8"))
-          assert build["provider_repository_head"] == sys.argv[1]
-          assert build["release_candidate"]["platform"] == "linux_amd64"
-          binary = root / build["artifacts"]["binary"]["path"]
-          assert hashlib.sha256(binary.read_bytes()).hexdigest() == build["artifacts"]["binary"]["sha256"]
-          assert proof["components"]["terraform-provider-pyvider"]["sha"] == sys.argv[1]
-          assert proof["provider_binary"]["sha256"] == build["artifacts"]["binary"]["sha256"]
-          assert proof["provider_binary"]["platform"] == "linux_amd64"
-          assert proof["release_candidate"] == build["release_candidate"]
-          for name in ("pyvider", "pyvider-components"):
-              dependency = build["dependencies"][name]
-              component = proof["components"][name]
-              assert component["sha"] == dependency["commit"]
-              assert component["wheel_sha256"] == dependency["sha256"]
-          PY
-
-      - name: 🪣 Install pinned OpenTofu prerelease
-        shell: bash
-        run: |
-          tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
-          echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
-
-      - name: 🧪 Re-run the released linux_amd64 proof
-        shell: bash
-        run: |
-          binary="$PWD/released/dist/linux_amd64/terraform-provider-pyvider_v${{ needs.release.outputs.version }}"
-          chmod +x "$binary"
-          make test-conformance-binary PYVIDER_CONFORMANCE_PSP="$binary"
-          make test-linting-opentofu-binary PYVIDER_CONFORMANCE_PSP="$binary" \
-            PYVIDER_OPENTOFU_BINARY="$PYVIDER_OPENTOFU_BINARY"
-          uv run python ci/verify-provider-linting-proof.py \
-            "$PWD/released/provider-linting-proof.json" \
-            "$PWD/released/provider-linting-opentofu.cast" \
-            "$PWD/released/provider-linting-direct.cast" \
-            "$PWD/released/provider-linting-walkthrough.cast"
+    uses: ./.github/workflows/verify-release.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+      release_target_sha: ${{ needs.validate-build.outputs.release_target_sha }}
+    secrets: inherit

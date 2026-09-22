@@ -120,8 +120,17 @@ def test_build_workflow_consumes_linux_artifact_without_rebuilding_proof_binary(
 
 def test_release_workflow_binds_numeric_build_to_exact_release_sha_and_proof_assets() -> None:
     path = ROOT / ".github" / "workflows" / "release.yml"
-    text = path.read_text(encoding="utf-8")
-    yaml.safe_load(text)
+    yaml.safe_load(path.read_text(encoding="utf-8"))
+    # The release's logic lives in the workflow and the ci/ scripts it calls.
+    text = "\n".join(
+        (ROOT / relative).read_text(encoding="utf-8")
+        for relative in (
+            ".github/workflows/release.yml",
+            ".github/workflows/verify-release.yml",
+            "ci/stage-release-assets.sh",
+            "ci/rerun-released-proof.sh",
+        )
+    )
 
     assert "latest successful" not in text.lower()
     assert "build_run_id must be numeric" in text
@@ -222,10 +231,15 @@ def test_provider_0_6_coordinates_and_proof_dependency_are_declared() -> None:
 
 
 def test_proof_workflows_verify_tofusoup_cli_and_imported_version() -> None:
-    for relative in (".github/workflows/build-provider.yml", ".github/workflows/release.yml"):
-        workflow = (ROOT / relative).read_text(encoding="utf-8")
-        assert 'test "$(soup --version)" = "soup, version 0.8.2"' in workflow
-        assert 'assert tofusoup.__version__ == "0.8.2"' in workflow
+    build = (ROOT / ".github" / "workflows" / "build-provider.yml").read_text(encoding="utf-8")
+    assert 'test "$(soup --version)" = "soup, version 0.8.2"' in build
+    assert 'assert tofusoup.__version__ == "0.8.2"' in build
+
+    verify = (ROOT / ".github" / "workflows" / "verify-release.yml").read_text(encoding="utf-8")
+    installer = (ROOT / "ci" / "install-released-tofusoup.sh").read_text(encoding="utf-8")
+    assert ".release-tooling/ci/install-released-tofusoup.sh 0.8.2" in verify
+    assert 'test "$(soup --version)" = "soup, version ${TOFUSOUP_VERSION}"' in installer
+    assert "tofusoup.__version__ != '${TOFUSOUP_VERSION}'" in installer
 
 
 def test_recorder_pins_tofusoup_before_the_first_film() -> None:

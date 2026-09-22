@@ -1,0 +1,99 @@
+# Verify a published release from its downloaded bytes: checksums, signature,
+# tag, the proof/build binding, and a re-run of the linux_amd64 proof against
+# the released binary. release.yml calls this after publishing; it can also be
+# dispatched against a release that already exists.
+#
+# The release's own source is checked out at the root, so conformance runs the
+# tests, Makefile, and lock that shipped. The verification tooling comes from
+# this workflow's commit in .release-tooling/, so a release published before a
+# tooling fix can still be verified by the fixed tooling.
+#
+# Script policy: run blocks longer than three lines live in ci/.
+name: 🔎 Verify Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Released version, without the leading v
+        required: true
+        type: string
+      release_target_sha:
+        description: Commit the release was published from
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Released version, without the leading v
+        required: true
+        type: string
+      release_target_sha:
+        description: Commit the release was published from
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: '3.11'
+  PYTHONIOENCODING: utf-8
+
+jobs:
+  verify-release-proof:
+    name: 🔎 verify-release-proof
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      # Check out the exact source the release was published from.
+      - name: 📥 Checkout exact released source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ inputs.release_target_sha }}
+
+      # Check out the verification tooling from this workflow's own commit.
+      - name: 🧰 Checkout verification tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-tooling
+          sparse-checkout: ci
+
+      # Python for the proof tooling.
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # uv for the dev environment and the pinned TofuSoup tool.
+      - name: 📦 Install UV
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
+
+      # The released TofuSoup the proof names, refusing any other version.
+      - name: 🍲 Install released TofuSoup
+        run: .release-tooling/ci/install-released-tofusoup.sh 0.8.2
+
+      # Fetch exactly what users download.
+      - name: 📥 Download immutable release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "v${{ inputs.version }}" --dir released
+
+      # Checksums, signature, tag, and proof/build binding; outputs the binary.
+      - name: 🔐 Verify checksums, signature, tag, and proof binding
+        id: verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          binary=$(.release-tooling/ci/verify-release-assets.sh "${{ inputs.version }}" "${{ inputs.release_target_sha }}" released)
+          echo "binary=$binary" >> "$GITHUB_OUTPUT"
+
+      # The OpenTofu prerelease the proof pins, checksum-verified.
+      - name: 🪣 Install pinned OpenTofu prerelease
+        run: |
+          tofu=$(ci/install-opentofu-experimental.sh --version 1.13.0-rc1 --cache-dir "$PWD/.cache/opentofu-prerelease")
+          echo "PYVIDER_OPENTOFU_BINARY=$tofu" >> "$GITHUB_ENV"
+
+      # Conformance, the OpenTofu lint lane, and the proof films against the released binary.
+      - name: 🧪 Re-run the released linux_amd64 proof
+        run: .release-tooling/ci/rerun-released-proof.sh released "${{ steps.verify.outputs.binary }}" "$PYVIDER_OPENTOFU_BINARY"
