@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   binary counted clusters by Unicode 16.0.0 and took case mappings from the
   packaged interpreter's `unicodedata`, so provider functions could disagree
   with OpenTofu's built-ins on characters added since.
+- **The `http_api` example survives a failed request.** A request that times
+  out or cannot connect reports `error_message` and leaves `status_code` and
+  `response_time_ms` null, and the example's comparisons and response-time
+  summaries raised on that null instead of reporting the failure. They now
+  fall back to `false` or `null`. This failed the conformance run on
+  linux_arm64 whenever the example's slow endpoint took longer than its
+  10-second timeout.
 
 ### Release verification
 
