@@ -1,0 +1,14 @@
+# Applies to every example of this component. `secret_value` is write-only: the
+# provider returns it null, which is exactly what write-only means. OpenTofu
+# 1.10.6 has no concept of the thing and enforces the ordinary rule that a
+# planned value must equal its config value, so it reports
+#
+#   planned an invalid value for ...secret_value: planned value
+#   cty.NullVal(cty.String) does not match config value cty.StringVal(...)
+#
+# and blames the provider for behaving correctly. Measured, not assumed: 1.10.6
+# fails, 1.11.0 and 1.12.5 both plan cleanly.
+[requirements]
+opentofu_min = "1.11.0"
+terraform_min = "1.11.0"
+reason = "write-only attributes are not understood before 1.11"

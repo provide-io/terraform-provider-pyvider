@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **Examples regenerated from pyvider-components' corrected bundles.** The list
+  resource query examples said to run `tofu query`, which does not exist; they
+  now name `terraform query` (Terraform 1.14+). The `secret_note` resource
+  example declares its measured 1.11 floor for write-only attributes, and the
+  `http_api` data source page carries the null-safe example.
+
 ## [0.6.1] - 2026-09-22
 
 ### Fixed
