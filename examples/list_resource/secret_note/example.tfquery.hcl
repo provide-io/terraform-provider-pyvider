@@ -1,4 +1,6 @@
-# Save as example.tfquery.hcl and run `tofu query`.
+# Save as example.tfquery.hcl and run `terraform query`, which reads these
+# files. It arrived in Terraform 1.14, alongside list resources themselves;
+# OpenTofu has no query command, so this file is inert under `tofu`.
 list "pyvider_secret_note" "example" {
   provider = pyvider
 
