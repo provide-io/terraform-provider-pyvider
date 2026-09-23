@@ -215,19 +215,20 @@ def test_proof_release_candidate_binds_archive_platform_and_binary() -> None:
 
 
 def test_provider_0_6_coordinates_and_proof_dependency_are_declared() -> None:
-    assert (ROOT / "VERSION").read_text(encoding="utf-8").strip() == "0.6.0"
+    assert (ROOT / "VERSION").read_text(encoding="utf-8").strip() == "0.6.1"
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = project["project"]["dependencies"]
     dev = project["dependency-groups"]["dev"]
     assert "pyvider>=0.8.1" in dependencies
     assert "pyvider-components>=0.8.0" in dependencies
+    assert "pyvider-cty>=0.6.3" in dependencies
     assert "tofusoup==0.8.2" in dev
     for relative in (
         "tests/e2e/provider-linting/main.tf",
         "tests/e2e/provider-linting/lint.soup.toml",
         "tests/proof/fixtures/provider-linting/main.tf",
     ):
-        assert 'version = "0.6.0"' in (ROOT / relative).read_text(encoding="utf-8")
+        assert 'version = "0.6.1"' in (ROOT / relative).read_text(encoding="utf-8")
 
 
 def test_proof_workflows_verify_tofusoup_cli_and_imported_version() -> None:
