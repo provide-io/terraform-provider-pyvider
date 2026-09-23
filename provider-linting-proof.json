@@ -2,21 +2,21 @@
   "casts": {
     "direct": {
       "path": "provider-linting-direct.cast",
-      "sha256": "f274b18199414accf422e19adb1870d9ffcd2eec9f3dd8a554674413e9c725bb"
+      "sha256": "a06222c6cb5cb0699cf870df3bae40a95b44d9ffe78b8c1ef3d604de33e7eb2a"
     },
     "opentofu": {
       "path": "provider-linting-opentofu.cast",
-      "sha256": "795066820683ec399f16f2ccb1cad24108574524d6d8a2f8a4de629d7eef879f"
+      "sha256": "613c59cce7ba06477782cd9f57747bab9dc2fbc3ace13b2185040497d867e486"
     },
     "walkthrough": {
       "path": "provider-linting-walkthrough.cast",
-      "sha256": "6ebd7b780068fe847c1721aa3193dd0542515f30c2b88e84a89ddb9645c59efc"
+      "sha256": "a45ff55b007b90ec2a60d7bf3e192a59d7afc42035f65d126ca555d5532ef6e7"
     }
   },
   "ci": {
     "repository": "provide-io/terraform-provider-pyvider",
     "run_attempt": "1",
-    "run_id": "35767569135",
+    "run_id": "35805023943",
     "workflow": "\ud83c\udfd7\ufe0f Build Provider Binary"
   },
   "commands": {
@@ -60,26 +60,26 @@
       "wheel_sha256": "76e003f6379112765c9d42779e58ea2c15ce955f214d3dd8b9a77907340822ce"
     },
     "terraform-provider-pyvider": {
-      "sha": "6ef4e0797bc250b114e5ab11a59537fb4c49b02e",
-      "version": "0.6.0"
+      "sha": "5cdf134995d7ef57208b73c27effaa8d332729b4",
+      "version": "0.6.1"
     }
   },
-  "generated_at": "2026-09-22T18:37:20.037427Z",
+  "generated_at": "2026-09-23T01:15:26.744461Z",
   "opentofu": {
     "archive": "tofu_1.13.0-rc1_linux_amd64.zip",
     "archive_sha256": "119162644e5e6e1b7ddb64a3979434b6f86a4e23f6bc1e361f5a8637fb4fd0e8",
     "version": "1.13.0-rc1"
   },
   "provider_binary": {
-    "path": "dist/linux_amd64/terraform-provider-pyvider_v0.6.0",
+    "path": "dist/linux_amd64/terraform-provider-pyvider_v0.6.1",
     "platform": "linux_amd64",
-    "sha256": "5bf3e35c1a25ad4ff879d327ebf2749b7706a878d5187110cd0eea9455887637"
+    "sha256": "8abe8bf91b74ba8aabd07a99fe9fd1fc7bd36a9ee000de1a94802d2be6f1b226"
   },
   "release_candidate": {
-    "archive": "terraform-provider-pyvider_0.6.0_linux_amd64.zip",
+    "archive": "terraform-provider-pyvider_0.6.1_linux_amd64.zip",
     "github_artifact": "provider-linux_amd64",
     "platform": "linux_amd64",
-    "sha256": "05936a094b4243e4b32d88b0c86106f4afafd4d8b548ddfba1f4a47b6a796faf"
+    "sha256": "d0461f495b21945386ab52bcb0ecf227f2b758f58967a1a150cd8c439cb72e28"
   },
   "rules": [
     {
