@@ -226,6 +226,7 @@ def test_provider_0_6_coordinates_and_proof_dependency_are_declared() -> None:
     for relative in (
         "tests/e2e/provider-linting/main.tf",
         "tests/e2e/provider-linting/lint.soup.toml",
+        "tests/e2e/refined-unknowns/main.tf",
         "tests/proof/fixtures/provider-linting/main.tf",
     ):
         assert 'version = "0.6.1"' in (ROOT / relative).read_text(encoding="utf-8")
