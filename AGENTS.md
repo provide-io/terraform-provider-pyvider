@@ -23,7 +23,7 @@ as a single Flavorpack executable (`.psp`).
 |---|---|
 | `examples/` | Terraform examples per component kind; also the corpus pyvider's Terraform Gate runs with `soup stir --recursive`. Every directory here must `init` against this provider. |
 | `tests/conformance/` | Drives a packaged provider binary over tfplugin6. Skipped unless a binary exists; `PYVIDER_CONFORMANCE_REQUIRED=1` turns a missing binary into a failure. |
-| `tests/e2e/` | OpenTofu 1.13.0-rc1 provider-linting end-to-end test (needs `PYVIDER_CONFORMANCE_PSP` and `PYVIDER_OPENTOFU_BINARY`). |
+| `tests/e2e/` | OpenTofu 1.13.0-rc1 end-to-end tests: provider linting, and refined unknowns (`assume*`) surviving the provider's plan (need `PYVIDER_CONFORMANCE_PSP` and `PYVIDER_OPENTOFU_BINARY`). |
 | `tests/proof/` | Contracts for the provider-linting proof (manifest, casts, docs). |
 | `tests/test_*.py` | Release, staging, installer, and build contracts. |
 | `ci/` | Every script the workflows run. Workflow `run:` blocks call these rather than holding inline logic. |
