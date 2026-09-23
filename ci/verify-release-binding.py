@@ -10,7 +10,8 @@ A `gh release download` directory is flat. The build provenance names its
 binary relative to its own directory, as it sat in the build's dist/, so the
 linux_amd64 archive is unpacked into <released-dir>/dist/linux_amd64 and the
 provenance copied beside it before the path is resolved. On success this
-prints the verified binary path, which the proof re-run then executes.
+prints the verified binary path. The proof re-run copies this dist/ into the
+checkout and resolves the binary there, where the released tests expect it.
 """
 
 from __future__ import annotations
