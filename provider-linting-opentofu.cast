@@ -1,4 +1,4 @@
-{"version": 2, "width": 110, "height": 26, "timestamp": 1790102226, "title": "Pyvider linting — OpenTofu demonstration", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
+{"version": 2, "width": 110, "height": 26, "timestamp": 1790126112, "title": "Pyvider linting — OpenTofu demonstration", "env": {"TERM": "xterm-256color", "SHELL": "/bin/bash"}}
 [1.424, "o", "Lane: OpenTofu runs the public suite through the checked provider and OpenTofu binary.\r\n"]
 [3.118, "o", "Warnings are lint findings from this fixture; any nonzero lint result stops the recording.\r\n"]
 [4.543, "o", "Coverage boundary: OpenTofu experimental lint validation reaches four ordinary validation paths.\r\n\r\n"]
@@ -14,9 +14,9 @@
 [21.033, "o", "Direct provider validation: not requested\r\n"]
 [22.457, "o", "OpenTofu experimental lint validation: valid\r\n"]
 [24.151, "o", "  warning: Experimental linting enabled\r\n"]
-[25.845, "o", "  warning: TLS certificate verification is disabled (provide-io/pyvider:insecure-tls)\r\n"]
-[27.539, "o", "  warning: Directory permissions are world-writable (provide-io/pyvider:world-writable-directory)\r\n"]
-[29.233, "o", "  warning: HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)\r\n"]
-[30.927, "o", "  warning: Lease lifetime exceeds one hour (provide-io/pyvider:long-lived-lease)\r\n"]
+[25.845, "o", "  warning: Lease lifetime exceeds one hour (provide-io/pyvider:long-lived-lease)\r\n"]
+[27.539, "o", "  warning: HTTP API uses an unencrypted connection (provide-io/pyvider:insecure-http)\r\n"]
+[29.233, "o", "  warning: TLS certificate verification is disabled (provide-io/pyvider:insecure-tls)\r\n"]
+[30.927, "o", "  warning: Directory permissions are world-writable (provide-io/pyvider:world-writable-directory)\r\n"]
 [32.351, "o", "OpenTofu coverage is separate from direct provider coverage.\r\n"]
 [34.0, "o", "OpenTofu core proof: 4/7 provider validation paths (provider, resource, data-source, ephemeral)\r\n"]

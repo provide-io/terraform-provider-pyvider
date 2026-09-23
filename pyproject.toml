@@ -79,6 +79,13 @@ dependencies = [
     "provide-foundation>=0.4.4",
     "pyvider>=0.8.1",
     "pyvider-components>=0.8.0",
+    # 0.6.3 answers like the go-cty OpenTofu 1.13 ships (Go 1.27, Unicode
+    # 17.0.0): grapheme clusters from the 17.0.0 tables, and upper, lower and
+    # title from Go's own case tables on every Python. Below it the function
+    # results follow Unicode 16.0 for clusters and the packaged interpreter's
+    # unicodedata for case. It is named here rather than left to pyvider, which
+    # asks only for >=0.6.2.
+    "pyvider-cty>=0.6.3",
     # 0.5.4 issues a server certificate that vouches for the address it is
     # served on, rather than DNS:localhost alone. The client-side override in
     # 0.5.3 is what makes the leg green; this is the same fix at the source, so
