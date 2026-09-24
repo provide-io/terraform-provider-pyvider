@@ -29,6 +29,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import re
+import socketserver
 import sys
 import time
 from urllib.parse import parse_qs, urlsplit
@@ -184,6 +185,26 @@ class Handler(BaseHTTPRequestHandler):
     do_GET = do_POST = do_PUT = do_PATCH = do_DELETE = do_HEAD = do_OPTIONS = _route
 
 
+class StubServer(ThreadingHTTPServer):
+    """A threading HTTP server that does not look up its own hostname.
+
+    `HTTPServer.server_bind` sets `server_name` from `socket.getfqdn`, a
+    reverse DNS lookup that can outlast the wrapper's readiness timeout on a
+    macOS CI runner -- the server is alive but has not finished binding. This
+    binds loopback by address and never uses the name.
+    """
+
+    def server_bind(self) -> None:
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = HOST
+        self.server_port = self.server_address[1]
+
+
+def make_server() -> StubServer:
+    """The stub, bound to a free loopback port."""
+    return StubServer((HOST, PORT), Handler)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -191,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    server = make_server()
     port = server.server_address[1]
     # Written only after bind, so the file's existence means "ready".
     tmp = args.url_file.with_suffix(args.url_file.suffix + ".tmp")

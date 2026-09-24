@@ -141,3 +141,26 @@ def test_the_wrapper_points_both_variables_at_the_server_and_stops_it() -> None:
 def test_the_wrapper_passes_the_command_exit_status_through() -> None:
     result = subprocess.run(["bash", str(WRAPPER), "sh", "-c", "exit 7"], capture_output=True, text=True)
     assert result.returncode == 7
+
+
+def test_starting_does_not_resolve_a_hostname(monkeypatch: pytest.MonkeyPatch) -> None:
+    # HTTPServer.server_bind calls socket.getfqdn, a reverse DNS lookup that
+    # can outlast the wrapper's readiness timeout on a macOS runner. The stub
+    # binds loopback by address and never needs the name.
+    import socket
+
+    sys.path.insert(0, str(STUB.parent))
+    try:
+        import http_api_stub
+    finally:
+        sys.path.remove(str(STUB.parent))
+
+    def refuse(*_: object) -> str:
+        raise AssertionError("getfqdn called")
+
+    monkeypatch.setattr(socket, "getfqdn", refuse)
+    server = http_api_stub.make_server()
+    try:
+        assert server.server_address[0] == http_api_stub.HOST
+    finally:
+        server.server_close()
