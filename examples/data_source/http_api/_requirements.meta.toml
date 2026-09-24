@@ -1,13 +1,15 @@
-# Applies to every example of this component: each one calls the live
-# httpbin.org, so they fail closed on an air-gapped runner and are at the mercy
-# of a third party's uptime. A failure here is not necessarily a defect in the
-# provider.
+# Applies to every example of this component. By default each one calls the
+# live httpbin.org and JSONPlaceholder services, so it fails closed on an
+# air-gapped runner and is at the mercy of a third party's uptime. A failure
+# here is not necessarily a defect in the provider. The URLs come from
+# `var.api_base_url` and `var.json_api_base_url`, so a test run can point them
+# at a local server instead (`TF_VAR_api_base_url`, `TF_VAR_json_api_base_url`).
 #
 # They also record how long each call took, and a measured duration is
 # different on every read, so the re-plan after a successful apply legitimately
 # shows a diff. That is what `converges = false` is for: the values are real
 # observations, not a provider inventing something during apply.
 [requirements]
-network = ["httpbin.org"]
+network = ["httpbin.org", "jsonplaceholder.typicode.com"]
 converges = false
-reason = "the examples call the live httpbin.org service and record its response times"
+reason = "the examples call live HTTP services (httpbin.org, JSONPlaceholder) and record their response times"

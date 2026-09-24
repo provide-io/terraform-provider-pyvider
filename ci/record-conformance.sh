@@ -13,7 +13,10 @@ cd "${REPO_ROOT}/examples"
 # record-to-cast.py strips screen-clear and cursor-position sequences in the
 # captured output, so the player scrolls smoothly without flashing.
 # Capture the test exit code so we can retime before propagating it.
-python3 "${REPO_ROOT}/ci/record-to-cast.py" "${RAW}" \
+# with-http-api-stub.sh points the http_api examples at a local server rather
+# than the public services they default to.
+"${REPO_ROOT}/ci/with-http-api-stub.sh" \
+    python3 "${REPO_ROOT}/ci/record-to-cast.py" "${RAW}" \
     soup stir --recursive
 RECORD_EXIT=$?
 
