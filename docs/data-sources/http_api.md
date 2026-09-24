@@ -30,8 +30,23 @@ This data source enables you to:
 ## Example Usage
 
 ```terraform
+# The examples call public test services by default. Point them elsewhere --
+# a mirror, or a local server in a test run -- with
+# `TF_VAR_api_base_url` / `TF_VAR_json_api_base_url`.
+variable "api_base_url" {
+  description = "Base URL of an httpbin-compatible service."
+  type        = string
+  default     = "https://httpbin.org"
+}
+
+variable "json_api_base_url" {
+  description = "Base URL of a JSONPlaceholder-compatible service."
+  type        = string
+  default     = "https://jsonplaceholder.typicode.com"
+}
+
 data "pyvider_http_api" "get_example" {
-  url = "https://httpbin.org/get"
+  url = "${var.api_base_url}/get"
 }
 
 output "example_data" {
@@ -43,12 +58,14 @@ output "example_data" {
 
 ## More Examples
 
+These use the `api_base_url` and `json_api_base_url` variables declared above, which default to the public httpbin.org and JSONPlaceholder services.
+
 ### Simple API integration patterns
 
 ```terraform
 # Make a simple GET request to a public API.
 data "pyvider_http_api" "example" {
-  url = "https://httpbin.org/get"
+  url = "${var.api_base_url}/get"
   headers = {
     "Accept" = "application/json"
   }
@@ -73,7 +90,7 @@ output "basic_api_response_body_preview" {
 
 # Example 1: POST request with JSON content type
 data "pyvider_http_api" "post_json" {
-  url    = "https://httpbin.org/post"
+  url    = "${var.api_base_url}/post"
   method = "POST"
   headers = {
     "Content-Type" = "application/json"
@@ -84,7 +101,7 @@ data "pyvider_http_api" "post_json" {
 
 # Example 2: PUT request for updates
 data "pyvider_http_api" "put_request" {
-  url    = "https://httpbin.org/put"
+  url    = "${var.api_base_url}/put"
   method = "PUT"
   headers = {
     "Content-Type"  = "application/json"
@@ -95,7 +112,7 @@ data "pyvider_http_api" "put_request" {
 
 # Example 3: DELETE request
 data "pyvider_http_api" "delete_request" {
-  url    = "https://httpbin.org/delete"
+  url    = "${var.api_base_url}/delete"
   method = "DELETE"
   headers = {
     "Authorization" = "Bearer fake-token-for-example"
@@ -105,7 +122,7 @@ data "pyvider_http_api" "delete_request" {
 
 # Example 4: PATCH request for partial updates
 data "pyvider_http_api" "patch_request" {
-  url    = "https://httpbin.org/patch"
+  url    = "${var.api_base_url}/patch"
   method = "PATCH"
   headers = {
     "Content-Type" = "application/json-patch+json"
@@ -115,13 +132,13 @@ data "pyvider_http_api" "patch_request" {
 
 # Example 5: OPTIONS request to check allowed methods
 data "pyvider_http_api" "options_request" {
-  url    = "https://httpbin.org/get"
+  url    = "${var.api_base_url}/get"
   method = "OPTIONS"
 }
 
 # Example 6: Request with custom timeout for slow APIs
 data "pyvider_http_api" "slow_api" {
-  url     = "https://httpbin.org/delay/3"
+  url     = "${var.api_base_url}/delay/3"
   timeout = 10
   headers = {
     "Accept-Encoding" = "gzip, deflate"
@@ -131,7 +148,7 @@ data "pyvider_http_api" "slow_api" {
 
 # Example 7: Complex headers for API authentication
 data "pyvider_http_api" "authenticated_api" {
-  url = "https://httpbin.org/bearer"
+  url = "${var.api_base_url}/bearer"
   headers = {
     "Authorization"     = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example"
     "X-API-Version"     = "2023-01-01"
@@ -144,7 +161,7 @@ data "pyvider_http_api" "authenticated_api" {
 
 # Example 8: Multiple related API calls
 data "pyvider_http_api" "user_profile" {
-  url = "https://jsonplaceholder.typicode.com/users/1"
+  url = "${var.json_api_base_url}/users/1"
 }
 
 # Get posts for the user (using data from first call)
@@ -175,20 +192,20 @@ locals {
 }
 
 data "pyvider_http_api" "user_posts" {
-  url = "https://jsonplaceholder.typicode.com/posts?userId=${local.advanced_user_data.id}"
+  url = "${var.json_api_base_url}/posts?userId=${local.advanced_user_data.id}"
 }
 
 # Example 9: Error status code handling
 data "pyvider_http_api" "not_found" {
-  url = "https://httpbin.org/status/404"
+  url = "${var.api_base_url}/status/404"
 }
 
 data "pyvider_http_api" "server_error" {
-  url = "https://httpbin.org/status/500"
+  url = "${var.api_base_url}/status/500"
 }
 
 data "pyvider_http_api" "unauthorized" {
-  url = "https://httpbin.org/status/401"
+  url = "${var.api_base_url}/status/401"
 }
 
 # Process responses and handle different scenarios

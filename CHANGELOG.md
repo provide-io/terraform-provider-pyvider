@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The conformance run no longer depends on httpbin.org or JSONPlaceholder.**
+  The `pyvider_http_api` examples take their URLs from `var.api_base_url` and
+  `var.json_api_base_url` (defaulting to the public services, so a reader's
+  copy works as written), and every `soup stir` run -- CI, the cast recording
+  and `make test-examples` -- now goes through `ci/with-http-api-stub.sh`, which
+  starts a small standard-library server on a free loopback port and points both
+  variables at it. A slow httpbin.org was what made the `delay/3` example flaky.
+  Checked with all outbound HTTP blocked: the examples pass on OpenTofu 1.12.6
+  and Terraform 1.16.1 with the server, and fail without it.
+
 ### Documentation
 
 - **Examples regenerated from pyvider-components' corrected bundles.** The list

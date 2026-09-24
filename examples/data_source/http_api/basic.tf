@@ -1,6 +1,6 @@
 # Make a simple GET request to a public API.
 data "pyvider_http_api" "example" {
-  url = "https://httpbin.org/get"
+  url = "${var.api_base_url}/get"
   headers = {
     "Accept" = "application/json"
   }

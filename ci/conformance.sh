@@ -102,7 +102,10 @@ full_suite() {
   echo "   PYVIDER_TESTMODE=${PYVIDER_TESTMODE}"
   echo "   TOFUSOUP_TF_COMMAND=${TOFUSOUP_TF_COMMAND}"; echo
   cd examples
-  soup stir --recursive
+  # The http_api examples default to the public httpbin.org and JSONPlaceholder;
+  # the wrapper points them at a local server so the run does not depend on
+  # either service being up or fast.
+  ../ci/with-http-api-stub.sh soup stir --recursive
   echo; echo "✅ All provider conformance tests passed"; rule
 }
 
